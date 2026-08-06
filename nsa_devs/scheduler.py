@@ -5,6 +5,7 @@ from __future__ import annotations
 import heapq
 from dataclasses import dataclass, field
 from fractions import Fraction
+from typing import Callable
 
 from .hypertime import HyperTime
 
@@ -36,6 +37,43 @@ class RelayResult:
                 + event.output_payload
             ) % 2_147_483_647
         return value
+
+
+@dataclass(order=True)
+class DesEvent:
+    """A generic discrete event for DES scheduling."""
+    time: HyperTime
+    sequence: int
+    name: str = field(compare=False)
+    handler: Callable = field(compare=False)
+    args: tuple = field(compare=False, default=())
+
+class DesScheduler:
+    """A general-purpose discrete event scheduler using HyperTime."""
+    def __init__(self, initial_time: HyperTime | None = None):
+        self.time = initial_time or HyperTime.at(0)
+        self.events: list[DesEvent] = []
+        self.event_sequence = 0
+
+    def schedule(self, delay_minutes: float, name: str, handler: Callable, *args) -> None:
+        if delay_minutes == 0.0:
+            target_time = self.time.after_epsilon(1)
+        else:
+            target_time = self.time.after_finite(delay_minutes)
+
+        heapq.heappush(
+            self.events,
+            DesEvent(target_time, self.event_sequence, name, handler, args),
+        )
+        self.event_sequence += 1
+
+    def run(self, until: float) -> None:
+        until_time = HyperTime.at(until)
+        while self.events and self.events[0].time <= until_time:
+            event = heapq.heappop(self.events)
+            self.time = event.time
+            event.handler(*event.args)
+        self.time = until_time
 
 
 @dataclass(order=True)

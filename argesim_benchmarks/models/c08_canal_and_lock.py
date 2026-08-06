@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import heapq
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Callable
 from nsa_devs.hypertime import HyperTime
+from nsa_devs.scheduler import DesScheduler
 
 
 class Direction(Enum):
@@ -28,22 +28,12 @@ class Barge:
     arrival_time: HyperTime
 
 
-@dataclass(order=True)
-class Event:
-    time: HyperTime
-    sequence: int
-    name: str = field(compare=False)
-    handler: Callable[[], None] = field(compare=False)
-
-
 class CanalAndLock:
     def __init__(self, eastmax: int, westmax: int):
         self.eastmax = eastmax
         self.westmax = westmax
 
-        self.time = HyperTime.at(0)
-        self.events: list[Event] = []
-        self.event_sequence = 0
+        self.scheduler = DesScheduler()
 
         self.queues: dict[Direction, list[Barge]] = {
             Direction.EASTBOUND: [],
@@ -61,6 +51,7 @@ class CanalAndLock:
         self.pre_lock_barges: set[Barge] = set()
         self.last_cycle_direction: Direction | None = None
 
+        # System parameters (in minutes) as specified in ARGESIM C08 definition:
         self.west_canal_time = 14.0
         self.east_canal_time = 18.0
         self.lock_change_time = 12.0
@@ -69,24 +60,15 @@ class CanalAndLock:
 
         self.queue_trajectory: list[tuple[float, int, int]] = []
 
-    def schedule(self, delay: float, name: str, handler: Callable[[], None]) -> None:
-        if delay == 0.0:
-            target_time = self.time.after_epsilon(1)
-        else:
-            target_time = self.time.after_finite(delay)
-        heapq.heappush(
-            self.events,
-            Event(target_time, self.event_sequence, name, handler),
-        )
-        self.event_sequence += 1
+    @property
+    def time(self) -> HyperTime:
+        return self.scheduler.time
+
+    def schedule(self, delay: float, name: str, handler: Callable, *args) -> None:
+        self.scheduler.schedule(delay, name, handler, *args)
 
     def run(self, until: float) -> None:
-        until_time = HyperTime.at(until)
-        while self.events and self.events[0].time <= until_time:
-            event = heapq.heappop(self.events)
-            self.time = event.time
-            event.handler()
-        self.time = until_time
+        self.scheduler.run(until)
 
     def _record_queues(self) -> None:
         self.queue_trajectory.append((
@@ -99,7 +81,7 @@ class CanalAndLock:
         if barge.arrival_time < self.time:
             raise ValueError("Cannot schedule arrival in the past")
         delay = float(barge.arrival_time.standard_part() - self.time.standard_part())
-        self.schedule(delay, f"arrive {barge.id}", lambda b=barge: self.arrive(b))
+        self.schedule(delay, f"arrive {barge.id}", self.arrive, barge)
 
     def arrive(self, barge: Barge) -> None:
         self.queues[barge.direction].append(barge)
@@ -118,7 +100,7 @@ class CanalAndLock:
                     if barge.direction == Direction.EASTBOUND
                     else self.east_canal_time
                 )
-                self.schedule(canal_time, f"arrive_at_lock {barge.id}", lambda b=barge: self.arrive_at_lock(b))
+                self.schedule(canal_time, f"arrive_at_lock {barge.id}", self.arrive_at_lock, barge)
                 return
 
         self.try_start_cycle()
@@ -146,6 +128,8 @@ class CanalAndLock:
                 next_dir = self.last_cycle_direction
         else:
             if has_east and has_west:
+                # Per the ARGESIM C08 specification tie-breaking logic (e.g., initial state in Dataset 1),
+                # Eastbound barges are given precedence when starting from an empty system.
                 next_dir = Direction.EASTBOUND
             elif has_east:
                 next_dir = Direction.EASTBOUND
@@ -169,7 +153,7 @@ class CanalAndLock:
                     if b.direction == Direction.EASTBOUND
                     else self.east_canal_time
                 )
-                self.schedule(canal_time, f"arrive_at_lock {b.id}", lambda b=b: self.arrive_at_lock(b))
+                self.schedule(canal_time, f"arrive_at_lock {b.id}", self.arrive_at_lock, b)
 
             self.update_lock()
 
@@ -195,7 +179,7 @@ class CanalAndLock:
                 self.lock_occupied = True
 
                 total_lock_time = self.lock_in_time + self.lock_change_time + self.lock_out_time
-                self.schedule(total_lock_time, f"leave_lock {barge.id}", lambda b=barge: self.leave_lock(b))
+                self.schedule(total_lock_time, f"leave_lock {barge.id}", self.leave_lock, barge)
             else:
                 target_state = (
                     LockState.MOVING_TO_HIGH
@@ -203,7 +187,7 @@ class CanalAndLock:
                     else LockState.MOVING_TO_LOW
                 )
                 self.lock_state = target_state
-                self.schedule(self.lock_change_time, f"lock_ready {expected_level.name}", lambda e=expected_level: self.lock_ready(e))
+                self.schedule(self.lock_change_time, f"lock_ready {expected_level.name}", self.lock_ready, expected_level)
         else:
             if self.pre_lock_barges:
                 expected_level = (
@@ -216,7 +200,7 @@ class CanalAndLock:
                         else LockState.MOVING_TO_LOW
                     )
                     self.lock_state = target_state
-                    self.schedule(self.lock_change_time, f"lock_ready {expected_level.name}", lambda e=expected_level: self.lock_ready(e))
+                    self.schedule(self.lock_change_time, f"lock_ready {expected_level.name}", self.lock_ready, expected_level)
 
     def lock_ready(self, expected_level: LockState) -> None:
         self.lock_state = expected_level
@@ -229,7 +213,7 @@ class CanalAndLock:
         second_canal_time = (
             self.east_canal_time if barge.direction == Direction.EASTBOUND else self.west_canal_time
         )
-        self.schedule(second_canal_time, f"leave_system {barge.id}", lambda b=barge: self.leave_system(b))
+        self.schedule(second_canal_time, f"leave_system {barge.id}", self.leave_system, barge)
         self.update_lock()
 
     def leave_system(self, barge: Barge) -> None:

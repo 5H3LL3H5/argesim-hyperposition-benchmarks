@@ -14,6 +14,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from argesim_benchmarks.models.c08_canal_and_lock import CanalAndLock, Barge, Direction
+from nsa_devs.hypertime import HyperTime
 
 
 def run_replication(
@@ -34,7 +35,6 @@ def run_replication(
     west_arrival = rng.uniform(0.0, 20.0)
 
     barge_id = 0
-    from nsa_devs.hypertime import HyperTime
 
     while east_arrival <= duration:
         model.schedule_arrival(Barge(barge_id, Direction.EASTBOUND, HyperTime.at(east_arrival)))
