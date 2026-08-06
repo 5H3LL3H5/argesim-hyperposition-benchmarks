@@ -1,13 +1,14 @@
 import unittest
 from argesim_benchmarks.models.c08_canal_and_lock import CanalAndLock, Barge, Direction
+from nsa_devs.hypertime import HyperTime
 
 class TestC08(unittest.TestCase):
     def test_dataset_1(self):
         c = CanalAndLock(1, 1)
         for i in range(15):
-            c.schedule_arrival(Barge(i, Direction.EASTBOUND, i * 108.0))
+            c.schedule_arrival(Barge(i, Direction.EASTBOUND, HyperTime.at(i * 108.0)))
         for i in range(15):
-            c.schedule_arrival(Barge(100+i, Direction.WESTBOUND, 54.0 + i * 108.0))
+            c.schedule_arrival(Barge(100+i, Direction.WESTBOUND, HyperTime.at(54.0 + i * 108.0)))
 
         c.run(1458.0)
 
@@ -23,13 +24,13 @@ class TestC08(unittest.TestCase):
     def test_dataset_2(self):
         c = CanalAndLock(2, 3)
         for i in range(20):
-            c.schedule_arrival(Barge(i*2, Direction.EASTBOUND, i * 210.0))
-            c.schedule_arrival(Barge(i*2+1, Direction.EASTBOUND, i * 210.0))
+            c.schedule_arrival(Barge(i*2, Direction.EASTBOUND, HyperTime.at(i * 210.0)))
+            c.schedule_arrival(Barge(i*2+1, Direction.EASTBOUND, HyperTime.at(i * 210.0)))
 
         for i in range(20):
-            c.schedule_arrival(Barge(100+i*3, Direction.WESTBOUND, 88.0 + i * 210.0))
-            c.schedule_arrival(Barge(100+i*3+1, Direction.WESTBOUND, 88.0 + i * 210.0))
-            c.schedule_arrival(Barge(100+i*3+2, Direction.WESTBOUND, 88.0 + i * 210.0))
+            c.schedule_arrival(Barge(100+i*3, Direction.WESTBOUND, HyperTime.at(88.0 + i * 210.0)))
+            c.schedule_arrival(Barge(100+i*3+1, Direction.WESTBOUND, HyperTime.at(88.0 + i * 210.0)))
+            c.schedule_arrival(Barge(100+i*3+2, Direction.WESTBOUND, HyperTime.at(88.0 + i * 210.0)))
 
         c.run(1470.0)
 
@@ -46,7 +47,7 @@ class TestC08(unittest.TestCase):
     def test_dataset_3(self):
         c = CanalAndLock(1, 1)
         for i in range(30):
-            c.schedule_arrival(Barge(i, Direction.EASTBOUND, i * 54.0))
+            c.schedule_arrival(Barge(i, Direction.EASTBOUND, HyperTime.at(i * 54.0)))
 
         c.run(1458.0)
 
@@ -58,7 +59,7 @@ class TestC08(unittest.TestCase):
     def test_dataset_4(self):
         c = CanalAndLock(1, 1)
         for i in range(20):
-            c.schedule_arrival(Barge(i, Direction.WESTBOUND, i * 100.0))
+            c.schedule_arrival(Barge(i, Direction.WESTBOUND, HyperTime.at(i * 100.0)))
 
         c.run(1500.0)
 
@@ -70,15 +71,15 @@ class TestC08(unittest.TestCase):
     def test_dataset_5(self):
         c = CanalAndLock(2, 3)
         for i in range(5):
-            c.schedule_arrival(Barge(i*3, Direction.EASTBOUND, i * 500.0))
-            c.schedule_arrival(Barge(i*3+1, Direction.EASTBOUND, i * 500.0))
-            c.schedule_arrival(Barge(i*3+2, Direction.EASTBOUND, i * 500.0))
+            c.schedule_arrival(Barge(i*3, Direction.EASTBOUND, HyperTime.at(i * 500.0)))
+            c.schedule_arrival(Barge(i*3+1, Direction.EASTBOUND, HyperTime.at(i * 500.0)))
+            c.schedule_arrival(Barge(i*3+2, Direction.EASTBOUND, HyperTime.at(i * 500.0)))
 
-            c.schedule_arrival(Barge(100+i*5, Direction.WESTBOUND, 200.0 + i * 500.0))
-            c.schedule_arrival(Barge(100+i*5+1, Direction.WESTBOUND, 200.0 + i * 500.0))
-            c.schedule_arrival(Barge(100+i*5+2, Direction.WESTBOUND, 200.0 + i * 500.0))
-            c.schedule_arrival(Barge(100+i*5+3, Direction.WESTBOUND, 200.0 + i * 500.0))
-            c.schedule_arrival(Barge(100+i*5+4, Direction.WESTBOUND, 200.0 + i * 500.0))
+            c.schedule_arrival(Barge(100+i*5, Direction.WESTBOUND, HyperTime.at(200.0 + i * 500.0)))
+            c.schedule_arrival(Barge(100+i*5+1, Direction.WESTBOUND, HyperTime.at(200.0 + i * 500.0)))
+            c.schedule_arrival(Barge(100+i*5+2, Direction.WESTBOUND, HyperTime.at(200.0 + i * 500.0)))
+            c.schedule_arrival(Barge(100+i*5+3, Direction.WESTBOUND, HyperTime.at(200.0 + i * 500.0)))
+            c.schedule_arrival(Barge(100+i*5+4, Direction.WESTBOUND, HyperTime.at(200.0 + i * 500.0)))
 
         c.run(1410.0)
 

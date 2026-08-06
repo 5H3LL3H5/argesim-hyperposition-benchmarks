@@ -8,6 +8,9 @@ import random
 import sys
 from pathlib import Path
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from argesim_benchmarks.models.c08_canal_and_lock import CanalAndLock, Barge, Direction
@@ -31,13 +34,15 @@ def run_replication(
     west_arrival = rng.uniform(0.0, 20.0)
 
     barge_id = 0
+    from nsa_devs.hypertime import HyperTime
+
     while east_arrival <= duration:
-        model.schedule_arrival(Barge(barge_id, Direction.EASTBOUND, east_arrival))
+        model.schedule_arrival(Barge(barge_id, Direction.EASTBOUND, HyperTime.at(east_arrival)))
         barge_id += 1
         east_arrival += rng.expovariate(1.0 / 75.0)
 
     while west_arrival <= duration:
-        model.schedule_arrival(Barge(barge_id, Direction.WESTBOUND, west_arrival))
+        model.schedule_arrival(Barge(barge_id, Direction.WESTBOUND, HyperTime.at(west_arrival)))
         barge_id += 1
         west_arrival += rng.expovariate(1.0 / 75.0)
 
@@ -110,6 +115,23 @@ def main() -> None:
     }
 
     print(json.dumps(report, indent=2))
+
+    if trajectory_sample:
+        times = np.array([pt[0] for pt in trajectory_sample])
+        east_queue = np.array([pt[1] for pt in trajectory_sample])
+        west_queue = np.array([pt[2] for pt in trajectory_sample])
+
+        plt.figure(figsize=(10, 6))
+        plt.step(times, east_queue, label="Eastbound Queue", where="post")
+        plt.step(times, west_queue, label="Westbound Queue", where="post", alpha=0.7)
+        plt.title("ARGESIM C08 - Barge Queue Lengths (Task C, Single Run)")
+        plt.xlabel("Time (minutes)")
+        plt.ylabel("Number of Barges Waiting")
+        plt.legend()
+        plt.grid(True)
+        plt.tight_layout()
+        plt.savefig("c08_trajectory.png")
+        print("Trajectory plot saved to c08_trajectory.png")
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ import heapq
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Callable
+from nsa_devs.hypertime import HyperTime
 
 
 class Direction(Enum):
@@ -24,12 +25,12 @@ class LockState(Enum):
 class Barge:
     id: int
     direction: Direction
-    arrival_time: float
+    arrival_time: HyperTime
 
 
 @dataclass(order=True)
 class Event:
-    time: float
+    time: HyperTime
     sequence: int
     name: str = field(compare=False)
     handler: Callable[[], None] = field(compare=False)
@@ -40,7 +41,7 @@ class CanalAndLock:
         self.eastmax = eastmax
         self.westmax = westmax
 
-        self.time = 0.0
+        self.time = HyperTime.at(0)
         self.events: list[Event] = []
         self.event_sequence = 0
 
@@ -69,22 +70,27 @@ class CanalAndLock:
         self.queue_trajectory: list[tuple[float, int, int]] = []
 
     def schedule(self, delay: float, name: str, handler: Callable[[], None]) -> None:
+        if delay == 0.0:
+            target_time = self.time.after_epsilon(1)
+        else:
+            target_time = self.time.after_finite(delay)
         heapq.heappush(
             self.events,
-            Event(self.time + delay, self.event_sequence, name, handler),
+            Event(target_time, self.event_sequence, name, handler),
         )
         self.event_sequence += 1
 
     def run(self, until: float) -> None:
-        while self.events and self.events[0].time <= until:
+        until_time = HyperTime.at(until)
+        while self.events and self.events[0].time <= until_time:
             event = heapq.heappop(self.events)
             self.time = event.time
             event.handler()
-        self.time = until
+        self.time = until_time
 
     def _record_queues(self) -> None:
         self.queue_trajectory.append((
-            self.time,
+            float(self.time.standard_part()),
             len(self.queues[Direction.EASTBOUND]),
             len(self.queues[Direction.WESTBOUND])
         ))
@@ -92,7 +98,7 @@ class CanalAndLock:
     def schedule_arrival(self, barge: Barge) -> None:
         if barge.arrival_time < self.time:
             raise ValueError("Cannot schedule arrival in the past")
-        delay = barge.arrival_time - self.time
+        delay = float(barge.arrival_time.standard_part() - self.time.standard_part())
         self.schedule(delay, f"arrive {barge.id}", lambda b=barge: self.arrive(b))
 
     def arrive(self, barge: Barge) -> None:
@@ -228,7 +234,7 @@ class CanalAndLock:
 
     def leave_system(self, barge: Barge) -> None:
         self.active_cycle_barges.remove(barge)
-        transit_time = self.time - barge.arrival_time
+        transit_time = float(self.time.standard_part() - barge.arrival_time.standard_part())
         self.completed_barges.append((barge, transit_time))
 
         if not self.active_cycle_barges:
