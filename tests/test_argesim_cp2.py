@@ -1,6 +1,7 @@
 import unittest
 import math
 
+from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
 from argesim_benchmarks.models.cp2_parallel_and_distributed import (
     CP2MonteCarloParameters,
     cp2_monte_carlo_problem,
@@ -12,6 +13,10 @@ from argesim_benchmarks.models.cp2_parallel_and_distributed import (
 
 
 class CP2Tests(unittest.TestCase):
+    def test_cp2_catalog_status(self) -> None:
+        cp2 = next(b for b in BENCHMARKS if b.identifier == "CP2")
+        self.assertEqual(cp2.status, BenchmarkStatus.IMPLEMENTED)
+
     def test_monte_carlo_parameters_must_be_positive_and_finite(self) -> None:
         with self.assertRaises(ValueError):
             CP2MonteCarloParameters(mass=-1.0)
