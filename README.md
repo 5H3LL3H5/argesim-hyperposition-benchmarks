@@ -28,6 +28,7 @@ See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status.
 - fixed-step classical RK4;
 - adaptive Dormand-Prince RK45 with a 5(4) embedded error estimate;
 - asynchronous first-order QSS for autonomous ODE systems;
+- asynchronous second-order QSS2 for autonomous ODE systems (using finite differences for Hessian estimation);
 - one-dimensional heat and wave equations through the Method of Lines;
 - exact rational macro time plus integer microsteps for restricted NSA-DEVS;
 - a finite acyclic Mealy-style NSA-DEVS relay reference model.
@@ -35,7 +36,7 @@ See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status.
   steady states.
 - ARGESIM C17R (ODE part) task 1 parameters, ODE problem, and solvers.
 
-QSS2, LIQSS, DAE handling, general hybrid-event localization, the modern
+LIQSS, DAE handling, general hybrid-event localization, the modern
 `neuraloperator` backend and ARGESIM C02-C22/CP1/CP2 are tracked as work in
 progress. They are not silently mapped to simpler algorithms.
 

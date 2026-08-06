@@ -11,7 +11,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
-from ..solvers import euler, qss1, rk4, rk45
+from ..solvers import euler, qss1, qss2, rk4, rk45
 
 C17_INITIAL_STATE: Vector = (9500.0, 500.0, 0.0)
 
@@ -104,4 +104,9 @@ def solve_c17(
         if not isinstance(quantum, (int, float, tuple, list)):
             raise TypeError("qss1 quantum must be scalar or a finite sequence")
         return qss1(problem, quantum)
+    if normalised == "qss2":
+        quantum = configured.get("quantum", (1.0, 1.0, 1.0))
+        if not isinstance(quantum, (int, float, tuple, list)):
+            raise TypeError("qss2 quantum must be scalar or a finite sequence")
+        return qss2(problem, quantum)
     raise ValueError(f"unsupported C17 solver: {method}")
