@@ -182,7 +182,7 @@ def c11_problem(
         initial_state,
         t_bound,
         name=f"ARGESIM-C11-scara-robot-{task}",
-        autonomous=False,
+        autonomous=True,
     )
 
 
@@ -216,4 +216,10 @@ def solve_c11(
             atol=float(configured.get("atol", 1.0e-8)),
             max_step=float(configured.get("max_step", 1.0e-2)),
         )
+    if normalised == "qss1":
+        from ..solvers.qss import qss1
+        quantum = configured.get("quantum", (1.0e-2, 1.0e-3, 1.0e-4))
+        if not isinstance(quantum, (int, float, tuple, list)):
+            raise TypeError("qss1 quantum must be scalar or a finite sequence")
+        return qss1(problem, quantum)
     raise ValueError(f"unsupported C11 solver: {method}")
