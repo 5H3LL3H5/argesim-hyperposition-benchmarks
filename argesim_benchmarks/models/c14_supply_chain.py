@@ -58,12 +58,6 @@ class Factory:
         self.rng = rng
         self.next_production_time = int(self.rng.expovariate(1/600))
 
-    def advance_to(self, current_time: int):
-        while self.next_production_time <= current_time:
-            product = self.rng.choice(self.products)
-            self.stock[product] += 1
-            self.next_production_time += int(self.rng.expovariate(1/600))
-
 class Distributor:
     def __init__(self, id: int):
         self.id = id
@@ -75,17 +69,6 @@ class Distributor:
         # metrics
         self.total_cost = 0.0
         self.delivered_products = 0
-
-    def advance_to(self, current_time: int):
-        # Process arrivals
-        new_deliveries = []
-        for delivery in self.incoming_deliveries:
-            arr_time, prod, amt = delivery
-            if arr_time <= current_time:
-                self.stock[prod] += amt
-            else:
-                new_deliveries.append(delivery)
-        self.incoming_deliveries = new_deliveries
 
     def calculate_storage_cost(self):
         # 1 euro per product per day
@@ -111,18 +94,52 @@ class SupplyChainSim:
         self.next_wholesaler_order_time = 192 * 3600 + self.rng.randint(600, 3600)
 
     def advance_time(self, new_time: int):
-        for f in self.factories.values():
-            f.advance_to(new_time)
+        # Event loop to process events in chronological order up to new_time
+        while True:
+            next_event_time = float('inf')
+            event_type = None
+            event_data = None
 
-        for d in self.distributors.values():
-            d.advance_to(new_time)
+            # Check factories
+            for f_id, f in self.factories.items():
+                if f.next_production_time < next_event_time:
+                    next_event_time = f.next_production_time
+                    event_type = "factory"
+                    event_data = f_id
 
-        while self.next_wholesaler_order_time <= new_time:
-            # Process wholesaler order
-            dist_id = self.rng.randint(1, 4)
-            prod = self.rng.randint(1, 12)
-            self.distributors[dist_id].fulfill_wholesaler_order(prod)
-            self.next_wholesaler_order_time += self.rng.randint(600, 3600)
+            # Check wholesaler orders
+            if self.next_wholesaler_order_time < next_event_time:
+                next_event_time = self.next_wholesaler_order_time
+                event_type = "wholesaler"
+
+            # Check deliveries
+            for d_id, d in self.distributors.items():
+                for arr_time, prod, amt in d.incoming_deliveries:
+                    if arr_time < next_event_time:
+                        next_event_time = arr_time
+                        event_type = "delivery"
+                        event_data = (d_id, arr_time, prod, amt)
+
+            if next_event_time > new_time:
+                break
+
+            self.current_time = next_event_time
+
+            if event_type == "factory":
+                f = self.factories[event_data]
+                product = self.rng.choice(f.products)
+                f.stock[product] += 1
+                f.next_production_time += int(self.rng.expovariate(1/600))
+            elif event_type == "wholesaler":
+                dist_id = self.rng.randint(1, 4)
+                # Pick a valid product for the chosen distributor based on assortments
+                prod = self.rng.choice(list(TASK_A_B_MAPPING[dist_id].keys()))
+                self.distributors[dist_id].fulfill_wholesaler_order(prod)
+                self.next_wholesaler_order_time += self.rng.randint(600, 3600)
+            elif event_type == "delivery":
+                d_id, arr_time, prod, amt = event_data
+                self.distributors[d_id].stock[prod] += amt
+                self.distributors[d_id].incoming_deliveries.remove((arr_time, prod, amt))
 
         self.current_time = new_time
 
@@ -143,15 +160,10 @@ class SupplyChainSim:
         self.advance_time(168 * 3600)
 
         for d_id in range(1, 5):
-            for p in range(1, 13):
+            # Only order products that are in the distributor's assortment
+            for p in TASK_A_B_MAPPING[d_id]:
                 # find factory mapping
-                f_id = 1
-                if p > 6:
-                    f_id = 2
-                if self.task in ["a", "b"] and d_id == 3:
-                    f_id = 3
-                if self.task in ["a", "b"] and d_id == 4:
-                    f_id = 4
+                f_id = TASK_A_B_MAPPING[d_id][p]
 
                 # Minimum supply time logic could apply but definition says "regardless of strategy"
                 # actually definition says: "regardless of the ordering strategy used ... order 10 pieces ... to fill their storages"
@@ -211,36 +223,24 @@ class SupplyChainSim:
             # Place new orders at target_time (00:00 of the current day)
             for d_id, dist in self.distributors.items():
                 if self.task == "a":
-                    # order 2 of each product
-                    for p in range(1, 13):
-                        f_id = 1
-                        if p > 6:
-                            f_id = 2
-                        if d_id == 3:
-                            f_id = 3
-                        if d_id == 4:
-                            f_id = 4
+                    # order 2 of each product in the assortment
+                    for p in TASK_A_B_MAPPING[d_id]:
+                        f_id = TASK_A_B_MAPPING[d_id][p]
                         if not self.place_factory_order(d_id, f_id, p, 2, target_time):
                             dist.backlogged_orders.append((p, 2, f_id))
                 elif self.task == "b":
                     # order whatever wholesalers demanded yesterday
-                    for p in range(1, 13):
+                    for p in TASK_A_B_MAPPING[d_id]:
                         amt = dist.wholesaler_demand[p]
                         if amt > 0:
-                            f_id = 1
-                            if p > 6:
-                                f_id = 2
-                            if d_id == 3:
-                                f_id = 3
-                            if d_id == 4:
-                                f_id = 4
+                            f_id = TASK_A_B_MAPPING[d_id][p]
                             if not self.place_factory_order(d_id, f_id, p, amt, target_time):
                                 dist.backlogged_orders.append((p, amt, f_id))
                     # reset demand
                     dist.wholesaler_demand = {p: 0 for p in range(1, 13)}
                 elif self.task == "c":
                     # Same logic as B for amount, but minimal time strategy
-                    for p in range(1, 13):
+                    for p in TASK_A_B_MAPPING[d_id]:
                         amt = dist.wholesaler_demand[p]
                         if amt > 0:
                             cands = []
