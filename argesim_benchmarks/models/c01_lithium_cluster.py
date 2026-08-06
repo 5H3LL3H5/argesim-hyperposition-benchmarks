@@ -100,9 +100,7 @@ def c01_steady_state(parameters: C01Parameters) -> Vector:
 
     f_center = parameters.production / parameters.loss_f
     m_center = parameters.k_f * f_center * f_center / parameters.decay_m
-    r_center = (
-        parameters.k_r * m_center * f_center / parameters.decay_r
-    )
+    r_center = parameters.k_r * m_center * f_center / parameters.decay_r
     return (r_center, m_center, f_center)
 
 

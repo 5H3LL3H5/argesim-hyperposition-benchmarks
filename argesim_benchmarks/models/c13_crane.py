@@ -1,0 +1,328 @@
+"""ARGESIM C13: Crane and Embedded Control."""
+
+from __future__ import annotations
+
+import math
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+
+from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector, SolverStats
+from ..solvers.explicit import rk45
+
+C13_INITIAL_STATE: Vector = (0.0, 0.0, 0.0, 0.0, 0.0)
+
+
+@dataclass(frozen=True)
+class C13Parameters:
+    mc: float = 10.0
+    ml: float = 100.0
+    r: float = 5.0
+    g: float = 9.81
+    dc: float = 0.5
+    dcBrake: float = 100000.0
+    dl: float = 0.01
+
+
+_C13_DEFAULT_PARAMETERS = C13Parameters()
+
+
+def c13_linear_rhs(
+    parameters: C13Parameters = _C13_DEFAULT_PARAMETERS,
+    fc_desired: float = 0.0,
+    fd: float = 0.0,
+) -> Rhs:
+    """Return the explicit continuous rate equations for the linear model."""
+
+    def rhs(_time: float, state: Sequence[float]) -> Vector:
+        xc, xc_dot, alpha, alpha_dot, current_fc = state
+
+        fc_dot = -4.0 * (current_fc - fc_desired)
+
+        xc_ddot = (
+            (current_fc / parameters.mc)
+            + (parameters.g * parameters.ml * alpha / parameters.mc)
+            - (parameters.dc * xc_dot / parameters.mc)
+        )
+
+        alpha_ddot = (
+            -parameters.g * (1.0 + parameters.ml / parameters.mc) * alpha
+            + (parameters.dc / parameters.mc - parameters.dl / parameters.ml) * xc_dot
+            - parameters.r * (parameters.dl / parameters.ml) * alpha_dot
+            - (current_fc / parameters.mc)
+            + (fd / parameters.ml)
+        ) / parameters.r
+
+        return (xc_dot, xc_ddot, alpha_dot, alpha_ddot, fc_dot)
+
+    return rhs
+
+
+def c13_nonlinear_rhs(
+    parameters: C13Parameters = _C13_DEFAULT_PARAMETERS,
+    fc_desired: float = 0.0,
+    fd: float = 0.0,
+    dc_current: float | None = None,
+) -> Rhs:
+    """Return the explicit continuous rate equations for the nonlinear model."""
+
+    dc = dc_current if dc_current is not None else parameters.dc
+
+    def rhs(_time: float, state: Sequence[float]) -> Vector:
+        xc, xc_dot, alpha, alpha_dot, current_fc = state
+
+        fc_dot = -4.0 * (current_fc - fc_desired)
+
+        sin_a = math.sin(alpha)
+        cos_a = math.cos(alpha)
+        sin_a2 = sin_a**2
+
+        M_xc = parameters.mc + parameters.ml * sin_a2
+
+        xc_ddot = (
+            -dc * xc_dot
+            + current_fc
+            + fd * sin_a2
+            + parameters.ml
+            * sin_a
+            * (parameters.r * alpha_dot**2 + parameters.g * cos_a)
+            - parameters.dl * xc_dot * sin_a2
+        ) / M_xc
+
+        M_alpha = (parameters.r**2) * (parameters.mc + parameters.ml * sin_a2)
+
+        alpha_ddot = (
+            (fd * parameters.mc / parameters.ml - current_fc + dc * xc_dot)
+            * parameters.r
+            * cos_a
+            - (
+                parameters.g * (parameters.mc + parameters.ml)
+                + parameters.ml * parameters.r * (alpha_dot**2) * cos_a
+            )
+            * parameters.r
+            * sin_a
+            - parameters.dl
+            * (
+                parameters.mc
+                / parameters.ml
+                * (xc_dot * parameters.r * cos_a + (parameters.r**2) * alpha_dot)
+                + (parameters.r**2) * alpha_dot * sin_a2
+            )
+        ) / M_alpha
+
+        return (xc_dot, xc_ddot, alpha_dot, alpha_ddot, fc_dot)
+
+    return rhs
+
+
+def solve_c13_task_a(fd_dist: float) -> dict[str, float]:
+    """Solve task A, returning the steady state position of the load."""
+
+    def get_segments():
+        return [
+            (0.0, 4.0, 0.0, 160.0),
+            (4.0, 7.0, fd_dist, 160.0),
+            (7.0, 15.0, 0.0, 160.0),
+            (15.0, 2000.0, 0.0, 0.0),
+        ]
+
+    def integrate_model(rhs_func) -> Vector:
+        state = C13_INITIAL_STATE
+        for t0, t1, fd, fc_desired in get_segments():
+            prob = InitialValueProblem(
+                rhs_func(_C13_DEFAULT_PARAMETERS, fd=fd, fc_desired=fc_desired),
+                t0,
+                state,
+                t1,
+                name="ARGESIM-C13-task-a",
+            )
+            res = rk45(prob, max_step=1.0)
+            state = res.final_state
+        return state
+
+    lin_state = integrate_model(c13_linear_rhs)
+    nonlin_state = integrate_model(c13_nonlinear_rhs)
+
+    return {
+        "linear": lin_state[0] + _C13_DEFAULT_PARAMETERS.r * lin_state[2],
+        "nonlinear": nonlin_state[0]
+        + _C13_DEFAULT_PARAMETERS.r * math.sin(nonlin_state[2]),
+    }
+
+
+def c13_task_a() -> dict[float, dict[str, float]]:
+    """Compute the steady-state load position for three disturbance values."""
+    return {dist: solve_c13_task_a(dist) for dist in (-750.0, -800.0, -850.0)}
+
+
+def _vec_add(v1: Sequence[float], v2: Sequence[float]) -> tuple[float, ...]:
+    return tuple(x + y for x, y in zip(v1, v2))
+
+
+def _scalar_mul(s: float, v: Sequence[float]) -> tuple[float, ...]:
+    return tuple(s * x for x in v)
+
+
+def _dot_prod(v1: Sequence[float], v2: Sequence[float]) -> float:
+    return sum(x * y for x, y in zip(v1, v2))
+
+
+def _mat_vec(m: Sequence[Sequence[float]], v: Sequence[float]) -> tuple[float, ...]:
+    return tuple(sum(row[j] * v[j] for j in range(len(v))) for row in m)
+
+
+class C13Controller:
+    """Discrete controller for C13 with 10 ms cycle time."""
+
+    def __init__(self, with_diagnosis: bool = False):
+        self.with_diagnosis = with_diagnosis
+        self.q = (0.0, 0.0, 0.0, 0.0, 0.0)
+        self.fc_desired = 0.0
+        self.brake_active = False
+        self.emergency_mode = False
+        self.time_fc_small = 0.0
+
+        self.V = 109.5
+        self.ForceMax = 160.0
+        self.BrakeCondition = 0.01
+        self.dt = 0.01
+
+        self.M = (
+            (0.96, 0, 0, 0, 0),
+            (0, 1, 0.01, 0, 0),
+            (0.001, 0, 0.9995, 0.981, 0),
+            (0, 0, 0, 1, 0),
+            (-0.0002, 0, 0.0001, -0.2158, 1),
+        )
+        self.c = (0, 1, 0, 0, 0)
+        self.d = (34.5724, 0.2395, 2.0322, 0.0164, -0.1979)
+        self.b = (0.04, 0, 0, 0, 0)
+        self.h = (2.9, 109.5, 286.0, 1790.6, 44.5)
+
+        self.M_minus_dcT = tuple(
+            tuple(self.M[i][j] - self.d[i] * self.c[j] for j in range(5))
+            for i in range(5)
+        )
+
+    def step(self, pos_car: float, pos_desired: float) -> None:
+        if self.with_diagnosis:
+            if pos_car > 5.0 or pos_car < -5.0:
+                self.emergency_mode = True
+
+            if self.emergency_mode:
+                self.brake_active = True
+                self.fc_desired = 0.0
+            else:
+                if abs(self.fc_desired) < self.BrakeCondition:
+                    self.time_fc_small += self.dt
+                else:
+                    self.time_fc_small = 0.0
+
+                if self.time_fc_small > 3.0:
+                    self.brake_active = True
+                    self.fc_desired = 0.0
+                else:
+                    self.brake_active = False
+
+        if not (self.with_diagnosis and self.emergency_mode):
+            q_next = _vec_add(
+                _vec_add(
+                    _mat_vec(self.M_minus_dcT, self.q), _scalar_mul(pos_car, self.d)
+                ),
+                _scalar_mul(self.fc_desired, self.b),
+            )
+            u_next = self.V * pos_desired - _dot_prod(self.h, q_next)
+            fc_desired_new = max(min(u_next, self.ForceMax), -self.ForceMax)
+
+            self.q = q_next
+
+            if not self.brake_active:
+                self.fc_desired = fc_desired_new
+
+
+def solve_c13_task_b_c(
+    with_diagnosis: bool = False,
+    options: Mapping[str, object] | None = None,
+) -> tuple[IntegrationResult, tuple[float, ...], tuple[bool, ...]]:
+    """Solve task B or C with discrete controller and continuous dynamics."""
+
+    configured = dict(options or {})
+    max_step = float(configured.get("max_step", 0.01))
+    rtol = float(configured.get("rtol", 1.0e-6))
+    atol = float(configured.get("atol", 1.0e-9))
+
+    controller = C13Controller(with_diagnosis=with_diagnosis)
+
+    t = 0.0
+    t_end = 60.0
+    dt = controller.dt
+
+    state = C13_INITIAL_STATE
+
+    times = [0.0]
+    states = [state]
+    evals = 0
+    accepted = 0
+    rejected = 0
+
+    xl_traj = [state[0] + _C13_DEFAULT_PARAMETERS.r * math.sin(state[2])]
+    brake_traj = [controller.brake_active]
+
+    while t < t_end - 1e-9:
+        if t >= 36.0:
+            PosDesired = 3.8
+        elif t >= 16.0:
+            PosDesired = -0.5
+        else:
+            PosDesired = 3.0
+
+        fd = 0.0
+        if 42.0 <= t < 43.0:
+            fd = 200.0 if with_diagnosis else -200.0
+
+        controller.step(state[0], PosDesired)
+
+        dc_val = (
+            _C13_DEFAULT_PARAMETERS.dcBrake
+            if controller.brake_active
+            else _C13_DEFAULT_PARAMETERS.dc
+        )
+
+        rhs = c13_nonlinear_rhs(
+            _C13_DEFAULT_PARAMETERS,
+            fd=fd,
+            fc_desired=controller.fc_desired,
+            dc_current=dc_val,
+        )
+
+        prob = InitialValueProblem(rhs, t, state, t + dt, name="ARGESIM-C13-controlled")
+        res = rk45(prob, max_step=max_step, rtol=rtol, atol=atol)
+
+        state = res.final_state
+        evals += res.stats.rhs_evaluations
+        accepted += res.stats.accepted_steps
+        rejected += res.stats.rejected_steps
+        t += dt
+
+        times.append(t)
+        states.append(state)
+        xl_traj.append(state[0] + _C13_DEFAULT_PARAMETERS.r * math.sin(state[2]))
+        brake_traj.append(controller.brake_active)
+
+    final_res = IntegrationResult(
+        method="rk45-dormand-prince-5(4)",
+        times=tuple(times),
+        states=tuple(states),
+        stats=SolverStats(accepted, rejected, evals),
+    )
+
+    return final_res, tuple(xl_traj), tuple(brake_traj)
+
+
+def c13_task_b() -> IntegrationResult:
+    """Run task B and return integration result."""
+    return solve_c13_task_b_c(with_diagnosis=False)[0]
+
+
+def c13_task_c() -> IntegrationResult:
+    """Run task C and return integration result."""
+    return solve_c13_task_b_c(with_diagnosis=True)[0]

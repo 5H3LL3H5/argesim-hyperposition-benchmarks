@@ -22,11 +22,7 @@ def _combine(
 ) -> tuple[float, ...]:
     return tuple(
         value
-        + h
-        * sum(
-            coefficient * derivative[index]
-            for coefficient, derivative in terms
-        )
+        + h * sum(coefficient * derivative[index] for coefficient, derivative in terms)
         for index, value in enumerate(y)
     )
 
@@ -239,11 +235,11 @@ def rk45(
             times.append(t)
             states.append(y)
             accepted += 1
-            factor = 10.0 if error_norm == 0.0 else min(10.0, 0.9 * error_norm ** -0.2)
+            factor = 10.0 if error_norm == 0.0 else min(10.0, 0.9 * error_norm**-0.2)
             h *= max(0.2, factor)
         else:
             rejected += 1
-            h *= max(0.2, 0.9 * error_norm ** -0.2)
+            h *= max(0.2, 0.9 * error_norm**-0.2)
 
     return IntegrationResult(
         method="rk45-dormand-prince-5(4)",

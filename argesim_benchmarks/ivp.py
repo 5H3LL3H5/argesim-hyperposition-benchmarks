@@ -97,4 +97,3 @@ class IntegrationResult:
     @property
     def final_state(self) -> Vector:
         return self.states[-1]
-

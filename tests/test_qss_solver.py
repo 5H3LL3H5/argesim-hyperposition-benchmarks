@@ -23,9 +23,7 @@ class QssSolverTests(unittest.TestCase):
             abs(qss1(self.decay_problem(), quantum).final_state[0] - exact)
             for quantum in (0.1, 0.05, 0.025, 0.0125)
         ]
-        self.assertTrue(
-            all(later < earlier for earlier, later in pairwise(errors))
-        )
+        self.assertTrue(all(later < earlier for earlier, later in pairwise(errors)))
         self.assertLess(errors[-1], 0.01)
 
     def test_qss1_uses_asynchronous_quantization_events(self) -> None:
