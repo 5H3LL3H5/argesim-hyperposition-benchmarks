@@ -2,7 +2,7 @@
 
 ## Executive Overview: The Core Breakthrough
 
-This document provides a **detailed, crystal-clear, and highly intuitive explanation** of our entire architecture-from GPU silicon up to autonomous Autonomous System Swarms.
+This document provides a **detailed, crystal-clear, and highly intuitive explanation** of our entire architecture-from GPU silicon up to autonomous Autonomous Agent Swarms.
 
 ---
 
@@ -17,8 +17,8 @@ Our architecture solves this by applying **State Superposition** and **Physical 
 ========================================================================================================================
                       THE 3-TIER ZERO-COLLISION PARALLELIZATION ARCHITECTURE
 ========================================================================================================================
-Level 1: Autonomous System Swarm (High-Level Task Parallelism)
- Each Autonomous System works in its own isolated Git Worktree folder (/tmp/worktree-agent-A).
+Level 1: Autonomous Agent Swarm (High-Level Task Parallelism)
+ Each Autonomous Agent works in its own isolated Git Worktree folder (/tmp/worktree-agent-A).
  Result: 0% file write collisions, 17.70x speedup (42.1s vs 745.2s).
 
 Level 2: OpenMPI Cluster (Distributed Network Parallelism)
@@ -35,8 +35,8 @@ Level 3: OpenCL GPU SIMD (Hardware Vector Acceleration)
 
 ## 2. The 3 Parallel Layers Explained Simply
 
-### Layer 1: Autonomous System Swarm (Git Worktrees)
-- **The Problem**: If 4 Autonomous System try to edit code in the same folder at the same time, they overwrite each other's files.
+### Layer 1: Autonomous Agent Swarm (Git Worktrees)
+- **The Problem**: If 4 Autonomous Agent try to edit code in the same folder at the same time, they overwrite each other's files.
 - **The Solution**: Every subagent gets its own **isolated Git Worktree** (`Workspace="branch"`). Agent A works in its private folder, Agent B works in its private folder.
 - **The Result**: Tasks execute in **42.1 seconds instead of 745.2 seconds ($17.70\times$ speedup)** with **0.0% build collisions**.
 
@@ -58,7 +58,7 @@ Level 3: OpenCL GPU SIMD (Hardware Vector Acceleration)
 
 ## 3. Token Optimality & Cost (3.25 EUR)
 
-- **The Problem**: Chatting back and forth with an Autonomous System re-sends the entire past history every turn, wasting millions of tokens.
+- **The Problem**: Chatting back and forth with an Autonomous Agent re-sends the entire past history every turn, wasting millions of tokens.
 - **The Solution (The Monograph Formalism)**: All knowledge, math proofs, and test results are flattened into a single, clean **Monograph Markdown File**. The agent updates only tiny delta changes.
 - **The Result**: Token consumption dropped by **80.81%** ($8.41\text{M} \to 1.61\text{M}$ tokens). Total cost for today's entire session on Compute Node 3: **3.25 EUR** ($3.53 USD).
 

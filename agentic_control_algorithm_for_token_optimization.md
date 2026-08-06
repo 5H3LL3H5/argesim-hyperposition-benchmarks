@@ -83,4 +83,4 @@ Overall Session Impact           ~8.50 Million Cumulative Tokens        1.61 Mil
 
 ## 5. Summary
 
-Applying MPC Observer Control to Autonomous System context management reduces cumulative token consumption by **81.06%**, dropping API session costs from **17.15 EUR** to **3.25 EUR** on Compute Node 3 while accelerating task completion time.
+Applying MPC Observer Control to Autonomous Agent context management reduces cumulative token consumption by **81.06%**, dropping API session costs from **17.15 EUR** to **3.25 EUR** on Compute Node 3 while accelerating task completion time.
