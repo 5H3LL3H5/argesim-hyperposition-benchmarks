@@ -76,6 +76,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Emergency Department - Follow-up Treatment",
         (ModelClass.DES, ModelClass.STOCHASTIC),
         _source("c06"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C07",
