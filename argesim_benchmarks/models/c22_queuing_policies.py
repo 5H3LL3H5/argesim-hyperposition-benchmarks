@@ -189,13 +189,16 @@ class BaseDevsSystem(AtomicModel):
         else:
             next_time = self._internal_events[0][0]
             macro_diff = next_time.macro - self.current_time.macro
-            micro_diff = next_time.micro - self.current_time.micro
-            if macro_diff < 0 or (macro_diff == 0 and micro_diff < 0):
+            if macro_diff < 0 or (
+                macro_diff == 0 and next_time.micro < self.current_time.micro
+            ):
                 self.sigma = HyperTime(Fraction(0))  # catch up
-            else:
+            elif macro_diff == 0:
                 self.sigma = HyperTime(
-                    macro_diff, micro_diff if macro_diff == 0 else next_time.micro
+                    Fraction(0), next_time.micro - self.current_time.micro
                 )
+            else:
+                self.sigma = HyperTime(macro_diff, next_time.micro)
 
     def time_advance(self) -> HyperTime:
         return self.sigma
@@ -291,6 +294,10 @@ class BaseDevsSystem(AtomicModel):
     def handle_enter(self, q_idx: int) -> None:
         if self.servers[q_idx] is None and self.queues[q_idx]:
             entity = self.queues[q_idx].pop(0)
+            while entity.reneged and self.queues[q_idx]:
+                entity = self.queues[q_idx].pop(0)
+            if entity.reneged:
+                return
             self.servers[q_idx] = entity
             entity.queue_wait_time += (
                 float(self.current_time.macro) - entity.enter_queue_time
@@ -410,8 +417,10 @@ class RenegingSystem(BaseDevsSystem):
         self.schedule_event(self.t_r, 3, "renege", entity)
 
     def handle_renege(self, entity: Entity) -> None:
-        if entity.assigned_queue != -1 and entity in self.queues[entity.assigned_queue]:
-            self.queues[entity.assigned_queue].remove(entity)
+        if entity.assigned_queue != -1 and not entity.reneged:
+            # We don't remove it from the list here to avoid O(N).
+            # Instead we mark it reneged, and ignore it when it pops.
+            entity.reneged = True
             entity.reneged = True
             entity.queue_wait_time = self.t_r
             self.wait_times.append(entity.queue_wait_time)
@@ -522,6 +531,10 @@ class ClassingSystem(BaseDevsSystem):
             and self.queues[q_idx][0].entity_class == self.current_class
         ):
             entity = self.queues[q_idx].pop(0)
+            while entity.reneged and self.queues[q_idx]:
+                entity = self.queues[q_idx].pop(0)
+            if entity.reneged:
+                return
             self.servers[q_idx] = entity
             entity.queue_wait_time += (
                 float(self.current_time.macro) - entity.enter_queue_time
