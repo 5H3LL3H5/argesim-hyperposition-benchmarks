@@ -11,7 +11,7 @@ import random
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
-from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
+from ..ivp import InitialValueProblem, IntegrationResult, Rhs, SolverStats, Vector
 from ..solvers import euler, qss1, rk4, rk45
 
 C15_INITIAL_STATE: Vector = (0.0, 0.0)
@@ -156,7 +156,6 @@ def solve_c15(
         prob2 = InitialValueProblem(rhs_phase2, bolus.tau, res1.final_state, t_bound, autonomous=True)
         res2 = qss1(prob2, quantum)
 
-        from ..ivp import SolverStats
         merged_times = res1.times + res2.times[1:]
         merged_states = res1.states + res2.states[1:]
         merged_stats = SolverStats(
@@ -253,8 +252,13 @@ def _levenberg_marquardt(
     p0: Sequence[float],
     tol: float = 1.0e-8,
     max_iter: int = 200,
+    min_bound: float = 1.0e-6,
 ) -> tuple[float, ...]:
-    """Minimise sum of squared residuals using Levenberg-Marquardt."""
+    """Minimise sum of squared residuals using Levenberg-Marquardt.
+
+    The min_bound prevents the parameters (which represent biological
+    rates and volumes) from becoming zero or negative during the search.
+    """
 
     p = list(p0)
     n = len(p)
@@ -296,7 +300,7 @@ def _levenberg_marquardt(
                 dp = [0.0] * n
 
             p_new = [p[i] - dp[i] for i in range(n)]
-            p_new = [max(1.0e-6, val) for val in p_new]
+            p_new = [max(min_bound, val) for val in p_new]
 
             f_new = residual_fn(p_new)
             cost_new = sum(x * x for x in f_new)
@@ -335,12 +339,23 @@ def c15_task_b(
     k01, k21, k12, v1 = p_opt
     params = C15Parameters(k01=k01, k21=k21, k12=k12, v1=v1)
 
-    max_c = 0.0
-    for i in range(1, 2400):
-        t = i * 0.1
-        x1, _ = c15_analytical(t, params, bolus)
-        if (c := x1 / v1) > max_c:
-            max_c = c
+    # Find exact maximum concentration using bisection on the derivative.
+    # The peak must occur after the bolus ends (t >= tau) since x1 is strictly increasing during injection.
+    def dx1_dt(t_val: float) -> float:
+        x1, x2 = c15_analytical(t_val, params, bolus)
+        return -(params.k01 + params.k21) * x1 + params.k12 * x2
+
+    t_low = bolus.tau
+    t_high = 240.0
+    for _ in range(50):
+        t_mid = 0.5 * (t_low + t_high)
+        if dx1_dt(t_mid) < 0.0:
+            t_high = t_mid
+        else:
+            t_low = t_mid
+
+    x1_max, _ = c15_analytical(t_low, params, bolus)
+    max_c = x1_max / v1
 
     res_final = residual(p_opt)
     residuum = sum(x * x for x in res_final)

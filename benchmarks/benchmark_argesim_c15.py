@@ -18,7 +18,7 @@ METHOD_TOLERANCES = {
     "euler": 8.0e-4,
     "rk4": 4.0e-6,
     "rk45": 2.0e-9,
-    "qss1": 4.0,
+    "qss1": 4.0,  # Large bound due to large required quantum=1.0 for speed
 }
 
 def _quartiles(values: list[int]) -> tuple[float, float]:
@@ -68,9 +68,6 @@ def main() -> None:
         error = _endpoint_error(result.final_state, reference)
         if error >= tolerance:
             raise RuntimeError(f"{method} endpoint error {error} exceeds tolerance {tolerance}")
-            # raise RuntimeError(
-            #     f"{method} endpoint error {error} exceeds tolerance {tolerance}"
-            # )
         first_quartile, third_quartile = _quartiles(durations)
         report["methods"][method] = {
             "endpoint": result.final_state,
