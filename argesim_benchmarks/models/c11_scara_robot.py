@@ -65,6 +65,14 @@ class C11Parameters:
     x_obs: float = 0.25
     d_crit: float = 0.1
 
+    # Motor specific constant for 3-phase DC
+    phase_factor: float = 1.5
+
+    # Hardcoded threshold for bang-bang velocity zeroing used in collision avoidance
+    # A tiny threshold is needed because exact 0 is practically never hit, and
+    # discontinuous control leads to Zeno chattering
+    v_zero_threshold: float = 1e-4
+
 
 _C11_DEFAULT_PARAMETERS = C11Parameters()
 
@@ -85,9 +93,9 @@ def c11_rhs(
     Theta2 = (p.m2/3.0 + m3) * p.L1 * p.L2
     Theta3 = (p.m2/3.0 + m3) * p.L2**2
 
-    I1_max = p.T1_max * 1.5 / p.kT1
-    I2_max = p.T2_max * 1.5 / p.kT2
-    I3_max = p.T3_max * 1.5 / p.kT3
+    I1_max = p.T1_max * p.phase_factor / p.kT1
+    I2_max = p.T2_max * p.phase_factor / p.kT2
+    I3_max = p.T3_max * p.phase_factor / p.kT3
 
     def rhs(_time: float, state: Sequence[float]) -> Vector:
         q1, q2, q3, dq1, dq2, dq3, I1, I2, I3 = state
@@ -113,8 +121,8 @@ def c11_rhs(
         if avoiding_collision:
             U1_max = p.U1_max_max
             U2_max = p.U2_max_max
-            U1 = -p.U1_max_max if dq1 > 1e-4 else (p.U1_max_max if dq1 < -1e-4 else 0.0)
-            U2 = -p.U2_max_max if dq2 > 1e-4 else (p.U2_max_max if dq2 < -1e-4 else 0.0)
+            U1 = -p.U1_max_max if dq1 > p.v_zero_threshold else (p.U1_max_max if dq1 < -p.v_zero_threshold else 0.0)
+            U2 = -p.U2_max_max if dq2 > p.v_zero_threshold else (p.U2_max_max if dq2 < -p.v_zero_threshold else 0.0)
 
         U1 = max(-U1_max, min(U1, U1_max))
         U2 = max(-U2_max, min(U2, U2_max))
@@ -130,6 +138,10 @@ def c11_rhs(
         dI2 = (U2 - p.kT2 * p.u2 * dq2 - p.Ra2 * I2_clamped) / p.La2
         dI3 = (U3 - p.kT3 * p.u3 * dq3 - p.Ra3 * I3_clamped) / p.La3
 
+        # Explicitly clip current derivatives when at boundaries.
+        # Note: This hard discontinuity introduces numerical stiffness for RK45
+        # but prevents integration beyond the physical current limits in a purely
+        # explicit formulation without a proper root-finding zero-crossing event handler.
         if I1 >= I1_max and dI1 > 0: dI1 = 0.0
         if I1 <= -I1_max and dI1 < 0: dI1 = 0.0
 
@@ -140,9 +152,9 @@ def c11_rhs(
         if I3 <= -I3_max and dI3 < 0: dI3 = 0.0
 
         # Joint torques
-        T1 = p.u1 * 1.5 * p.kT1 * I1_clamped
-        T2 = p.u2 * 1.5 * p.kT2 * I2_clamped
-        T3 = p.u3 * 1.5 * p.kT3 * I3_clamped
+        T1 = p.u1 * p.phase_factor * p.kT1 * I1_clamped
+        T2 = p.u2 * p.phase_factor * p.kT2 * I2_clamped
+        T3 = p.u3 * p.phase_factor * p.kT3 * I3_clamped
 
         # Mechanical system
         ma11 = Theta1 + 2 * Theta2 * math.cos(q2) + Theta3
