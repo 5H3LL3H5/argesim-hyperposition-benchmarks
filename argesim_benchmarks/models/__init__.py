@@ -21,6 +21,12 @@ from .c13_crane import (
     c13_task_c,
 )
 
+from .c06_emergency_department import (
+    solve_c06_task_a,
+    solve_c06_task_b,
+    solve_c06_task_c,
+)
+
 __all__ = [
     "C01_INITIAL_STATE",
     "C01_LOG_LOSS_VALUES",
@@ -38,4 +44,7 @@ __all__ = [
     "c13_task_b",
     "c13_task_c",
     "solve_c01",
+    "solve_c06_task_a",
+    "solve_c06_task_b",
+    "solve_c06_task_c",
 ]
