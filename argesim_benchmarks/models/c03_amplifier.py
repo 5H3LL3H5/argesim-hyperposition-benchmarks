@@ -101,46 +101,29 @@ def _durand_kerner(coeffs: Sequence[float], iterations: int = 2000) -> tuple[com
     return tuple(roots)
 
 def _c03_characteristic_polynomial(r: float, p: C03Parameters) -> list[float]:
-    """Return the coefficients of the characteristic polynomial for state matrix A(R)."""
-    # A = [[0, -1/L1, 0, 0],
-    #      [1/C2, -1/(C2*R), -1/C2, 0],
-    #      [0, 1/L3, -RL/L3, -1/L3],
-    #      [0, 0, 1/C4, 0]]
-    # Expand det(A - xI):
-    # x^4 + a x^3 + b x^2 + c x + d = 0
-    # We can evaluate the characteristic equation using numeric values directly.
-    # We compute coefficients via interpolation on x = 0, 1, -1, 2, -2
+    """
+    Analytically construct the characteristic polynomial of the linear system
+    for a given resistance `r`.
+    The system is:
+        dx1/dt = -x2 / L1
+        dx2/dt = x1/C2 - x2/(R*C2) - x3/C2
+        dx3/dt = x2/L3 - RL*x3/L3 - x4/L3
+        dx4/dt = x3/C4
 
-    def det4(m: list[list[float]]) -> float:
-        return (
-            m[0][0]*(m[1][1]*(m[2][2]*m[3][3] - m[2][3]*m[3][2]) - m[1][2]*(m[2][1]*m[3][3] - m[2][3]*m[3][1]) + m[1][3]*(m[2][1]*m[3][2] - m[2][2]*m[3][1]))
-          - m[0][1]*(m[1][0]*(m[2][2]*m[3][3] - m[2][3]*m[3][2]) - m[1][2]*(m[2][0]*m[3][3] - m[2][3]*m[3][0]) + m[1][3]*(m[2][0]*m[3][2] - m[2][2]*m[3][0]))
-          + m[0][2]*(m[1][0]*(m[2][1]*m[3][3] - m[2][3]*m[3][1]) - m[1][1]*(m[2][0]*m[3][3] - m[2][3]*m[3][0]) + m[1][3]*(m[2][0]*m[3][1] - m[2][1]*m[3][0]))
-          - m[0][3]*(m[1][0]*(m[2][1]*m[3][2] - m[2][2]*m[3][1]) - m[1][1]*(m[2][0]*m[3][2] - m[2][2]*m[3][0]) + m[1][2]*(m[2][0]*m[3][1] - m[2][1]*m[3][0]))
-        )
+    The characteristic equation det(A - sI) = 0 yields:
+    s^4 + c3*s^3 + c2*s^2 + c1*s + c0 = 0
+    """
+    c3 = 1.0 / (r * p.c2) + p.rl / p.l3
+    c2 = (1.0 / (p.l1 * p.c2) +
+          p.rl / (r * p.c2 * p.l3) +
+          1.0 / (p.c2 * p.l3) +
+          1.0 / (p.l3 * p.c4))
+    c1 = (p.rl / (p.l1 * p.c2 * p.l3) +
+          1.0 / (r * p.c2 * p.l3 * p.c4))
+    c0 = 1.0 / (p.l1 * p.c2 * p.l3 * p.c4)
 
-    mat_a = [
-        [0.0, -1.0 / p.l1, 0.0, 0.0],
-        [1.0 / p.c2, -1.0 / (p.c2 * r), -1.0 / p.c2, 0.0],
-        [0.0, 1.0 / p.l3, -p.rl / p.l3, -1.0 / p.l3],
-        [0.0, 0.0, 1.0 / p.c4, 0.0],
-    ]
-
-    def eval_p(x: float) -> float:
-        m = [[mat_a[i][j] - (x if i == j else 0.0) for j in range(4)] for i in range(4)]
-        return det4(m)
-
-    d = eval_p(0.0)
-    y1 = eval_p(1.0)
-    ym1 = eval_p(-1.0)
-    y2 = eval_p(2.0)
-
-    b = (y1 + ym1 - 2.0 * d - 2.0) / 2.0
-    ac_sum = (y1 - ym1) / 2.0
-    a = ((y2 - 16.0 - 4.0 * b - d) - 2.0 * ac_sum) / 6.0
-    c = ac_sum - a
-
-    return [1.0, a, b, c, d]
+    # Return coefficients [a4, a3, a2, a1, a0]
+    return [1.0, c3, c2, c1, c0]
 
 def c03_task_a(parameters: C03Parameters = _C03_DEFAULT_PARAMETERS) -> dict[str, tuple[complex, ...]]:
     """Return the eigenvalues of the system in the ON and OFF periods."""

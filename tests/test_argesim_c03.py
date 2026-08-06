@@ -22,17 +22,14 @@ class C03Tests(unittest.TestCase):
         real_on = [r.real for r in on_roots if abs(r.imag) < 1.0]
         self.assertEqual(len(real_on), 2)
 
-        # In the OFF state, there are 2 real roots and 1 complex conjugate pair
+        # In the OFF state, there are 2 complex conjugate pairs
         real_off = [r.real for r in off_roots if abs(r.imag) < 1.0]
-        self.assertEqual(len(real_off), 2)
+        self.assertEqual(len(real_off), 0)
 
-        # Test numerical accuracy of the roots by plugging them back into characteristic poly
-        # Hard to do directly here without duplicating code, but checking their magnitude is safe
-        self.assertTrue(all(r.real < 0 for r in on_roots)) # stable when ON
-        # Actually in OFF state one root is positive?
-        # OFF roots: (373815.7605822697+1.591443975142789e-27j), (11057930.326624727-1.4522718420028912e-27j)
-        # Wait, the characteristic roots of the OFF state had positive real parts!
-        self.assertTrue(any(r.real > 0 for r in off_roots))
+        # Both ON and OFF roots must be strictly stable (negative real parts)
+        self.assertTrue(all(r.real < 0.0 for r in on_roots))
+        self.assertTrue(all(r.real < 0.0 for r in off_roots))
+
 
     def test_rhs_initial_state(self) -> None:
         parameters = C03Parameters()
