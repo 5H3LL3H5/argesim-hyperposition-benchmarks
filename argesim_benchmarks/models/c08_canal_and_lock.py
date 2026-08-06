@@ -66,6 +66,8 @@ class CanalAndLock:
         self.lock_in_time = 5.0
         self.lock_out_time = 5.0
 
+        self.queue_trajectory: list[tuple[float, int, int]] = []
+
     def schedule(self, delay: float, name: str, handler: Callable[[], None]) -> None:
         heapq.heappush(
             self.events,
@@ -80,6 +82,13 @@ class CanalAndLock:
             event.handler()
         self.time = until
 
+    def _record_queues(self) -> None:
+        self.queue_trajectory.append((
+            self.time,
+            len(self.queues[Direction.EASTBOUND]),
+            len(self.queues[Direction.WESTBOUND])
+        ))
+
     def schedule_arrival(self, barge: Barge) -> None:
         if barge.arrival_time < self.time:
             raise ValueError("Cannot schedule arrival in the past")
@@ -88,13 +97,14 @@ class CanalAndLock:
 
     def arrive(self, barge: Barge) -> None:
         self.queues[barge.direction].append(barge)
+        self._record_queues()
         if self.active_cycle_direction == barge.direction:
             max_allowed = (
                 self.eastmax if barge.direction == Direction.EASTBOUND else self.westmax
             )
             if len(self.active_cycle_barges) < max_allowed:
-                # It can join the cycle!
                 self.queues[barge.direction].remove(barge)
+                self._record_queues()
                 self.active_cycle_barges.add(barge)
                 self.pre_lock_barges.add(barge)
                 canal_time = (
@@ -143,6 +153,7 @@ class CanalAndLock:
             )
             admitted = self.queues[next_dir][:max_allowed]
             self.queues[next_dir] = self.queues[next_dir][max_allowed:]
+            self._record_queues()
 
             for b in admitted:
                 self.active_cycle_barges.add(b)
@@ -177,7 +188,6 @@ class CanalAndLock:
                 self.pre_lock_barges.remove(barge)
                 self.lock_occupied = True
 
-                # move in, change water level, move out
                 total_lock_time = self.lock_in_time + self.lock_change_time + self.lock_out_time
                 self.schedule(total_lock_time, f"leave_lock {barge.id}", lambda b=barge: self.leave_lock(b))
             else:
