@@ -16,7 +16,7 @@ have already been implemented.
 | C05 | Two State Model | stiff ODE, state events | cataloged |
 | C06 | Emergency Department - Follow-up Treatment | stochastic DES | cataloged |
 | C07 | Constrained Pendulum | hybrid mechanics | cataloged |
-| C08 | Canal-and-Lock System | stochastic DES | implemented |
+| C08 | Canal-and-Lock System | stochastic DES | specified |
 | C09 | Fuzzy Control of a Two Tank System | hybrid sampled control | cataloged |
 | C10 | Dining Philosophers II | DES/concurrency | cataloged |
 | C11 | SCARA Robot | DAE, hybrid control | cataloged |
