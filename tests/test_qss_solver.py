@@ -90,5 +90,18 @@ class QssSolverTests(unittest.TestCase):
             qss2(self.decay_problem(), (0.1, 0.2))
 
 
+    def test_qss2_catastrophic_cancellation_edge_case(self) -> None:
+        # Trigger b == 0 and c_eff == 0 in QSS2 logic.
+        problem = InitialValueProblem(
+            lambda _time, state: (1.0, state[0]),
+            0.0,
+            (0.0, 0.0),
+            2.0,
+            autonomous=True,
+        )
+        result = qss2(problem, 0.1)
+        self.assertEqual(result.final_time, 2.0)
+        self.assertGreater(result.stats.accepted_steps, 0)
+
 if __name__ == "__main__":
     unittest.main()
