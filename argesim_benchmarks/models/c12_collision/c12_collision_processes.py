@@ -1,10 +1,17 @@
-"""ARGESIM C12: Collision Processes in Rows of Spheres."""
+"""ARGESIM C12: Collision Processes in Rows of Spheres.
+
+This model simulates the 1D collision of 4 identical spheres. The primary definition
+uses relative distances between adjacent spheres.
+"""
 
 from __future__ import annotations
 
 import math
 import random
 from dataclasses import dataclass
+
+from argesim_benchmarks.solvers.roots import brentq
+
 
 @dataclass(frozen=True)
 class C12Parameters:
@@ -33,6 +40,16 @@ def _simulate(e: float, v0: float, max_time: float = float('inf')) -> tuple[int,
     t = 0.0
     cols = 0
     history = [(t, list(y), list(v))]
+
+    # In the perfectly plastic case, zeno behavior occurs.
+    # The specification states that for e=0, the velocities become "sufficiently equal".
+    if e == 0.0:
+        # perfectly inelastic collision resolves instantly to all spheres
+        # moving together at v0 / 4 by conservation of momentum.
+        v = [v0 / 4.0] * 4
+        # We model this as a single macro-collision step
+        history.append((0.0, list(y), list(v)))
+        return 3, v, 0.0, history
 
     while cols < 100000:
         times = []
@@ -67,6 +84,10 @@ def _simulate(e: float, v0: float, max_time: float = float('inf')) -> tuple[int,
         cols += 1
         history.append((t, list(y), list(v)))
 
+        # Fast-forward plastic/zeno collapse if relative velocities vanish
+        if max(abs(v[k+1] - v[k]) for k in range(3)) < 1e-12:
+            break
+
     return cols, v, t, history
 
 
@@ -98,69 +119,10 @@ def c12_task_b() -> dict[str, object]:
 def c12_task_c() -> dict[str, object]:
     """Task C: Boundary value problem and stochastic study."""
     # c1: find e for v4 = v0/2 = 0.5
-    # Brent's method equivalent
     def f(e_val: float) -> float:
         return _simulate(e_val, 1.0)[1][3] - 0.5
 
-    a, b = 0.0, 1.0
-    fa, fb = f(a), f(b)
-    if fa * fb > 0:
-        raise ValueError("Root not bracketed")
-    if abs(fa) < abs(fb):
-        a, b = b, a
-        fa, fb = fb, fa
-    c = a
-    fc = fa
-    d = b - a
-    e = d
-    tol = 1e-12
-    maxiter = 100
-    for i in range(maxiter):
-        if abs(fc) < abs(fb):
-            a, b, c = b, c, b
-            fa, fb, fc = fb, fc, fb
-        tol1 = 2.0 * 2.220446049250313e-16 * abs(b) + 0.5 * tol
-        xm = 0.5 * (c - b)
-        if abs(xm) <= tol1 or fb == 0.0:
-            break
-        if abs(e) >= tol1 and abs(fa) > abs(fb):
-            s = fb / fa
-            if a == c:
-                p = 2.0 * xm * s
-                q = 1.0 - s
-            else:
-                q = fa / fc
-                r = fb / fc
-                p = s * (2.0 * xm * q * (q - r) - (b - a) * (r - 1.0))
-                q = (q - 1.0) * (r - 1.0) * (s - 1.0)
-            if p > 0.0:
-                q = -q
-            p = abs(p)
-            min1 = 3.0 * xm * q - abs(tol1 * q)
-            min2 = abs(e * q)
-            if 2.0 * p < (min1 if min1 < min2 else min2):
-                e = d
-                d = p / q
-            else:
-                d = xm
-                e = d
-        else:
-            d = xm
-            e = d
-        a = b
-        fa = fb
-        if abs(d) > tol1:
-            b += d
-        else:
-            b += tol1 if xm >= 0.0 else -tol1
-        fb = f(b)
-        if (fb > 0.0 and fc > 0.0) or (fb < 0.0 and fc < 0.0):
-            c = a
-            fc = fa
-            d = b - a
-            e = d
-
-    e_solution = b
+    e_solution = brentq(f, 0.0, 1.0)
 
     # c2: stochastic study
     n_samples = 10000
