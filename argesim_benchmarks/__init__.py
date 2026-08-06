@@ -19,6 +19,9 @@ from .models import (
     c13_task_b,
     c13_task_c,
     solve_c01,
+    solve_c06_task_a,
+    solve_c06_task_b,
+    solve_c06_task_c,
 )
 from .pde import heat_1d_ivp, heat_sine_exact, heat_sine_initial, wave_1d_ivp
 from .solvers import euler, qss1, rk4, rk45
@@ -54,5 +57,8 @@ __all__ = [
     "rk4",
     "rk45",
     "solve_c01",
+    "solve_c06_task_a",
+    "solve_c06_task_b",
+    "solve_c06_task_c",
     "wave_1d_ivp",
 ]
