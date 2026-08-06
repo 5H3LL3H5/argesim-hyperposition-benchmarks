@@ -214,7 +214,10 @@ class C16Simulation:
                 for rest in self.restaurants:
                     dist = math.hypot(cx - rest.x, cy - rest.y)
                     # Sum of 1 / (dist/k + 1)
-                    rest_density += 1.0 / ((dist / self.parameters.k_density) + 1.0)
+                    if self.parameters.k_density == 0.0:
+                        rest_density += 0.0 if dist > 0 else 1.0
+                    else:
+                        rest_density += 1.0 / ((dist / self.parameters.k_density) + 1.0)
 
                 if rest_density == 0.0:
                     # Edge case where no restaurants exist, though theoretically not possible if one is opening
