@@ -194,6 +194,13 @@ def c03_task_b(
     options: Mapping[str, object] | None = None,
 ) -> IntegrationResult:
     """Compute the task-B trajectory over [0, 100E-6]."""
+
+    # Note on QSS1/2: This model contains an explicitly non-autonomous component
+    # `r_t(time)` representing the switched resistance. The framework's QSS solvers
+    # (`qss1`, `qss2`) strictly enforce that the RHS must be autonomous (`autonomous=True`).
+    # Because `r_t` directly depends on `time`, QSS solvers will aggressively reject
+    # this InitialValueProblem upon initialization.
+
     return solve_c03(
         method=method,
         parameters=_C03_DEFAULT_PARAMETERS,
