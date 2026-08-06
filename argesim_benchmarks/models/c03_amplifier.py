@@ -19,7 +19,7 @@ class C03Parameters:
     c2: float = 17.9e-9
     l3: float = 232.0e-6
     c4: float = 9.66e-9
-    rl: float = 52.4
+    rl: float = 38.6
     r_on: float = 0.05
     r_off: float = 5.0e6
     trf: float = 1.0e-15
@@ -39,21 +39,16 @@ def _r_t(time: float, parameters: C03Parameters) -> float:
 
     # 0 to TRF: transition from ON to OFF
     if t_mod < parameters.trf:
-        if parameters.trf == 0.0:
-            return parameters.r_off
         return parameters.r_on + (parameters.r_off - parameters.r_on) * (t_mod / parameters.trf)
     # TRF to half period: OFF
     elif t_mod < half_period:
         return parameters.r_off
     # half period to half period + TRF: transition from OFF to ON
     elif t_mod < half_period + parameters.trf:
-        if parameters.trf == 0.0:
-            return parameters.r_on
         return parameters.r_off - (parameters.r_off - parameters.r_on) * ((t_mod - half_period) / parameters.trf)
     # half period + TRF to end of period: ON
     else:
         return parameters.r_on
-
 def c03_rhs(parameters: C03Parameters = _C03_DEFAULT_PARAMETERS) -> Rhs:
     """Return the official four-state continuous right-hand side."""
 
@@ -70,7 +65,7 @@ def c03_rhs(parameters: C03Parameters = _C03_DEFAULT_PARAMETERS) -> Rhs:
 
     return rhs
 
-def _durand_kerner(coeffs: Sequence[float], iterations: int = 2000) -> tuple[complex, ...]:
+def _durand_kerner(coeffs: Sequence[float], iterations: int = 2000, tol: float = 1e-12) -> tuple[complex, ...]:
     """Find roots of a polynomial using the Durand-Kerner method."""
     degree = len(coeffs) - 1
     if degree < 1:
@@ -84,6 +79,7 @@ def _durand_kerner(coeffs: Sequence[float], iterations: int = 2000) -> tuple[com
     roots = [complex(0.4, 0.9) * (complex(0.4, 0.9) ** i) for i in range(degree)]
 
     for _ in range(iterations):
+        max_diff = 0.0
         for i in range(degree):
             # Evaluate P(root)
             p_val = 0j
@@ -96,7 +92,12 @@ def _durand_kerner(coeffs: Sequence[float], iterations: int = 2000) -> tuple[com
                 if i != j:
                     denom *= (roots[i] - roots[j])
 
-            roots[i] -= p_val / denom
+            diff = p_val / denom
+            roots[i] -= diff
+            max_diff = max(max_diff, abs(diff))
+
+        if max_diff < tol:
+            break
 
     return tuple(roots)
 

@@ -17,7 +17,6 @@ A generalized Class-E amplifier modeled as an initial-value problem of ordinary 
 
 **Initial Parameters:**
 - `VDC = 5.0 V`
-- `VDC = 5.0 V`
 - `L1 = 79.9e-6 H`, `C2 = 17.9e-9 F`, `L3 = 232e-6 H`, `C4 = 9.66e-9 F`, `RL = 38.6 Ohms`
 - `f = 100.0e3 Hz` (Switching frequency), `period = 1.0e-5 s`
 - Switch resistance `R(t)` toggles between `RON = 0.05 Ohms` and `ROFF = 1.0e6 Ohms` with transitions smoothed by rise/fall time `TRF`.
@@ -54,7 +53,7 @@ The SNE paper lists:
 
 **Experiment:** Investigate the influence of the rise and fall time `TRF` of the switch resistance `R(t)` using a phase diagram of the current `IL3 (x3)` versus the voltage `VL3` (`d(IL3)/dt * L3`).
 **Runs:** Swept `TRF` over four values: `1.0e-7` (100ns), `1.0e-9` (1ns), `1.0e-11` (10ps), and `1.0e-15` (1fs).
-**Method:** Continued simulation from the end state of Task B up to `102 µs` to observe 2 steady-state periods, mapping the phase curve and saving the result as `c03_task_c.png`.
+**Method:** Continued simulation from the end state of Task B for an additional `9 µs` (almost one full period), mapping the phase curve and saving the result as `c03_task_c.png`.
 
 **Outcome & Validation:**
 - The generated curves for `TRF = 1ns, 10ps, 1fs` completely overlap, indicating that dropping `TRF` below 1ns has no further impact on the macro-dynamics of this system setup.

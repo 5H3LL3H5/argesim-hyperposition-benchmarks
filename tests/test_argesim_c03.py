@@ -19,12 +19,24 @@ class C03Tests(unittest.TestCase):
         self.assertEqual(len(off_roots), 4)
 
         # In the ON state, there are 2 real roots and 1 complex conjugate pair
-        real_on = [r.real for r in on_roots if abs(r.imag) < 1.0]
+        real_on = [r for r in on_roots if abs(r.imag) < 1.0]
         self.assertEqual(len(real_on), 2)
+        complex_on = [r for r in on_roots if abs(r.imag) >= 1.0]
+        self.assertEqual(len(complex_on), 2)
+
+        # Exact values from report (allowing some numerical tolerance)
+        self.assertAlmostEqual(min(r.real for r in real_on), -1.117317e9, delta=1e4)
+        self.assertAlmostEqual(max(r.real for r in real_on), -6.2578e2, delta=1.0)
+        self.assertAlmostEqual(complex_on[0].real, -8.32974e4, delta=1.0)
 
         # In the OFF state, there are 2 complex conjugate pairs
-        real_off = [r.real for r in off_roots if abs(r.imag) < 1.0]
+        real_off = [r for r in off_roots if abs(r.imag) < 1.0]
         self.assertEqual(len(real_off), 0)
+
+        # Check OFF state complex roots
+        off_real_parts = sorted(list(set([round(r.real, 0) for r in off_roots])))
+        self.assertAlmostEqual(off_real_parts[1], -40617.0, delta=2.0)
+        self.assertAlmostEqual(off_real_parts[0], -42578.0, delta=2.0)
 
         # Both ON and OFF roots must be strictly stable (negative real parts)
         self.assertTrue(all(r.real < 0.0 for r in on_roots))
