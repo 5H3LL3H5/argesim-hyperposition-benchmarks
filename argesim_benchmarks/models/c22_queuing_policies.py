@@ -109,11 +109,14 @@ class BaseDevsSystem(AtomicModel):
         stochastic: bool = False,
         large: bool = False,
         variant: bool = False,
+        rng: random.Random | None = None,
     ):
         super().__init__(name)
         self.stochastic = stochastic
         self.large = large
         self.variant = variant
+        self.rng = rng or random.Random()
+        # C22 Specification Parameters
         self.num_queues = 40 if large else 4
         self.num_entities = 5000 if large else (500 if stochastic else 100)
 
@@ -237,7 +240,7 @@ class BaseDevsSystem(AtomicModel):
         if not self.stochastic:
             return self.service_time_mode
         else:
-            return random.triangular(
+            return self.rng.triangular(
                 self.service_time_mode - self.service_time_hw,
                 self.service_time_mode + self.service_time_hw,
                 self.service_time_mode,
@@ -247,7 +250,7 @@ class BaseDevsSystem(AtomicModel):
         if not self.stochastic:
             return self.interarrival_time
         else:
-            return random.expovariate(1.0 / self.interarrival_time)
+            return self.rng.expovariate(1.0 / self.interarrival_time)
 
     def total_length(self, i: int) -> int:
         return len(self.queues[i]) + (1 if self.servers[i] is not None else 0)
@@ -320,6 +323,12 @@ class BaseDevsSystem(AtomicModel):
         pass
 
     def handle_operator(self) -> None:
+        """Process operator call for the next class.
+
+        As per the ARGESIM C22 specification, the operator calls classes in
+        descending round-robin order starting with the highest class (nC = 5),
+        which then proceeds to the front of their respective queues.
+        """
         pass
 
 
@@ -330,6 +339,7 @@ class JockeyingSystem(BaseDevsSystem):
         stochastic: bool = False,
         large: bool = False,
         variant: bool = False,
+        rng: random.Random | None = None,
     ):
         super().__init__(name, stochastic, large, variant)
         self.jockey_events = 0
@@ -388,6 +398,7 @@ class RenegingSystem(BaseDevsSystem):
         stochastic: bool = False,
         large: bool = False,
         variant: bool = False,
+        rng: random.Random | None = None,
     ):
         super().__init__(name, stochastic, large, variant)
         self.t_r = 9.0
@@ -419,6 +430,7 @@ class ClassingSystem(BaseDevsSystem):
         stochastic: bool = False,
         large: bool = False,
         variant: bool = False,
+        rng: random.Random | None = None,
     ):
         super().__init__(name, stochastic, large, variant)
         self.n_c = 5
@@ -438,7 +450,7 @@ class ClassingSystem(BaseDevsSystem):
         self.entities_created += 1
 
         if self.stochastic:
-            c = random.randint(1, self.n_c)
+            c = self.rng.randint(1, self.n_c)
         else:
             c = self.det_class_counter
             self.det_class_counter = (self.det_class_counter % self.n_c) + 1
@@ -462,6 +474,12 @@ class ClassingSystem(BaseDevsSystem):
             )
 
     def handle_operator(self) -> None:
+        """Process operator call for the next class.
+
+        As per the ARGESIM C22 specification, the operator calls classes in
+        descending round-robin order starting with the highest class (nC = 5),
+        which then proceeds to the front of their respective queues.
+        """
         if self.entities_terminated >= self.num_entities:
             return
 
@@ -537,10 +555,12 @@ def run_model(
     stochastic: bool,
     large: bool,
     variant: bool = False,
+    seed: int = 42,
 ) -> dict[str, Any]:
-    random.seed(42)
+    # Use an isolated random instance to avoid polluting global state
+    rng = random.Random(seed)
 
-    system = system_cls("C22_Model", stochastic, large, variant)
+    system = system_cls("C22_Model", stochastic, large, variant, rng)
     sim = DevsSimulator(system)
 
     sim.run()
