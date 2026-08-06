@@ -101,7 +101,7 @@ CP2_LBM_REVERSE = (0, 3, 4, 1, 2, 7, 8, 5, 6)
 
 def cp2_lbm_initial_state(
     nx: int = 257,
-) -> tuple[tuple[list[float], ...], ...]:
+) -> tuple[tuple[tuple[float, ...], ...], ...]:
     """Create the initial D2Q9 grid for Task 2."""
     if nx < 3:
         raise ValueError("grid size nx must be at least 3")
@@ -112,7 +112,7 @@ def cp2_lbm_initial_state(
     for _ in range(nx):
         row = []
         for _ in range(nx):
-            row.append(list(CP2_LBM_WEIGHTS))
+            row.append(CP2_LBM_WEIGHTS)
         grid.append(tuple(row))
     return tuple(grid)
 
@@ -131,11 +131,11 @@ def _compute_equilibrium(
 
 
 def cp2_lbm_step(
-    grid: tuple[tuple[list[float], ...], ...],
+    grid: tuple[tuple[tuple[float, ...], ...], ...],
     nx: int,
     omega: float,
     u0_x: float = 0.1,
-) -> tuple[tuple[list[float], ...], ...]:
+) -> tuple[tuple[tuple[float, ...], ...], ...]:
     """Perform one LBM collision and propagation step."""
 
     # Collision
