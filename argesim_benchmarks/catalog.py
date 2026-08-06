@@ -51,7 +51,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Lithium-Cluster Dynamics",
         (ModelClass.STIFF_ODE,),
         _source("c01"),
-        BenchmarkStatus.BENCHMARK_READY,
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C02", "Flexible Assembly System", (ModelClass.DES,), _source("c02")

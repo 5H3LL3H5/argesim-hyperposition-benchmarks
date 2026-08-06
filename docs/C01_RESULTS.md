@@ -18,13 +18,13 @@ The tight reference endpoint using `RK45` with strict tolerances (`rtol=1.0e-11`
 All evaluated numeric methods effectively track the analytical endpoint and stay well within their declared theoretical bounds. For example, the `RK45` candidate converges with an endpoint error of `~1.08e-10` compared to the tight reference.
 
 **Trajectory Plot:**
-![Task A Trajectory](c01_task_a.png)
+![Task A Trajectory](images/c01_task_a.png)
 
 ### Task B (Parameter Variation)
 We executed a parameter sweep varying the loss rate $l_f$ in logarithmic steps. The output matches expected trends from literature.
 
 **Trajectory Plot (log-log):**
-![Task B Parameter Sweep](c01_task_b.png)
+![Task B Parameter Sweep](images/c01_task_b.png)
 
 ### Task C (Steady State Verification)
 The exact mathematical steady states evaluated with constant bombardment $p = 10000$ and zero bombardment $p = 0$ perfectly match the solutions provided across various historical tools documented in SNE:

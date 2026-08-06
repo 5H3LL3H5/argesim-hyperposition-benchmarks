@@ -118,21 +118,5 @@ A-C are explicit in code. The weighted population balance
 provides a structural equation check. Task-A timing is allowed only after the
 endpoint agrees with a tighter, independently configured RK45 run within a
 method-specific threshold. The tight RK45 result is a numerical oracle, not a
-published reference solution. Cross-tool and published reference solutions
-from SNE (such as SNE 10(29/30) 2000, SNE 12(35/36) 2002, and SNE 14(41/42) 2004)
-confirm the exact analytical steady states `(1000, 10, 10)` and `(0, 0, 0)`,
-which provides the independent verification required to advance C01 to the
-`validated` and `benchmark-ready` gates.
-
-### C01 Simulation Results
-To demonstrate validation, the full timing experiment for Task A is available by
-running `python benchmarks/benchmark_argesim_c01.py --repeat 9 --warmup 1`.
-The experiment executes the reference system using four different solver
-algorithms (Euler, RK4, RK45, QSS1) and ensures that all method approximations
-remain within the specified acceptable maximum endpoint error thresholds
-relative to the RK45 numerical oracle `(31.75561249, 3.47967131, 0.01010072)`.
-This script outputs the complete experiment setup, full JSON trajectories,
-tolerances, steps, RHS evaluations, and timing statistics (including median
-and IQR nanoseconds over the 9 repetitions), which serves as the final proof
-of implementation accuracy and performance characteristics required for the
-`benchmark-ready` status.
+published reference solution; consequently C01 remains below the `validated`
+gate until cross-tool or published reference trajectories are archived.
