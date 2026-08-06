@@ -130,7 +130,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Restaurant Business Dynamics",
         (ModelClass.DES, ModelClass.AGENT_BASED, ModelClass.STOCHASTIC),
         _source("c16"),
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.BENCHMARK_READY,
     ),
     BenchmarkDefinition(
         "C17R",

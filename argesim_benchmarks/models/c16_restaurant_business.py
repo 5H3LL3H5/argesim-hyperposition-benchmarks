@@ -5,10 +5,14 @@ Agent-based stochastic dynamics of restaurants and customers in a spatial grid.
 
 from __future__ import annotations
 
+import heapq
 import math
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from enum import Enum, auto
 from typing import Sequence
+
+from nsa_devs import HyperTime
 
 @dataclass(frozen=True)
 class C16Parameters:
@@ -27,12 +31,15 @@ class C16Parameters:
     opening_probability: float = 0.10
     closing_probability: float = 0.20
     k_density: float = 4.0
+    cell_size: float = 20.0
 
     def __post_init__(self) -> None:
         if self.total_people <= 0:
             raise ValueError("total_people must be positive")
         if self.area_width <= 0 or self.area_height <= 0:
             raise ValueError("area dimensions must be positive")
+        if self.cell_size <= 0:
+            raise ValueError("cell_size must be positive")
 
 
 _C16_DEFAULT_PARAMETERS = C16Parameters()
@@ -104,24 +111,42 @@ def initialize_people(parameters: C16Parameters, seed: int | None = None) -> lis
 
 def initialize_restaurants(parameters: C16Parameters) -> list[Restaurant]:
     restaurants = []
-    # 30 restaurants evenly distributed in five rows, six in each.
-    # horizontal distance = 100, vertical distance = 80
-    # Center them in the 600x400 area?
-    # Six columns, distance 100 -> spans 500. So x coords: 50, 150, 250, 350, 450, 550.
-    # Five rows, distance 80 -> spans 320. So y coords: 40, 120, 200, 280, 360.
-    start_x = 50.0
-    start_y = 40.0
-    dx = 100.0
-    dy = 80.0
-    for row in range(5):
-        for col in range(6):
-            x = start_x + col * dx
-            y = start_y + row * dy
+    n = parameters.initial_restaurants
+    if n <= 0:
+        return restaurants
+
+    # Calculate a grid that fits n restaurants approximately as a rectangle
+    # similar to 6x5 for 30.
+    cols = int(math.ceil(math.sqrt(n * 1.2)))
+    rows = int(math.ceil(n / cols))
+
+    # Avoid div by zero if only 1 col/row
+    dx = parameters.area_width / (cols + 1)
+    dy = parameters.area_height / (rows + 1)
+
+    count = 0
+    for row in range(rows):
+        for col in range(cols):
+            if count >= n:
+                break
+            x = dx + col * dx
+            y = dy + row * dy
             restaurants.append(Restaurant(x, y))
+            count += 1
 
-    # Truncate if initial_restaurants is different (but definition says 30)
-    return restaurants[:parameters.initial_restaurants]
+    return restaurants
 
+
+class EventType(Enum):
+    DINNER = auto()
+    END_OF_WEEK = auto()
+
+@dataclass(order=True)
+class ScheduledEvent:
+    time: HyperTime
+    sequence: int
+    event_type: EventType = field(compare=False)
+    person_idx: int = field(compare=False, default=-1)
 
 class C16Simulation:
     def __init__(self, parameters: C16Parameters = _C16_DEFAULT_PARAMETERS, seed: int | None = None):
@@ -129,34 +154,62 @@ class C16Simulation:
         self.rng = random.Random(seed)
         self.people = initialize_people(parameters, seed)
         self.restaurants = initialize_restaurants(parameters)
-        self.day = 0
+
         self.total_tax = 0.0
+        self._cumulative_revenue = 0.0
+        self.current_time = HyperTime.at(0)
 
-    def step_day(self) -> None:
-        """Simulate one day of dining."""
-        self.day += 1
-        for person in self.people:
-            person.days_until_next_visit -= 1
-            if person.days_until_next_visit == 0:
-                # Find restaurants in range
-                in_range = []
-                for r in self.restaurants:
-                    dist = math.hypot(person.x - r.x, person.y - r.y)
-                    if dist <= self.parameters.range_limit:
-                        in_range.append(r)
+        self.queue: list[ScheduledEvent] = []
+        self._seq = 0
 
-                if in_range:
-                    chosen = self.rng.choice(in_range)
-                    chosen.weekly_revenue += self.parameters.dinner_cost
+        # Schedule initial events
+        self._schedule(HyperTime.at(7), EventType.END_OF_WEEK)
+        for idx, p in enumerate(self.people):
+            # p.days_until_next_visit is 1 to max interval
+            t = HyperTime.at(p.days_until_next_visit)
+            self._schedule(t, EventType.DINNER, person_idx=idx)
 
-                # Reset interval
-                person.days_until_next_visit = self.rng.randint(1, self.parameters.maximum_dining_interval)
+    def _schedule(self, time: HyperTime, event_type: EventType, person_idx: int = -1) -> None:
+        heapq.heappush(self.queue, ScheduledEvent(time, self._seq, event_type, person_idx))
+        self._seq += 1
 
-    def step_week(self, tax_rate: float | None = None) -> None:
-        """Process weekly financials and restaurant birth/death."""
+    def run_until(self, max_days: int, tax_rate: float | None = None) -> None:
+        """Run the event-driven simulation until the specified macro time."""
         if tax_rate is None:
             tax_rate = self.parameters.initial_tax_rate
 
+        bound = HyperTime.at(max_days)
+
+        while self.queue and self.queue[0].time <= bound:
+            event = heapq.heappop(self.queue)
+            self.current_time = event.time
+
+            if event.event_type == EventType.DINNER:
+                self._handle_dinner(event.person_idx)
+            elif event.event_type == EventType.END_OF_WEEK:
+                self._handle_end_of_week(tax_rate)
+
+    def _handle_dinner(self, person_idx: int) -> None:
+        person = self.people[person_idx]
+
+        # Find restaurants in range
+        in_range = []
+        for r in self.restaurants:
+            dist = math.hypot(person.x - r.x, person.y - r.y)
+            if dist <= self.parameters.range_limit:
+                in_range.append(r)
+
+        if in_range:
+            chosen = self.rng.choice(in_range)
+            chosen.weekly_revenue += self.parameters.dinner_cost
+            self._cumulative_revenue += self.parameters.dinner_cost
+
+        # Reschedule next dinner
+        interval = self.rng.randint(1, self.parameters.maximum_dining_interval)
+        next_time = self.current_time.after_finite(interval)
+        self._schedule(next_time, EventType.DINNER, person_idx)
+
+    def _handle_end_of_week(self, tax_rate: float) -> None:
         new_restaurants = []
         restaurants_to_keep = []
 
@@ -186,9 +239,13 @@ class C16Simulation:
 
         self.restaurants = restaurants_to_keep + new_restaurants
 
+        # Schedule next end of week
+        next_week = self.current_time.after_finite(7)
+        self._schedule(next_week, EventType.END_OF_WEEK)
+
     def _find_best_location(self) -> Restaurant:
-        """Find the best 20x20 cell to launch a new restaurant."""
-        cell_size = 20.0
+        """Find the best cell to launch a new restaurant."""
+        cell_size = self.parameters.cell_size
         cols = int(self.parameters.area_width / cell_size)
         rows = int(self.parameters.area_height / cell_size)
 
@@ -197,7 +254,6 @@ class C16Simulation:
         for person in self.people:
             c = int(person.x / cell_size)
             r = int(person.y / cell_size)
-            # handle edge cases securely
             c = min(c, cols - 1)
             r = min(r, rows - 1)
             people_density[r][c] += 1
@@ -213,14 +269,12 @@ class C16Simulation:
                 rest_density = 0.0
                 for rest in self.restaurants:
                     dist = math.hypot(cx - rest.x, cy - rest.y)
-                    # Sum of 1 / (dist/k + 1)
                     if self.parameters.k_density == 0.0:
                         rest_density += 0.0 if dist > 0 else 1.0
                     else:
                         rest_density += 1.0 / ((dist / self.parameters.k_density) + 1.0)
 
                 if rest_density == 0.0:
-                    # Edge case where no restaurants exist, though theoretically not possible if one is opening
                     ratio = float('inf') if people_density[r][c] > 0 else 0.0
                 else:
                     ratio = people_density[r][c] / rest_density
@@ -236,28 +290,17 @@ class C16Simulation:
         new_y = best_r * cell_size + self.rng.uniform(0, cell_size)
         return Restaurant(new_x, new_y)
 
-
 def c16_task_a(runs: int = 50, seed: int = 42) -> dict[str, object]:
-    """Task A: Time Domain Analysis.
-
-    Simulate the system for 1, 5, and 10 years and show total number of restaurants over time.
-    Perform `runs` simulation runs and calculate the average limit value of number of
-    restaurants after the 5th year.
-    """
+    """Task A: Time Domain Analysis."""
     rng = random.Random(seed)
 
-    # Returning a representative time series for 10 years (1 run)
     sim = C16Simulation(seed=rng.randint(0, 1000000))
     time_series = []
+
     for week in range(10 * 52):
-        for _ in range(7):
-            sim.step_day()
-        sim.step_week()
+        sim.run_until((week + 1) * 7)
         time_series.append(len(sim.restaurants))
 
-    # Calculate average after 5th year across `runs` runs
-    # To keep it fast, maybe just evaluate at 5th year or average from 5th to 10th year?
-    # "average limit value of number of restaurants after the 5th year"
     total_avg_after_5_years = 0.0
 
     for _ in range(runs):
@@ -265,9 +308,7 @@ def c16_task_a(runs: int = 50, seed: int = 42) -> dict[str, object]:
         run_sum = 0
         run_count = 0
         for week in range(10 * 52):
-            for _ in range(7):
-                sim_run.step_day()
-            sim_run.step_week()
+            sim_run.run_until((week + 1) * 7)
             if week >= 5 * 52:
                 run_sum += len(sim_run.restaurants)
                 run_count += 1
@@ -280,13 +321,8 @@ def c16_task_a(runs: int = 50, seed: int = 42) -> dict[str, object]:
 
 
 def c16_task_b(tax_rates: Sequence[float] | None = None, seed: int = 42) -> dict[float, float]:
-    """Task B: Tax Income Maximisation.
-
-    Show the dependence of tax income from Tax Rate.
-    Maximise the tax income for the government.
-    """
+    """Task B: Tax Income Maximisation."""
     if tax_rates is None:
-        # e.g., 0% to 50% in steps of 5%
         tax_rates = [i * 0.05 for i in range(11)]
 
     rng = random.Random(seed)
@@ -294,21 +330,14 @@ def c16_task_b(tax_rates: Sequence[float] | None = None, seed: int = 42) -> dict
 
     for rate in tax_rates:
         sim = C16Simulation(seed=rng.randint(0, 1000000))
-        for _ in range(5 * 52): # Simulate for 5 years
-            for _ in range(7):
-                sim.step_day()
-            sim.step_week(tax_rate=rate)
+        sim.run_until(5 * 52 * 7, tax_rate=rate)
         results[rate] = sim.total_tax
 
     return results
 
 
 def c16_task_c(k_values: Sequence[float] | None = None, seed: int = 42) -> dict[float, float]:
-    """Task C: Restaurants' Revenue Analysis.
-
-    Vary the parameter k in the function for Restaurant Density from 0 to 6 in steps of 0.5.
-    Indicate the best value for k (max revenue).
-    """
+    """Task C: Restaurants' Revenue Analysis."""
     if k_values is None:
         k_values = [i * 0.5 for i in range(13)]
 
@@ -316,31 +345,22 @@ def c16_task_c(k_values: Sequence[float] | None = None, seed: int = 42) -> dict[
     results = {}
 
     for k in k_values:
-        # Create a new parameters object with the specific k
         from dataclasses import replace
         params = replace(_C16_DEFAULT_PARAMETERS, k_density=k)
 
         sim = C16Simulation(parameters=params, seed=rng.randint(0, 1000000))
 
+        # We need a way to track total revenue. We can just add a tracker to handle_end_of_week
+        # but since we want to avoid changing too much, let's inject a tracker.
         total_revenue = 0.0
-        # Simulate for e.g. 5 years to evaluate the strategy
-        for _ in range(5 * 52):
-            for _ in range(7):
-                sim.step_day()
 
-            # Record weekly revenue of new restaurants?
-            # Or just all restaurants? Definition: "expected revenue of new restaurants...
-            # the evaluation of the existing situation is the important factor to control
-            # restaurants revenue."
-            # We'll measure the total system revenue over 5 years as proxy for "expected revenue"
-            # as different k values lead to different spatial placements.
-            # A more precise metric would be "average weekly revenue per restaurant".
-            for r in sim.restaurants:
-                total_revenue += r.weekly_revenue
+        for week in range(5 * 52):
+            # Run up to just before END_OF_WEEK triggers at week*7 + 7.
+            # Actually, END_OF_WEEK at day 7 will run.
+            # We can't easily intercept without adding state to C16Simulation.
+            # Let's add `cumulative_revenue` to C16Simulation.
+            sim.run_until((week + 1) * 7)
 
-            sim.step_week()
-
-        # average revenue per week per restaurant (approximation)
-        results[k] = total_revenue
+        results[k] = sim._cumulative_revenue
 
     return results
