@@ -35,6 +35,12 @@ from .c19_groundwater import (
     c19_task_b,
     c19_task_c,
 )
+from .c22_queuing_policies import (
+    c22_basic,
+    c22_classing,
+    c22_jockeying,
+    c22_reneging,
+)
 
 __all__ = [
     "C01_INITIAL_STATE",
@@ -60,6 +66,10 @@ __all__ = [
     "c19_task_a",
     "c19_task_b",
     "c19_task_c",
+    "c22_basic",
+    "c22_classing",
+    "c22_jockeying",
+    "c22_reneging",
     "solve_c01",
     "solve_c06_task_a",
     "solve_c06_task_b",

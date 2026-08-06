@@ -176,6 +176,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Non-standard Queuing Policies",
         (ModelClass.DES,),
         _source("c22"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "CP1",
