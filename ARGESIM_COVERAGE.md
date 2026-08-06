@@ -31,7 +31,7 @@ have already been implemented.
 | C20 | Complex Production System | DES | cataloged |
 | C21 | State Events and Structural-dynamic Systems | ODE/DAE, hybrid | cataloged |
 | C22 | Non-standard Queuing Policies | DES/queueing | cataloged |
-| CP1 | Parallel Simulation Techniques | ODE, MOL/PDE, parallel study | cataloged |
+| CP1 | Parallel Simulation Techniques | ODE, MOL/PDE, parallel study | implemented |
 | CP2 | Parallel and Distributed Simulation | Monte Carlo, LBM, MOL/PDE | cataloged |
 
 ## Solver applicability
