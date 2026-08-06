@@ -133,19 +133,7 @@ def c19_rhs(
     # Upwind convection coefficient (assuming ux > 0, uy = 0)
     conv_x = (ux / R) / dx
 
-    # Pre-calculate facility degradation map
-    # facility locations: (40, 5) and (40, -5) with radius 5
-    deg_map = [0.0] * (nx * ny)
-    if facility_mode in ("continuous", "schedule"):
-        deg_val = 1e-6 * math.log(10.0) # lambda = 10^-6 * ln(10)
-        for j in range(ny):
-            y_pos = y_offset + j * dy
-            for i in range(nx):
-                x_pos = x_offset + i * dx
-                r1 = math.sqrt((x_pos - 40.0)**2 + (y_pos - 5.0)**2)
-                r2 = math.sqrt((x_pos - 40.0)**2 + (y_pos + 5.0)**2)
-                if r1 <= 5.0 or r2 <= 5.0:
-                    deg_map[j * nx + i] = deg_val
+    deg_val = 1e-6 * math.log(10.0)  # lambda = 10^-6 * ln(10)
 
     source_term = [0.0] * (nx * ny)
     # The source is a point source M at (0,0). In a discrete grid, it corresponds to the cell
@@ -157,32 +145,41 @@ def c19_rhs(
     vol = dx * dy * parameters.thickness * parameters.porosity
     source_rate = parameters.mass_rate / vol
 
+    # Precalculate facility indices for efficiency (avoid distance checks in inner loop)
+    facility_indices: list[int] = []
+    if facility_mode in ("continuous", "schedule"):
+        for j in range(ny):
+            y_pos = y_offset + j * dy
+            for i in range(nx):
+                x_pos = x_offset + i * dx
+                r1 = math.sqrt((x_pos - 40.0)**2 + (y_pos - 5.0)**2)
+                r2 = math.sqrt((x_pos - 40.0)**2 + (y_pos + 5.0)**2)
+                if r1 <= 5.0 or r2 <= 5.0:
+                    facility_indices.append(j * nx + i)
+
     # Find the closest cell to (0,0)
     ix0 = max(0, min(nx - 1, int(round((0.0 - x_offset) / dx))))
     iy0 = max(0, min(ny - 1, int(round((0.0 - y_offset) / dy))))
-    source_term[iy0 * nx + ix0] = source_rate
+
+    source_idx = iy0 * nx + ix0
 
     def rhs(t: float, c: Sequence[float]) -> tuple[float, ...]:
         dc = [0.0] * (nx * ny)
 
-        # Determine current degradation map if schedule-controlled
-        active_deg = deg_map
-        if facility_mode == "schedule":
+        is_active = False
+        if facility_mode == "continuous":
+            is_active = True
+        elif facility_mode == "schedule":
             # Monday to Friday 0-8am, 8pm-12pm
             # Weekends around the clock
             # Assuming t=0 is Monday 00:00. Time is in seconds.
             day_of_week = int(t / (24 * 3600)) % 7  # 0=Monday, 6=Sunday
             hour_of_day = (t % (24 * 3600)) / 3600.0
 
-            is_active = False
             if day_of_week >= 5: # Saturday, Sunday
                 is_active = True
-            else:
-                if hour_of_day < 8.0 or hour_of_day >= 20.0:
-                    is_active = True
-
-            if not is_active:
-                active_deg = [0.0] * (nx * ny)
+            elif hour_of_day < 8.0 or hour_of_day >= 20.0:
+                is_active = True
 
         for j in range(ny):
             for i in range(nx):
@@ -190,10 +187,10 @@ def c19_rhs(
                 c_ij = c[idx]
 
                 # Boundary conditions:
-                # Left (upstream): x = -10. No flux or fixed value.
+                # Left (upstream): x = -10. Zero gradient.
                 # Right (downstream): convection driven, zero gradient.
                 # Top/Bottom: diffusion driven, zero gradient.
-
+                # Note: Zero gradient implies no flux for diffusion, and outward flux for convection.
                 c_left = c[idx - 1] if i > 0 else c_ij
                 c_right = c[idx + 1] if i < nx - 1 else c_ij
                 c_down = c[idx - nx] if j > 0 else c_ij
@@ -206,11 +203,15 @@ def c19_rhs(
                 # Central difference diffusion: alpha * |u| * d2C/dx2
                 diff = diff_x * (c_left - 2.0 * c_ij + c_right) + diff_y * (c_down - 2.0 * c_ij + c_up)
 
-                # Degradation and source
-                deg = -active_deg[idx] * c_ij
-                src = source_term[idx]
+                dc[idx] = conv + diff
 
-                dc[idx] = conv + diff + deg + src
+        # Degradation application
+        if is_active:
+            for idx in facility_indices:
+                dc[idx] -= deg_val * c[idx]
+
+        # Source application
+        dc[source_idx] += source_rate
 
         return tuple(dc)
 
