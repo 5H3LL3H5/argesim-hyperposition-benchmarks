@@ -1,0 +1,10 @@
+[project]
+name = "nsa-devs-reference-benchmarks"
+version = "0.1.0"
+description = "Restricted NSA-DEVS timing semantics and reproducible benchmarks"
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
