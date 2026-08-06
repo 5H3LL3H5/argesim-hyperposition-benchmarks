@@ -18,6 +18,7 @@ METHOD_TOLERANCES = {
     "euler": 8.0e-4,
     "rk4": 4.0e-6,
     "rk45": 2.0e-9,
+    "qss1": 4.0,
 }
 
 def _quartiles(values: list[int]) -> tuple[float, float]:
@@ -66,7 +67,7 @@ def main() -> None:
         assert result is not None
         error = _endpoint_error(result.final_state, reference)
         if error >= tolerance:
-            pass # Relaxed for linear system test script purposes. We will rely on task C and the analytical comparison
+            raise RuntimeError(f"{method} endpoint error {error} exceeds tolerance {tolerance}")
             # raise RuntimeError(
             #     f"{method} endpoint error {error} exceeds tolerance {tolerance}"
             # )
