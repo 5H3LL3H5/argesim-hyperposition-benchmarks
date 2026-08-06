@@ -117,7 +117,11 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         _source("c13"),
     ),
     BenchmarkDefinition(
-        "C14", "Supply Chain", (ModelClass.DISCRETE_TIME,), _source("c14")
+        "C14",
+        "Supply Chain",
+        (ModelClass.DISCRETE_TIME,),
+        _source("c14"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C15",
