@@ -11,6 +11,7 @@ from .c01_lithium_cluster import (
     c01_task_c,
     solve_c01,
 )
+from .c02_flexible_assembly import solve_c02
 
 __all__ = [
     "C01_INITIAL_STATE",
@@ -22,4 +23,5 @@ __all__ = [
     "c01_task_b",
     "c01_task_c",
     "solve_c01",
+    "solve_c02",
 ]

@@ -14,14 +14,15 @@ class ArgesimCatalogTests(unittest.TestCase):
         self.assertEqual(identifiers, expected)
         self.assertEqual(len(BENCHMARKS), 24)
 
-    def test_only_c01_is_marked_implemented(self) -> None:
+    def test_implemented_benchmarks(self) -> None:
         statuses = {entry.identifier: entry.status for entry in BENCHMARKS}
         self.assertEqual(statuses["C01"], BenchmarkStatus.IMPLEMENTED)
+        self.assertEqual(statuses["C02"], BenchmarkStatus.IMPLEMENTED)
         self.assertTrue(
             all(
                 status is BenchmarkStatus.CATALOGED
                 for identifier, status in statuses.items()
-                if identifier != "C01"
+                if identifier not in ("C01", "C02")
             )
         )
 
