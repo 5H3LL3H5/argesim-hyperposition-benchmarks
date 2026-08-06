@@ -194,8 +194,8 @@ def qss2(
                         sqrt_d = math.sqrt(discriminant)
                         # Numerically stable quadratic formula
                         q_root = -0.5 * (b + math.copysign(sqrt_d, b))
-                        r1 = q_root / a
-                        r2 = c_eff / q_root
+                        r1 = q_root / a if a != 0.0 else 0.0
+                        r2 = c_eff / q_root if q_root != 0.0 else 0.0
 
                         if r1 > -tolerance:
                             roots.append(r1 if r1 > 0 else 0.0)
