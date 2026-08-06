@@ -2,6 +2,11 @@
 
 This module provides an implementation of the C20 benchmark utilizing HyperTime
 to ensure proper restricted NSA-DEVS timing validation.
+
+Note: While this implementation uses HyperTime to preserve strict causal ordering,
+it is not formally derived into atomic or coupled DEVS components. The repository's
+`nsa_devs` core currently only provides a restricted relay chain reference and
+lacks a general DEVS simulation framework for formal component derivation.
 """
 
 from __future__ import annotations
