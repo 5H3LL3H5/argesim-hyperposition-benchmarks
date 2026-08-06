@@ -20,7 +20,7 @@ have already been implemented.
 | C09 | Fuzzy Control of a Two Tank System | hybrid sampled control | cataloged |
 | C10 | Dining Philosophers II | DES/concurrency | cataloged |
 | C11 | SCARA Robot | DAE, hybrid control | cataloged |
-| C12 | Collision Processes in Rows of Spheres | hybrid mechanics, stochastic study | cataloged |
+| C12 | Collision Processes in Rows of Spheres | hybrid mechanics, stochastic study | implemented |
 | C13 | Crane and Embedded Control | DAE, sampled control | cataloged |
 | C14 | Supply Chain | discrete-time dynamics | cataloged |
 | C15 | Clearance Identification | ODE identification | cataloged |

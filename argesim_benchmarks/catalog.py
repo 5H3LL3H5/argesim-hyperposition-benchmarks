@@ -109,6 +109,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Collision Processes in Rows of Spheres",
         (ModelClass.ODE, ModelClass.HYBRID, ModelClass.STOCHASTIC),
         _source("c12"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C13",
