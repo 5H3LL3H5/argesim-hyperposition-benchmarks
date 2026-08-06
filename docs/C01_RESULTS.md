@@ -31,8 +31,8 @@ The exact mathematical steady states evaluated with constant bombardment $p = 10
 *   **Constant Bombardment ($p=10000$)**: $r = 1000, m = 10, f = 10$
 *   **Without Bombardment ($p=0$)**: $r = 0, m = 0, f = 0$
 
-**Confidence Level**: **High**.
-The alignment of numeric trajectories, expected error margins against high-accuracy numerical oracles, and the exact match with the analytical steady states confirmed by cross-tool studies (SNE 10(29/30) 2000, SNE 12(35/36) 2002, and SNE 14(41/42) 2004) completely fulfills the `validated` and `benchmark-ready` gates.
+**Confidence Level**: **Moderate**.
+The numeric trajectories and error margins align well against high-accuracy numerical oracles. The mathematical steady states also exactly match those confirmed by cross-tool studies (SNE 10(29/30) 2000, SNE 12(35/36) 2002, and SNE 14(41/42) 2004). However, because an independent published transient trajectory table or cross-tool reference data set has not been formally archived, C01 scientifically remains at the `implemented` gate.
 
 ---
 
