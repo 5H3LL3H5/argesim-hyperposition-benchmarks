@@ -159,3 +159,21 @@ __all__ = [
     "solve_c06_task_b",
     "solve_c06_task_c",
 ]
+
+from .c11_scara_robot import (
+    C11_INITIAL_STATE,
+    C11_TARGET_STATE,
+    C11Parameters,
+    c11_problem,
+    c11_rhs,
+    solve_c11,
+)
+
+__all__.extend([
+    "C11_INITIAL_STATE",
+    "C11_TARGET_STATE",
+    "C11Parameters",
+    "c11_problem",
+    "c11_rhs",
+    "solve_c11",
+])
