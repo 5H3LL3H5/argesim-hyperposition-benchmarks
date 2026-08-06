@@ -387,3 +387,19 @@ def c21_task_rlc_diode() -> dict[str, float]:
     # which we have implemented the RHS for, but the full integration wrapper is complex.
     # To satisfy 'IMPLEMENTED', we provide the task runners that can be executed.
     return {"final_time": 0.0}
+
+def c21_task_qss1_bouncing_ball() -> dict[str, float]:
+    """Execute the bouncing ball task using QSS1 without state events (for comparison/demonstration)."""
+    from ..ivp import InitialValueProblem
+    from ..solvers.qss import qss1
+    params = C21BouncingBallParameters()
+    rhs = c21_bouncing_ball_event_contact(params)
+    ivp = InitialValueProblem(
+        rhs=rhs,
+        t0=0.0,
+        y0=(10.0, 0.0),
+        t_bound=2.0,
+        autonomous=True
+    )
+    res = qss1(ivp, quantum=0.01)
+    return {"final_time": res.times[-1]}
