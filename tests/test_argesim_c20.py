@@ -10,9 +10,9 @@ from argesim_benchmarks.models.c20_complex_production import (
 )
 
 class C20Tests(unittest.TestCase):
-    def test_c20_is_implemented(self):
+    def test_c20_is_specified(self):
         c20 = catalog.benchmark("C20")
-        self.assertEqual(c20.status, catalog.BenchmarkStatus.IMPLEMENTED)
+        self.assertEqual(c20.status, catalog.BenchmarkStatus.SPECIFIED)
 
     def test_c20_components_exist(self):
         self.assertEqual(WorkStationType.I.value, "WS1")
@@ -30,7 +30,7 @@ class C20Tests(unittest.TestCase):
         for order in orders:
             env.schedule(order.earliest_release_date, lambda o=order: ws1.request(o, delay=10.0, on_finish=dummy_on_finish))
 
-        env.run(until_macro=100.0)
+        env.run(until_macro=1000000.0)
         self.assertEqual(ws1.processed_count, len(orders))
 
 if __name__ == '__main__':

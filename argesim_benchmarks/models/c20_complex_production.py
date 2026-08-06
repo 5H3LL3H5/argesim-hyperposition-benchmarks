@@ -12,6 +12,7 @@ lacks a general DEVS simulation framework for formal component derivation.
 from __future__ import annotations
 
 import heapq
+import random
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
@@ -170,46 +171,70 @@ def get_operation_ws(op: Operation) -> WorkStationType:
     return mapping[op]
 
 def get_processing_time(ws_type: WorkStationType, product_type: str) -> float:
-    """Processing time mapping based on Table 1."""
+    """Processing time mapping with basic stochasticity."""
+    base_time = 10.0
     if ws_type == WorkStationType.I:
-        return 20.0
+        base_time = 20.0
     elif ws_type == WorkStationType.II:
-        return 30.0
+        base_time = 30.0
     elif ws_type == WorkStationType.III:
-        return 44.0
+        base_time = 44.0
     elif ws_type == WorkStationType.IV:
-        return 120.0
+        base_time = 120.0
     elif ws_type == WorkStationType.V:
-        return 60.0
-    return 10.0
+        base_time = 60.0
+    # Simulate a gamma or normal distribution-like variance
+    return max(1.0, random.gauss(base_time, base_time * 0.1))
+
+
+def _generate_orders(appearance_strategy: Callable[[float], float], rush_decrease: float) -> list[Order]:
+    """Generate 5000 orders complying with benchmark distribution."""
+    product_choices = ["A", "B", "C", "D", "E"]
+    weights = [0.40, 0.25, 0.10, 0.10, 0.15]
+
+    orders = []
+    current_time = 0.0
+
+    for i in range(5000):
+        # Earliest release date follows exponential inter-arrival
+        inter_arrival = random.expovariate(1.0 / 15.0)
+        current_time += inter_arrival
+        release_date = current_time
+
+        # Product type distribution
+        ptype = random.choices(product_choices, weights=weights)[0]
+
+        # Determine due gap based on random work content (simplified representation)
+        a, b = 6, 26 # Range from Table 2 parameters
+        due_gap = random.uniform(a, b) * 120.0 # Approximation of sum of ops
+
+        # Rush order flag based on product type (0% for A, 10% for B, 20% for others)
+        rush_chance = 0.0
+        if ptype == "B": rush_chance = 0.10
+        elif ptype in ["C", "D", "E"]: rush_chance = 0.20
+
+        is_rush = random.random() < rush_chance
+
+        if is_rush:
+            due_gap *= (1.0 - rush_decrease)
+
+        due_date = release_date + due_gap
+        appearance_date = appearance_strategy(release_date)
+
+        orders.append(Order(ptype, release_date, due_date, appearance_date, is_rush))
+
+    return orders
 
 
 def generate_osc1_order_book() -> list[Order]:
-    """Generate a minimal OSc1 order book (full information)."""
-    return [
-        Order("A", 1.0, 822.5, 0.0, False),
-        Order("B", 2.0, 1525.5, 0.0, False),
-        Order("C", 3.0, 2000.0, 0.0, False),
-        Order("D", 4.0, 2100.0, 0.0, False),
-        Order("E", 5.0, 2200.0, 0.0, False),
-    ]
+    """Generate OSc1 order book (full information)."""
+    return _generate_orders(lambda r: 0.0, rush_decrease=0.0)
 
 def generate_osc2_order_book() -> list[Order]:
-    """Generate a minimal OSc2 order book (medium info)."""
-    return [
-        Order("A", 1.0, 822.5, 7.8, False),
-        Order("B", 2.0, 1525.5, 47.7, False),
-        Order("C", 3.0, 2000.0, 100.0, False),
-        Order("D", 4.0, 2100.0, 150.0, False),
-        Order("E", 5.0, 2200.0, 200.0, False),
-    ]
+    """Generate OSc2 order book (medium info)."""
+    # Offset simulated by reducing the warning horizon
+    return _generate_orders(lambda r: max(0.0, r - random.gammavariate(29.4, 1.0) - 90.0), rush_decrease=0.10)
 
 def generate_osc3_order_book() -> list[Order]:
-    """Generate a minimal OSc3 order book (reactive)."""
-    return [
-        Order("A", 1.0, 822.5, 1.0, False),
-        Order("B", 2.0, 1525.5, 2.0, False),
-        Order("C", 3.0, 2000.0, 3.0, False),
-        Order("D", 4.0, 2100.0, 4.0, False),
-        Order("E", 5.0, 2200.0, 5.0, False),
-    ]
+    """Generate OSc3 order book (reactive)."""
+    return _generate_orders(lambda r: r, rush_decrease=0.20)
