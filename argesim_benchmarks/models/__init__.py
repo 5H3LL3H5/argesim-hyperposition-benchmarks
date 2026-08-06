@@ -11,6 +11,20 @@ from .c01_lithium_cluster import (
     c01_task_c,
     solve_c01,
 )
+from .c15_clearance import (
+    C15_INITIAL_STATE,
+    C15_MEASUREMENTS_CONC,
+    C15_MEASUREMENTS_TIME,
+    C15Bolus,
+    C15Parameters,
+    c15_analytical,
+    c15_problem,
+    c15_rhs,
+    c15_task_a,
+    c15_task_b,
+    c15_task_c,
+    solve_c15,
+)
 
 __all__ = [
     "C01_INITIAL_STATE",
@@ -22,4 +36,16 @@ __all__ = [
     "c01_task_b",
     "c01_task_c",
     "solve_c01",
+    "C15_INITIAL_STATE",
+    "C15_MEASUREMENTS_CONC",
+    "C15_MEASUREMENTS_TIME",
+    "C15Bolus",
+    "C15Parameters",
+    "c15_analytical",
+    "c15_problem",
+    "c15_rhs",
+    "c15_task_a",
+    "c15_task_b",
+    "c15_task_c",
+    "solve_c15",
 ]
