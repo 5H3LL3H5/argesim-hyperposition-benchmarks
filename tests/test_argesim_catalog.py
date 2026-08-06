@@ -16,7 +16,7 @@ class ArgesimCatalogTests(unittest.TestCase):
 
     def test_implemented_benchmarks_status(self) -> None:
         statuses = {entry.identifier: entry.status for entry in BENCHMARKS}
-        implemented = ("C01", "C06", "C13", "CP1")
+        implemented = ("C01", "C06", "C13", "C19R", "CP1")
         for identifier in implemented:
             self.assertEqual(statuses[identifier], BenchmarkStatus.IMPLEMENTED)
         self.assertTrue(

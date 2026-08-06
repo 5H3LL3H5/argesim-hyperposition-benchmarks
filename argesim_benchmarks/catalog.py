@@ -160,6 +160,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Pollution in Groundwater Flow",
         (ModelClass.PDE, ModelClass.HYBRID),
         _source("c19"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C20", "Complex Production System", (ModelClass.DES,), _source("c20")
