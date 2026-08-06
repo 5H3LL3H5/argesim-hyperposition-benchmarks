@@ -49,6 +49,10 @@ class C17Tests(unittest.TestCase):
         result = solve_c17("qss1", t_bound=1.0, options={"quantum": (1.0, 1.0, 1.0)})
         self.assertEqual(result.final_time, 1.0)
 
+    def test_qss2_solve_c17(self) -> None:
+        result = solve_c17("qss2", t_bound=1.0, options={"quantum": (1.0, 1.0, 1.0)})
+        self.assertEqual(result.final_time, 1.0)
+
     def test_unsupported_solver(self) -> None:
         with self.assertRaises(ValueError):
             solve_c17("unsupported_solver")
