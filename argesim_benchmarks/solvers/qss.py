@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import sys
 from collections.abc import Sequence
 
 from ..ivp import (
@@ -120,7 +121,6 @@ def qss2(
     *,
     max_events: int = 1_000_000,
     simultaneous_tolerance: float = 1e-12,
-    dq_min: float = 1e-8,
 ) -> IntegrationResult:
     """Integrate an autonomous ODE with classical second-order QSS.
 
@@ -130,7 +130,7 @@ def qss2(
     updated to the current derivative ``x_i'``.
 
     Since the problem defines a black-box RHS, the second derivative ``x_i''`` is
-    estimated using forward finite differences.
+    estimated using forward finite differences with a scaled step size.
     """
 
     if not problem.autonomous:
@@ -153,19 +153,21 @@ def qss2(
     states = [tuple(x)]
     events = 0
 
+    eps_sqrt = math.sqrt(sys.float_info.epsilon)
+
     while t < problem.t_bound:
         if events >= max_events:
             raise IntegrationError("qss2 exceeded max_events")
 
-        # In QSS2, x' = f(q). Since q is linear, x is quadratic.
-        # We estimate x'' = d/dt f(q) by evaluating f at q and a small step q + dq.
         derivative = problem.evaluate(t, q)
         evaluations += 1
 
         # Use finite difference to estimate the second derivative (x'')
-        # q_next = q + q_slope * dt_fd
-        # We choose a small effective time step for the finite difference
-        dt_fd = dq_min
+        # Scaled step size for finite differences based on state scale.
+        dt_fd = eps_sqrt * max(1.0, max(abs(qs) for qs in q_slope))
+        if dt_fd == 0.0:
+            dt_fd = eps_sqrt
+
         q_fd = [qv + qs * dt_fd for qv, qs in zip(q, q_slope)]
         derivative_fd = problem.evaluate(t, q_fd)
         evaluations += 1
@@ -174,24 +176,14 @@ def qss2(
 
         crossings: list[float] = []
         for state, q_val, qs_val, dx, ddx, delta in zip(x, q, q_slope, derivative, x_second_deriv, quanta):
-            # We want to solve for dt > 0:
-            # |x(t+dt) - q(t+dt)| = delta
-            # Let e(dt) = x(t+dt) - q(t+dt)
-            # e(dt) = (x(t) + x'(t)*dt + 1/2*x''(t)*dt^2) - (q(t) + q'(t)*dt)
-            # x'(t) is exactly f(q(t)) which is `dx`
-            # q'(t) is `qs_val`
             c = state - q_val
             b = dx - qs_val
             a = 0.5 * ddx
 
-            # We need to find the smallest positive root of:
-            # a*dt^2 + b*dt + c - delta = 0
-            # a*dt^2 + b*dt + c + delta = 0
             roots = []
             for target in (delta, -delta):
                 c_eff = c - target
                 if abs(a) < 1e-14:
-                    # Effectively linear
                     if abs(b) > 1e-14:
                         r = -c_eff / b
                         if r > -tolerance:
@@ -200,8 +192,11 @@ def qss2(
                     discriminant = b*b - 4*a*c_eff
                     if discriminant >= 0:
                         sqrt_d = math.sqrt(discriminant)
-                        r1 = (-b + sqrt_d) / (2*a)
-                        r2 = (-b - sqrt_d) / (2*a)
+                        # Numerically stable quadratic formula
+                        q_root = -0.5 * (b + math.copysign(sqrt_d, b))
+                        r1 = q_root / a
+                        r2 = c_eff / q_root
+
                         if r1 > -tolerance:
                             roots.append(r1 if r1 > 0 else 0.0)
                         if r2 > -tolerance:
@@ -222,10 +217,8 @@ def qss2(
             states.append(tuple(x))
             break
 
-        # Advance state to the event time
         x = [state + dx * elapsed + 0.5 * ddx * elapsed**2
              for state, dx, ddx in zip(x, derivative, x_second_deriv)]
-        # Advance q to the event time
         q = [qv + qs * elapsed for qv, qs in zip(q, q_slope)]
         t += elapsed
 
@@ -239,10 +232,6 @@ def qss2(
         if not due:
             raise IntegrationError("qss2 failed to identify the imminent quantizer")
 
-        # We need the true derivative at the new state to update q_slope accurately.
-        # But wait, QSS2 evaluates the RHS using the *new* q.
-        # Actually, q_i is set to x_i, and q_slope_i is set to f_i(q).
-        # We must temporarily update q to evaluate f(q).
         for index in due:
             q[index] = x[index]
 
