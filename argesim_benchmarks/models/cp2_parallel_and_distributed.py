@@ -147,6 +147,13 @@ def cp2_lbm_step(
             rho = sum(f)
 
             # Boundary condition handling during collision
+            # Note:
+            # For the moving wall, we approximate by forcing it directly to equilibrium.
+            # For solid walls, we skip the collision step and defer bounce back to the
+            # propagation step. This implements a full-node bounce-back where a particle
+            # enters the boundary node, undergoes no collision, and streams back out in
+            # the next step. This is an accepted approximation for this benchmark context.
+
             if y == nx - 1: # Top wall (moving)
                 # Compute equilibrium with u = (u0_x, 0)
                 eq = _compute_equilibrium(rho, u0_x, 0.0)
@@ -179,12 +186,12 @@ def cp2_lbm_step(
                 nx_y = y + cy
                 # Only propagate if within bounds. Populations leaving the domain are lost,
                 if 0 <= nx_x < nx and 0 <= nx_y < nx:
-                    new_grid[nx_y][nx_x][i] = f_post_collision[y][x][i]
+                    new_grid[nx_y][nx_x][i] += f_post_collision[y][x][i]
                 else:
                     new_grid[y][x][CP2_LBM_REVERSE[i]] += f_post_collision[y][x][i]
 
     # Convert inner lists back to tuples for structure consistency if needed, or keep lists
-    return tuple(tuple(col) for col in new_grid)
+    return tuple(tuple(tuple(f) for f in row) for row in new_grid)
 
 
 # Task 3: Swinging Rope PDE
