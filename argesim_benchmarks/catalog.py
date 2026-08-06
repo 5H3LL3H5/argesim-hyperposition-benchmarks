@@ -196,6 +196,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
             ModelClass.STOCHASTIC,
         ),
         _source("cp"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
 )
 

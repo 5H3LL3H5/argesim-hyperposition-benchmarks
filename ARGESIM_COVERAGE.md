@@ -32,7 +32,7 @@ have already been implemented.
 | C21 | State Events and Structural-dynamic Systems | ODE/DAE, hybrid | cataloged |
 | C22 | Non-standard Queuing Policies | DES/queueing | implemented |
 | CP1 | Parallel Simulation Techniques | ODE, MOL/PDE, parallel study | implemented |
-| CP2 | Parallel and Distributed Simulation | Monte Carlo, LBM, MOL/PDE | cataloged |
+| CP2 | Parallel and Distributed Simulation | Monte Carlo, LBM, MOL/PDE | implemented |
 
 ## Solver applicability
 
