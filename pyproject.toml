@@ -1,10 +1,9 @@
 [project]
-name = "nsa-devs-reference-benchmarks"
-version = "0.1.0"
-description = "Restricted NSA-DEVS timing semantics and reproducible benchmarks"
+name = "argesim-nsa-devs-reference-benchmarks"
+version = "0.3.0"
+description = "Scientific ARGESIM rebuild with NSA-DEVS and numerical references"
 requires-python = ">=3.10"
 
 [tool.ruff]
 line-length = 88
 target-version = "py310"
-

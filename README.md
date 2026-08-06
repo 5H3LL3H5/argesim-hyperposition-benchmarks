@@ -1,51 +1,66 @@
-# NSA-DEVS reference benchmarks
+# ARGESIM and NSA-DEVS reference suite
 
-This repository contains a small, reproducible benchmark and correctness suite
-for restricted NSA-DEVS timing semantics.
+This branch is the scientific rebuild of the historical repository. It has
+two deliberately separate purposes:
 
-The repository name is historical. The active suite does not claim to
-implement the official ARGESIM C01-C21 or CP1/CP2 benchmark definitions.
+1. provide executable reference semantics for restricted NSA-DEVS timing;
+2. implement and validate the official ARGESIM catalog without relabelling
+   unrelated toy problems as ARGESIM benchmarks.
 
-## What is implemented
+## Current status
 
-- exact rational macro time plus an integer infinitesimal microstep;
-- lexicographic ordering of values representing `a + b epsilon`;
-- a finite acyclic Mealy-style relay chain;
-- analytical trace checks;
-- a workload-equivalent raw-tuple baseline;
-- a finite convergence experiment for the NSA identity
-  `st((1 - 1/N)^N) = exp(-1)`.
+The official inventory is complete for the catalog published in August 2026:
+C01-C22 plus CP1 and CP2. C17R and C19R are the active revised definitions.
+The inventory is machine-readable in `argesim_benchmarks.catalog`.
 
-## What was removed
+ARGESIM C01 is the first model at the `implemented` gate. The remaining 23
+definitions are cataloged only. Each benchmark must pass five evidence gates
+before it is benchmark-ready:
 
-The former suite compared real computations against `sleep()` calls, no-op
-functions or prescribed constants. Those programs could not support claims
-about solver accuracy, rollbacks, SIMD utilisation or speedup and are absent
-from the active tree.
+`cataloged -> specified -> implemented -> validated -> benchmark-ready`
+
+See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status.
+
+## Implemented numerical foundation
+
+- fixed-step explicit Euler;
+- fixed-step classical RK4;
+- adaptive Dormand-Prince RK45 with a 5(4) embedded error estimate;
+- asynchronous first-order QSS for autonomous ODE systems;
+- one-dimensional heat and wave equations through the Method of Lines;
+- exact rational macro time plus integer microsteps for restricted NSA-DEVS;
+- a finite acyclic Mealy-style NSA-DEVS relay reference model.
+- ARGESIM C01 tasks A-C, including the official parameter sweep and analytical
+  steady states.
+
+QSS2, LIQSS, DAE handling, general hybrid-event localization, the modern
+`neuraloperator` backend and ARGESIM C02-C22/CP1/CP2 are tracked as work in
+progress. They are not silently mapped to simpler algorithms.
 
 ## Run the tests
 
-No third-party Python dependencies are required.
+No third-party Python dependency is required for the current reference core.
 
 ```bash
 python -m unittest discover -s tests -v
+python -m compileall -q .
 ```
 
-## Run the experiments
+## Run the NSA-DEVS experiments
 
 ```bash
 python benchmarks/benchmark_event_chain.py --length 1000 --repeat 21
 python benchmarks/benchmark_euler_convergence.py
+python benchmarks/benchmark_argesim_c01.py --repeat 9 --warmup 1
 ```
 
 The event-chain benchmark validates result parity before recording timing. It
-reports median and interquartile range; it does not promise that the typed
-representation is faster than the raw tuple.
+reports median and interquartile range and makes no speedup claim.
 
 ## Interpretation
 
-`HyperTime` is an executable encoding of the restricted ordering needed by the
-reference model. It is not a complete hyperreal-number implementation. A
-finite convergence table illustrates a standard NSA argument but does not
-compute an infinite hyperinteger on the CPU.
-
+`HyperTime` is an executable superdense-time encoding of values `a + b epsilon`
+needed by the restricted reference model. It is not an implementation of the
+complete hyperreal field. QSS is a DEVS-based numerical method, but its use
+does not by itself establish any claim about locks, rollbacks or parallel
+speedup.

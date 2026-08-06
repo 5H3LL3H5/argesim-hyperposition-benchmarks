@@ -1,5 +1,5 @@
-from fractions import Fraction
 import unittest
+from fractions import Fraction
 
 from nsa_devs import HyperTime
 
@@ -34,4 +34,5 @@ class HyperTimeTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
 

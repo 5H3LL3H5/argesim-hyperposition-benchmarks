@@ -4,17 +4,17 @@
 from __future__ import annotations
 
 import argparse
-from fractions import Fraction
 import heapq
 import json
-from pathlib import Path
 import statistics
 import sys
 import time
+from fractions import Fraction
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from nsa_devs import HyperTime, run_relay_chain
+from nsa_devs import run_relay_chain
 
 
 def run_tuple_chain(length: int, initial_payload: int = 0) -> tuple[int, int, int]:
@@ -125,4 +125,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 

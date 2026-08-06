@@ -1,5 +1,20 @@
 # Benchmark methodology
 
+## 0. Evidence gates
+
+An official ARGESIM entry advances only through these ordered gates:
+
+1. **cataloged** - official identity, active revision and model family checked;
+2. **specified** - equations, parameters, events, stochastic assumptions,
+   experiments and required outputs transcribed from the primary definition;
+3. **implemented** - executable model and every required task present;
+4. **validated** - independent analytical, tabulated or high-accuracy reference
+   values pass declared tolerances;
+5. **benchmark-ready** - workload parity, environment capture, warm-up,
+   repetitions and raw result retention are complete.
+
+A catalog entry or placeholder never counts as an implementation.
+
 ## 1. Research questions
 
 1. Does the executable time encoding preserve the analytical order of a
@@ -70,3 +85,38 @@ These experiments do not establish:
 - parallel speedup;
 - compliance with official ARGESIM benchmark definitions.
 
+## 7. Solver comparisons
+
+All solver candidates receive one immutable model definition, initial state,
+time interval and output grid. Accuracy is checked before runtime is compared.
+Adaptive and event-driven methods report accepted and rejected steps or events
+and right-hand-side evaluations in addition to wall time.
+
+Explicit methods are not presented as suitable stiff or DAE solvers merely
+because they can execute with a very small step. QSS2 and LIQSS results will
+not be published until their actual quantizer algorithms and convergence tests
+are present.
+
+## 8. PDE and learned-operator protocol
+
+Time-dependent PDEs are spatially discretized first. Grid size, stencil,
+boundary treatment and spatial error are reported separately from temporal
+solver error. Neural-operator training cost, inference cost and data generation
+cost are reported separately. Evaluation requires held-out data, PDE residual,
+boundary-condition error and out-of-distribution tests.
+
+## 9. ARGESIM C01 protocol
+
+The C01 transcription is checked directly against the official definition:
+state order, five rate parameters, production term, initial state and tasks
+A-C are explicit in code. The weighted population balance
+
+\[
+\frac{d}{dt}(3r+2m+f)=p-l_f f
+\]
+
+provides a structural equation check. Task-A timing is allowed only after the
+endpoint agrees with a tighter, independently configured RK45 run within a
+method-specific threshold. The tight RK45 result is a numerical oracle, not a
+published reference solution; consequently C01 remains below the `validated`
+gate until cross-tool or published reference trajectories are archived.
