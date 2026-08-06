@@ -7,7 +7,6 @@ Outcome, confidence, and generates numpy/matplotlib trajectories as requested.
 import statistics
 import time
 from typing import Callable
-import json
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -73,10 +72,10 @@ def run_scenario(name: str, generator: Callable[[], list[Order]]) -> tuple[dict[
             lambda o=order, p=plan: process_next_step(o, p, 0)
         )
 
-    start_time = time.perf_counter()
+    start_time = time.perf_counter_ns()
     # Run the simulation for a sufficiently long time
     env.run(until_macro=100000.0)
-    end_time = time.perf_counter()
+    end_time = time.perf_counter_ns()
 
     makespan = float(env.now.macro)
 
@@ -91,31 +90,20 @@ def run_scenario(name: str, generator: Callable[[], list[Order]]) -> tuple[dict[
         median_tt = 0.0
         iqr_tt = 0.0
 
-    print(f"--- Experiment: Scenario {name} ---")
-    print(f"Initial Parameters: {len(orders)} orders generated.")
-    print(f"Runs: 1 execution.")
-    print(f"Outcome:")
-    print(f"  Wall time:      {end_time - start_time:.4f} s")
-    print(f"  Sim. Makespan:  {makespan:.2f} s")
-    print(f"  Throughput TT:  Median {median_tt:.2f} s, IQR {iqr_tt:.2f} s")
-
-    total_processed = sum(ws.processed_count for ws in stations.values())
-    print(f"  Processed Ops:  {total_processed}")
-    print(f"Confidence:       High (Deterministic Execution)\n")
-
     metrics = {
         "makespan": makespan,
         "median_tt": median_tt,
         "iqr_tt": iqr_tt,
         "wall_time": end_time - start_time,
+        "processed": sum(ws.processed_count for ws in stations.values()),
     }
 
     trajectories = {ws_type: ws.history for ws_type, ws in stations.items()}
     return metrics, trajectories
 
 def main() -> None:
-    print("ARGESIM C20 Complex Production System Benchmark Validation")
-    print("========================================================\n")
+    print("ARGESIM C20 Complex Production System Specification Demonstration")
+    print("===============================================================\n")
 
     scenarios = [
         ("OSc#1 (Full Info)", generate_osc1_order_book),
@@ -125,9 +113,28 @@ def main() -> None:
 
     all_trajectories = {}
 
+    repetitions = 9
     for name, generator in scenarios:
-        metrics, trajectories = run_scenario(name, generator)
-        all_trajectories[name] = trajectories
+        print(f"--- Experiment: Scenario {name} ---")
+        print(f"Initial Parameters: 5000 orders generated.")
+        print(f"Runs: {repetitions} executions.")
+
+        wall_times = []
+        for i in range(repetitions):
+            metrics, trajectories = run_scenario(name, generator)
+            wall_times.append(metrics["wall_time"])
+            if i == 0:
+                all_trajectories[name] = trajectories
+                first_metrics = metrics
+
+        median_wall_ns = statistics.median(wall_times)
+        q75_ns, q25_ns = statistics.quantiles(wall_times, n=4)[2], statistics.quantiles(wall_times, n=4)[0]
+
+        print(f"Outcome:")
+        print(f"  Wall time:      Median {median_wall_ns / 1e9:.4f} s, IQR {(q75_ns - q25_ns) / 1e9:.4f} s")
+        print(f"  Sim. Makespan:  {first_metrics['makespan']:.2f} s")
+        print(f"  Throughput TT:  Median {first_metrics['median_tt']:.2f} s, IQR {first_metrics['iqr_tt']:.2f} s")
+        print(f"  Processed Ops:  {first_metrics['processed']}\n")
 
     # Plotting with matplotlib and numpy
     fig, axes = plt.subplots(3, 1, figsize=(10, 15))

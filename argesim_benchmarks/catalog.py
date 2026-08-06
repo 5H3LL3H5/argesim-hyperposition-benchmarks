@@ -167,7 +167,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Complex Production System",
         (ModelClass.DES,),
         _source("c20"),
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.SPECIFIED,
     ),
     BenchmarkDefinition(
         "C21",
