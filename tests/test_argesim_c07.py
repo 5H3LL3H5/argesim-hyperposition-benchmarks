@@ -3,6 +3,7 @@
 import math
 import unittest
 
+from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
 from argesim_benchmarks.models.c07_constrained_pendulum import (
     C07Parameters,
     c07_rhs,
@@ -13,6 +14,10 @@ from argesim_benchmarks.models.c07_constrained_pendulum import (
 
 
 class TestC07(unittest.TestCase):
+    def test_c07_catalog_status(self):
+        c07 = next(b for b in BENCHMARKS if b.identifier == "C07")
+        self.assertEqual(c07.status, BenchmarkStatus.IMPLEMENTED)
+
     def test_parameters_validation(self):
         with self.assertRaises(ValueError):
             C07Parameters(m=-1.0)
