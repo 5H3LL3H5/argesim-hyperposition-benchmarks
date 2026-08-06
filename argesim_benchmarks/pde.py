@@ -39,11 +39,7 @@ def heat_sine_exact(
     length: float = 1.0,
 ) -> tuple[float, ...]:
     initial = heat_sine_initial(interior_points, length=length)
-    decay = math.exp(
-        -float(diffusivity)
-        * (math.pi / float(length)) ** 2
-        * float(time)
-    )
+    decay = math.exp(-float(diffusivity) * (math.pi / float(length)) ** 2 * float(time))
     return tuple(decay * value for value in initial)
 
 

@@ -29,7 +29,9 @@ def _quartiles(values: list[int]) -> tuple[float, float]:
     return quartiles[0], quartiles[2]
 
 
-def _endpoint_error(candidate: tuple[float, ...], reference: tuple[float, ...]) -> float:
+def _endpoint_error(
+    candidate: tuple[float, ...], reference: tuple[float, ...]
+) -> float:
     return max(abs(value - expected) for value, expected in zip(candidate, reference))
 
 

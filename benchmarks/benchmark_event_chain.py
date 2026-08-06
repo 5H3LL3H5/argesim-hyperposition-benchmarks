@@ -30,10 +30,7 @@ def run_tuple_chain(length: int, initial_payload: int = 0) -> tuple[int, int, in
         output_time = (macro, micro + 1)
         output_payload = payload + 1
         checksum = (
-            checksum * 1_000_003
-            + component * 97
-            + output_time[1] * 31
-            + output_payload
+            checksum * 1_000_003 + component * 97 + output_time[1] * 31 + output_payload
         ) % 2_147_483_647
         processed += 1
         final_payload = output_payload
@@ -125,5 +122,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

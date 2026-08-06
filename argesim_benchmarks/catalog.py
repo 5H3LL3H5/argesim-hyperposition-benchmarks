@@ -115,6 +115,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Crane and Embedded Control",
         (ModelClass.DAE, ModelClass.HYBRID, ModelClass.DISCRETE_TIME),
         _source("c13"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C14", "Supply Chain", (ModelClass.DISCRETE_TIME,), _source("c14")

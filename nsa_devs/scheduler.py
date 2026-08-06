@@ -94,5 +94,3 @@ def run_relay_chain(
             sequence += 1
 
     return RelayResult(final_payload=trace[-1].output_payload, trace=tuple(trace))
-
-

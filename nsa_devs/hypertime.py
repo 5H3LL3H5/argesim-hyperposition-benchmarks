@@ -71,4 +71,3 @@ class HyperTime:
         if self.micro == 0:
             return str(self.macro)
         return f"{self.macro}+{self.micro}epsilon"
-

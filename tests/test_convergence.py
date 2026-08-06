@@ -10,9 +10,7 @@ class ConvergenceTests(unittest.TestCase):
         errors = [row.absolute_error for row in rows]
 
         self.assertTrue(all(error > 0.0 for error in errors))
-        self.assertTrue(
-            all(later < earlier for earlier, later in pairwise(errors))
-        )
+        self.assertTrue(all(later < earlier for earlier, later in pairwise(errors)))
         self.assertLess(errors[-1], 2e-5)
 
     def test_endpoint_remains_below_exact_solution(self) -> None:
@@ -27,4 +25,3 @@ class ConvergenceTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
