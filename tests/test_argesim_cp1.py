@@ -1,0 +1,86 @@
+import unittest
+
+from argesim_benchmarks.models.cp1_parallel import (
+    cp1_task_a_ivp,
+    cp1_task_b_ivp,
+    cp1_task_b_rhs,
+    cp1_task_c_ivp,
+    CP1_TASK_B_EQUILIBRIUM,
+    CP1_TASK_B_TERMINAL_VALUES,
+)
+from argesim_benchmarks.solvers import rk45
+
+class CP1Tests(unittest.TestCase):
+    def test_task_a_ivp_creation(self) -> None:
+        ivp = cp1_task_a_ivp(1000.0)
+        self.assertEqual(ivp.dimension, 2)
+        self.assertEqual(ivp.t_bound, 2.0)
+        self.assertEqual(ivp.y0, (0.1, 0.0))
+        # Evaluate RHS at initial state
+        derivative = ivp.evaluate(0.0, ivp.y0)
+        # x' = v = 0.0
+        # v' = (-9000 * 0.1 - 1000 * 0.0) / 450 = -900 / 450 = -2.0
+        self.assertEqual(derivative, (0.0, -2.0))
+
+    def test_task_b_ivp_creation(self) -> None:
+        ivp = cp1_task_b_ivp()
+        self.assertEqual(ivp.dimension, 10)
+        self.assertEqual(ivp.t_bound, 100.0)
+        self.assertEqual(ivp.y0, (1.0,) * 10)
+        derivative = ivp.evaluate(0.0, ivp.y0)
+        self.assertEqual(len(derivative), 10)
+
+    def test_task_b_steady_state(self) -> None:
+        eq_state = (
+            CP1_TASK_B_EQUILIBRIUM["v1"],
+            CP1_TASK_B_EQUILIBRIUM["v2"],
+            CP1_TASK_B_EQUILIBRIUM["w1"],
+            CP1_TASK_B_EQUILIBRIUM["w2"],
+            CP1_TASK_B_EQUILIBRIUM["x1"],
+            CP1_TASK_B_EQUILIBRIUM["x2"],
+            CP1_TASK_B_EQUILIBRIUM["y1"],
+            CP1_TASK_B_EQUILIBRIUM["y2"],
+            CP1_TASK_B_EQUILIBRIUM["z1"],
+            CP1_TASK_B_EQUILIBRIUM["z2"],
+        )
+        rhs = cp1_task_b_rhs()
+        derivative = rhs(0.0, eq_state)
+        # Check that derivative at equilibrium is close to 0
+        max_drv = max(abs(x) for x in derivative)
+        self.assertLess(max_drv, 0.001)
+
+    def test_task_b_integration_approaches_table_values(self) -> None:
+        ivp = cp1_task_b_ivp(t_bound=100.0)
+        result = rk45(ivp)
+        self.assertEqual(result.final_time, 100.0)
+
+        expected_terminal = (
+            CP1_TASK_B_TERMINAL_VALUES["v1"],
+            CP1_TASK_B_TERMINAL_VALUES["v2"],
+            CP1_TASK_B_TERMINAL_VALUES["w1"],
+            CP1_TASK_B_TERMINAL_VALUES["w2"],
+            CP1_TASK_B_TERMINAL_VALUES["x1"],
+            CP1_TASK_B_TERMINAL_VALUES["x2"],
+            CP1_TASK_B_TERMINAL_VALUES["y1"],
+            CP1_TASK_B_TERMINAL_VALUES["y2"],
+            CP1_TASK_B_TERMINAL_VALUES["z1"],
+            CP1_TASK_B_TERMINAL_VALUES["z2"],
+        )
+
+        for candidate, expected in zip(result.final_state, expected_terminal):
+            # ARGESIM table says "Solutions obtained using ACSL in double precision (stepsize 0.01, RK4)".
+            # Adaptive RK45 might have a small difference, so we use a relatively loose tolerance.
+            self.assertAlmostEqual(candidate, expected, delta=0.5)
+
+    def test_task_c_ivp_creation(self) -> None:
+        # Test with a small N to make it fast
+        interior_points = 9  # N = 10
+        ivp = cp1_task_c_ivp(interior_points, t_bound=30.0)
+        self.assertEqual(ivp.dimension, 18)  # 9 positions, 9 velocities
+        self.assertEqual(ivp.t_bound, 30.0)
+        self.assertEqual(ivp.y0, (0.0,) * 18)
+        derivative = ivp.evaluate(0.0, ivp.y0)
+        self.assertEqual(len(derivative), 18)
+
+if __name__ == "__main__":
+    unittest.main()

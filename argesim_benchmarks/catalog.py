@@ -179,6 +179,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Parallel Simulation Techniques",
         (ModelClass.ODE, ModelClass.PDE, ModelClass.PARALLEL),
         _source("cp"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "CP2",
