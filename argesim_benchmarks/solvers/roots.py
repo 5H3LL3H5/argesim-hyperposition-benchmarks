@@ -1,6 +1,8 @@
 """Root-finding algorithms for boundary value problems."""
 
+import sys
 from collections.abc import Callable
+
 
 def brentq(
     f: Callable[[float], float],
@@ -33,7 +35,7 @@ def brentq(
             a, b, c = b, c, b
             fa, fb, fc = fb, fc, fb
 
-        tol1 = 2.0 * 2.220446049250313e-16 * abs(b) + 0.5 * tol
+        tol1 = 2.0 * sys.float_info.epsilon * abs(b) + 0.5 * tol
         xm = 0.5 * (c - b)
 
         if abs(xm) <= tol1 or fb == 0.0:

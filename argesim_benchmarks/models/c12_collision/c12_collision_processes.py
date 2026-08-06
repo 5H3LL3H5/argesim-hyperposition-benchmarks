@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import math
 import random
+import statistics
 from dataclasses import dataclass
 
 from argesim_benchmarks.solvers.roots import brentq
@@ -20,6 +21,11 @@ class C12Parameters:
     d: float = 1.0
     a: float = 1.0
     v0: float = 1.0
+    # Task A termination time (from spec: t=15)
+    max_time: float = 15.0
+    # Task C stochastic parameters
+    mean_e: float = 0.5
+    std_e: float = 0.05
 
     def __post_init__(self) -> None:
         if not math.isfinite(self.e) or self.e < 0.0 or self.e > 1.0:
@@ -30,13 +36,24 @@ class C12Parameters:
             raise ValueError("Distance a must be positive and finite")
         if not math.isfinite(self.v0) or self.v0 <= 0.0:
             raise ValueError("Initial velocity v0 must be positive and finite")
+        if not math.isfinite(self.max_time) or self.max_time <= 0.0:
+            raise ValueError("Max time must be positive and finite")
+        if not math.isfinite(self.mean_e) or self.mean_e < 0.0 or self.mean_e > 1.0:
+            raise ValueError("Mean e must be between 0.0 and 1.0")
+        if not math.isfinite(self.std_e) or self.std_e <= 0.0:
+            raise ValueError("Standard deviation of e must be positive")
 
 
 _C12_DEFAULT_PARAMETERS = C12Parameters()
 
-def _simulate(e: float, v0: float, max_time: float = float('inf')) -> tuple[int, list[float], float, list[tuple[float, list[float], list[float]]]]:
+def _simulate(params: C12Parameters = _C12_DEFAULT_PARAMETERS) -> tuple[int, list[float], float, list[tuple[float, list[float], list[float]]]]:
+    e = params.e
+    v0 = params.v0
+    a_dist = params.a
+    max_time = params.max_time
+
     v = [v0, 0.0, 0.0, 0.0]
-    y = [1.0, 1.0, 1.0] # using initial distance a = 1.0 for relative distances
+    y = [a_dist, a_dist, a_dist] # using initial distance a for relative distances
     t = 0.0
     cols = 0
     history = [(t, list(y), list(v))]
@@ -94,11 +111,11 @@ def _simulate(e: float, v0: float, max_time: float = float('inf')) -> tuple[int,
 def c12_task_a() -> dict[str, object]:
     """Task A: Distance-time functions and final velocities."""
     # a1
-    cols, v_final, t_final, history = _simulate(0.2, 1.0, max_time=15.0)
+    cols, v_final, t_final, history = _simulate(C12Parameters(e=0.2, v0=1.0, max_time=15.0))
 
     # a2
-    _, v_elastic, _, _ = _simulate(1.0, 1.0)
-    _, v_plastic, _, _ = _simulate(0.0, 1.0)
+    _, v_elastic, _, _ = _simulate(C12Parameters(e=1.0, v0=1.0))
+    _, v_plastic, _, _ = _simulate(C12Parameters(e=0.0, v0=1.0))
 
     return {
         "a1_trajectory": history,
@@ -111,32 +128,33 @@ def c12_task_b() -> dict[str, object]:
     steps = 100
     results = {}
     for i in range(steps + 1):
-        e = i / steps
-        cols, v, t, _ = _simulate(e, 1.0)
-        results[e] = {"collisions": cols, "velocities": v}
+        e_val = i / steps
+        cols, v, t, _ = _simulate(C12Parameters(e=e_val, v0=1.0))
+        results[e_val] = {"collisions": cols, "velocities": v}
     return {"sweep": results}
 
 def c12_task_c() -> dict[str, object]:
     """Task C: Boundary value problem and stochastic study."""
     # c1: find e for v4 = v0/2 = 0.5
     def f(e_val: float) -> float:
-        return _simulate(e_val, 1.0)[1][3] - 0.5
+        return _simulate(C12Parameters(e=e_val, v0=1.0))[1][3] - 0.5
 
     e_solution = brentq(f, 0.0, 1.0)
 
     # c2: stochastic study
     n_samples = 10000
     random.seed(42)
-    mean_e, std_e = 0.5, 0.05
+    mean_e = _C12_DEFAULT_PARAMETERS.mean_e
+    std_e = _C12_DEFAULT_PARAMETERS.std_e
+
     v4_samples = []
     for _ in range(n_samples):
         e_val = random.normalvariate(mean_e, std_e)
         e_val = max(0.0, min(1.0, e_val))
-        v4_samples.append(_simulate(e_val, 1.0)[1][3])
+        v4_samples.append(_simulate(C12Parameters(e=e_val, v0=1.0))[1][3])
 
-    mean_v4 = sum(v4_samples) / n_samples
-    var_v4 = sum((x - mean_v4)**2 for x in v4_samples) / (n_samples - 1)
-    std_v4 = math.sqrt(var_v4)
+    mean_v4 = statistics.mean(v4_samples)
+    std_v4 = statistics.stdev(v4_samples)
     ci = 1.96 * std_v4 / math.sqrt(n_samples)
 
     return {
