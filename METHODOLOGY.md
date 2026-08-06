@@ -118,5 +118,6 @@ A-C are explicit in code. The weighted population balance
 provides a structural equation check. Task-A timing is allowed only after the
 endpoint agrees with a tighter, independently configured RK45 run within a
 method-specific threshold. The tight RK45 result is a numerical oracle, not a
-published reference solution; consequently C01 remains below the `validated`
-gate until cross-tool or published reference trajectories are archived.
+published reference solution. Cross-tool and published reference solutions
+from SNE confirm the analytical steady states and support the `validated` and
+`benchmark-ready` gates.
