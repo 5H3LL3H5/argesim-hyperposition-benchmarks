@@ -23,6 +23,10 @@ class C19GroundwaterTests(unittest.TestCase):
         val = c19_analytical_transient(10.0, 5.0, 0.0)
         self.assertEqual(val, 0.0)
 
+    def test_analytical_transient_is_positive(self) -> None:
+        val = c19_analytical_transient(10.0, 0.0, 10 * 24 * 3600)
+        self.assertGreater(val, 0.0)
+
     def test_analytical_steady_state_positive(self) -> None:
         val = c19_analytical_steady_state(10.0, 0.0)
         self.assertGreater(val, 0.0)
