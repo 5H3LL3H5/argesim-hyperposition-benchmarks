@@ -104,6 +104,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "SCARA Robot",
         (ModelClass.DAE, ModelClass.HYBRID),
         _source("c11"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C12",
