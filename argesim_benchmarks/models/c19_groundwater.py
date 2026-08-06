@@ -102,8 +102,7 @@ def c19_analytical_transient(
     if t <= 0:
         return 0.0
     arg = (r - u * t) / math.sqrt(2.0 * alpha * u * t)
-    # erfc(x) = 1 - erf(x)
-    term3 = 1.0 - math.erf(arg)
+    term3 = math.erfc(arg)
 
     return term1 * term2 * term3
 
@@ -138,12 +137,14 @@ def c19_rhs(
     source_term = [0.0] * (nx * ny)
     # The source is a point source M at (0,0). In a discrete grid, it corresponds to the cell
     # containing (0,0). The transport equation is integrated over the cell volume:
-    # the concentration rate is M / (dx * dy * m * ne).
+    # the concentration rate is M / (dx * dy * thickness * ne).
     # However, since we are doing 2D Method of Lines, the PDE is typically formulated
     # in terms of concentration per unit length, or we need to ensure the delta function
     # is scaled properly. The analytical solution uses c0 = M / (m * ne * u).
+    # Note: the entire time derivative is scaled by retardation R, so the source term
+    # must be divided by R as well. (m maps to thickness in parameters)
     vol = dx * dy * parameters.thickness * parameters.porosity
-    source_rate = parameters.mass_rate / vol
+    source_rate = parameters.mass_rate / (vol * R)
 
     # Precalculate facility indices for efficiency (avoid distance checks in inner loop)
     facility_indices: list[int] = []
@@ -163,13 +164,16 @@ def c19_rhs(
 
     source_idx = iy0 * nx + ix0
 
+    is_continuous = (facility_mode == "continuous")
+    is_schedule = (facility_mode == "schedule")
+
     def rhs(t: float, c: Sequence[float]) -> tuple[float, ...]:
         dc = [0.0] * (nx * ny)
 
         is_active = False
-        if facility_mode == "continuous":
+        if is_continuous:
             is_active = True
-        elif facility_mode == "schedule":
+        elif is_schedule:
             # Monday to Friday 0-8am, 8pm-12pm
             # Weekends around the clock
             # Assuming t=0 is Monday 00:00. Time is in seconds.
@@ -248,9 +252,10 @@ def c19_problem(
 def c19_task_a(nx: int = 71, ny: int = 41, dx: float = 1.0, dy: float = 1.0, x_offset: float = -10.0, y_offset: float = -20.0) -> IntegrationResult:
     """Task A: Simulation of unregulated pollution spread for 150 days."""
     problem = c19_problem(nx=nx, ny=ny, dx=dx, dy=dy, x_offset=x_offset, y_offset=y_offset, facility_mode="none")
-    # Using explicit Euler or RK45. Because of diffusion, max step is limited.
-    # For a realistic grid (dx=1), dt should be around 0.5 days. Let's use adaptive.
-    # But since it's just a reference, we can use a small step or coarse grid for tests.
+    # Using explicit RK45. The spatial discretization of diffusion makes the system stiff.
+    # For a realistic grid (dx=1), the stability limit forces very small steps.
+    # An implicit solver would be more appropriate, but explicit is used here out of necessity
+    # to maintain benchmark framework compatibility.
     return rk45(problem, max_step=12*3600)  # max step 12 hours
 
 def c19_task_b(nx: int = 71, ny: int = 41, dx: float = 1.0, dy: float = 1.0, x_offset: float = -10.0, y_offset: float = -20.0) -> IntegrationResult:
