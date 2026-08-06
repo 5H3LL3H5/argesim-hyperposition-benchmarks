@@ -1,0 +1,251 @@
+"""ARGESIM C03: Generalized Class-E Amplifier."""
+
+from __future__ import annotations
+
+import cmath
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, replace
+
+from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
+from ..solvers import euler, rk4, rk45
+
+C03_INITIAL_STATE: Vector = (0.0, 0.0, 0.0, 0.0)
+
+@dataclass(frozen=True)
+class C03Parameters:
+    """Parameters for the C03 class-E amplifier."""
+    vdc: float = 5.0
+    l1: float = 79.9e-6
+    c2: float = 17.9e-9
+    l3: float = 232.0e-6
+    c4: float = 9.66e-9
+    rl: float = 52.4
+    r_on: float = 0.05
+    r_off: float = 5.0e6
+    trf: float = 1.0e-15
+    period: float = 10.0e-6
+    duty_cycle: float = 0.5
+
+    def __post_init__(self) -> None:
+        if self.trf < 0.0:
+            raise ValueError("C03 rise/fall time must be non-negative")
+
+_C03_DEFAULT_PARAMETERS = C03Parameters()
+
+def _r_t(time: float, parameters: C03Parameters) -> float:
+    """Calculate the resistance of the switch at a given time."""
+    t_mod = time % parameters.period
+    half_period = parameters.period * parameters.duty_cycle
+
+    # 0 to TRF: transition from ON to OFF
+    if t_mod < parameters.trf:
+        if parameters.trf == 0.0:
+            return parameters.r_off
+        return parameters.r_on + (parameters.r_off - parameters.r_on) * (t_mod / parameters.trf)
+    # TRF to half period: OFF
+    elif t_mod < half_period:
+        return parameters.r_off
+    # half period to half period + TRF: transition from OFF to ON
+    elif t_mod < half_period + parameters.trf:
+        if parameters.trf == 0.0:
+            return parameters.r_on
+        return parameters.r_off - (parameters.r_off - parameters.r_on) * ((t_mod - half_period) / parameters.trf)
+    # half period + TRF to end of period: ON
+    else:
+        return parameters.r_on
+
+def c03_rhs(parameters: C03Parameters = _C03_DEFAULT_PARAMETERS) -> Rhs:
+    """Return the official four-state continuous right-hand side."""
+
+    def rhs(time: float, state: Sequence[float]) -> Vector:
+        x1, x2, x3, x4 = state
+        r = _r_t(time, parameters)
+
+        dx1 = -x2 / parameters.l1 + parameters.vdc / parameters.l1
+        dx2 = x1 / parameters.c2 - x2 / (parameters.c2 * r) - x3 / parameters.c2
+        dx3 = x2 / parameters.l3 - parameters.rl * x3 / parameters.l3 - x4 / parameters.l3
+        dx4 = x3 / parameters.c4
+
+        return (dx1, dx2, dx3, dx4)
+
+    return rhs
+
+def _durand_kerner(coeffs: Sequence[float], iterations: int = 2000) -> tuple[complex, ...]:
+    """Find roots of a polynomial using the Durand-Kerner method."""
+    degree = len(coeffs) - 1
+    if degree < 1:
+        return ()
+
+    # Normalize polynomial
+    a_n = coeffs[0]
+    normalized_coeffs = [c / a_n for c in coeffs]
+
+    # Initialize roots with some complex values
+    roots = [complex(0.4, 0.9) * (complex(0.4, 0.9) ** i) for i in range(degree)]
+
+    for _ in range(iterations):
+        for i in range(degree):
+            # Evaluate P(root)
+            p_val = 0j
+            for j, c in enumerate(normalized_coeffs):
+                p_val = p_val * roots[i] + c
+
+            # Denominator product (root_i - root_j)
+            denom = 1.0 + 0.0j
+            for j in range(degree):
+                if i != j:
+                    denom *= (roots[i] - roots[j])
+
+            roots[i] -= p_val / denom
+
+    return tuple(roots)
+
+def _c03_characteristic_polynomial(r: float, p: C03Parameters) -> list[float]:
+    """Return the coefficients of the characteristic polynomial for state matrix A(R)."""
+    # A = [[0, -1/L1, 0, 0],
+    #      [1/C2, -1/(C2*R), -1/C2, 0],
+    #      [0, 1/L3, -RL/L3, -1/L3],
+    #      [0, 0, 1/C4, 0]]
+    # Expand det(A - xI):
+    # x^4 + a x^3 + b x^2 + c x + d = 0
+    # We can evaluate the characteristic equation using numeric values directly.
+    # We compute coefficients via interpolation on x = 0, 1, -1, 2, -2
+
+    def det4(m: list[list[float]]) -> float:
+        return (
+            m[0][0]*(m[1][1]*(m[2][2]*m[3][3] - m[2][3]*m[3][2]) - m[1][2]*(m[2][1]*m[3][3] - m[2][3]*m[3][1]) + m[1][3]*(m[2][1]*m[3][2] - m[2][2]*m[3][1]))
+          - m[0][1]*(m[1][0]*(m[2][2]*m[3][3] - m[2][3]*m[3][2]) - m[1][2]*(m[2][0]*m[3][3] - m[2][3]*m[3][0]) + m[1][3]*(m[2][0]*m[3][2] - m[2][2]*m[3][0]))
+          + m[0][2]*(m[1][0]*(m[2][1]*m[3][3] - m[2][3]*m[3][1]) - m[1][1]*(m[2][0]*m[3][3] - m[2][3]*m[3][0]) + m[1][3]*(m[2][0]*m[3][1] - m[2][1]*m[3][0]))
+          - m[0][3]*(m[1][0]*(m[2][1]*m[3][2] - m[2][2]*m[3][1]) - m[1][1]*(m[2][0]*m[3][2] - m[2][2]*m[3][0]) + m[1][2]*(m[2][0]*m[3][1] - m[2][1]*m[3][0]))
+        )
+
+    mat_a = [
+        [0.0, -1.0 / p.l1, 0.0, 0.0],
+        [1.0 / p.c2, -1.0 / (p.c2 * r), -1.0 / p.c2, 0.0],
+        [0.0, 1.0 / p.l3, -p.rl / p.l3, -1.0 / p.l3],
+        [0.0, 0.0, 1.0 / p.c4, 0.0],
+    ]
+
+    def eval_p(x: float) -> float:
+        m = [[mat_a[i][j] - (x if i == j else 0.0) for j in range(4)] for i in range(4)]
+        return det4(m)
+
+    d = eval_p(0.0)
+    y1 = eval_p(1.0)
+    ym1 = eval_p(-1.0)
+    y2 = eval_p(2.0)
+
+    b = (y1 + ym1 - 2.0 * d - 2.0) / 2.0
+    ac_sum = (y1 - ym1) / 2.0
+    a = ((y2 - 16.0 - 4.0 * b - d) - 2.0 * ac_sum) / 6.0
+    c = ac_sum - a
+
+    return [1.0, a, b, c, d]
+
+def c03_task_a(parameters: C03Parameters = _C03_DEFAULT_PARAMETERS) -> dict[str, tuple[complex, ...]]:
+    """Return the eigenvalues of the system in the ON and OFF periods."""
+
+    coeffs_on = _c03_characteristic_polynomial(parameters.r_on, parameters)
+    coeffs_off = _c03_characteristic_polynomial(parameters.r_off, parameters)
+
+    roots_on = _durand_kerner(coeffs_on, iterations=5000)
+    roots_off = _durand_kerner(coeffs_off, iterations=5000)
+
+    # Sort roots by real part then imaginary part for deterministic output
+    return {
+        "ON": tuple(sorted(roots_on, key=lambda r: (r.real, r.imag))),
+        "OFF": tuple(sorted(roots_off, key=lambda r: (r.real, r.imag))),
+    }
+
+
+def c03_problem(
+    *,
+    parameters: C03Parameters = _C03_DEFAULT_PARAMETERS,
+    initial_state: Sequence[float] = C03_INITIAL_STATE,
+    t_bound: float = 100.0e-6,
+) -> InitialValueProblem:
+    """Build the C03 initial-value problem."""
+    return InitialValueProblem(
+        c03_rhs(parameters),
+        0.0,
+        initial_state,
+        t_bound,
+        name="ARGESIM-C03-amplifier",
+        autonomous=False,
+    )
+
+def solve_c03(
+    method: str = "rk45",
+    *,
+    parameters: C03Parameters = _C03_DEFAULT_PARAMETERS,
+    initial_state: Sequence[float] = C03_INITIAL_STATE,
+    t_bound: float = 100.0e-6,
+    options: Mapping[str, object] | None = None,
+) -> IntegrationResult:
+    """Solve C03 with an explicitly selected, auditable backend."""
+    configured = dict(options or {})
+    problem = c03_problem(
+        parameters=parameters,
+        initial_state=initial_state,
+        t_bound=t_bound,
+    )
+    normalised = method.strip().lower()
+
+    # In C03, some steps need to be very small, so we customize the defaults for RK methods
+    if normalised == "euler":
+        return euler(problem, float(configured.get("step", 1.0e-10)))
+    if normalised == "rk4":
+        return rk4(problem, float(configured.get("step", 1.0e-10)))
+    if normalised == "rk45":
+        return rk45(
+            problem,
+            rtol=float(configured.get("rtol", 1.0e-6)),
+            atol=float(configured.get("atol", 1.0e-8)),
+            max_step=float(configured.get("max_step", 1.0e-7)),
+        )
+    raise ValueError(f"unsupported C03 solver: {method}")
+
+def c03_task_b(
+    method: str = "rk45",
+    *,
+    options: Mapping[str, object] | None = None,
+) -> IntegrationResult:
+    """Compute the task-B trajectory over [0, 100E-6]."""
+    return solve_c03(
+        method=method,
+        parameters=_C03_DEFAULT_PARAMETERS,
+        initial_state=C03_INITIAL_STATE,
+        t_bound=100.0e-6,
+        options=options,
+    )
+
+def c03_task_c(
+    trf_values: Sequence[float] = (1.0e-15, 1.0e-11, 1.0e-9, 1.0e-7),
+    *,
+    method: str = "rk45",
+    initial_state: Sequence[float] | None = None,
+    options: Mapping[str, object] | None = None,
+) -> dict[float, IntegrationResult]:
+    """Compute task-C parameter variation trajectories over [0, 9E-6]."""
+
+    values = tuple(float(value) for value in trf_values)
+    if not values:
+        raise ValueError("task C requires at least one TRF value")
+
+    start_state = initial_state
+    if start_state is None:
+        # Task C definition: "with initial solution equal to the final solution at 100E-6 sec from task (b)"
+        res_b = c03_task_b(method=method, options=options)
+        start_state = res_b.final_state
+
+    baseline = _C03_DEFAULT_PARAMETERS
+    return {
+        trf: solve_c03(
+            method=method,
+            parameters=replace(baseline, trf=trf),
+            initial_state=start_state,
+            t_bound=9.0e-6,
+            options=options,
+        )
+        for trf in values
+    }

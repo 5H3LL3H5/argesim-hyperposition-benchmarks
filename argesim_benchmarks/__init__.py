@@ -12,6 +12,14 @@ from .models import (
     c01_task_b,
     c01_task_c,
     solve_c01,
+    C03_INITIAL_STATE,
+    C03Parameters,
+    c03_problem,
+    c03_rhs,
+    c03_task_a,
+    c03_task_b,
+    c03_task_c,
+    solve_c03,
 )
 from .pde import heat_1d_ivp, heat_sine_exact, heat_sine_initial, wave_1d_ivp
 from .solvers import euler, qss1, rk4, rk45
@@ -23,6 +31,8 @@ __all__ = [
     "BenchmarkDefinition",
     "BenchmarkStatus",
     "C01Parameters",
+    "C03_INITIAL_STATE",
+    "C03Parameters",
     "InitialValueProblem",
     "IntegrationResult",
     "ModelClass",
@@ -32,6 +42,11 @@ __all__ = [
     "c01_steady_state",
     "c01_task_b",
     "c01_task_c",
+    "c03_problem",
+    "c03_rhs",
+    "c03_task_a",
+    "c03_task_b",
+    "c03_task_c",
     "euler",
     "heat_1d_ivp",
     "heat_sine_exact",
@@ -40,5 +55,6 @@ __all__ = [
     "rk4",
     "rk45",
     "solve_c01",
+    "solve_c03",
     "wave_1d_ivp",
 ]

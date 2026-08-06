@@ -11,6 +11,16 @@ from .c01_lithium_cluster import (
     c01_task_c,
     solve_c01,
 )
+from .c03_amplifier import (
+    C03_INITIAL_STATE,
+    C03Parameters,
+    c03_problem,
+    c03_rhs,
+    c03_task_a,
+    c03_task_b,
+    c03_task_c,
+    solve_c03,
+)
 
 __all__ = [
     "C01_INITIAL_STATE",
@@ -22,4 +32,12 @@ __all__ = [
     "c01_task_b",
     "c01_task_c",
     "solve_c01",
+    "C03_INITIAL_STATE",
+    "C03Parameters",
+    "c03_problem",
+    "c03_rhs",
+    "c03_task_a",
+    "c03_task_b",
+    "c03_task_c",
+    "solve_c03",
 ]

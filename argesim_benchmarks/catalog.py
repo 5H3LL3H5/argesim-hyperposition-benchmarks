@@ -61,6 +61,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Class-E Amplifier",
         (ModelClass.ODE, ModelClass.HYBRID),
         _source("c03"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C04", "Dining Philosophers", (ModelClass.DES,), _source("c04")
