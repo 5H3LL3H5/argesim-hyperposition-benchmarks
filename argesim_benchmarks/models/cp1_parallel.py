@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Sequence
+from dataclasses import dataclass
 
 from ..ivp import InitialValueProblem, Rhs, Vector
 
@@ -82,64 +83,134 @@ CP1_TASK_B_EQUILIBRIUM: dict[str, float] = {
     "z2": 4.10656804,
 }
 
-def cp1_task_b_rhs() -> Rhs:
-    """Return the RHS function for the coupled predator-prey model."""
-    # Parameters for v
-    a_v, b_v, c_v, d_v, e_v, f_v = 2.0, 0.5, 0.01, 0.2, 0.4, 0.02
-    g_v, h_v, j_v, k_v = 0.01, 0.02, 0.01, 0.03
-    # Parameters for w
-    a_w, b_w, c_w, d_w, e_w, f_w = 1.0, 0.5, 0.02, 0.1, 0.4, 0.04
-    g_w, h_w = 0.02, 0.04
-    # Parameters for x
-    a_x, b_x, c_x, d_x, e_x, f_x = 3.0, 0.9, 0.02, 0.2, 0.2, 0.04
-    g_x, h_x = 0.025, 0.1
-    # Parameters for y
-    a_y, b_y, c_y, d_y, e_y, f_y = 1.0, 0.8, 0.04, 0.2, 0.6, 0.07
-    g_y, h_y = 0.03, 0.025
-    # Parameters for z
-    a_z, b_z, c_z, d_z, e_z, f_z = 3.0, 0.7, 0.02, 0.5, 0.3, 0.04
-    g_z, h_z = 0.02, 0.04
+@dataclass(frozen=True)
+class CP1TaskBParameters:
+    """Parameters for the CP1 Task B predator-prey model."""
+    a_v: float = 2.0
+    b_v: float = 0.5
+    c_v: float = 0.01
+    d_v: float = 0.2
+    e_v: float = 0.4
+    f_v: float = 0.02
+    g_v: float = 0.01
+    h_v: float = 0.02
+    j_v: float = 0.01
+    k_v: float = 0.03
 
+    a_w: float = 1.0
+    b_w: float = 0.5
+    c_w: float = 0.02
+    d_w: float = 0.1
+    e_w: float = 0.4
+    f_w: float = 0.04
+    g_w: float = 0.02
+    h_w: float = 0.04
+
+    a_x: float = 3.0
+    b_x: float = 0.9
+    c_x: float = 0.02
+    d_x: float = 0.2
+    e_x: float = 0.2
+    f_x: float = 0.04
+    g_x: float = 0.025
+    h_x: float = 0.1
+
+    a_y: float = 1.0
+    b_y: float = 0.8
+    c_y: float = 0.04
+    d_y: float = 0.2
+    e_y: float = 0.6
+    f_y: float = 0.07
+    g_y: float = 0.03
+    h_y: float = 0.025
+
+    a_z: float = 3.0
+    b_z: float = 0.7
+    c_z: float = 0.02
+    d_z: float = 0.5
+    e_z: float = 0.3
+    f_z: float = 0.04
+    g_z: float = 0.02
+    h_z: float = 0.04
+
+_CP1_TASK_B_DEFAULT_PARAMETERS = CP1TaskBParameters()
+
+def cp1_task_b_rhs(parameters: CP1TaskBParameters = _CP1_TASK_B_DEFAULT_PARAMETERS) -> Rhs:
+    """Return the RHS function for the coupled predator-prey model."""
     def rhs(_time: float, state: Sequence[float]) -> Vector:
         v1, v2, w1, w2, x1, x2, y1, y2, z1, z2 = state
+        p = parameters
 
         # Equations for v
-        r_v = v2 * (g_v * w1 + h_v * x1 + j_v * y1 + k_v * z1)
-        dv1 = a_v * v1 - b_v * v1 * v2 - c_v * v1 * v1
-        dv2 = -d_v * v2 + e_v * v1 * v2 - f_v * v2 * v2 + r_v
+        r_v = v2 * (p.g_v * w1 + p.h_v * x1 + p.j_v * y1 + p.k_v * z1)
+        dv1 = p.a_v * v1 - p.b_v * v1 * v2 - p.c_v * v1 * v1
+        dv2 = -p.d_v * v2 + p.e_v * v1 * v2 - p.f_v * v2 * v2 + r_v
 
         # Equations for w
-        r_w = w1 * (-g_w * v2 + h_w * x2)
-        dw1 = a_w * w1 - b_w * w1 * w2 - c_w * w1 * w1 + r_w
-        dw2 = -d_w * w2 + e_w * w1 * w2 - f_w * w2 * w2
+        r_w = w1 * (-p.g_w * v2 + p.h_w * x2)
+        dw1 = p.a_w * w1 - p.b_w * w1 * w2 - p.c_w * w1 * w1 + r_w
+        dw2 = -p.d_w * w2 + p.e_w * w1 * w2 - p.f_w * w2 * w2
 
         # Equations for x
-        r_x = -g_x * x1 * v2
-        s_x = -h_x * x2 * w1
-        dx1 = a_x * x1 - b_x * x1 * x2 - c_x * x1 * x1 + r_x
-        dx2 = -d_x * x2 + e_x * x1 * x2 - f_x * x2 * x2 + s_x
+        r_x = -p.g_x * x1 * v2
+        s_x = -p.h_x * x2 * w1
+        dx1 = p.a_x * x1 - p.b_x * x1 * x2 - p.c_x * x1 * x1 + r_x
+        dx2 = -p.d_x * x2 + p.e_x * x1 * x2 - p.f_x * x2 * x2 + s_x
 
         # Equations for y
-        r_y = y1 * (-g_y * v2 + h_y * z2)
-        dy1 = a_y * y1 - b_y * y1 * y2 - c_y * y1 * y1 + r_y
-        dy2 = -d_y * y2 + e_y * y1 * y2 - f_y * y2 * y2
+        r_y = y1 * (-p.g_y * v2 + p.h_y * z2)
+        dy1 = p.a_y * y1 - p.b_y * y1 * y2 - p.c_y * y1 * y1 + r_y
+        dy2 = -p.d_y * y2 + p.e_y * y1 * y2 - p.f_y * y2 * y2
 
         # Equations for z
-        r_z = -g_z * z1 * v2
-        s_z = -h_z * z2 * y1
-        dz1 = a_z * z1 - b_z * z1 * z2 - c_z * z1 * z1 + r_z
-        dz2 = -d_z * z2 + e_z * z1 * z2 - f_z * z2 * z2 + s_z
+        r_z = -p.g_z * z1 * v2
+        s_z = -p.h_z * z2 * y1
+        dz1 = p.a_z * z1 - p.b_z * z1 * z2 - p.c_z * z1 * z1 + r_z
+        dz2 = -p.d_z * z2 + p.e_z * z1 * z2 - p.f_z * z2 * z2 + s_z
 
         return (dv1, dv2, dw1, dw2, dx1, dx2, dy1, dy2, dz1, dz2)
 
     return rhs
 
-def cp1_task_b_ivp(*, t_bound: float = 100.0) -> InitialValueProblem:
-    """Create the IVP for the coupled predator-prey model."""
+def cp1_task_b_ivp(
+    *,
+    parameters: CP1TaskBParameters = _CP1_TASK_B_DEFAULT_PARAMETERS,
+    t_bound: float = 100.0,
+) -> InitialValueProblem:
+    """Create the IVP for the coupled predator-prey model.
+
+    This system models five interacting predator-prey populations:
+    (v1, v2), (w1, w2), (x1, x2), (y1, y2), and (z1, z2).
+
+    Equations:
+    v1' = a_v * v1 - b_v * v1 * v2 - c_v * v1^2
+    v2' = -d_v * v2 + e_v * v1 * v2 - f_v * v2^2 + r_v
+    r_v = v2 * (g_v * w1 + h_v * x1 + j_v * y1 + k_v * z1)
+
+    w1' = a_w * w1 - b_w * w1 * w2 - c_w * w1^2 + r_w
+    r_w = w1 * (-g_w * v2 + h_w * x2)
+    w2' = -d_w * w2 + e_w * w1 * w2 - f_w * w2^2
+
+    x1' = a_x * x1 - b_x * x1 * x2 - c_x * x1^2 + r_x
+    r_x = -g_x * x1 * v2
+    x2' = -d_x * x2 + e_x * x1 * x2 - f_x * x2^2 + s_x
+    s_x = -h_x * x2 * w1
+
+    y1' = a_y * y1 - b_y * y1 * y2 - c_y * y1^2 + r_y
+    r_y = y1 * (-g_y * v2 + h_y * z2)
+    y2' = -d_y * y2 + e_y * y1 * y2 - f_y * y2^2
+
+    z1' = a_z * z1 - b_z * z1 * z2 - c_z * z1^2 + r_z
+    r_z = -g_z * z1 * v2
+    z2' = -d_z * z2 + e_z * z1 * z2 - f_z * z2^2 + s_z
+    s_z = -h_z * z2 * y1
+
+    Initial state components are all normalized to 1.0.
+    """
     # All initial populations are normalized to 1.
     initial_state = (1.0,) * 10
     return InitialValueProblem(
-        cp1_task_b_rhs(),
+        cp1_task_b_rhs(parameters),
         0.0,
         initial_state,
         t_bound,

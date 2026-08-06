@@ -8,7 +8,7 @@ from argesim_benchmarks.models.cp1_parallel import (
     CP1_TASK_B_EQUILIBRIUM,
     CP1_TASK_B_TERMINAL_VALUES,
 )
-from argesim_benchmarks.solvers import rk45
+from argesim_benchmarks.solvers import rk4
 
 class CP1Tests(unittest.TestCase):
     def test_task_a_ivp_creation(self) -> None:
@@ -51,7 +51,8 @@ class CP1Tests(unittest.TestCase):
 
     def test_task_b_integration_approaches_table_values(self) -> None:
         ivp = cp1_task_b_ivp(t_bound=100.0)
-        result = rk45(ivp)
+        # ARGESIM reference table uses fixed-step RK4 with step size 0.01
+        result = rk4(ivp, step=0.01)
         self.assertEqual(result.final_time, 100.0)
 
         expected_terminal = (
@@ -68,9 +69,7 @@ class CP1Tests(unittest.TestCase):
         )
 
         for candidate, expected in zip(result.final_state, expected_terminal):
-            # ARGESIM table says "Solutions obtained using ACSL in double precision (stepsize 0.01, RK4)".
-            # Adaptive RK45 might have a small difference, so we use a relatively loose tolerance.
-            self.assertAlmostEqual(candidate, expected, delta=0.5)
+            self.assertAlmostEqual(candidate, expected, delta=1e-3)
 
     def test_task_c_ivp_creation(self) -> None:
         # Test with a small N to make it fast
