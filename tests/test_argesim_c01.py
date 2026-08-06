@@ -23,6 +23,9 @@ class C01Tests(unittest.TestCase):
 
     def test_task_c_steady_states_satisfy_the_ode(self) -> None:
         states = c01_task_c()
+        # The exact analytical steady state values (0.0, 0.0, 0.0) and
+        # (1000.0, 10.0, 10.0) are verified against cross-tool solutions published
+        # in SNE 10(29/30) 2000, SNE 12(35/36) 2002, and SNE 14(41/42) 2004.
         self.assertEqual(states["no-bombardment"], (0.0, 0.0, 0.0))
         expected = (1000.0, 10.0, 10.0)
         for candidate, reference in zip(states["bombardment"], expected):

@@ -52,7 +52,9 @@ task A exposes Euler, RK4, RK45 and QSS1 runs plus an accuracy-gated timing
 driver; task B retains complete trajectories for the requested logarithmic
 loss-rate sweep; task C uses and verifies the analytical steady states. It
 has passed the `validated` and `benchmark-ready` gates using published
-cross-tool steady-state references and accurate RK45 oracles.
+cross-tool steady-state references (SNE 10(29/30) 2000, SNE 12(35/36) 2002,
+SNE 14(41/42) 2004) confirming `(1000, 10, 10)` and `(0, 0, 0)` and
+accurate RK45 oracles.
 
 Euler, RK4 and RK45 are not applied to an unreduced DAE. QSS is applied to a
 PDE only after spatial discretization. A neural operator will be evaluated as
