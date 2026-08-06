@@ -88,6 +88,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Canal-and-Lock System",
         (ModelClass.DES, ModelClass.STOCHASTIC),
         _source("c08"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C09",
