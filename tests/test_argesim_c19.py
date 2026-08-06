@@ -1,6 +1,7 @@
 import unittest
 import math
 
+from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
 from argesim_benchmarks.models.c19_groundwater import (
     C19Parameters,
     _k0_approx,
@@ -12,6 +13,10 @@ from argesim_benchmarks.models.c19_groundwater import (
 
 
 class C19GroundwaterTests(unittest.TestCase):
+    def test_c19r_catalog_status(self) -> None:
+        c19r = next(b for b in BENCHMARKS if b.identifier == "C19R")
+        self.assertEqual(c19r.status, BenchmarkStatus.IMPLEMENTED)
+
     def test_k0_approximation_accuracy(self) -> None:
         # Check against known values of K0
         # K0(0.5) ~ 0.9244, K0(1.0) ~ 0.4210, K0(2.5) ~ 0.0623

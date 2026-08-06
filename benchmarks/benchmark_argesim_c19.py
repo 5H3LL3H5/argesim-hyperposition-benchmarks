@@ -1,122 +1,83 @@
-"""Benchmark and validation script for ARGESIM C19R.
+#!/usr/bin/env python3
+"""Timing experiment for ARGESIM C19R (Pollution in Groundwater Flow)."""
 
-This script executes Tasks A, B, and C as described in the benchmark
-definition and compares the numerical PDE solutions to the analytical
-approximations. It optionally plots the results if matplotlib is available.
-"""
+from __future__ import annotations
 
-import math
+import argparse
+import json
+import statistics
 import sys
 import time
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from argesim_benchmarks.models.c19_groundwater import (
-    C19Parameters,
-    c19_analytical_steady_state,
-    c19_analytical_transient,
     c19_task_a,
     c19_task_b,
     c19_task_c,
 )
 
 
-def get_concentration(state, nx, ny, dx, dy, x_offset, y_offset, target_x, target_y):
-    """Interpolate concentration at target_x, target_y (nearest neighbor for simplicity)."""
-    i = int(round((target_x - x_offset) / dx))
-    j = int(round((target_y - y_offset) / dy))
-    if 0 <= i < nx and 0 <= j < ny:
-        return state[j * nx + i]
-    return 0.0
+def _quartiles(values: list[int]) -> tuple[float, float]:
+    if len(values) < 2:
+        return float(values[0]), float(values[0])
+    quartiles = statistics.quantiles(values, n=4, method="inclusive")
+    return quartiles[0], quartiles[2]
 
 
-def run_benchmark():
-    print("ARGESIM Benchmark C19R: Pollution in Groundwater Flow")
-    print("=====================================================")
-    print("This experiment compares a 2D Method of Lines PDE solver against")
-    print("the analytical steady-state and transient approximations.\n")
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Timing experiment for ARGESIM C19R."
+    )
+    parser.add_argument("--repeat", type=int, default=9, help="Number of repetitions.")
+    parser.add_argument("--warmup", type=int, default=1, help="Number of warmup runs.")
+    arguments = parser.parse_args()
+    if arguments.repeat < 1 or arguments.warmup < 0:
+        parser.error("repeat must be positive and warmup must be non-negative")
 
-    # We use a relatively coarse grid to keep runtime reasonable for a CI/benchmark script.
-    # The paper uses 71x41 for dx=1, dy=1 from x=-10..60, y=-20..20.
-    # Let's use 36x21 for dx=2, dy=2 to speed up execution by 4x in space and ~2x in time.
-    nx, ny = 36, 21
-    dx, dy = 2.0, 2.0
-    x_offset, y_offset = -10.0, -20.0
+    report: dict[str, object] = {
+        "benchmark": "ARGESIM-C19R",
+        "definition": "https://www.argesim.org/benchmarks/c19/",
+        "tasks": {},
+    }
 
-    print(f"Grid: {nx}x{ny} (dx={dx}, dy={dy}) over x=[{x_offset}, {x_offset + (nx-1)*dx}], y=[{y_offset}, {y_offset + (ny-1)*dy}]\n")
+    # Coarse grid to keep runtime reasonable for benchmarking
+    nx, ny = 18, 11
+    dx, dy = 4.0, 4.0
 
-    print("Running Task A (Unregulated Spread)...")
-    start_time = time.perf_counter()
-    res_a = c19_task_a(nx=nx, ny=ny, dx=dx, dy=dy, x_offset=x_offset, y_offset=y_offset)
-    dur_a = time.perf_counter() - start_time
-    print(f"Task A completed in {dur_a:.3f}s. Final time: {res_a.final_time / (24*3600):.1f} days.")
+    tasks = {
+        "Task_A": lambda: c19_task_a(nx=nx, ny=ny, dx=dx, dy=dy),
+        "Task_B": lambda: c19_task_b(nx=nx, ny=ny, dx=dx, dy=dy),
+        "Task_C": lambda: c19_task_c(nx=nx, ny=ny, dx=dx, dy=dy),
+    }
 
-    print("\nRunning Task B (Continuous Facility)...")
-    start_time = time.perf_counter()
-    res_b = c19_task_b(nx=nx, ny=ny, dx=dx, dy=dy, x_offset=x_offset, y_offset=y_offset)
-    dur_b = time.perf_counter() - start_time
-    print(f"Task B completed in {dur_b:.3f}s. Final time: {res_b.final_time / (24*3600):.1f} days.")
+    for task_name, task_func in tasks.items():
+        for _ in range(arguments.warmup):
+            task_func()
 
-    print("\nRunning Task C (Schedule-Controlled Facility)...")
-    start_time = time.perf_counter()
-    res_c = c19_task_c(nx=nx, ny=ny, dx=dx, dy=dy, x_offset=x_offset, y_offset=y_offset)
-    dur_c = time.perf_counter() - start_time
-    print(f"Task C completed in {dur_c:.3f}s. Final time: {res_c.final_time / (24*3600):.1f} days.")
+        durations: list[int] = []
+        result = None
+        for _ in range(arguments.repeat):
+            started = time.perf_counter_ns()
+            result = task_func()
+            durations.append(time.perf_counter_ns() - started)
+        assert result is not None
 
-    # Compare against analytical at x=50, y=0 at 150 days
-    t_150 = 150 * 24 * 3600
-    ana_150 = c19_analytical_transient(50.0, 0.0, t_150)
+        first_quartile, third_quartile = _quartiles(durations)
+        report["tasks"][task_name] = {
+            "method": result.method,
+            "final_time": result.final_time,
+            "accepted_steps": result.stats.accepted_steps,
+            "rejected_steps": result.stats.rejected_steps,
+            "rhs_evaluations": result.stats.rhs_evaluations,
+            "durations_ns": durations,
+            "median_ns": statistics.median(durations),
+            "iqr_ns": third_quartile - first_quartile,
+        }
 
-    # Extract numerical result at x=50, y=0 for Task A
-    num_a_150 = get_concentration(res_a.final_state, nx, ny, dx, dy, x_offset, y_offset, 50.0, 0.0)
-
-    print(f"\nValidation at x=50, y=0, t=150 days:")
-    print(f"  Analytical Transient (Task A):  {ana_150:8.4f} mg/m^3")
-    print(f"  Numerical MoL (Task A):         {num_a_150:8.4f} mg/m^3")
-
-    ana_ss = c19_analytical_steady_state(50.0, 0.0)
-    num_b_end = get_concentration(res_b.final_state, nx, ny, dx, dy, x_offset, y_offset, 50.0, 0.0)
-    print(f"\nValidation at x=50, y=0 for Facilities:")
-    print(f"  Analytical Steady-State (No Fac): {ana_ss:8.4f} mg/m^3")
-    print(f"  Numerical MoL (Task B, Cont.):    {num_b_end:8.4f} mg/m^3")
-
-    num_c_end = get_concentration(res_c.final_state, nx, ny, dx, dy, x_offset, y_offset, 50.0, 0.0)
-    print(f"  Numerical MoL (Task C, Sched.):   {num_c_end:8.4f} mg/m^3")
-
-    print("\nConfidence:")
-    print("  Due to the coarse upwind-differenced MoL grid used to maintain execution")
-    print("  speed, numerical diffusion flattens the plume compared to the exact analytical")
-    print("  solution. The qualitative behaviour (facilities reducing concentration) matches")
-    print("  expectations.")
-
-    try:
-        import matplotlib.pyplot as plt
-        import numpy as np
-
-        print("\nGenerating plots...")
-        # Plot time series at (50, 0)
-        times_days = np.array(res_c.times) / (24 * 3600)
-        c_vals = []
-        for state in res_c.states:
-            c_vals.append(get_concentration(state, nx, ny, dx, dy, x_offset, y_offset, 50.0, 0.0))
-
-        b_times_days = np.array(res_b.times) / (24 * 3600)
-        b_c_vals = []
-        for state in res_b.states:
-            b_c_vals.append(get_concentration(state, nx, ny, dx, dy, x_offset, y_offset, 50.0, 0.0))
-
-        plt.figure(figsize=(10, 5))
-        plt.plot(b_times_days, b_c_vals, label="Task B (Continuous)", linestyle='--')
-        plt.plot(times_days, c_vals, label="Task C (Scheduled)")
-        plt.xlabel("Time (days)")
-        plt.ylabel("Concentration at (50,0)")
-        plt.title("ARGESIM C19R: Facility Influence")
-        plt.legend()
-        plt.grid(True)
-        plt.savefig("c19_task_c_validation.png")
-        print("Saved 'c19_task_c_validation.png'")
-
-    except ImportError:
-        print("\nMatplotlib/NumPy not installed; skipping plot generation.")
+    print(json.dumps(report, indent=2))
 
 
 if __name__ == "__main__":
-    run_benchmark()
+    main()
