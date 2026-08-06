@@ -96,8 +96,6 @@ def solve_c07(
     rejected = 0
     evals = 0
 
-    eps = 1e-12
-
     while t < t_bound:
         step_bound = min(t + max_step, t_bound)
         phi_current = state[0]
@@ -209,11 +207,11 @@ def solve_c07(
             if crossing_direction == -1:
                 # Hits the pin
                 new_phi_dot = phi_dot * (parameters.l / parameters.l_s)
-                new_phi = parameters.phi_p - eps
+                new_phi = parameters.phi_p
             else:
                 # Releases from the pin
                 new_phi_dot = phi_dot * (parameters.l_s / parameters.l)
-                new_phi = parameters.phi_p + eps
+                new_phi = parameters.phi_p
 
             state = (new_phi, new_phi_dot)
             t = t_event
@@ -303,7 +301,10 @@ def c07_task_c() -> float:
     v_left = -10.0
     v_right = 0.0
 
-    for _ in range(40):
+    tol = 1e-9
+    for _ in range(100):
+        if abs(v_right - v_left) < tol:
+            break
         v_mid = (v_left + v_right) / 2.0
         min_phi = simulate_max_angle(v_mid)
         if min_phi > -math.pi/2.0:
