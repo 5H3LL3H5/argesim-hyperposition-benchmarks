@@ -1,0 +1,603 @@
+                                             SN E       BEN C H MA RK             N O T E
+
+
+
+   ARGESIM Benchmark C20 ‘Complex Production System’
+                 – Definition and Call
+                                          Sebastian Schreiber, Alexander Fay*
+Helmut Schmidt University / University of the Federal Armed Forces Hamburg, Institute of Automation Technology,
+ Holstenhofweg 85, 22043 Hamburg, Germany; 85, *alexander.fay@hsu-hh.de; ARGESIM-C20@hsu-hh.de
+
+
+Abstract. ARGESIM provides several different benchmarks                  tion of the system’s structure and dynamics, we refer to
+for modelling and simulation. Unfortunately, the only                    [4] and [5].
+benchmark that can be used as a foundation for analyzing                     For easier reading and better understanding, this
+manufacturing control systems, ARGESIM C2 ‘Flexible As-                  benchmark description is divided into two parts. The
+sembly System’, does not cover today’s requirements for                  first part describes the general problem definition, the
+comparing different simulation techniques and/or control                 second compiles all parameters and settings in detail
+algorithms regarding complexity and dynamics. Therefore,                 within the Appendix.
+the authors propose a new benchmark description: AR-                         The first part is structured according to the frame-
+GESIM Benchmark C20 ‘Complex Production System’. The                     work dimensions presented by Terzi et al. [6] (see also
+benchmark is based on two dimensions, defining a total of                Figure 1). Section 1 describes the reference system re-
+twelve different scenarios that differ in their complexity               garding its static structure as a ‘Production System
+and dynamic behavior.                                                    Model’, Section 2 is concerned with its dynamic behav-
+                                                                         iour as a ‘Manufacturing Scenario’. In addition, the
+                                                                         ‘Measurement of Performance’ for this system is de-
+Introduction                                                             scribed in Section 3, which is also used to formulate
+Today’s manufacturing systems show an increasing lev-                    tasks for comparison. In Section 4, guidelines for pub-
+el of complexity and a growing demand for more sys-                      lishing solutions based on this description are given.
+tem flexibility. To test and compare new algorithms that                 The Appendix is divided into five sections: (A) physical
+tackle this challenge, properly defined ‘reference sys-                  resources, (B) process plan, (C) system layout, (D) Op-
+tems’ are required, especially in the research community                 erational Scenario, and (E) Plant Scenario.
+of manufacturing control systems. Leitão [1] and
+Valckenaers et al. [2] underpin this prevalent lack of
+‘reference systems’, i.e. physical systems (test-beds)
+                                                                         1 Production System Model
+and/or virtual systems (simulation models).                              The benchmark is based on a fixed system layout, as
+    ARGESIM provides a set of different benchmarks                       shown in Figure 2. The manufacturing system consists
+with focus on modelling and simulation of several re-                    of a central transport system based on conveyors with
+search fields. Unfortunately, the only benchmark that                    an inner and an outer cycle, mono-directional traffic,
+covers material flow or production system problems –                     and a constant conveyor speed. The processors are
+C2 ‘Flexible Assembly System’ (first proposed in July                    placed within ‘processing areas’ which are connected to
+1991) – does not cover today’s complexity and dynam-                     the outer cycle, each with one input and one output port.
+ics, as already shown in [3]. Therefore, this benchmark                  Orders are represented as parts within the system, where
+seems to be less suitable for testing or comparing of cur-               each order consists of exactly one part. Pallets or either
+rent modelling and simulation techniques and/or soft-                    carriers can be used to move them through the system.
+ware. For that reason, the authors developed an ad-
+vanced reference system that covers today’s challenges.                  1.1 Physical resources
+The proposed system ARGESIM C20 ‘Complex Pro-                            The system consists of five different types of work sta-
+duction System’ is an extended and revised version of                    tions (WS). Each WS type is able to process a defined
+the reference system described in [4]. For further details               set of operations. The WS abilities vary from only one
+regarding the development and the theoretical founda-                    operation (WS type I to IV) to multiple operations (WS
+
+SNE Simulation Notes Europe – Print ISSN 2305-9974 | Online ISSN 2306-0271
+SNE 21(3-4), 2011, 181-190 | doi: 10.11128/sne.21.bn20.10097                                        SNE 21(3-4) – 12/2011 181
+S Schreiber, A Fay      Benchmark C20 ‘Complex Production System’ - Definition                                         TN
+type V). Some WS types have special abilities, like tool            Thus, order books are similar regarding the distribu-
+abrasion, or they differ in their age (‘generation’). The       tion parameters and order book size (number of orders),
+types, quantities, and abilities of the WSs are listed in       but differ with respect to the individual orders. The gen-
+Appendix A (see Table 2). All WS types are subject to           eral order book definition is summarized in Appendix D
+disruption.                                                     (see also Table 2). Each order is defined by its product
+                                                                type, earliest release date, due date, appearance date,
+                                                                and rush order flag. The appearance date is an important
+                                                                parameter for the planning horizon of an algorithm and
+                                                                will be discussed later, as well as the need for a rush or-
+                                                                der flag.
+                                                                    In [7], Law distinguishes between ‘terminating’ and
+                                                                ‘nonterminating simulations’. Terminating simulations
+                                                                are characterized by a pre-defined point of termination,
+                                                                e.g. number of events, while nonterminating simulations
+                                                                have a continuous input and, in most cases, are charac-
+                                                                terized by some kind of steady-state behaviour. The in-
+                                                                dicators that can be analyzed during a simulation study
+                                                                differ for these different kinds of simulations, e.g.
+     Figure 1.Framework dimensions for the description
+                                                                makespan is an indicator that is only defined for termi-
+         of the benchmark (taken from [6], Figure 2).
+                                                                nating simulations. Usually, nonterminating simulations
+    The system’s general topology is shown in Figure 2,         can be described by an ‘initialisation phase’ and a
+where processing area 0 represents system input and             ‘steady-state phase’ in which the system behaves nearly
+output. Here, parts are loaded and unloaded, and NOK            stable. For analyzing steady-state parameters, a steady-
+(‘not-okay’) parts are discharged. The other three pro-         state phase of a length of three to six times the initialisa-
+cessing areas are divided into a buffering area and a           tion phase is considered necessary according to different
+manufacturing cell. Figure 4 and Figure 5 in Appen-             authors’ views [8].
+dix C provide a detailed view of the layout including
+dimensioning.
+    The transport system is represent-
+                                                      processing area 0                   processing area 3
+ed through conveyors and junctions.
+The amount of parts that can be car-
+ried by a conveyor depends on its
+length. In contrast, each junction can
+hold only one part at a time and rep-
+resents a decision point. Junctions are
+represented as a dot within the fig-
+ures. The sections of the central
+transport system are clustered into
+three groups (A to C) by their influ-
+ence to the system in case of a dis-
+ruption (see also Figure 2).
+
+1.2 Production planning
+                                                      processing area 1                 processing area 2
+Order books define the production
+planning. Each order book contains a
+fixed number of orders. The orders in Conveyor-Cluster:      A:              B:               C:                 no scale
+an order book follow a probability       Figure 2. General layout of the proposed reference system with clustering
+distribution.                                       of conveyors (based on [4], Figure 1(a)): without scale.
+
+
+182 SNE 21(3-4) – 12/2011
+TN                            S Schreiber, A Fay     Benchmark C20 ‘Complex Production System’ - Definition
+
+
+    The current specification of this benchmark de-              For a detailed description of the Complexity Dimen-
+scribes a terminating simulation study that terminates       sions see [5].
+when all orders of an order book are finished. For ana-
+lyzing the system under nonterminating aspects, this or-
+der book size should be sufficiently large. Investigations
+during validation of this benchmark have shown that the
+initialisation phase for this system has a length of about
+1,000 orders, depending on the implemented control al-
+gorithm.
+
+1.3 Process plan
+The system processes five different product types (A to
+E). The product type definitions are summarized in Ap-
+pendix B (see Table 2). Product types differ in their           Figufre 3: Design of experiments described by the two
+complexity, especially with regard to the operations (O1          dimensions ‘Operational Scenario (OSc)’ and ‘Plant
+to O6) that need to be processed and the possible se-                   Scenario (PSc)’ (based on [5], Figure 2).
+quences of these operations. The operation O1 can be
+interpreted as a quality control process and may occur           The Complexity Dimensions proposed by the au-
+more than once. In addition, some operations introduce       thors cover dynamic effects caused by order release, or-
+pre-process constraints to the process plan:                 der specification, and processor downtime, and are all
+                                                             built upon an identical benchmark system’s structure.
+ • [MIN] The successor of an operation cannot be
+                                                             They describe a total of twelve different scenarios, rep-
+   processed before a given period of time has
+                                                             resenting the experiment designs (Figure 3) to be inves-
+   elapsed (e.g. drying process).
+                                                             tigated for comparison. First, the OSc defines the sto-
+ • [MAX NOK] The time between the end of one op-             chastic workload for the system. Second, the stochastic
+   eration and the start of the next must not exceed a       behaviour of the manufacturing system itself is de-
+   given period of time, otherwise, parts need to be         scribed as the PSc.
+   discharged as NOK and need to be rescheduled                  In the following, a distinction between the different
+   (e.g. dry adhesive).                                      scenarios for each of the two dimensions is given, enu-
+ • [MAX OK] The predecessor operation can be re-             merated as OSc#(1..3) and PSc#(1..4). Each combina-
+   peated if the time between the end of an operation        tion of these two dimensions defines a manufacturing
+   and the start of the next exceeds a given period of       scenario for the reference system. They are numbered
+   time. Thus, the part must not be discharged as            consecutively from 1 to 12 for better comparison, as
+   NOK (e.g. heating/re-heating process).                    shown in Figure 3. As an example, the highlighted
+                                                             block in this figure describes Scenario 12 with no in-
+                                                             formation ahead of time about the system’s workload
+2 Manufacturing Scenario                                     and the worst case regarding the internal dynamic be-
+In [5], three Complexity Dimensions and their complex-       haviour, with many disruptions.
+ity levels are defined to describe the dynamic environ-
+ment for a reference system: ‘Operational Scenario’          2.1 Operational Scenario (OSc)
+(OSc) with three different complexity levels, ‘Plant         Variations of the order mix are part of the OSc. The
+Scenario’ (PSc) with four different complexity levels,       OSc describes ‘appearance dates’, i.e., the time at which
+and ‘Transport System Complexity Dimension’ with             individual orders appear on the planning horizon in rela-
+three different complexity levels. To reduce the bench-      tion to their individual release dates. An order book rep-
+mark’s complexity, only the first two dimensions are         resents external effects only. Therefore, it should be
+adopted for this proposed system. These are related to       generated independently from the control algorithm and
+the framework dimension Manufacturing Scenario (ac-          used as an input for the control system. Some orders are
+cording to [6]), more specifically to the Operational        generated with a rush order flag, which needs to be tak-
+Scenario and Plant Scenario levels (see also Figure 1).      en into account depending on the OSc level.
+
+                                                                                        SNE 21(3-4) – 12/2011 183
+S Schreiber, A Fay      Benchmark C20 ‘Complex Production System’ - Definition                                     TN
+When a rush order is released, its due date is influenced     Criteria – Task A: Makespan. Median and IQR value of
+(decreased) in a predefined way.                              the makespan of the order books for all scenarios.
+    Three different OSc levels should be analysed: an
+environment with full information about all order re-         Criteria – Task B: Throughput Time. Median and IQR
+lease dates at the beginning of a simulation run and no       value of the throughput time of the orders, i.e. each
+occurrence of rush orders (OSc#1), a short-term envi-         from release date to sink.
+ronment with medium decrease of rush order due dates
+                                                              Criteria – Task C: Tardiness. Based on the due dates, the
+and a defined appearance date (OSc#2), and a purely re-
+                                                              number of tardy jobs and the (weighted) tardiness,
+active environment with an appearance date of zero
+                                                              summarized as median and IQR value for the order
+(i.e., the orders appear at their release date; thus, the
+                                                              books. For this, the required individual weights for each
+planning horizon equals zero), and a high decrease in
+                                                              product type are listed in Appendix B, Table 2 (10).
+rush order due dates (OSc#3). The parameters for the
+Operational Scenario are summarized in Appendix D             Criteria – Task D: Violated Constraints. Median, and
+(see Table 3).                                                IQR value of the number of [MAX NOK] and [MAX OK]
+                                                              parts generated during each simulation run.
+2.2 Plant Scenario (PSc)
+The PSc levelss differ in their complexity, i.e. the level        All tasks should be performed with at least ten runs
+of dynamic behaviour of the environment. They are de-         of simulation experiments and by use of several order
+scribed by 2-tupels MTBF/MTTR (mean time between              books to analyze system behaviour with different sets of
+failure/mean time to repair).                                 internal and external conditions.
+    PSc#1 represents a fully deterministic behaviour
+with no occurrence of disruptions. PSc#2 and PSc#3 on-
+ly differ in their MTBF, where the former represents
+                                                              4 Guidelines for Presenting Solutions
+behaviour with few disruptions, i.e. high means and low       If questions or remarks come up during modelling, sim-
+variances, while the latter represents behaviour with         ulation, or interpretation of this reference system, please
+many disruptions, i.e. lower means and higher vari-           feel free to contact the authors or have a look at the
+ances.                                                        ARGESIM homepage, where you can find comprehen-
+    The fourth level PSc#4 represents the worst case          sive information and three order books in CSV format
+within this reference system. It expands PSc#3 with the       as a reference for comparison.
+possibility of failures of some transport system ele-             Solutions (to be sent bx email to sne@argesim.org,
+ments. This introduces the need for rerouting to prevent      office@sne-journal.org) would ideally be accompanied
+a system blockade. For the exact distributions and pa-        by detailed documentation and source code of the simu-
+rameters for MTBF/MTTR see Table 5 in Appendix E.             lation model and/or the control algorithm. Such infor-
+                                                              mation would be made available on the ARGESIM
+                                                              server under the current software license terms. The so-
+3 Measures of Performance                                     lution should use than four to six pages SNE and cover
+  (Tasks for Benchmark)                                       the following aspects (with general layout as technical
+                                                              notes, not as 2-page layout for ‘short’ comparison solu-
+Many different indicators are reported in the literature to
+                                                              tions..
+measure the performance of production systems, partic-
+ularly in the research area of scheduling (e.g. [9]). For     Authors are asked to give an overview of the
+presentation of results, median and interquartile range       •   Simulator and its capabilities used, esp. with regard
+IQR ( IQR = Q.75 – Q.25) should be used as robust statis-         to analysis of simulation runs,
+tics. The authors consider the following indicators as
+                                                              •   Modelling of the implemented system and model-
+suitable performance criteria to compare different algo-
+                                                                  ling techniques used, and
+rithms:
+                                                              •   Control Algorithm used for controlling this system
+                                                                  and its location with regard to the simulator (em-
+                                                                  bedded/external).
+
+
+184 SNE 21(3-4) – 12/2011
+TN                              S Schreiber, A Fay          Benchmark C20 ‘Complex Production System’ - Definition
+
+
+    For presenting the results of their solutions with re-            [5] S. Schreiber, A. Fay. Requirements for the benchmarking
+spect to the mentioned criteria, we encourage authors to                  of decentralized manufacturing control systems. Proc. of
+use tables and figures as appropriate. The set of the four                the 16th IEEE-ETFA Conference, 2011.
+tasks described in Section 3 can only be regarded as an               [6] S. Terzi, S. Cavalieri, M. Macchi, M. Garetti, H.
+initial set for analyzing the system’s behaviour. Authors                 Panetto. Development of a Reference Architecture for
+should feel free to report additional indicators to analyze               Benchmarking Service of Manufacturing Systems. 7th
+                                                                          IFAC workshop on Intell. manuf. systems, pp. 193–200,
+different effects that they regard as suitable for compari-
+                                                                          2003.
+son.
+                                                                      [7] A. M. Law. Simulation Modeling and Analysis. 4th ed.
+References                                                                Boston: McGraw-Hill, 2007.
+                                                                      [8] O. A. Joseph, R. Sridharan. Evaluation of routing flexi-
+ [1] P. Leitão. Agent-based distributed manufacturing con-                bility of a flexible manufacturing system using simulation
+     trol: A state-of-the-art survey. Engineering Applications            modelling and analysis. The International Journal of
+     of Artificial Intelligence, vol. 22 (7), pp. 979–91, 2009.           Advanced Manufacturing Technology, vol. 56 (1-4),
+ [2] P. Valckenaers, et al., A benchmarking service for the               pp. 273–289, 2011.
+     manufacturing control research community. Journal of             [9] V. Vinod, R. Sridharan. Simulation modeling and
+     Intelligent Manufacturing, vol. 17 (6), pp. 667–79, 2006.            analysis of due-date assignment methods and scheduling
+ [3] S. Schreiber, M. Barth, R. Nicolaus, M. Schleburg,                   decision rules in a dynamic job shop production system.
+     A. Fay. Event-based and State-Automata-based Model-                  International Journal of Production Economics,
+     ling of FMS - A Comparative Case Study of Flexsim,                   vol. 129 (1), pp. 127–46, 2011.
+     Dymola and Matlab/Stateflow based on the ARGESIM
+     Benchmark C2. Simulation News Europe, vol. 20 (1),              Received:          August 30, 2011
+     pp. 38–44, 2010.
+                                                                     Revised:           October 16, 2011
+ [4] S. Schreiber, A. Fay. A reference system for the                Accepted:          November 15, 2011
+     benchmarking of manufacturing control systems. Proc.
+     of the 16th IEEE-ETFA Conference, 2011.
+
+
+
+
+   WS           WS no.        Operation      Product Type/        Processing                        Additional
+   Type         (gen.)        Capability    Process Time [s]        Area                            Remarks
+    (1)           (2)            (3)              (4)                (5)                               (6)
+
+                 I.1, I.2                                           1.1, 1.4
+     I           I.3, I.4         O1             A-E / 20           2.1, 2.5
+                 I.5, I.6                                           3.1, 3.4
+                II.1, II.2
+                                  O2            A-B / 30            1.2, 1.3
+                  (1st)                                                           WS instances of the later generation can handle
+    II                                                                             more product types and have shorter process
+               II.3 (2nd)         O2            A-D / 27              1.5                                                    time
+                II.4 (3rd)        O2             A-E / 24             1.6
+                                                  B / 40
+              III.1, III.2,                                                                      tool replacement after 2,500 s of
+    III                           O3             C-D / 44         2.2, 2.3, 2.4
+                  III.3                                                                               processing time, takes 120 s
+                                                  E / 50
+    IV         IV.1, IV.2         O6             E / 120            3.2, 3.3
+                V.1, V.2                         C-D / 60           2.6, 2.7
+     V                          O4, O5                                                setup time of 300 s for switching operation
+                V.3, V.4                          E / 90            3.5, 3.6
+
+
+                    Table 1: Technical characteristics of the system and work stations (based on [4], Table 1).
+
+
+                                                                                                  SNE 21(3-4) – 12/2011 185
+S Schreiber, A Fay      Benchmark C20 ‘Complex Production System’ - Definition                                                    TN
+APPENDIX A - Physical Resources                                         (4) product types and the required process times for
+                                                                            each WS type (the row of WS type II is subdivided
+Appendix A lists all detailed definitions and parameters                    into three different generations),
+for the physical resources of the benchmark system. The
+                                                                        (5) location of each WS within the system, according
+layout and its dimensions are part of Appendix C. The
+                                                                            to the enumeration of Figure 5,
+conveyor speed is 1 m/s and parts have a length of
+1 meter. Thus, a conveyor that is 10 meters long can                    (6) and special abilities of some WS types. During
+transport a maximum of 10 parts simultaneously.                             tool change or operation change, parts are not al-
+                                                                            lowed to stay inside the WS.
+Definition of workstations.
+The technical characteristics of the system and defini-                 Disruptions of workstations
+tions of work stations are summarized in Table 2, where                 Instances of WS type I do not cause any damage to the
+columns list:                                                           part and thus the process can be continued at the end of
+                                                                        a disruption. All other WS types damage the part inside
+(1) the five different WS types,                                        in case of a disruption, so that the part is classified as
+(2) the instances of each WS type,                                      NOK and needs to be processed accordingly. The pa-
+                                                                        rameters for the disruption profiles are listed in Appen-
+(3) operations for each of the WS instance,
+                                                                        dix D, Table 5.
+
+
+
+       (1) Product Type       A               B            C              D             E            Remarks
+
+             (2) Earliest                                                                            describes the inter-arrival time
+                                      exponential distribution with parameter Ȝ = 15 s/pc.
+             Release Date                                                                                                   of orders
+
+                                  a = 13          a = 10        a=9            a=7           a=6     RWK method with parameters
+            (3) Due Date
+                                  b = 20          b = 12       b = 26         b = 10        b = 10                      a and b
+     (4) Appearance Date                   depends on Operation Scenario, see Table 3
+
+                                                                                                     2-level distribution (rush order
+     (5) Rush Order Flag           0%             10 %         20 %           20 %          20 %
+                                                                                                                            %), each
+
+       (6) Distribution of                                                                                       5-level distribution
+                                  40 %            25 %         10 %           10 %          15 %
+           Product Types                                                                                                    (in total)
+                                                                                         O1, O2,
+          (7) Operations                       O1, O2,      O1, O2,        O1, O2,
+                               O1, O2                                                    O3, O5,
+                Needed                           O3         O3, O4         O3, O5
+                                                                                           O6
+                                                                                        O2 Æ O1
+                                              O2 Æ O1      O2 Æ O1        O2 Æ O1
+                                                                                        Æ O6 Æ
+                                              Æ O3 Æ       Æ O4 Æ         Æ O5 Æ
+                                                                                        O5 Æ O3
+         (8) Sequence of                      O1           O3 Æ O1        O3 Æ O1
+                                                                                        Æ O1           alternative process plans for
+               Operations     O2 Æ O1
+            (Process Plan)                                                              O6 Æ O5                product types B to E
+                                              O3 Æ O1      O4 Æ O3        O5 Æ O3
+                                                                                        Æ O3 Æ
+                                              Æ O2 Æ       Æ O1 Æ         Æ O1 Æ
+                                                                                        O1 Æ O2
+                                              O1           O2 Æ O1        O2 Æ O1
+                                                                                        Æ O1
+                                                                               600        600                  O5 Æ [min] Æ O3
+    (9) Pre-process Time
+                                  none            none          360                                         O4Æ [max NOK]Æ O3
+           Constraints [s]
+                                                                                             300             O6Æ [max OK]Æ O5
+      (10) Product Weight         0.40             .90         1.42           1.42          2.21             for weighted tardiness
+
+           Table 2: Product type definition: specifies order book and sequences of operation (based on [4], Table 2).
+
+
+
+186 SNE 21(3-4) – 12/2011
+TN                             S Schreiber, A Fay        Benchmark C20 ‘Complex Production System’ - Definition
+
+
+APPENDIX B - Process Plan                                          Due date parameters
+                                                                   The due date for each order is defined according to the
+Appendix B lists detailed definitions and parameters for
+                                                                   ‘random work content (RWK) method’ provided in [9],
+process plan and products. These definitions also impact
+                                                                   which calculates due dates depending on the arrival time
+the settings for order books for this benchmark, which is
+                                                                   of an order, its total processing time, and a uniform dis-
+part of Appendix D.
+                                                                   tributed factor, as shown in the following equation:
+                                                                                                                ௡೔
+Definition of products.
+Each product type differs in its complexity as shown in                               ‫ܦ‬௜ ൌ ‫ܣ‬௜ ൅ ܷሺܽǡ ܾሻ ෍ ‫݌‬௜௝
+                                                                                                                ௝ୀଵ
+Table 2, where each order is defined by (1) a product
+type, (2) an earliest release date, (3) a due date, (4) an         In this equation (see [9], p. 131):
+appearance date, and (5) a rush order flag. In addition,                • Di represents the due date of order i,
+the (7) operations that need to be processed and (8) pos-               • Ai the arrival time of order i in the shop,
+sible sequences of these operations are listed. Some op-                • pij the processing time of operation j of order i,
+erations include pre-process time constraints, as shown                 • ni the number of operation in order i, and
+in column (9):                                                          • a and b are parameters for the uniform
+  • [MIN]:                  between O5 and O3,                               distribution U(a, b).
+ • [MAX NOK]:               between O4 and O3, and                 Because of the unequal ratios of processing time to nec-
+                                                                   essary transportation time for different product types,
+ • [MAX OK]:                between O6 and O5.
+                                                                   these distribution parameters a and b differ for the
+                                                                   product types (see Table 2 (3))
+
+
+
+
+                                                                                                        (4.0)
+
+
+                                                                                                                     20.0
+
+
+
+
+      Figure 4. Layout of the reference system (based on [4], Figure 1(a)): dimensions are in meters and without scale.
+
+                                                                                                 SNE 21(3-4) – 12/2011 187
+S Schreiber, A Fay       Benchmark C20 ‘Complex Production System’ - Definition                                                          TN
+
+            sample processing area
+
+                                       R 2.5
+
+
+
+                                WS               WS                  WS           WS
+                                (1)              (2)                 (9)          (10)
+
+
+                       R 2.5
+
+
+
+           R 2.5
+
+                                                                                                            Legend:
+
+                                                                                                                      WS
+                                                                                                                      (X)   Workstation no. X
+
+                                        R 2.5
+                                                                                                                  B(Y, Z)
+                                                                                                                            buffer place Z,
+                               B(1.1)           B(2.1)    B(3.1)                 B(10.1)
+                                                                                                                            located in block Y
+
+                               B(1.2)           B(2.2)    B(3.2)                 B(10.2)
+
+                               B(1.3)           B(2.3)    B(3.3)                 B(10.3)                                    decision point
+
+                                                                                                                            normal transport
+                                       R 2.5
+
+            R 2.5
+                                                                                                                            for default decision only
+
+
+                                                                                                                            system border
+
+
+
+                                                  main transport system
+                                                      (outer cycle)
+                               (5.0)
+                                                                                                    no scale/
+                                                           55.0
+                                                                                                    in meters
+
+
+
+      Figure 5. Layout of a sample processing area (based on [4], Figure 1(b)): dimensions are in meters and without scale.
+
+
+
+
+Appendix C - System Layout
+The dimensions for the system layout are given in Fig-                         The clustering in Figure 4 is related to the whole
+ure 4 and Figure 5, given in meters. The system layout                     track, from one dot to the next one.If a modeller decided
+is designed in a way that it can be modularly extended                     to model these elements by use of several objects, the
+(a) within a processing area or (b) through the main                       probabilities for disruption would need to be divided
+transport system.                                                          too.
+
+    A part which enters a processing area can either
+move to one of the buffer places or bypass the buffers
+and move directly to an idle WS. Buffers are used as lo-
+cal processing buffers for parts either waiting for pro-
+cessing or waiting due to pre-process conditions.
+
+
+
+
+188 SNE 21(3-4) – 12/2011
+TN                                 S Schreiber, A Fay            Benchmark C20 ‘Complex Production System’ - Definition
+
+
+
+
+                                           OSc#1 (D.1.1)            OSc#2 (D.1.2)           OSc#3 (D.1.3)            Remarks
+
+                                                                        = release date                               Į = 29.4, ȕ = 1.0,
+              (1) appearance date [s]       = simulation start                                   = release date
+                                                                     – (offset + ࢥ(Į, ȕ))                                 offset = 90.0
+
+                                                no decrease of          decrease of               decrease of        due gap = due date
+          (2) rush orders/due date [s]
+                                                   due gap            due gap by 10%            due gap by 20%       – release date
+
+
+Table 3. Specifications for Operational Scenario: due date based on RWK method (see Table 2 (3)) and appearance date based on
+                          gamma distribution ੮(ɲ, ɴ) with μ = ɲ ɴ and ʍ = ɲ ɴ² and [ɲ] = [ɴ] = [offset] = s.
+
+
+
+
+             Product     Inter-                     Due          Due        Due         App.         App.
+ID                       arrival    Release         date         date       date        date         date         App. date    Rush order
+             type        time       date            OSc#1        OSc#2      OSc#3       OSc#1        OSc#2        OSc#3        flag
+(1)          (2)         (3)        (4)             (5)          (6)        (7)         (8)          (9)          (10)         (11)
+
+      1            1       7.8           7.8         822.5        822.5      822.5          0           0            7.8            0
+
+      2            2       39.9          47.7        1525.5      1525.5     1525.5          0           0           47.7            0
+
+      …
+
+ 4999              4       9.9      78959.9         80886.6      80886.6    80886.6         0        78836.8       78959.9          0
+
+ 5000              5        8       78967.9         81541.2      81283.8    81026.5         0        78844.8       78967.9          1
+
+
+          Table 4. Example of an order book following the requirements for Operational Scenarios OSc#1, OSc#2, and OSc#3.
+
+
+
+
+Appendix D - Operational Scenario
+The composition of an order book depends on the prod-                           Therefore, a percentage of the ‘due gap’ is used as
+uct types corresponding to a 5-level distribution defined                   the starting value.
+in Table 2 (6) and a size of 5,000 orders. The parameters
+for the three Operational Scenario levels are listed in                     Example for an order book
+Table 3.                                                                    An example of an order book that covers the require-
+                                                                            ments listed above is shown in Table 4, where (1) lists
+Appearance date                                                             individual order IDs and (2) lists the corresponding
+The appearance date is defined in Table 3 (1). For                          product type of this order. The release date (4) is based
+OSc#2, the appearance date is described by a gamma                          on the inter-arrival time (3). (5) to (7) list the due dates
+distributed factor with mean of 119.4 s, which is the                       depending on the Operational Scenario.
+theoretical average process time of an order. For the
+other scenarios it either equals zero (simulation start) or                     The values are either identical if the Boolean rush
+the order’s release date.                                                   order flag (11) is false, or decrease, as described above.
+                                                                            The appearance date for each OSc level is listed in (8)
+Rush orders                                                                 to (10), where (8) is zero for all orders, i.e. full infor-
+A rush order decreases its due date, by a defined per-                      mation at beginning, and (10) is equivalent with the cor-
+centage (see Table 3 (2)) when reaching its release date.                   responding release date (4) for each order.
+
+
+                                                                                                             SNE 21(3-4) – 12/2011 189
+S Schreiber, A Fay          Benchmark C20 ‘Complex Production System’ - Definition                                         TN
+                             PSc#1      PSc#2                      PSc#3                  PSc#4                  MTTR
+                             (D.2.1)    (D.2.2)                    (D.2.3)                (D.2.4)
+
+              WS type I                   Į = 4.450, ȕ = 0.100                Į = 1.115, ȕ = 0.200                   160
+
+    WS type II (1st gen.)                 Į = 2.400, ȕ = 0.125                Į = 0.742, ȕ = 0.225                   135
+
+   WS type II (2nd gen.)                  Į = 3.750, ȕ = 0.100                Į = 0.940, ȕ = 0.200                   135
+
+   WS type II (3rd gen.)       none      Į = 15.000, ȕ = 0.050                Į = 1.667, ȕ = 0.150                   135
+
+             WS type III                  Į = 6.120, ȕ = 0.100                Į = 1.530, ȕ = 0.200                   220
+
+             WS type IV                   Į = 8.340, ȕ = 0.100                Į = 2.085, ȕ = 0.200                   365
+
+              WS type V                  Į = 10.140, ȕ = 0.100                Į = 2.535, ȕ = 0.100                   300
+
+               Conveyor                                none                               Į = 2.000, ȕ = 0.500       600
+
+
+  Table 5. Plant scenario (PSc) specifications of MTBF for workstations and conveyors based on gamma distribution ੮(ɲ, ɴ) with
+                               μ = ɲ ɴ and ʍ = ɲ ɴ² and [ɲ] = [ɴ] = h, and a fix MTTR with [MTTR] = s.
+
+
+
+
+APPENDIX E Plant Scenario
+The four PSc levels are listed in Table 5 for the different
+WS types and conveyors, where Į and ȕ represent the
+parameters for gamma distribution. MTTR should be
+modelled as a constant time.                                           The selection of the next element to disrupt is done
+                                                                   in two phases: (1) the conveyor cluster, based on a 3-
+    Disruptions for conveyors only occur during PSc#4
+                                                                   level distribution with {A, B, C} = {.50, .35, .15} is se-
+with an average frequency of one disruption per hour,
+                                                                   lected, and (2) one of the elements within this cluster is
+and with only one transport system element affected at
+                                                                   chosen, based on uniform distribution. Following this
+the same time. Because of the different influence of an
+                                                                   selection process should provide a nearly similar disrup-
+element on system performance in case of a disruption,
+                                                                   tion profile through the simulation runs.
+clustering of these elements is used, as already de-
+scribed above.
+
+
+
+
+190 SNE 21(3-4) – 12/2011
+

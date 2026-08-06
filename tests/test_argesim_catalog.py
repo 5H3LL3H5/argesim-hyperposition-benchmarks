@@ -23,10 +23,10 @@ class ArgesimCatalogTests(unittest.TestCase):
             all(
                 status is BenchmarkStatus.CATALOGED
                 for identifier, status in statuses.items()
-                if identifier not in implemented and identifier != "C21"
+                if identifier not in implemented and identifier != "C20"
             )
         )
-        self.assertEqual(statuses["C21"], BenchmarkStatus.SPECIFIED)
+        self.assertEqual(statuses["C20"], BenchmarkStatus.SPECIFIED)
 
     def test_sources_are_official_and_lookup_is_strict(self) -> None:
         self.assertTrue(
