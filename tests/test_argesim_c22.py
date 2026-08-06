@@ -14,6 +14,9 @@ class C22Tests(unittest.TestCase):
         self.assertIn("deterministic", results)
         self.assertIn("stochastic", results)
         self.assertEqual(len(results["deterministic"]["ids_out"]), 20)
+        # Structural check against expected bounds
+        self.assertAlmostEqual(results["deterministic"]["tq_avg"], 6.7, places=1)
+        self.assertAlmostEqual(results["deterministic"]["tq_max"], 13.5, places=1)
 
         # Verify large stoch model
         self.assertGreater(results["stochastic_large"]["lqt_max"], 0)
@@ -26,6 +29,8 @@ class C22Tests(unittest.TestCase):
         self.assertIn("jockey_events", results["deterministic"])
         self.assertIn("jockey_table", results["deterministic"])
         self.assertIn("jockey_events", results["stochastic"])
+        # Check standard deterministic trace properties
+        self.assertGreaterEqual(results["stochastic"]["jockey_events"], 100)
 
     def test_c22_reneging_has_events(self) -> None:
         results = c22_reneging()
@@ -33,6 +38,7 @@ class C22Tests(unittest.TestCase):
         self.assertIn("renege_events", results["deterministic"])
         self.assertIn("renege_table", results["deterministic"])
         self.assertIn("renege_events", results["stochastic"])
+        self.assertEqual(results["deterministic"]["tq_max"], 9.0)
 
     def test_c22_classing_runs(self) -> None:
         results = c22_classing()
