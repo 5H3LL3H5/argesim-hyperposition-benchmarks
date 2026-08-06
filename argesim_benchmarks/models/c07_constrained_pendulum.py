@@ -10,7 +10,7 @@ import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 
-from ..ivp import InitialValueProblem, IntegrationResult, Rhs, SolverStats, Vector
+from ..ivp import InitialValueProblem, IntegrationError, IntegrationResult, Rhs, SolverStats, Vector
 from ..solvers import rk45
 
 
@@ -45,8 +45,15 @@ def c07_rhs(parameters: C07Parameters = _C07_DEFAULT_PARAMETERS) -> Rhs:
 
     def rhs(_time: float, state: Sequence[float]) -> Vector:
         phi, phi_dot = state
-        l_eff = parameters.l if phi >= parameters.phi_p else parameters.l_s
+        if phi > parameters.phi_p or (phi == parameters.phi_p and phi_dot >= 0):
+            l_eff = parameters.l
+        else:
+            l_eff = parameters.l_s
 
+        # Damping is often specified as angular damping where M = d * phi_dot.
+        # Original: m * l * phi'' = -m * g * sin(phi) - d * l * phi'
+        # Division by (m * l) yields: phi'' = -(g/l) * sin(phi) - (d/m) * phi'
+        # Which is exactly what the code below evaluates to.
         damping = parameters.d * l_eff * phi_dot
         if parameters.linear:
             gravity = parameters.m * parameters.g * phi
@@ -161,7 +168,7 @@ def solve_c07(
                     accepted += res_mid.stats.accepted_steps
                     rejected += res_mid.stats.rejected_steps
                     evals += res_mid.stats.rhs_evaluations
-                except Exception:
+                except IntegrationError:
                     # If it fails due to min step or whatever, we just assume root is here
                     break
 
@@ -197,7 +204,7 @@ def solve_c07(
                             states.append(res_event.states[i])
 
                         phi, phi_dot = res_event.final_state
-                    except Exception:
+                    except IntegrationError:
                         phi, phi_dot = y_right
                 else:
                     phi, phi_dot = y_right
