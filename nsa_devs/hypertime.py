@@ -10,9 +10,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from fractions import Fraction
 from functools import total_ordering
-from typing import Union
 
-Scalar = Union[int, float, str, Fraction]
+Scalar = int | float | str | Fraction
 
 
 def _as_fraction(value: Scalar) -> Fraction:
@@ -42,17 +41,17 @@ class HyperTime:
             raise ValueError("microstep must be non-negative")
 
     @classmethod
-    def at(cls, macro: Scalar, micro: int = 0) -> "HyperTime":
+    def at(cls, macro: Scalar, micro: int = 0) -> HyperTime:
         return cls(_as_fraction(macro), micro)
 
-    def after_epsilon(self, steps: int = 1) -> "HyperTime":
+    def after_epsilon(self, steps: int = 1) -> HyperTime:
         if not isinstance(steps, int) or isinstance(steps, bool):
             raise TypeError("epsilon steps must be an integer")
         if steps <= 0:
             raise ValueError("epsilon steps must be positive")
         return HyperTime(self.macro, self.micro + steps)
 
-    def after_finite(self, delay: Scalar) -> "HyperTime":
+    def after_finite(self, delay: Scalar) -> HyperTime:
         finite_delay = _as_fraction(delay)
         if finite_delay <= 0:
             raise ValueError("finite delay must be positive")

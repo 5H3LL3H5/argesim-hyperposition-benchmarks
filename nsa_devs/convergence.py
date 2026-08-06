@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import math
-from typing import Iterable
+from collections.abc import Iterable
+from dataclasses import dataclass
 
 
 def decay_exact() -> float:
@@ -47,4 +47,5 @@ def convergence_table(step_counts: Iterable[int]) -> tuple[ConvergenceRow, ...]:
     if not rows:
         raise ValueError("at least one step count is required")
     return tuple(rows)
+
 

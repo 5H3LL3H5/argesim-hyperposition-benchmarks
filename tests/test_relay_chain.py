@@ -1,5 +1,5 @@
-from fractions import Fraction
 import unittest
+from fractions import Fraction
 
 from nsa_devs import HyperTime, run_relay_chain
 
@@ -45,4 +45,5 @@ class RelayChainTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
 

@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
+import heapq
 from dataclasses import dataclass, field
 from fractions import Fraction
-import heapq
-from typing import List
 
 from .hypertime import HyperTime
 
@@ -68,7 +67,7 @@ def run_relay_chain(
         raise ValueError("input delay must be positive")
 
     initial_time = start_time or HyperTime(Fraction(0), 0)
-    queue: List[_QueuedInput] = [_QueuedInput(initial_time, 0, 0, initial_payload)]
+    queue: list[_QueuedInput] = [_QueuedInput(initial_time, 0, 0, initial_payload)]
     trace: list[ProcessedEvent] = []
     sequence = 1
 
@@ -95,4 +94,5 @@ def run_relay_chain(
             sequence += 1
 
     return RelayResult(final_payload=trace[-1].output_payload, trace=tuple(trace))
+
 

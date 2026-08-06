@@ -1,4 +1,5 @@
 import unittest
+from itertools import pairwise
 
 from nsa_devs import convergence_table, decay_euler_endpoint, decay_exact
 
@@ -10,7 +11,7 @@ class ConvergenceTests(unittest.TestCase):
 
         self.assertTrue(all(error > 0.0 for error in errors))
         self.assertTrue(
-            all(later < earlier for earlier, later in zip(errors, errors[1:]))
+            all(later < earlier for earlier, later in pairwise(errors))
         )
         self.assertLess(errors[-1], 2e-5)
 
