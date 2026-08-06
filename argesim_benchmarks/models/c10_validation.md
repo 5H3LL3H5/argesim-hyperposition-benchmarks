@@ -20,7 +20,7 @@ The following table compares our implementation against existing literature. The
 | **Strict C10 Literature** ([3], [4]) | ~11.5 time units | 92% | Yes |
 | **EZStrobe Non-Deadlocking** (2026) | 4.19 time units | 72% | No |
 
-- **Confidence:** High. Our results strictly match the established expected values of ~11.5-12.7 avg waiting time and 92% utilization from early C10 publications that followed the exact deadlock-prone specification.
+- **Confidence:** High. While our model statistics strictly match the published reference values of ~11.5-12.7 avg waiting time and 92% utilization from early C10 publications, we do not officially claim compliance with the ARGESIM benchmark definitions.
 
 ## Methodology Note
 Because this repository forbids third-party dependencies like `matplotlib` or `numpy` for core benchmarking functionality, graphical validation (Gantt charts of trajectories) was conducted manually via an ASCII terminal script during development but is not committed into the core source. We rely on the tested numerical statistics corresponding perfectly to published validated baselines.

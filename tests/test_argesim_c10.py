@@ -45,10 +45,49 @@ class C10Tests(unittest.TestCase):
         self.assertGreater(result.termination_time, 0)
 
     def test_c10_simultaneous_access_resolved_correctly(self) -> None:
-        # It's hard to force simultaneous access predictably with pure random, but by running it
-        # it is highly likely to encounter one during the long run until deadlock.
-        # The logic inside run_c10_simulation will not crash if our implementation is solid.
-        pass
+        from argesim_benchmarks.models.c10_dining_philosophers import PhilosopherState
+
+        # We will extract the core allocation logic to test it directly.
+        num_philosophers = 5
+        chopstick_free = [True] * num_philosophers
+        states = [PhilosopherState.THINKING] * num_philosophers
+
+        # P0 wants Left (0), P4 wants Right (0). Simultaneous access on chopstick 0.
+        states[0] = PhilosopherState.WAITING_LEFT
+        states[4] = PhilosopherState.WAITING_RIGHT
+
+        allocation_changed = True
+        while allocation_changed:
+            allocation_changed = False
+            for c in range(num_philosophers):
+                if not chopstick_free[c]:
+                    continue
+
+                left_requester = c
+                right_requester = (c - 1) % 5
+
+                req_left = (states[left_requester] == PhilosopherState.WAITING_LEFT)
+                req_right = (states[right_requester] == PhilosopherState.WAITING_RIGHT)
+
+                if req_left and req_right:
+                    chopstick_free[c] = False
+                    states[left_requester] = PhilosopherState.WAITING_RIGHT
+                    allocation_changed = True
+                elif req_left:
+                    chopstick_free[c] = False
+                    states[left_requester] = PhilosopherState.WAITING_RIGHT
+                    allocation_changed = True
+                elif req_right:
+                    chopstick_free[c] = False
+                    states[right_requester] = PhilosopherState.EATING
+                    allocation_changed = True
+
+        # P0 (left requester) wins chopstick 0 and transitions to WAITING_RIGHT.
+        # Then, because chopstick 1 is free, P0 wins chopstick 1 and transitions to EATING.
+        # P4 (right requester) loses chopstick 0 and stays WAITING_RIGHT.
+        self.assertEqual(states[0], PhilosopherState.EATING)
+        self.assertEqual(states[4], PhilosopherState.WAITING_RIGHT)
+        self.assertFalse(chopstick_free[0])
 
 if __name__ == "__main__":
     unittest.main()

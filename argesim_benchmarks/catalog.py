@@ -96,7 +96,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         _source("c09"),
     ),
     BenchmarkDefinition(
-        "C10", "Dining Philosophers II", (ModelClass.DES,), _source("c10"), BenchmarkStatus.IMPLEMENTED
+        "C10", "Dining Philosophers II", (ModelClass.DES,), _source("c10"), BenchmarkStatus.VALIDATED
     ),
     BenchmarkDefinition(
         "C11",

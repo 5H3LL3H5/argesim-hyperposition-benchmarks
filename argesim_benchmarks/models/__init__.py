@@ -12,6 +12,9 @@ from .c01_lithium_cluster import (
     solve_c01,
 )
 from .c10_dining_philosophers import (
+    EventAction,
+    PhilosopherState,
+    _Event,
     c10_task_a,
     c10_task_b,
     TaskAResult,
@@ -32,4 +35,7 @@ __all__ = [
     "c10_task_b",
     "TaskAResult",
     "TaskBResult",
+    "EventAction",
+    "PhilosopherState",
+    "_Event",
 ]

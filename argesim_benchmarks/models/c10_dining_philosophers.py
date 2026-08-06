@@ -28,6 +28,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 
+class EventAction(Enum):
+    HUNGRY = "hungry"
+    DONE_EATING = "done_eating"
+
 class PhilosopherState(Enum):
     THINKING = "thinking"
     WAITING_LEFT = "waiting_left"
@@ -40,7 +44,7 @@ class _Event:
     time: int
     sequence: int
     philosopher_id: int = field(compare=False)
-    action: str = field(compare=False)
+    action: EventAction = field(compare=False)
 
 
 @dataclass(frozen=True)
@@ -116,7 +120,7 @@ def run_c10_simulation(seed: int | None = None) -> TaskAResult:
     queue: list[_Event] = []
     sequence = 0
 
-    def schedule(time: int, p_id: int, action: str):
+    def schedule(time: int, p_id: int, action: EventAction):
         nonlocal sequence
         heapq.heappush(queue, _Event(time, sequence, p_id, action))
         sequence += 1
@@ -125,7 +129,7 @@ def run_c10_simulation(seed: int | None = None) -> TaskAResult:
         now = current_time
         old_state = states[p_id]
         duration = now - state_start_time[p_id]
-        if duration > 0:
+        if duration >= 0:
             if old_state == PhilosopherState.THINKING:
                 thinking_times[p_id].append(duration)
             elif old_state in (PhilosopherState.WAITING_LEFT, PhilosopherState.WAITING_RIGHT):
@@ -138,7 +142,7 @@ def run_c10_simulation(seed: int | None = None) -> TaskAResult:
     for i in range(num_philosophers):
         # All 5 philosophers start with a thinking period
         t_think = rng.randint(1, 10)
-        schedule(t_think, i, "hungry")
+        schedule(t_think, i, EventAction.HUNGRY)
 
     while queue:
         # We need to process all events at the current time together to handle simultaneous access.
@@ -149,9 +153,9 @@ def run_c10_simulation(seed: int | None = None) -> TaskAResult:
             events_now.append(heapq.heappop(queue))
 
         for ev in events_now:
-            if ev.action == "hungry":
+            if ev.action == EventAction.HUNGRY:
                 transition(ev.philosopher_id, PhilosopherState.WAITING_LEFT)
-            elif ev.action == "done_eating":
+            elif ev.action == EventAction.DONE_EATING:
                 p_id = ev.philosopher_id
                 left_c = p_id
                 right_c = (p_id + 1) % 5
@@ -160,7 +164,7 @@ def run_c10_simulation(seed: int | None = None) -> TaskAResult:
 
                 t_think = rng.randint(1, 10)
                 transition(p_id, PhilosopherState.THINKING)
-                schedule(current_time + t_think, p_id, "hungry")
+                schedule(current_time + t_think, p_id, EventAction.HUNGRY)
 
         # Now, try to allocate chopsticks.
         # To handle priority, we iterate over all chopsticks.
@@ -203,7 +207,7 @@ def run_c10_simulation(seed: int | None = None) -> TaskAResult:
                     # right_requester gets their right chopstick! Now they have both.
                     transition(right_requester, PhilosopherState.EATING)
                     t_eat = rng.randint(1, 10)
-                    schedule(current_time + t_eat, right_requester, "done_eating")
+                    schedule(current_time + t_eat, right_requester, EventAction.DONE_EATING)
                     allocation_changed = True
 
         # Check deadlock: All 5 are waiting for their right chopstick.
