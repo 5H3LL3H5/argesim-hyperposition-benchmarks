@@ -1,14 +1,14 @@
 """ARGESIM C02: Flexible Assembly System.
 
-This model is a Discrete Event Simulation (DES).
+This model is a Formal Discrete Event Simulation (DEVS) implementation.
 """
 
 from __future__ import annotations
 
 import heapq
+import math
 from dataclasses import dataclass, field
-from enum import Enum, auto
-
+from fractions import Fraction
 from nsa_devs.hypertime import HyperTime
 
 
@@ -54,219 +54,509 @@ class StationConfig:
             buffer_capacity=int(length_buffer // pallet_length)
         )
 
-class EventType(Enum):
-    ARRIVAL_B1 = auto()
-    ENTER_STATION = auto()
-    LEAVE_STATION = auto()
-    SHIFT_TO_B2 = auto()
-    SHIFT_TO_B1 = auto()
+# --- Formal DEVS Framework ---
+
+class Message:
+    def __init__(self, port: str, value: object):
+        self.port = port
+        self.value = value
+
+class AtomicModel:
+    def __init__(self, name: str):
+        self.name = name
+        self.sigma: float = math.inf
+        self.phase: str = "passive"
+
+    def init_state(self):
+        """Initialize model state."""
+        pass
+
+    def ta(self) -> float:
+        """Time advance function."""
+        return self.sigma
+
+    def dint(self):
+        """Internal transition function."""
+        pass
+
+    def dext(self, e: float, message: Message):
+        """External transition function."""
+        pass
+
+    def out(self) -> Message | None:
+        """Output function."""
+        return None
 
 @dataclass(order=True)
-class Event:
+class DEVS_Event:
     time: HyperTime
     sequence: int
-    type: EventType = field(compare=False)
-    pallet: Pallet = field(compare=False)
-    station_idx: int = field(compare=False)
+    type: str = field(compare=False)
+    model: AtomicModel = field(compare=False)
+    message: Message | None = field(compare=False, default=None)
 
-class Simulator:
-    def __init__(self, num_pallets: int, constants: C02Constants = C02Constants()):
-        self.constants = constants
-        self.pallets = [Pallet(id=i) for i in range(num_pallets)]
-        self.queue: list[Event] = []
-        self.sequence = 0
+class Coordinator:
+    def __init__(self, end_minutes: int):
+        self.end_minutes = end_minutes
         self.time = HyperTime.at(0)
-
-        # Subsystems configuration
-        self.stations = [
-            StationConfig.create("A1", 15.0, 2.0, 1.2, constants.pallet_length),
-            StationConfig.create("A2_1", 60.0, 1.6, 0.8, constants.pallet_length),
-            StationConfig.create("A2_2", 60.0, 1.6, 0.8, constants.pallet_length),
-            StationConfig.create("A2_3", 60.0, 1.6, 0.8, constants.pallet_length),
-            StationConfig.create("A3", 20.0, 1.6, 0.8, constants.pallet_length),
-            StationConfig.create("A4", 20.0, 1.6, 0.8, constants.pallet_length),
-            StationConfig.create("A5", 20.0, 1.6, 0.8, constants.pallet_length),
-            StationConfig.create("A6", 30.0, 2.0, 1.2, constants.pallet_length),
-        ]
-
-        # Distances to the next subsystem. A2_3 to A3 is 0.0, A6 to A1 is 0.0, rest are 0.4.
-        self.distances = [0.4, 0.4, 0.4, 0.0, 0.4, 0.4, 0.4, 0.0]
-
-        self.buffer_occupancy = [0] * 8
-        self.station_busy = [False] * 8
-        self.station_wait_lists: list[list[tuple[HyperTime, Pallet]]] = [[] for _ in range(8)]
-
+        self.models: list[AtomicModel] = []
+        self.couplings: dict[tuple[AtomicModel, str], list[tuple[AtomicModel, str]]] = {}
+        self.model_next_event: dict[AtomicModel, HyperTime] = {}
+        self.model_last_event: dict[AtomicModel, HyperTime] = {}
         self.throughput = 0
         self.total_throughput_time = 0.0
 
-    def schedule(self, time: HyperTime, event_type: EventType, pallet: Pallet, station_idx: int):
-        heapq.heappush(self.queue, Event(time, self.sequence, event_type, pallet, station_idx))
-        self.sequence += 1
+    def add_model(self, model: AtomicModel):
+        self.models.append(model)
+        self.model_last_event[model] = self.time
+        model.init_state()
+
+    def add_coupling(self, source: AtomicModel, src_port: str, dest: AtomicModel, dst_port: str):
+        key = (source, src_port)
+        if key not in self.couplings:
+            self.couplings[key] = []
+        self.couplings[key].append((dest, dst_port))
+
+    def schedule(self, model: AtomicModel, current_time: HyperTime):
+        ta = model.ta()
+        if ta < math.inf:
+            if ta > 0:
+                next_time = current_time.after_finite(ta)
+            else:
+                next_time = current_time.after_epsilon(1)
+            self.model_next_event[model] = next_time
+        else:
+            self.model_next_event[model] = None
+
+    def get_next_internal_model(self) -> tuple[HyperTime, AtomicModel] | None:
+        min_time = None
+        min_model = None
+        for model, t in self.model_next_event.items():
+            if t is not None:
+                if min_time is None or t < min_time:
+                    min_time = t
+                    min_model = model
+        if min_time is None:
+            return None
+        return min_time, min_model
+
+    def send_messages(self, source: AtomicModel, msg: Message, time: HyperTime):
+        targets = self.couplings.get((source, msg.port), [])
+        for dest, dst_port in targets:
+            new_msg = Message(dst_port, msg.value)
+            # Propagate with epsilon delay for causality
+            recv_time = time.after_epsilon(1)
+            # Process EXT immediately
+            e = float(recv_time.macro - self.model_last_event[dest].macro)
+            dest.dext(e, new_msg)
+            self.model_last_event[dest] = recv_time
+            self.schedule(dest, recv_time)
+
+    def initialize(self):
+        for model in self.models:
+            self.schedule(model, self.time)
 
     def run(self):
-        # 5. In the beginning empty pallets are circulating in the system.
-        # Their positions on the conveyors B1 (not B2!) can be chosen randomly.
-        # To avoid randomness causing nondeterminism in tests and per methodology,
-        # we evenly space them along the total loop length of B1.
+        self.initialize()
+        while True:
+            res = self.get_next_internal_model()
+            if not res:
+                break
+            t_next, model = res
 
-        # Calculate total belt length
-        total_b1_length = sum(s.length_b1 for s in self.stations) + sum(self.distances)
-        spacing = total_b1_length / len(self.pallets)
-
-        for i, pallet in enumerate(self.pallets):
-            pos = i * spacing
-            # Find which station and where it is
-            current_dist = 0.0
-            for s_idx, station in enumerate(self.stations):
-                segment_len = station.length_b1 + self.distances[s_idx]
-                if current_dist + segment_len >= pos or s_idx == len(self.stations) - 1:
-                    dist_to_end_of_segment = current_dist + segment_len - pos
-                    travel_time = dist_to_end_of_segment / self.constants.speed_m_s
-                    self.schedule(HyperTime.at(travel_time), EventType.ARRIVAL_B1, pallet, (s_idx + 1) % 8)
-                    break
-                current_dist += segment_len
-
-        while self.queue:
-            event = heapq.heappop(self.queue)
-            self.time = event.time
-
-            # Stop condition
-            if self.time.macro >= self.constants.end_minutes * 60:
+            if t_next.macro >= self.end_minutes * 60:
                 break
 
-            self.process_event(event)
+            self.time = t_next
 
-    def process_event(self, event: Event):
-        pallet = event.pallet
-        s_idx = event.station_idx
-        station = self.stations[s_idx]
-        t = self.time
+            # Output phase
+            msg = model.out()
+            if msg:
+                self.send_messages(model, msg, self.time)
 
-        if event.type == EventType.ARRIVAL_B1:
-            # Pallet arrives at start of subsystem s_idx (at Sx)
-            # Decide if it needs processing here
+            # Internal transition
+            model.dint()
+            self.model_last_event[model] = self.time
+            self.schedule(model, self.time)
+
+
+# --- C02 DEVS Models ---
+
+class StationModel(AtomicModel):
+    """
+    Formal DEVS Atomic Model for a Station.
+
+    States:
+      - passive: empty, waiting for pallets.
+      - shifting_in: moving from main belt B1 to B2 (takes 2 sec).
+      - buffering: waiting in buffer or traveling along buffer to station.
+      - processing: at the positioning unit undergoing operation.
+      - shifting_out: moving from B2 to B1 (takes 2 sec).
+
+    In reality, due to the buffer holding multiple pallets concurrently,
+    a strict AtomicModel state machine needs to track a queue of pallets
+    and multiplex their delays. Since standard DEVS typically has a single
+    sigma, we track multiple events using a single state variable that
+    predicts the *next* event time.
+    """
+    def __init__(self, name: str, config: StationConfig, constants: C02Constants, is_a1: bool = False):
+        super().__init__(name)
+        self.config = config
+        self.constants = constants
+        self.is_a1 = is_a1
+
+        # State variables
+        self.buffer_queue: list[Pallet] = []
+        self.processing_pallet: Pallet | None = None
+        self.shifting_out_pallet: Pallet | None = None
+
+        # Next event times relative to current time
+        self.next_internal_event: str | None = None
+        self.events: list[tuple[float, str, Pallet]] = [] # (remaining_time, event_type, pallet)
+
+    def _schedule_internal(self, delay: float, event_type: str, pallet: Pallet):
+        self.events.append((delay, event_type, pallet))
+        self._update_sigma()
+
+    def _update_sigma(self):
+        if not self.events:
+            self.sigma = math.inf
+            self.next_internal_event = None
+        else:
+            self.events.sort(key=lambda x: x[0])
+            self.sigma = self.events[0][0]
+            self.next_internal_event = self.events[0][1]
+
+    def dext(self, e: float, message: Message):
+        # Time advance all pending events
+        for i in range(len(self.events)):
+            self.events[i] = (self.events[i][0] - e, self.events[i][1], self.events[i][2])
+
+        if message.port == "in":
+            pallet: Pallet = message.value
+            # Pallet is shifting in (takes 2 sec)
+            self._schedule_internal(self.constants.shift_time, "SHIFT_IN_DONE", pallet)
+
+    def out(self) -> Message | None:
+        if self.next_internal_event == "SHIFT_OUT_DONE":
+            # Just look at the first event
+            pallet = self.events[0][2]
+            return Message("out", pallet)
+        return None
+
+    def dint(self):
+        if not self.events:
+            return
+
+        # Time advance by sigma (which is events[0][0])
+        e = self.sigma
+        for i in range(len(self.events)):
+            self.events[i] = (self.events[i][0] - e, self.events[i][1], self.events[i][2])
+
+        # Pop the first event (it is now at time 0)
+        _, event_type, pallet = self.events.pop(0)
+
+        if event_type == "SHIFT_IN_DONE":
+            self.buffer_queue.append(pallet)
+            self._check_buffer_to_processing()
+
+        elif event_type == "PROCESSING_DONE":
+            self.processing_pallet = None
+
+            # Apply operation
+            if self.is_a1:
+                pass # Unload/load happens, but we handle in_system tracking at SourceSink
+            else:
+                if self.config.name.startswith("A2"):
+                    pallet.operations_done.add("A2")
+                elif self.config.name == "A3":
+                    pallet.operations_done.add("A3")
+                elif self.config.name == "A4":
+                    pallet.operations_done.add("A4")
+                elif self.config.name == "A5":
+                    pallet.operations_done.add("A5")
+                elif self.config.name == "A6":
+                    missing = {"A3", "A4", "A5"} - pallet.operations_done
+                    pallet.operations_done.update(missing)
+
+            # Now shift out
+            self._schedule_internal(self.constants.shift_time, "SHIFT_OUT_DONE", pallet)
+            self._check_buffer_to_processing()
+
+        elif event_type == "SHIFT_OUT_DONE":
+            # Output was already sent
+            pass
+
+        self._update_sigma()
+
+    def _check_buffer_to_processing(self):
+        if self.buffer_queue and self.processing_pallet is None:
+            # Pop next
+            pallet = self.buffer_queue.pop(0)
+            self.processing_pallet = pallet
+
+            # Assume buffer travel time + processing time
+            travel_time = self.config.length_buffer / self.constants.speed_m_s
+            total_delay = travel_time + self.config.op_time
+            self._schedule_internal(total_delay, "PROCESSING_DONE", pallet)
+
+
+class ConveyorModel(AtomicModel):
+    """
+    Formal DEVS Atomic Model for a conveyor belt segment.
+    Transports a pallet with a fixed delay.
+    """
+    def __init__(self, name: str, length: float, constants: C02Constants):
+        super().__init__(name)
+        self.delay = length / constants.speed_m_s
+        self.events: list[tuple[float, Pallet]] = []
+
+    def dext(self, e: float, message: Message):
+        for i in range(len(self.events)):
+            self.events[i] = (self.events[i][0] - e, self.events[i][1])
+
+        if message.port == "in":
+            self.events.append((self.delay, message.value))
+            self.events.sort(key=lambda x: x[0])
+            self.sigma = self.events[0][0]
+
+    def out(self) -> Message | None:
+        if self.events:
+            return Message("out", self.events[0][1])
+        return None
+
+    def dint(self):
+        e = self.sigma
+        for i in range(len(self.events)):
+            self.events[i] = (self.events[i][0] - e, self.events[i][1])
+
+        self.events.pop(0)
+
+        if self.events:
+            self.sigma = self.events[0][0]
+        else:
+            self.sigma = math.inf
+
+class RouterModel(AtomicModel):
+    """
+    Formal DEVS Atomic Model for the Sx routing point.
+    Decides if a pallet enters the station or bypasses it.
+    It takes 0 delay (passes through instantly) but modifies routing.
+    """
+    def __init__(self, name: str, station_model: StationModel, is_a1: bool = False):
+        super().__init__(name)
+        self.station_model = station_model
+        self.is_a1 = is_a1
+        self.queue: list[tuple[Pallet, str]] = [] # (pallet, destination_port)
+
+    def dext(self, e: float, message: Message):
+        if message.port == "in":
+            pallet: Pallet = message.value
+
             needs_processing = False
+            s_name = self.station_model.config.name
 
-            if s_idx == 0: # A1
-                # 5. Unprocessed pieces are put on in A1, finished parts unloaded in A1. A1 only used for this.
+            if self.is_a1:
                 needs_processing = True
-            elif s_idx in (1, 2, 3): # A2
+            elif s_name.startswith("A2"):
                 if "A2" not in pallet.operations_done:
                     needs_processing = True
-            elif s_idx == 4: # A3
-                if "A3" not in pallet.operations_done:
-                    needs_processing = True
-            elif s_idx == 5: # A4
-                if "A4" not in pallet.operations_done:
-                    needs_processing = True
-            elif s_idx == 6: # A5
-                if "A5" not in pallet.operations_done:
-                    needs_processing = True
-            elif s_idx == 7: # A6
-                # 6. Pallets are brought to A6 if they have not undergone one or more of A3, A4, A5.
+            elif s_name == "A3" and "A3" not in pallet.operations_done:
+                needs_processing = True
+            elif s_name == "A4" and "A4" not in pallet.operations_done:
+                needs_processing = True
+            elif s_name == "A5" and "A5" not in pallet.operations_done:
+                needs_processing = True
+            elif s_name == "A6":
                 if not {"A3", "A4", "A5"}.issubset(pallet.operations_done):
                     needs_processing = True
 
-            can_shift = needs_processing and self.buffer_occupancy[s_idx] < station.buffer_capacity
+            # Check buffer occupancy. We peek into the station model's state.
+            # In pure DEVS, this would be coupled via a port, but peeking is equivalent to
+            # a zero-delay status port for the sake of this reference implementation.
+
+            # buffer_occupancy = buffer_queue + items currently shifting in + processing
+            # We can count events destined for SHIFT_IN_DONE, plus len(buffer_queue), plus 1 if processing
+            shifting_in = sum(1 for ev in self.station_model.events if ev[1] == "SHIFT_IN_DONE")
+            processing = 1 if self.station_model.processing_pallet is not None else 0
+            occupancy = len(self.station_model.buffer_queue) + shifting_in + processing
+
+            can_shift = needs_processing and occupancy < self.station_model.config.buffer_capacity
 
             if can_shift:
-                # Reserve the spot immediately to avoid race conditions with pallets arriving right behind
-                self.buffer_occupancy[s_idx] += 1
-                # Shift to B2 (takes 2 sec)
-                self.schedule(t.after_finite(self.constants.shift_time), EventType.SHIFT_TO_B2, pallet, s_idx)
+                self.queue.append((pallet, "to_station"))
             else:
-                # Move along B1 to next station
-                travel_time = station.length_b1 / self.constants.speed_m_s
-                # Add gap distance
-                travel_time += self.distances[s_idx] / self.constants.speed_m_s
-                if travel_time > 0:
-                    self.schedule(t.after_finite(travel_time), EventType.ARRIVAL_B1, pallet, (s_idx + 1) % 8)
-                else:
-                    self.schedule(t.after_epsilon(1), EventType.ARRIVAL_B1, pallet, (s_idx + 1) % 8)
+                self.queue.append((pallet, "to_conveyor"))
 
-        elif event.type == EventType.SHIFT_TO_B2:
-            # Wait list logic
-            self.station_wait_lists[s_idx].append((t, pallet))
+            self.sigma = 0.0 # route immediately
 
-            if not self.station_busy[s_idx] and len(self.station_wait_lists[s_idx]) == 1:
-                travel_time = station.length_buffer / self.constants.speed_m_s
-                self.schedule(t.after_finite(travel_time), EventType.ENTER_STATION, pallet, s_idx)
+    def out(self) -> Message | None:
+        if self.queue:
+            pallet, port = self.queue[0]
+            return Message(port, pallet)
+        return None
 
-        elif event.type == EventType.ENTER_STATION:
-            # We pop ourselves
-            self.station_wait_lists[s_idx].pop(0)
-            self.station_busy[s_idx] = True
-            self.buffer_occupancy[s_idx] -= 1
-            self.schedule(t.after_finite(station.op_time), EventType.LEAVE_STATION, pallet, s_idx)
+    def dint(self):
+        self.queue.pop(0)
+        if self.queue:
+            self.sigma = 0.0
+        else:
+            self.sigma = math.inf
 
-        elif event.type == EventType.LEAVE_STATION:
-            self.station_busy[s_idx] = False
+class SourceSinkModel(AtomicModel):
+    """
+    Handles the overall throughput collection at A1 and initial pallet injection.
+    """
+    def __init__(self, constants: C02Constants, num_pallets: int):
+        super().__init__("SourceSink")
+        self.constants = constants
+        self.num_pallets = num_pallets
+        self.pallets = [Pallet(id=i) for i in range(num_pallets)]
+        self.queue: list[Pallet] = []
+        self.coordinator: Coordinator | None = None
 
-            # Update operations done
-            if s_idx == 0:
-                if pallet.in_system:
-                    # Output
-                    if t.macro >= self.constants.warmup_minutes * 60:
-                        self.throughput += 1
-                        self.total_throughput_time += float(t.macro - pallet.arrival_time.macro)
-                pallet.reset(t)
-            elif s_idx in (1, 2, 3):
-                pallet.operations_done.add("A2")
-            elif s_idx == 4:
-                pallet.operations_done.add("A3")
-            elif s_idx == 5:
-                pallet.operations_done.add("A4")
-            elif s_idx == 6:
-                pallet.operations_done.add("A5")
-            elif s_idx == 7:
-                # A6 substitute - does missing operations
-                missing = {"A3", "A4", "A5"} - pallet.operations_done
-                pallet.operations_done.update(missing)
-                # Text says: "They can then undergo all the missing operations at a time."
-                # Does this mean operation time is 30s total or 30s per missing?
-                # Table says operation time 30s. We use 30s total since it's one station.
+    def dext(self, e: float, message: Message):
+        if message.port == "in":
+            pallet: Pallet = message.value
+            # Output record if it completed a loop
+            time = self.coordinator.time if self.coordinator else HyperTime.at(0)
+            if pallet.in_system:
+                if time.macro >= self.constants.warmup_minutes * 60:
+                    if self.coordinator:
+                        self.coordinator.throughput += 1
+                        self.coordinator.total_throughput_time += float(time.macro - pallet.arrival_time.macro)
 
-            # If someone is waiting in the queue for this station, trigger their entry
-            if self.station_wait_lists[s_idx]:
-                # Next one travels from wherever it is.
-                # Simplification: buffer is constantly moving, so next is ready immediately if it has been waiting long enough.
-                # Actually, the buffer conveys parts at constant speed.
-                # If they queued up, the next one is 0.36m behind the station.
-                # So travel time is 0.36m / speed.
-                next_t, next_pallet = self.station_wait_lists[s_idx][0]
-                travel_delay = self.constants.pallet_length / self.constants.speed_m_s
+            pallet.reset(time)
+            self.queue.append(pallet)
+            self.sigma = 0.0
 
-                # However, if they just entered the buffer, they need to travel the full distance.
-                # Take max of (now + travel_delay) and (time_entered + full_buffer_travel_time)
-                full_travel = station.length_buffer / self.constants.speed_m_s
-                earliest_arrival = next_t.after_finite(full_travel)
+    def out(self) -> Message | None:
+        if self.queue:
+            return Message("out", self.queue[0])
+        return None
 
-                start_time = max(t.after_finite(travel_delay), earliest_arrival)
-                self.schedule(start_time, EventType.ENTER_STATION, next_pallet, s_idx)
-
-            # Shift back to B1 in Sy (takes 2 sec)
-            self.schedule(t.after_finite(self.constants.shift_time), EventType.SHIFT_TO_B1, pallet, s_idx)
-
-        elif event.type == EventType.SHIFT_TO_B1:
-            # Shifted back to B1, has priority over those coming from left.
-            # Just move to next station.
-            travel_time = self.distances[s_idx] / self.constants.speed_m_s
-            if travel_time > 0:
-                self.schedule(t.after_finite(travel_time), EventType.ARRIVAL_B1, pallet, (s_idx + 1) % 8)
-            else:
-                self.schedule(t.after_epsilon(1), EventType.ARRIVAL_B1, pallet, (s_idx + 1) % 8)
+    def dint(self):
+        self.queue.pop(0)
+        if self.queue:
+            self.sigma = 0.0
+        else:
+            self.sigma = math.inf
 
 
 def solve_c02(num_pallets: int) -> dict[str, float]:
-    """Solve ARGESIM C02 for the specified number of pallets."""
-    sim = Simulator(num_pallets)
-    sim.run()
+    """Solve ARGESIM C02 for the specified number of pallets using formal DEVS."""
+    constants = C02Constants()
+    coord = Coordinator(constants.end_minutes)
+
+    # Define Stations
+    station_configs = [
+        StationConfig.create("A1", 15.0, 2.0, 1.2, constants.pallet_length),
+        StationConfig.create("A2_1", 60.0, 1.6, 0.8, constants.pallet_length),
+        StationConfig.create("A2_2", 60.0, 1.6, 0.8, constants.pallet_length),
+        StationConfig.create("A2_3", 60.0, 1.6, 0.8, constants.pallet_length),
+        StationConfig.create("A3", 20.0, 1.6, 0.8, constants.pallet_length),
+        StationConfig.create("A4", 20.0, 1.6, 0.8, constants.pallet_length),
+        StationConfig.create("A5", 20.0, 1.6, 0.8, constants.pallet_length),
+        StationConfig.create("A6", 30.0, 2.0, 1.2, constants.pallet_length),
+    ]
+
+    distances = [0.4, 0.4, 0.4, 0.0, 0.4, 0.4, 0.4, 0.0]
+
+    stations = []
+    routers = []
+    conveyor_b1s = []
+    conveyor_gaps = []
+
+    source_sink = SourceSinkModel(constants, num_pallets)
+    source_sink.coordinator = coord
+    coord.add_model(source_sink)
+
+    for i, config in enumerate(station_configs):
+        is_a1 = (i == 0)
+        station = StationModel(f"Station_{config.name}", config, constants, is_a1)
+        router = RouterModel(f"Router_{config.name}", station, is_a1)
+        b1 = ConveyorModel(f"B1_{config.name}", config.length_b1, constants)
+        gap_len = distances[i]
+
+        # We model the gap to the next station as another conveyor segment
+        if gap_len > 0:
+            gap = ConveyorModel(f"Gap_{config.name}", gap_len, constants)
+        else:
+            gap = None
+
+        stations.append(station)
+        routers.append(router)
+        conveyor_b1s.append(b1)
+        conveyor_gaps.append(gap)
+
+        coord.add_model(station)
+        coord.add_model(router)
+        coord.add_model(b1)
+        if gap:
+            coord.add_model(gap)
+
+    # Connect them
+    for i in range(8):
+        # 1. Router to Station (Shift to B2)
+        coord.add_coupling(routers[i], "to_station", stations[i], "in")
+
+        # 2. Router to B1 (Bypass)
+        coord.add_coupling(routers[i], "to_conveyor", conveyor_b1s[i], "in")
+
+        # 3. Station (Shift to B1 done) -> Gap or Next Router
+        if conveyor_gaps[i]:
+            coord.add_coupling(stations[i], "out", conveyor_gaps[i], "in")
+            coord.add_coupling(conveyor_b1s[i], "out", conveyor_gaps[i], "in")
+            coord.add_coupling(conveyor_gaps[i], "out", routers[(i+1)%8], "in")
+        else:
+            coord.add_coupling(stations[i], "out", routers[(i+1)%8], "in")
+            coord.add_coupling(conveyor_b1s[i], "out", routers[(i+1)%8], "in")
+
+    # Connect A1 logic to SourceSink
+    # Actually, the problem says A1 unloads and loads.
+    # Let's intercept the flow at A1's router or station out.
+    # To correctly measure throughput, we route pallets from Station_A1's out to SourceSink,
+    # and from SourceSink out to Conveyor Gap_A1.
+
+    # Remove existing coupling from A1 out
+    coord.couplings[(stations[0], "out")] = []
+
+    # New couplings for A1 out -> SourceSink -> Gap_A1
+    coord.add_coupling(stations[0], "out", source_sink, "in")
+    coord.add_coupling(source_sink, "out", conveyor_gaps[0], "in")
+
+    # Inject pallets initially.
+    # We simulate them being evenly spaced.
+    total_b1_length = sum(s.length_b1 for s in station_configs) + sum(distances)
+    spacing = total_b1_length / num_pallets
+
+    # We will use an Injector model to send them at time 0 to various segments.
+    # For simplicity of DEVS setup, we can just pre-load the gap conveyors' events arrays.
+    for i, pallet in enumerate(source_sink.pallets):
+        pos = i * spacing
+        current_dist = 0.0
+        for s_idx, config in enumerate(station_configs):
+            segment_len = config.length_b1 + distances[s_idx]
+            if current_dist + segment_len >= pos or s_idx == 7:
+                dist_to_end = current_dist + segment_len - pos
+                travel_time = dist_to_end / constants.speed_m_s
+
+                # Push directly into the router for the next station as an incoming event
+                target_router = routers[(s_idx + 1) % 8]
+                e = travel_time
+                target_router.dext(e, Message("in", pallet))
+                coord.model_last_event[target_router] = HyperTime.at(travel_time)
+                coord.schedule(target_router, HyperTime.at(travel_time))
+                break
+            current_dist += segment_len
+
+    coord.run()
 
     avg_throughput_time = (
-        sim.total_throughput_time / sim.throughput if sim.throughput > 0 else 0.0
+        coord.total_throughput_time / coord.throughput if coord.throughput > 0 else 0.0
     )
 
     return {
-        "throughput": float(sim.throughput),
+        "throughput": float(coord.throughput),
         "average_throughput_time": avg_throughput_time
     }
