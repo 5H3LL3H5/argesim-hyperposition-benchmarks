@@ -17,6 +17,11 @@ from .c12_collision import (
     c12_task_b,
     c12_task_c,
 )
+from .c12_collision.c12_collision_plots import (
+    render_task_a_svg,
+    render_task_b1_svg,
+    render_task_b2_svg,
+)
 
 __all__ = [
     "C01_INITIAL_STATE",
@@ -32,4 +37,7 @@ __all__ = [
     "c12_task_a",
     "c12_task_b",
     "c12_task_c",
+    "render_task_a_svg",
+    "render_task_b1_svg",
+    "render_task_b2_svg",
 ]

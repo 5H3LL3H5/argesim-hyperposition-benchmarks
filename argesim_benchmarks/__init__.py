@@ -15,6 +15,9 @@ from .models import (
     c12_task_a,
     c12_task_b,
     c12_task_c,
+    render_task_a_svg,
+    render_task_b1_svg,
+    render_task_b2_svg,
     solve_c01,
 )
 from .pde import heat_1d_ivp, heat_sine_exact, heat_sine_initial, wave_1d_ivp
@@ -40,6 +43,9 @@ __all__ = [
     "c12_task_a",
     "c12_task_b",
     "c12_task_c",
+    "render_task_a_svg",
+    "render_task_b1_svg",
+    "render_task_b2_svg",
     "euler",
     "heat_1d_ivp",
     "heat_sine_exact",
