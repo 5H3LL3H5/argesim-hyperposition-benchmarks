@@ -28,7 +28,7 @@ have already been implemented.
 | C17R | SIR-type Epidemic with Cellular Automata and ODEs | ODE, CA, identification | cataloged |
 | C18 | Identification of Nonlinear Dynamics | transfer functions, neural networks | cataloged |
 | C19R | Pollution in Groundwater Flow | PDE/distributed system | implemented |
-| C20 | Complex Production System | DES | cataloged |
+| C20 | Complex Production System | DES | specified |
 | C21 | State Events and Structural-dynamic Systems | ODE/DAE, hybrid | cataloged |
 | C22 | Non-standard Queuing Policies | DES/queueing | implemented |
 | CP1 | Parallel Simulation Techniques | ODE, MOL/PDE, parallel study | implemented |
