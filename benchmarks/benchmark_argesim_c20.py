@@ -1,49 +1,51 @@
-"""Execute ARGESIM C20 benchmark and report performance indicators.
+#!/usr/bin/env python3
+"""Timing experiment for ARGESIM C20 (Complex Production System)."""
 
-Validates the results by printing the Experiment, Runs, Initial Parameters,
-Outcome, confidence, and generates numpy/matplotlib trajectories as requested.
-"""
+from __future__ import annotations
 
+import argparse
+import json
 import statistics
+import sys
 import time
+from pathlib import Path
 from typing import Callable
 
-import numpy as np
-import matplotlib.pyplot as plt
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from argesim_benchmarks.models.c20_complex_production import (
+    Conveyor,
     Order,
     SimulationEnvironment,
     WorkStation,
     WorkStationType,
-    Conveyor,
-    get_process_plan,
-    get_operation_ws,
-    get_processing_time,
     generate_osc1_order_book,
     generate_osc2_order_book,
     generate_osc3_order_book,
+    get_operation_ws,
+    get_process_plan,
+    get_processing_time,
 )
 
-def run_scenario(name: str, generator: Callable[[], list[Order]]) -> tuple[dict[str, float], dict[WorkStationType, list[tuple[float, int]]]]:
-    """Run one C20 scenario and return measured statistics and trajectories."""
+
+def _quartiles(values: list[int]) -> tuple[float, float]:
+    if len(values) < 2:
+        return float(values[0]), float(values[0])
+    quartiles = statistics.quantiles(values, n=4, method="inclusive")
+    return quartiles[0], quartiles[2]
+
+
+def run_scenario(generator: Callable[[], list[Order]]) -> dict[str, float]:
+    """Run one C20 scenario and return measured metrics."""
     env = SimulationEnvironment()
-
-    # Initialize workstations
-    stations = {
-        ws_type: WorkStation(env, ws_type)
-        for ws_type in WorkStationType
-    }
-
+    stations = {ws_type: WorkStation(env, ws_type) for ws_type in WorkStationType}
     conveyor = Conveyor(env, transport_time=5.0)
 
     orders = generator()
     throughput_times: list[float] = []
 
-    # Route an order through its process plan
     def process_next_step(order: Order, plan: list, step: int) -> None:
         if step >= len(plan):
-            # Order finished
             completion_time = float(env.now.macro)
             throughput_times.append(completion_time - order.earliest_release_date)
             return
@@ -53,112 +55,77 @@ def run_scenario(name: str, generator: Callable[[], list[Order]]) -> tuple[dict[
         ws = stations[ws_type]
         delay = get_processing_time(ws_type, order.product_type)
 
-        # Define what happens when the workstation finishes
         def on_finish(finished_order: Order) -> None:
-            # Transport to next station
             conveyor.transport(
-                finished_order,
-                lambda o: process_next_step(o, plan, step + 1)
+                finished_order, lambda o: process_next_step(o, plan, step + 1)
             )
 
-        # Request the workstation
         ws.request(order, delay, on_finish)
 
-    # Schedule initial releases
     for order in orders:
         plan = get_process_plan(order.product_type)
         env.schedule(
             order.earliest_release_date,
-            lambda o=order, p=plan: process_next_step(o, p, 0)
+            lambda o=order, p=plan: process_next_step(o, p, 0),
         )
 
-    start_time = time.perf_counter_ns()
-    # Run the simulation for a sufficiently long time
     env.run(until_macro=100000.0)
-    end_time = time.perf_counter_ns()
 
     makespan = float(env.now.macro)
-
-    if throughput_times:
-        median_tt = statistics.median(throughput_times)
-        if len(throughput_times) > 1:
-            q75, q25 = statistics.quantiles(throughput_times, n=4)[2], statistics.quantiles(throughput_times, n=4)[0]
-            iqr_tt = q75 - q25
-        else:
-            iqr_tt = 0.0
-    else:
-        median_tt = 0.0
-        iqr_tt = 0.0
-
-    metrics = {
+    median_tt = statistics.median(throughput_times) if throughput_times else 0.0
+    return {
         "makespan": makespan,
         "median_tt": median_tt,
-        "iqr_tt": iqr_tt,
-        "wall_time": end_time - start_time,
-        "processed": sum(ws.processed_count for ws in stations.values()),
+        "processed_operations": float(
+            sum(ws.processed_count for ws in stations.values())
+        ),
     }
 
-    trajectories = {ws_type: ws.history for ws_type, ws in stations.items()}
-    return metrics, trajectories
 
 def main() -> None:
-    print("ARGESIM C20 Complex Production System Specification Demonstration")
-    print("===============================================================\n")
+    parser = argparse.ArgumentParser(
+        description="Timing experiment for ARGESIM C20."
+    )
+    parser.add_argument("--repeat", type=int, default=9, help="Number of repetitions.")
+    parser.add_argument("--warmup", type=int, default=1, help="Number of warmup runs.")
+    arguments = parser.parse_args()
+    if arguments.repeat < 1 or arguments.warmup < 0:
+        parser.error("repeat must be positive and warmup must be non-negative")
 
-    scenarios = [
-        ("OSc#1 (Full Info)", generate_osc1_order_book),
-        ("OSc#2 (Medium Info)", generate_osc2_order_book),
-        ("OSc#3 (Reactive)", generate_osc3_order_book),
-    ]
+    report: dict[str, object] = {
+        "benchmark": "ARGESIM-C20",
+        "definition": "https://www.argesim.org/benchmarks/c20/",
+        "scenarios": {},
+    }
 
-    all_trajectories = {}
+    scenarios = {
+        "OSc1_FullInfo": generate_osc1_order_book,
+        "OSc2_MediumInfo": generate_osc2_order_book,
+        "OSc3_Reactive": generate_osc3_order_book,
+    }
 
-    repetitions = 9
-    for name, generator in scenarios:
-        print(f"--- Experiment: Scenario {name} ---")
-        print(f"Initial Parameters: 5000 orders generated.")
-        print(f"Runs: {repetitions} executions.")
+    for scenario_name, generator in scenarios.items():
+        for _ in range(arguments.warmup):
+            run_scenario(generator)
 
-        wall_times = []
-        for i in range(repetitions):
-            metrics, trajectories = run_scenario(name, generator)
-            wall_times.append(metrics["wall_time"])
-            if i == 0:
-                all_trajectories[name] = trajectories
-                first_metrics = metrics
+        durations: list[int] = []
+        last_metrics = None
+        for _ in range(arguments.repeat):
+            started = time.perf_counter_ns()
+            last_metrics = run_scenario(generator)
+            durations.append(time.perf_counter_ns() - started)
+        assert last_metrics is not None
 
-        median_wall_ns = statistics.median(wall_times)
-        q75_ns, q25_ns = statistics.quantiles(wall_times, n=4)[2], statistics.quantiles(wall_times, n=4)[0]
+        first_quartile, third_quartile = _quartiles(durations)
+        report["scenarios"][scenario_name] = {
+            "metrics": last_metrics,
+            "durations_ns": durations,
+            "median_ns": statistics.median(durations),
+            "iqr_ns": third_quartile - first_quartile,
+        }
 
-        print(f"Outcome:")
-        print(f"  Wall time:      Median {median_wall_ns / 1e9:.4f} s, IQR {(q75_ns - q25_ns) / 1e9:.4f} s")
-        print(f"  Sim. Makespan:  {first_metrics['makespan']:.2f} s")
-        print(f"  Throughput TT:  Median {first_metrics['median_tt']:.2f} s, IQR {first_metrics['iqr_tt']:.2f} s")
-        print(f"  Processed Ops:  {first_metrics['processed']}\n")
+    print(json.dumps(report, indent=2))
 
-    # Plotting with matplotlib and numpy
-    fig, axes = plt.subplots(3, 1, figsize=(10, 15))
-    for ax, (name, trajectories) in zip(axes, all_trajectories.items()):
-        ax.set_title(f"Workstation Queues for {name}")
-        ax.set_xlabel("Macro Time (s)")
-        ax.set_ylabel("Queue Length + Processing")
-
-        for ws_type, history in trajectories.items():
-            if not history:
-                continue
-            # Convert history to numpy array
-            history_arr = np.array(history)
-            times = history_arr[:, 0]
-            queue_lens = history_arr[:, 1]
-            # Use step plot for DES trajectories
-            ax.step(times, queue_lens, where='post', label=ws_type.value)
-
-        ax.legend()
-        ax.grid(True)
-
-    plt.tight_layout()
-    plt.savefig("c20_trajectories.png")
-    print("Saved trajectories plot to c20_trajectories.png")
 
 if __name__ == "__main__":
     main()
