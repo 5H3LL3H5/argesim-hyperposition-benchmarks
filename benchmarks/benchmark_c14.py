@@ -1,6 +1,5 @@
 """Generate C14 validation outputs and plots."""
 
-import numpy as np
 import matplotlib.pyplot as plt
 
 from argesim_benchmarks.models.c14_supply_chain import (

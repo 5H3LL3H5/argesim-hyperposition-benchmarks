@@ -11,6 +11,15 @@ Tasks a, b, c involve different ordering strategies.
 """
 
 import random
+import statistics
+
+COST_PER_ORDER = 10.0
+COST_STORAGE_PER_DAY = 1.0
+WHOLESALER_START_TIME = 192 * 3600
+HOURS_PER_DAY = 24
+SECONDS_PER_HOUR = 3600
+DAYS_TO_SIMULATE = 30
+MAX_SEED_VAL = 1000000
 
 # Simulation time is up to 30 days. Each day has 24 hours. Each hour has 3600 seconds.
 # Total time: 30 days = 720 hours = 2,592,000 seconds.
@@ -51,6 +60,7 @@ TASK_A_B_MAPPING = {
 }
 
 class Factory:
+    """Represents a factory in the supply chain."""
     def __init__(self, id: int, rng: random.Random):
         self.id = id
         self.products = FACTORY_PRODUCTS[id]
@@ -59,6 +69,7 @@ class Factory:
         self.next_production_time = int(self.rng.expovariate(1/600))
 
 class Distributor:
+    """Represents a distributor in the supply chain."""
     def __init__(self, id: int):
         self.id = id
         self.stock = {p: 0 for p in range(1, 13)}
@@ -70,12 +81,14 @@ class Distributor:
         self.total_cost = 0.0
         self.delivered_products = 0
 
-    def calculate_storage_cost(self):
+    def calculate_storage_cost(self) -> None:
+        """Calculate daily storage costs for the current stock."""
         # 1 euro per product per day
         total_products = sum(self.stock.values())
-        self.total_cost += total_products * 1.0
+        self.total_cost += total_products * COST_STORAGE_PER_DAY
 
     def fulfill_wholesaler_order(self, product: int) -> bool:
+        """Attempt to fulfill a wholesaler order for the specified product."""
         self.wholesaler_demand[product] += 1
         if self.stock[product] > 0:
             self.stock[product] -= 1
@@ -84,6 +97,7 @@ class Distributor:
         return False
 
 class SupplyChainSim:
+    """Simulates the ARGESIM C14 supply chain model."""
     def __init__(self, task: str, seed: int = 42):
         self.task = task
         self.rng = random.Random(seed)
@@ -91,9 +105,10 @@ class SupplyChainSim:
         self.distributors = {i: Distributor(i) for i in range(1, 5)}
 
         self.current_time = 0
-        self.next_wholesaler_order_time = 192 * 3600 + self.rng.randint(600, 3600)
+        self.next_wholesaler_order_time = WHOLESALER_START_TIME + self.rng.randint(600, 3600)
 
-    def advance_time(self, new_time: int):
+    def advance_time(self, new_time: int) -> None:
+        """Advance the simulation chronologically to the specified time."""
         # Event loop to process events in chronological order up to new_time
         while True:
             next_event_time = float('inf')
@@ -144,17 +159,19 @@ class SupplyChainSim:
         self.current_time = new_time
 
     def place_factory_order(self, dist_id: int, fac_id: int, product: int, amount: int, current_time: int) -> bool:
+        """Attempt to place an order from a distributor to a factory."""
         if amount == 0:
             return True
         if self.factories[fac_id].stock.get(product, 0) >= amount:
             self.factories[fac_id].stock[product] -= amount
-            lead_time_sec = int(SUPPLY_LEAD_TIMES[(dist_id, fac_id)] * 3600)
+            lead_time_sec = int(SUPPLY_LEAD_TIMES[(dist_id, fac_id)] * SECONDS_PER_HOUR)
             self.distributors[dist_id].incoming_deliveries.append((current_time + lead_time_sec, product, amount))
-            self.distributors[dist_id].total_cost += 10.0 # 10 euro per order
+            self.distributors[dist_id].total_cost += COST_PER_ORDER # euro per order
             return True
         return False
 
-    def run(self, days: int = 30):
+    def run(self, days: int = DAYS_TO_SIMULATE) -> list[tuple[int, dict[int, int]]]:
+        """Run the supply chain simulation for the specified number of days."""
         # 1st day to 7th day: only production
         # 8th day 00:00 (168h): distributors order 10 of each
         self.advance_time(168 * 3600)
@@ -190,7 +207,7 @@ class SupplyChainSim:
 
         # Advance day by day
         for day in range(8, days + 1): # 8th day has already started (orders placed), next order is at 9th day 00:00
-            target_time = day * 24 * 3600
+            target_time = day * HOURS_PER_DAY * SECONDS_PER_HOUR
             self.advance_time(target_time)
 
             # calculate storage cost
@@ -261,19 +278,13 @@ class SupplyChainSim:
 
         return d1_stock_history
 
-def c14_task_a1(seed: int = 42) -> list[tuple[int, dict[int, int]]]:
-    """Task a1: Simulate the system once for 30 days and show stock of D1 over time."""
-    sim = SupplyChainSim("a", seed=seed)
-    return sim.run(30)
 
-
-def c14_task_a2(seed: int = 42, runs: int = 100) -> dict[str, dict[str, float]]:
-    """Task a2: Perform 100 simulation runs, calculate metrics for D1."""
+def _run_monte_carlo(task: str, seed: int = 42, runs: int = 100) -> dict[str, dict[str, float]]:
     rng = random.Random(seed)
     costs, delivered, relative_costs = [], [], []
     for _ in range(runs):
-        sim = SupplyChainSim("a", seed=rng.randint(0, 1000000))
-        sim.run(30)
+        sim = SupplyChainSim(task, seed=rng.randint(0, MAX_SEED_VAL))
+        sim.run(DAYS_TO_SIMULATE)
         d1 = sim.distributors[1]
         costs.append(d1.total_cost)
         delivered.append(d1.delivered_products)
@@ -282,8 +293,7 @@ def c14_task_a2(seed: int = 42, runs: int = 100) -> dict[str, dict[str, float]]:
         else:
             relative_costs.append(float('inf'))
 
-    def stats(data):
-        import statistics
+    def stats(data: list[float]) -> dict[str, float]:
         valid = [d for d in data if d != float('inf')]
         if not valid:
             return {"max": 0.0, "min": 0.0, "mean": 0.0, "dev": 0.0}
@@ -299,80 +309,32 @@ def c14_task_a2(seed: int = 42, runs: int = 100) -> dict[str, dict[str, float]]:
         "N": stats(delivered),
         "R": stats(relative_costs)
     }
+
+def c14_task_a1(seed: int = 42) -> list[tuple[int, dict[int, int]]]:
+    """Task a1: Simulate the system once for 30 days and show stock of D1 over time."""
+    sim = SupplyChainSim("a", seed=seed)
+    return sim.run(DAYS_TO_SIMULATE)
+
+
+def c14_task_a2(seed: int = 42, runs: int = 100) -> dict[str, dict[str, float]]:
+    """Task a2: Perform 100 simulation runs, calculate metrics for D1."""
+    return _run_monte_carlo("a", seed, runs)
 
 
 def c14_task_b1(seed: int = 42) -> list[tuple[int, dict[int, int]]]:
     """Task b1: Simulate the system once for 30 days and show stock of D1 over time."""
     sim = SupplyChainSim("b", seed=seed)
-    return sim.run(30)
+    return sim.run(DAYS_TO_SIMULATE)
 
 
 def c14_task_b2(seed: int = 42, runs: int = 100) -> dict[str, dict[str, float]]:
     """Task b2: Perform 100 simulation runs, calculate metrics for D1."""
-    rng = random.Random(seed)
-    costs, delivered, relative_costs = [], [], []
-    for _ in range(runs):
-        sim = SupplyChainSim("b", seed=rng.randint(0, 1000000))
-        sim.run(30)
-        d1 = sim.distributors[1]
-        costs.append(d1.total_cost)
-        delivered.append(d1.delivered_products)
-        if d1.delivered_products > 0:
-            relative_costs.append(d1.total_cost / d1.delivered_products)
-        else:
-            relative_costs.append(float('inf'))
-
-    def stats(data):
-        import statistics
-        valid = [d for d in data if d != float('inf')]
-        if not valid:
-            return {"max": 0.0, "min": 0.0, "mean": 0.0, "dev": 0.0}
-        return {
-            "max": max(valid),
-            "min": min(valid),
-            "mean": sum(valid) / len(valid),
-            "dev": statistics.stdev(valid) if len(valid) > 1 else 0.0
-        }
-
-    return {
-        "C": stats(costs),
-        "N": stats(delivered),
-        "R": stats(relative_costs)
-    }
+    return _run_monte_carlo("b", seed, runs)
 
 
 def c14_task_c1(seed: int = 42, runs: int = 100) -> dict[str, dict[str, float]]:
     """Task c1: Perform 100 simulation runs, calculate metrics for D1."""
-    rng = random.Random(seed)
-    costs, delivered, relative_costs = [], [], []
-    for _ in range(runs):
-        sim = SupplyChainSim("c", seed=rng.randint(0, 1000000))
-        sim.run(30)
-        d1 = sim.distributors[1]
-        costs.append(d1.total_cost)
-        delivered.append(d1.delivered_products)
-        if d1.delivered_products > 0:
-            relative_costs.append(d1.total_cost / d1.delivered_products)
-        else:
-            relative_costs.append(float('inf'))
-
-    def stats(data):
-        import statistics
-        valid = [d for d in data if d != float('inf')]
-        if not valid:
-            return {"max": 0.0, "min": 0.0, "mean": 0.0, "dev": 0.0}
-        return {
-            "max": max(valid),
-            "min": min(valid),
-            "mean": sum(valid) / len(valid),
-            "dev": statistics.stdev(valid) if len(valid) > 1 else 0.0
-        }
-
-    return {
-        "C": stats(costs),
-        "N": stats(delivered),
-        "R": stats(relative_costs)
-    }
+    return _run_monte_carlo("c", seed, runs)
 
 
 def c14_task_c2(seed: int = 42, runs: int = 100) -> dict[str, dict[str, dict[str, float]]]:
