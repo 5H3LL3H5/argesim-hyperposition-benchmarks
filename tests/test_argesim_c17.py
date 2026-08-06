@@ -1,6 +1,7 @@
 import unittest
 import math
 
+from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
 from argesim_benchmarks.models.c17_sir_epidemic import (
     C17Parameters,
     c17_rhs,
@@ -10,6 +11,10 @@ from argesim_benchmarks.models.c17_sir_epidemic import (
 )
 
 class C17Tests(unittest.TestCase):
+    def test_c17r_catalog_status(self) -> None:
+        c17r = next(b for b in BENCHMARKS if b.identifier == "C17R")
+        self.assertEqual(c17r.status, BenchmarkStatus.IMPLEMENTED)
+
     def test_c17_parameters_validation(self) -> None:
         with self.assertRaises(ValueError):
             C17Parameters(n=0.0)
