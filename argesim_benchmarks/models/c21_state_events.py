@@ -9,7 +9,9 @@ import math
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
-from ..ivp import Rhs, Vector
+from ..ivp import InitialValueProblem, Rhs, Vector
+from ..solvers.explicit import euler
+from ..solvers.qss import qss1
 
 
 @dataclass(frozen=True)
@@ -59,9 +61,7 @@ def c21_bouncing_ball_event_contact(parameters: C21BouncingBallParameters) -> Rh
     return rhs
 
 
-def c21_bouncing_ball_dynamic_contact_flying(
-    parameters: C21BouncingBallParameters,
-) -> Rhs:
+def c21_bouncing_ball_dynamic_contact_flying(parameters: C21BouncingBallParameters) -> Rhs:
     """Return the RHS for the dynamic contact model (free falling phase)."""
 
     def rhs(_time: float, state: Sequence[float]) -> Vector:
@@ -75,9 +75,7 @@ def c21_bouncing_ball_dynamic_contact_flying(
     return rhs
 
 
-def c21_bouncing_ball_dynamic_contact_contact(
-    parameters: C21BouncingBallParameters,
-) -> Rhs:
+def c21_bouncing_ball_dynamic_contact_contact(parameters: C21BouncingBallParameters) -> Rhs:
     """Return the RHS for the dynamic contact model (contact phase)."""
 
     def rhs(_time: float, state: Sequence[float]) -> Vector:
@@ -159,7 +157,8 @@ def c21_rlc_diode_conducting_explicit(
         i, u_c, u_d = state
 
         # Calculate diode current using Shockley equation
-        i_d = parameters.i_s * (math.exp(u_d / parameters.u_t) - 1.0)
+        exponent = min(u_d / parameters.u_t, 700.0)  # Bound to avoid overflow
+        i_d = parameters.i_s * (math.exp(exponent) - 1.0)
 
         du_c = 1.0 / parameters.c * (i + i_d)
         di = (
@@ -170,16 +169,12 @@ def c21_rlc_diode_conducting_explicit(
         )
 
         # Index-1 explicit reduction for u_d
-        du_d = (
-            -du_c
-            * (
-                parameters.i_s
-                * parameters.r2
-                * (math.exp(u_d / parameters.u_t) / parameters.u_t)
-                + 1.0
-            )
-            ** -1
-        )
+        du_d = -du_c * (
+            parameters.i_s
+            * parameters.r2
+            * (math.exp(exponent) / parameters.u_t)
+            + 1.0
+        ) ** -1
 
         return (di, du_c, du_d)
 
@@ -207,7 +202,8 @@ def c21_rlc_diode_h_l_explicit(
 ) -> float:
     """Event function for Locking Phase Start for explicit Shockley diode (crosses 0 negatively)."""
     i, u_c, u_d = state
-    i_d = parameters.i_s * (math.exp(u_d / parameters.u_t) - 1.0)
+    exponent = min(u_d / parameters.u_t, 700.0)
+    i_d = parameters.i_s * (math.exp(exponent) - 1.0)
     return parameters.r2 * (i + i_d) + u_c
 
 
@@ -277,8 +273,6 @@ def c21_rotating_pendulum_action_s(
     """Event action for Swinging event (convert cartesian to polar)."""
     x, dx, y, dy = state
     phi = math.atan2(x, -y)
-    # The tangential velocity v = dx * cos(phi) + dy * sin(phi)
-    # dphi = v / l
     dphi = (dx * math.cos(phi) + dy * math.sin(phi)) / parameters.l
     return (phi, dphi)
 
@@ -290,8 +284,6 @@ def solve_c21_bouncing_ball_event_contact(
     max_bounces: int = 100,
 ) -> tuple[list[float], list[Vector]]:
     """Task: Simulate event contact model using Euler integration to demonstrate scatter."""
-    # This acts as the specified runner for the Bouncing Ball case using a simple Euler
-    # with event detection manually implemented for auditable demonstration.
     t = 0.0
     y = list(initial_state)
     times = [t]
@@ -301,16 +293,28 @@ def solve_c21_bouncing_ball_event_contact(
     bounces = 0
 
     while t < t_bound and bounces < max_bounces:
-        # Check event
-        y_next = [yi + dt * dyi for yi, dyi in zip(y, rhs(t, y))]
+        # Instead of manual integration, use the built-in euler solver for one step
+        problem = InitialValueProblem(
+            rhs=rhs, t0=t, y0=y, t_bound=min(t + dt, t_bound)
+        )
+        res = euler(problem, step=dt)
+        y_next = res.states[-1]
+
         if y[0] > 0 and y_next[0] <= 0:
             # Event triggered (crossing 0 negatively)
             # Linear interpolation for zero crossing
-            dt_event = y[0] / (y[0] - y_next[0]) * dt
+            denominator = y[0] - y_next[0]
+            dt_event = (y[0] / denominator) * dt if denominator != 0.0 else dt / 2.0
+
             t_event = t + dt_event
-            y_event = [yi + dt_event * dyi for yi, dyi in zip(y, rhs(t, y))]
+            problem_event = InitialValueProblem(
+                rhs=rhs, t0=t, y0=y, t_bound=t_event
+            )
+            res_event = euler(problem_event, step=dt_event)
+            y_event = res_event.states[-1]
+
             times.append(t_event)
-            states.append(tuple(y_event))
+            states.append(y_event)
 
             # Action
             y = list(c21_bouncing_ball_action_b(y_event, parameters))
@@ -319,8 +323,8 @@ def solve_c21_bouncing_ball_event_contact(
             states.append(tuple(y))
             bounces += 1
         else:
-            t += dt
-            y = y_next
+            t = res.final_time
+            y = list(y_next)
             times.append(t)
             states.append(tuple(y))
 
@@ -335,7 +339,7 @@ def solve_c21_rotating_pendulum(
     """Task: Simulate the rotating pendulum using simple Euler with event switching."""
     t = 0.0
     y = list(initial_state)
-    phase = "swinging"  # or "falling"
+    phase = "swinging"
     times = [t]
     states = [tuple(y)]
     dt = 0.001
@@ -345,24 +349,32 @@ def solve_c21_rotating_pendulum(
 
     while t < t_bound:
         if phase == "swinging":
-            y_next = [yi + dt * dyi for yi, dyi in zip(y, rhs_s(t, y))]
+            problem = InitialValueProblem(
+                rhs=rhs_s, t0=t, y0=y, t_bound=min(t + dt, t_bound)
+            )
+            res = euler(problem, step=dt)
+            y_next = res.states[-1]
             h_curr = c21_rotating_pendulum_h_f(y, parameters)
             h_next = c21_rotating_pendulum_h_f(y_next, parameters)
             if h_curr > 0 and h_next <= 0:
                 y = list(c21_rotating_pendulum_action_f(y_next, parameters))
                 phase = "falling"
             else:
-                y = y_next
+                y = list(y_next)
         else:
-            y_next = [yi + dt * dyi for yi, dyi in zip(y, rhs_f(t, y))]
+            problem = InitialValueProblem(
+                rhs=rhs_f, t0=t, y0=y, t_bound=min(t + dt, t_bound)
+            )
+            res = euler(problem, step=dt)
+            y_next = res.states[-1]
             h_curr = c21_rotating_pendulum_h_s(y, parameters)
             h_next = c21_rotating_pendulum_h_s(y_next, parameters)
             if h_curr < 0 and h_next >= 0:
                 y = list(c21_rotating_pendulum_action_s(y_next, parameters))
                 phase = "swinging"
             else:
-                y = y_next
-        t += dt
+                y = list(y_next)
+        t = res.final_time
         times.append(t)
         states.append(tuple(y))
 
@@ -371,35 +383,27 @@ def solve_c21_rotating_pendulum(
 
 def c21_task_bouncing_ball() -> dict[str, float]:
     """Execute the bouncing ball task and return final time to indicate success."""
-    times, states = solve_c21_bouncing_ball_event_contact()
+    times, _states = solve_c21_bouncing_ball_event_contact()
     return {"final_time": times[-1]}
+
+
+def c21_task_qss1_bouncing_ball() -> dict[str, float]:
+    """Execute the bouncing ball task using QSS1 without state events."""
+    params = C21BouncingBallParameters()
+    rhs = c21_bouncing_ball_event_contact(params)
+    ivp = InitialValueProblem(
+        rhs=rhs, t0=0.0, y0=(10.0, 0.0), t_bound=2.0, autonomous=True
+    )
+    res = qss1(ivp, quantum=0.01)
+    return {"final_time": res.times[-1]}
 
 
 def c21_task_rotating_pendulum() -> dict[str, float]:
     """Execute the rotating pendulum task and return final time to indicate success."""
-    times, states = solve_c21_rotating_pendulum()
+    times, _states = solve_c21_rotating_pendulum()
     return {"final_time": times[-1]}
 
 
 def c21_task_rlc_diode() -> dict[str, float]:
     """Execute the RLC diode task (stub)."""
-    # This is a stub for RLC task as it involves solving a DAE or using explicit reduction
-    # which we have implemented the RHS for, but the full integration wrapper is complex.
-    # To satisfy 'IMPLEMENTED', we provide the task runners that can be executed.
     return {"final_time": 0.0}
-
-def c21_task_qss1_bouncing_ball() -> dict[str, float]:
-    """Execute the bouncing ball task using QSS1 without state events (for comparison/demonstration)."""
-    from ..ivp import InitialValueProblem
-    from ..solvers.qss import qss1
-    params = C21BouncingBallParameters()
-    rhs = c21_bouncing_ball_event_contact(params)
-    ivp = InitialValueProblem(
-        rhs=rhs,
-        t0=0.0,
-        y0=(10.0, 0.0),
-        t_bound=2.0,
-        autonomous=True
-    )
-    res = qss1(ivp, quantum=0.01)
-    return {"final_time": res.times[-1]}

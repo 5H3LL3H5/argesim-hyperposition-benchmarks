@@ -170,7 +170,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "State Events and Structural-dynamic Systems",
         (ModelClass.ODE, ModelClass.DAE, ModelClass.HYBRID),
         _source("c21"),
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.SPECIFIED,
     ),
     BenchmarkDefinition(
         "C22",
