@@ -25,7 +25,7 @@ have already been implemented.
 | C14 | Supply Chain | discrete-time dynamics | cataloged |
 | C15 | Clearance Identification | ODE identification | cataloged |
 | C16 | Restaurant Business Dynamics | agent-based stochastic dynamics | cataloged |
-| C17R | SIR-type Epidemic with Cellular Automata and ODEs | ODE, CA, identification | cataloged |
+| C17R | SIR-type Epidemic with Cellular Automata and ODEs | ODE, CA, identification | implemented |
 | C18 | Identification of Nonlinear Dynamics | transfer functions, neural networks | cataloged |
 | C19R | Pollution in Groundwater Flow | PDE/distributed system | implemented |
 | C20 | Complex Production System | DES | specified |
@@ -42,7 +42,7 @@ have already been implemented.
 | RK4 | explicit ODE and MOL systems | implemented and tested |
 | RK45 | non-stiff explicit ODE and MOL systems | implemented and tested |
 | QSS1 | autonomous explicit ODE and MOL systems | implemented and tested |
-| QSS2 | piecewise-linear quantized trajectories | not implemented |
+| QSS2 | piecewise-linear quantized trajectories | implemented and tested |
 | LIQSS | compatible stiff ODE/MOL structures | not implemented |
 | DES/NSA-DEVS | discrete and hybrid event execution | restricted relay reference only |
 | Neural operator | trained surrogate for a fixed PDE family | not integrated |

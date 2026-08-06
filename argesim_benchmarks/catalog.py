@@ -145,6 +145,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
             ModelClass.IDENTIFICATION,
         ),
         _source("c17r"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C18",
