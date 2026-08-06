@@ -83,6 +83,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Constrained Pendulum",
         (ModelClass.ODE, ModelClass.HYBRID),
         _source("c07"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C08",

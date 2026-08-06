@@ -15,7 +15,7 @@ have already been implemented.
 | C04 | Dining Philosophers | DES/concurrency | cataloged |
 | C05 | Two State Model | stiff ODE, state events | cataloged |
 | C06 | Emergency Department - Follow-up Treatment | stochastic DES | implemented |
-| C07 | Constrained Pendulum | hybrid mechanics | cataloged |
+| C07 | Constrained Pendulum | hybrid mechanics | implemented |
 | C08 | Canal-and-Lock System | stochastic DES | cataloged |
 | C09 | Fuzzy Control of a Two Tank System | hybrid sampled control | cataloged |
 | C10 | Dining Philosophers II | DES/concurrency | cataloged |
