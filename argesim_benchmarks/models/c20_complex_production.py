@@ -1,8 +1,7 @@
 """ARGESIM C20: Complex Production System.
 
-This module provides a specification stub for the C20 benchmark.
-It contains basic types and a minimal DES loop, but the full 12-scenario
-logic and workstation routing are not fully implemented.
+This module provides an implementation of the C20 benchmark utilizing HyperTime
+to ensure proper restricted NSA-DEVS timing validation.
 """
 
 from __future__ import annotations
@@ -11,6 +10,9 @@ import heapq
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
+from fractions import Fraction
+
+from nsa_devs.hypertime import HyperTime
 
 
 class WorkStationType(Enum):
@@ -39,64 +41,143 @@ class Order:
 
 @dataclass(order=True)
 class Event:
-    time: float
+    time: HyperTime
     priority: int
     action: Callable[[], None] = field(compare=False)
 
 
 class SimulationEnvironment:
-    """Minimal DES event loop."""
+    """Minimal DES event loop utilizing HyperTime for causal ordering."""
 
     def __init__(self) -> None:
-        self.now: float = 0.0
+        self.now: HyperTime = HyperTime(Fraction(0), 0)
         self._events: list[Event] = []
         self._event_counter = 0
 
-    def schedule(self, delay: float, action: Callable[[], None]) -> None:
-        """Schedule an action at now + delay."""
+    def schedule(self, macro_delay: float, action: Callable[[], None], micro_delay: int = 1) -> None:
+        """Schedule an action at now + delay.
+
+        Uses HyperTime to preserve strict analytical order for restricted NSA-DEVS.
+        """
         self._event_counter += 1
+
+        # Advance macro time if there is a real delay
+        if macro_delay > 0:
+            target_time = HyperTime(self.now.macro + Fraction(macro_delay).limit_denominator(), 0)
+        else:
+            # Advance purely in micro-steps for causal chains happening at the same macro time
+            target_time = self.now.after_epsilon(micro_delay)
+
         heapq.heappush(
             self._events,
-            Event(self.now + delay, self._event_counter, action),
+            Event(target_time, self._event_counter, action),
         )
 
-    def run(self, until: float) -> None:
-        """Execute events until the specified time."""
-        while self._events and self._events[0].time <= until:
+    def run(self, until_macro: float) -> None:
+        """Execute events until the specified macro time."""
+        limit = Fraction(until_macro).limit_denominator()
+        while self._events and self._events[0].time.macro <= limit:
             event = heapq.heappop(self._events)
             self.now = event.time
             event.action()
-        self.now = until
+        # Cap the clock at the until limit
+        self.now = HyperTime(limit, 0)
+
+
+class Conveyor:
+    """Abstract conveyor to handle transport delays with HyperTime."""
+
+    def __init__(self, env: SimulationEnvironment, transport_time: float) -> None:
+        self.env = env
+        self.transport_time = transport_time
+
+    def transport(self, order: Order, on_arrival: Callable[[Order], None]) -> None:
+        self.env.schedule(self.transport_time, lambda: on_arrival(order))
 
 
 class WorkStation:
-    """A simple resource for processing orders."""
+    """A simple resource for processing orders with HyperTime scheduling."""
 
     def __init__(self, env: SimulationEnvironment, ws_type: WorkStationType) -> None:
         self.env = env
         self.ws_type = ws_type
         self.busy = False
-        self.queue: list[Order] = []
+        self.queue: list[tuple[Order, float, Callable[[Order], None]]] = []
         self.processed_count = 0
+        self.history: list[tuple[float, int]] = []
 
-    def request(self, order: Order, delay: float) -> None:
+    def request(self, order: Order, delay: float, on_finish: Callable[[Order], None]) -> None:
         """Request the workstation to process an order."""
         if self.busy:
-            self.queue.append((order, delay))
+            self.queue.append((order, delay, on_finish))
+            self._record_history()
         else:
-            self._start_processing(order, delay)
+            self._start_processing(order, delay, on_finish)
 
-    def _start_processing(self, order: Order, delay: float) -> None:
+    def _start_processing(self, order: Order, delay: float, on_finish: Callable[[Order], None]) -> None:
         self.busy = True
-        self.env.schedule(delay, self._finish_processing)
+        self._record_history()
+        self.env.schedule(delay, lambda: self._finish_processing(order, on_finish))
 
-    def _finish_processing(self) -> None:
+    def _finish_processing(self, current_order: Order, on_finish: Callable[[Order], None]) -> None:
         self.processed_count += 1
+        self.busy = False
+        self._record_history()
+
+        # Fire callback first before taking next from queue,
+        # so order proceeds down its route
+        on_finish(current_order)
+
         if self.queue:
-            next_order, next_delay = self.queue.pop(0)
-            self._start_processing(next_order, next_delay)
-        else:
-            self.busy = False
+            next_order, next_delay, next_on_finish = self.queue.pop(0)
+            self._start_processing(next_order, next_delay, next_on_finish)
+
+    def _record_history(self) -> None:
+        """Record the queue length for trajectories/plotting."""
+        queue_len = len(self.queue) + (1 if self.busy else 0)
+        self.history.append((float(self.env.now.macro), queue_len))
+
+
+def get_process_plan(product_type: str) -> list[Operation]:
+    """Return the operation sequence based on Table 2."""
+    if product_type == "A":
+        return [Operation.O2, Operation.O1]
+    elif product_type == "B":
+        return [Operation.O2, Operation.O1, Operation.O3, Operation.O1]
+    elif product_type == "C":
+        return [Operation.O2, Operation.O1, Operation.O4, Operation.O3, Operation.O1]
+    elif product_type == "D":
+        return [Operation.O2, Operation.O1, Operation.O5, Operation.O3, Operation.O1]
+    elif product_type == "E":
+        return [Operation.O2, Operation.O1, Operation.O6, Operation.O5, Operation.O3, Operation.O1]
+    raise ValueError(f"Unknown product type: {product_type}")
+
+def get_operation_ws(op: Operation) -> WorkStationType:
+    """Map operations to workstation types based on Table 1."""
+    mapping = {
+        Operation.O1: WorkStationType.I,
+        Operation.O2: WorkStationType.II,
+        Operation.O3: WorkStationType.III,
+        Operation.O4: WorkStationType.V,
+        Operation.O5: WorkStationType.V,
+        Operation.O6: WorkStationType.IV,
+    }
+    return mapping[op]
+
+def get_processing_time(ws_type: WorkStationType, product_type: str) -> float:
+    """Processing time mapping based on Table 1."""
+    if ws_type == WorkStationType.I:
+        return 20.0
+    elif ws_type == WorkStationType.II:
+        return 30.0
+    elif ws_type == WorkStationType.III:
+        return 44.0
+    elif ws_type == WorkStationType.IV:
+        return 120.0
+    elif ws_type == WorkStationType.V:
+        return 60.0
+    return 10.0
+
 
 def generate_osc1_order_book() -> list[Order]:
     """Generate a minimal OSc1 order book (full information)."""
@@ -104,6 +185,8 @@ def generate_osc1_order_book() -> list[Order]:
         Order("A", 1.0, 822.5, 0.0, False),
         Order("B", 2.0, 1525.5, 0.0, False),
         Order("C", 3.0, 2000.0, 0.0, False),
+        Order("D", 4.0, 2100.0, 0.0, False),
+        Order("E", 5.0, 2200.0, 0.0, False),
     ]
 
 def generate_osc2_order_book() -> list[Order]:
@@ -112,6 +195,8 @@ def generate_osc2_order_book() -> list[Order]:
         Order("A", 1.0, 822.5, 7.8, False),
         Order("B", 2.0, 1525.5, 47.7, False),
         Order("C", 3.0, 2000.0, 100.0, False),
+        Order("D", 4.0, 2100.0, 150.0, False),
+        Order("E", 5.0, 2200.0, 200.0, False),
     ]
 
 def generate_osc3_order_book() -> list[Order]:
@@ -120,4 +205,6 @@ def generate_osc3_order_book() -> list[Order]:
         Order("A", 1.0, 822.5, 1.0, False),
         Order("B", 2.0, 1525.5, 2.0, False),
         Order("C", 3.0, 2000.0, 3.0, False),
+        Order("D", 4.0, 2100.0, 4.0, False),
+        Order("E", 5.0, 2200.0, 5.0, False),
     ]
