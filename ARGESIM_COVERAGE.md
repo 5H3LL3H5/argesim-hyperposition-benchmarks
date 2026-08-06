@@ -21,7 +21,7 @@ have already been implemented.
 | C10 | Dining Philosophers II | DES/concurrency | cataloged |
 | C11 | SCARA Robot | DAE, hybrid control | cataloged |
 | C12 | Collision Processes in Rows of Spheres | hybrid mechanics, stochastic study | cataloged |
-| C13 | Crane and Embedded Control | DAE, sampled control | cataloged |
+| C13 | Crane and Embedded Control | DAE, sampled control | implemented |
 | C14 | Supply Chain | discrete-time dynamics | cataloged |
 | C15 | Clearance Identification | ODE identification | cataloged |
 | C16 | Restaurant Business Dynamics | agent-based stochastic dynamics | cataloged |
@@ -30,7 +30,7 @@ have already been implemented.
 | C19R | Pollution in Groundwater Flow | PDE/distributed system | implemented |
 | C20 | Complex Production System | DES | cataloged |
 | C21 | State Events and Structural-dynamic Systems | ODE/DAE, hybrid | cataloged |
-| C22 | Non-standard Queuing Policies | DES/queueing | cataloged |
+| C22 | Non-standard Queuing Policies | DES/queueing | implemented |
 | CP1 | Parallel Simulation Techniques | ODE, MOL/PDE, parallel study | implemented |
 | CP2 | Parallel and Distributed Simulation | Monte Carlo, LBM, MOL/PDE | cataloged |
 
