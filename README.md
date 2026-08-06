@@ -13,7 +13,7 @@ The official inventory is complete for the catalog published in August 2026:
 C01-C22 plus CP1 and CP2. C17R and C19R are the active revised definitions.
 The inventory is machine-readable in `argesim_benchmarks.catalog`.
 
-ARGESIM C01 is the first model at the `implemented` gate. The remaining 23
+ARGESIM C01 is the first model at the `benchmark-ready` gate. The remaining 23
 definitions are cataloged only. Each benchmark must pass five evidence gates
 before it is benchmark-ready:
 

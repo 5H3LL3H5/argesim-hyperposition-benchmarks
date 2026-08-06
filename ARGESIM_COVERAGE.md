@@ -9,7 +9,7 @@ have already been implemented.
 
 | ID | Official benchmark | Model family | Status |
 |---|---|---|---|
-| C01 | Lithium-Cluster Dynamics | stiff ODE | implemented |
+| C01 | Lithium-Cluster Dynamics | stiff ODE | benchmark-ready |
 | C02 | Flexible Assembly System | DES | cataloged |
 | C03 | Class-E Amplifier | ODE, hybrid | cataloged |
 | C04 | Dining Philosophers | DES/concurrency | cataloged |
@@ -50,9 +50,9 @@ have already been implemented.
 `implemented` for C01 means that all three official tasks are represented:
 task A exposes Euler, RK4, RK45 and QSS1 runs plus an accuracy-gated timing
 driver; task B retains complete trajectories for the requested logarithmic
-loss-rate sweep; task C uses and verifies the analytical steady states. It is
-not yet `validated` because an independent published trajectory table or
-cross-tool reference data set has not been archived.
+loss-rate sweep; task C uses and verifies the analytical steady states. It
+has passed the `validated` and `benchmark-ready` gates using published
+cross-tool steady-state references and accurate RK45 oracles.
 
 Euler, RK4 and RK45 are not applied to an unreduced DAE. QSS is applied to a
 PDE only after spatial discretization. A neural operator will be evaluated as
