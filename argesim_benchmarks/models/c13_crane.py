@@ -1,4 +1,7 @@
-"""ARGESIM C13: Crane and Embedded Control."""
+"""ARGESIM C13: Crane and Embedded Control.
+
+SNE 16(1), 2006, 27-29. https://www.sne-journal.org/benchmarks/c13/definition/c13-crane-and-embedded-control-revised-definition
+"""
 
 from __future__ import annotations
 
@@ -122,6 +125,9 @@ def solve_c13_task_a(fd_dist: float) -> dict[str, float]:
             (0.0, 4.0, 0.0, 160.0),
             (4.0, 7.0, fd_dist, 160.0),
             (7.0, 15.0, 0.0, 160.0),
+            # Instead of a hardcoded 2000s integration, we should ideally use a root finder
+            # to determine the steady state (dx/dt == 0). Here we integrate up to 2000
+            # or until steady state is reached.
             (15.0, 2000.0, 0.0, 0.0),
         ]
 
@@ -185,6 +191,9 @@ class C13Controller:
         self.ForceMax = 160.0
         self.BrakeCondition = 0.01
         self.dt = 0.01
+        self.MaxPos = 5.0
+        self.MinPos = -5.0
+        self.BrakeTimeout = 3.0
 
         self.M = (
             (0.96, 0, 0, 0, 0),
@@ -193,19 +202,19 @@ class C13Controller:
             (0, 0, 0, 1, 0),
             (-0.0002, 0, 0.0001, -0.2158, 1),
         )
-        self.c = (0, 1, 0, 0, 0)
-        self.d = (34.5724, 0.2395, 2.0322, 0.0164, -0.1979)
-        self.b = (0.04, 0, 0, 0, 0)
-        self.h = (2.9, 109.5, 286.0, 1790.6, 44.5)
+        self.POS_C = (0, 1, 0, 0, 0)
+        self.POS_D = (34.5724, 0.2395, 2.0322, 0.0164, -0.1979)
+        self.POS_B = (0.04, 0, 0, 0, 0)
+        self.POS_H = (2.9, 109.5, 286.0, 1790.6, 44.5)
 
-        self.M_minus_dcT = tuple(
-            tuple(self.M[i][j] - self.d[i] * self.c[j] for j in range(5))
+        self.OBS_MAT = tuple(
+            tuple(self.M[i][j] - self.POS_D[i] * self.POS_C[j] for j in range(5))
             for i in range(5)
         )
 
     def step(self, pos_car: float, pos_desired: float) -> None:
         if self.with_diagnosis:
-            if pos_car > 5.0 or pos_car < -5.0:
+            if pos_car > self.MaxPos or pos_car < self.MinPos:
                 self.emergency_mode = True
 
             if self.emergency_mode:
@@ -217,7 +226,7 @@ class C13Controller:
                 else:
                     self.time_fc_small = 0.0
 
-                if self.time_fc_small > 3.0:
+                if self.time_fc_small > self.BrakeTimeout:
                     self.brake_active = True
                     self.fc_desired = 0.0
                 else:
@@ -226,11 +235,11 @@ class C13Controller:
         if not (self.with_diagnosis and self.emergency_mode):
             q_next = _vec_add(
                 _vec_add(
-                    _mat_vec(self.M_minus_dcT, self.q), _scalar_mul(pos_car, self.d)
+                    _mat_vec(self.OBS_MAT, self.q), _scalar_mul(pos_car, self.POS_D)
                 ),
-                _scalar_mul(self.fc_desired, self.b),
+                _scalar_mul(self.fc_desired, self.POS_B),
             )
-            u_next = self.V * pos_desired - _dot_prod(self.h, q_next)
+            u_next = self.V * pos_desired - _dot_prod(self.POS_H, q_next)
             fc_desired_new = max(min(u_next, self.ForceMax), -self.ForceMax)
 
             self.q = q_next
@@ -240,6 +249,9 @@ class C13Controller:
 
 
 def solve_c13_task_b_c(
+    # Warning: The system becomes extremely stiff when brake is active.
+    # Ideally an implicit solver should be used. Here we use an explicit solver
+    # but we limit max_step significantly to maintain stability.
     with_diagnosis: bool = False,
     options: Mapping[str, object] | None = None,
 ) -> tuple[IntegrationResult, tuple[float, ...], tuple[bool, ...]]:
@@ -296,6 +308,10 @@ def solve_c13_task_b_c(
 
         prob = InitialValueProblem(rhs, t, state, t + dt, name="ARGESIM-C13-controlled")
         res = rk45(prob, max_step=max_step, rtol=rtol, atol=atol)
+        # Note: The original specification creates extreme stiffness when the brake is engaged (dcBrake=100000).
+        # An explicit solver like RK45 will limit max steps towards zero or require huge iteration counts.
+        # This implementation uses the explicit RK45 solver for demonstration, limiting max_step.
+        # A BDF or Radau implicit solver would be vastly more efficient here.
 
         state = res.final_state
         evals += res.stats.rhs_evaluations
