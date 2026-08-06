@@ -1,5 +1,6 @@
 import unittest
 
+from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
 from argesim_benchmarks.models import (
     c22_basic,
     c22_classing,
@@ -9,6 +10,10 @@ from argesim_benchmarks.models import (
 
 
 class C22Tests(unittest.TestCase):
+    def test_c22_catalog_status(self) -> None:
+        c22 = next(b for b in BENCHMARKS if b.identifier == "C22")
+        self.assertEqual(c22.status, BenchmarkStatus.IMPLEMENTED)
+
     def test_c22_basic_runs_without_errors(self) -> None:
         results = c22_basic()
         self.assertIn("deterministic", results)

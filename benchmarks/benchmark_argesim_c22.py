@@ -1,12 +1,16 @@
-"""Standalone script to run and plot ARGESIM C22 benchmark trajectories.
-Requires matplotlib and numpy for visualization.
-"""
+#!/usr/bin/env python3
+"""Timing experiment for ARGESIM C22 (Non-standard Queuing Policies)."""
 
-import os
+from __future__ import annotations
+
+import argparse
+import json
+import statistics
 import sys
+import time
+from pathlib import Path
 
-# Make sure our module path is available
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from argesim_benchmarks.models.c22_queuing_policies import (
     c22_basic,
@@ -15,55 +19,58 @@ from argesim_benchmarks.models.c22_queuing_policies import (
     c22_reneging,
 )
 
-def run_and_plot():
-    # Make sure we use an agg backend if headless
-    import matplotlib
-    matplotlib.use('Agg')
 
-    print("Running C22 Benchmark Tasks...")
+def _quartiles(values: list[int]) -> tuple[float, float]:
+    if len(values) < 2:
+        return float(values[0]), float(values[0])
+    quartiles = statistics.quantiles(values, n=4, method="inclusive")
+    return quartiles[0], quartiles[2]
 
-    # Run Basic
-    res_basic = c22_basic()
-    det_basic = res_basic["deterministic"]
-    stoch_basic = res_basic["stochastic"]
-    print(f"Basic (Deterministic): avg_wait={det_basic['tq_avg']:.2f}, max_wait={det_basic['tq_max']:.2f}")
-    print(f"Basic (Stochastic): avg_wait={stoch_basic['tq_avg']:.2f}, max_wait={stoch_basic['tq_max']:.2f}")
 
-    # Run Jockeying
-    res_jock = c22_jockeying()
-    stoch_jock = res_jock["stochastic"]
-    print(f"Jockeying (Stochastic): avg_wait={stoch_jock['tq_avg']:.2f}, max_wait={stoch_jock['tq_max']:.2f}, events={stoch_jock['jockey_events']}")
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Timing experiment for ARGESIM C22."
+    )
+    parser.add_argument("--repeat", type=int, default=9, help="Number of repetitions.")
+    parser.add_argument("--warmup", type=int, default=1, help="Number of warmup runs.")
+    arguments = parser.parse_args()
+    if arguments.repeat < 1 or arguments.warmup < 0:
+        parser.error("repeat must be positive and warmup must be non-negative")
 
-    # Run Reneging
-    res_ren = c22_reneging()
-    stoch_ren = res_ren["stochastic"]
-    print(f"Reneging (Stochastic): avg_wait={stoch_ren['tq_avg']:.2f}, max_wait={stoch_ren['tq_max']:.2f}, events={stoch_ren['renege_events']}")
+    report: dict[str, object] = {
+        "benchmark": "ARGESIM-C22",
+        "definition": "https://www.argesim.org/benchmarks/c22/",
+        "tasks": {},
+    }
 
-    # Run Classing
-    res_class = c22_classing()
-    stoch_class = res_class["stochastic"]
-    print(f"Classing (Stochastic):")
-    for c, stats in stoch_class["class_stats"].items():
-        print(f"  Class {c}: avg_wait={stats['avg']:.2f}, max_wait={stats['max']:.2f}")
+    tasks = {
+        "Basic": c22_basic,
+        "Jockeying": c22_jockeying,
+        "Reneging": c22_reneging,
+        "Classing": c22_classing,
+    }
 
-    try:
-        import matplotlib.pyplot as plt
-        import numpy as np
+    for task_name, task_func in tasks.items():
+        for _ in range(arguments.warmup):
+            task_func()
 
-        # Plot for Basic Deterministic
-        plt.figure(figsize=(10, 6))
-        times = det_basic["times_out"]
-        ids = det_basic["ids_out"]
-        plt.stem(times, ids, basefmt=" ")
-        plt.title("C22 Basic (Deterministic) - IDs over Termination Time")
-        plt.xlabel("Time (t)")
-        plt.ylabel("Entity ID")
-        plt.grid(True)
-        plt.savefig("c22_basic_deterministic.png")
-        plt.close()
-        print("Generated c22_basic_deterministic.png")
-    except ImportError:
-        print("Warning: matplotlib and/or numpy not installed. Skipping plot generation.")
+        durations: list[int] = []
+        result = None
+        for _ in range(arguments.repeat):
+            started = time.perf_counter_ns()
+            result = task_func()
+            durations.append(time.perf_counter_ns() - started)
+        assert result is not None
+
+        first_quartile, third_quartile = _quartiles(durations)
+        report["tasks"][task_name] = {
+            "durations_ns": durations,
+            "median_ns": statistics.median(durations),
+            "iqr_ns": third_quartile - first_quartile,
+        }
+
+    print(json.dumps(report, indent=2))
+
 
 if __name__ == "__main__":
-    run_and_plot()
+    main()
