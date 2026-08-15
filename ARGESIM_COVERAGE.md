@@ -16,7 +16,7 @@ have already been implemented.
 | C05 | Two State Model | stiff ODE, state events | cataloged |
 | C06 | Emergency Department - Follow-up Treatment | stochastic DES | implemented |
 | C07 | Constrained Pendulum | hybrid mechanics | implemented |
-| C08 | Canal-and-Lock System | stochastic DES | cataloged |
+| C08 | Canal-and-Lock System | stochastic DES | validated |
 | C09 | Fuzzy Control of a Two Tank System | hybrid sampled control | cataloged |
 | C10 | Dining Philosophers II | DES/concurrency | cataloged |
 | C11 | SCARA Robot | DAE, hybrid control | implemented |
@@ -29,7 +29,7 @@ have already been implemented.
 | C18 | Identification of Nonlinear Dynamics | transfer functions, neural networks | cataloged |
 | C19R | Pollution in Groundwater Flow | PDE/distributed system | implemented |
 | C20 | Complex Production System | DES | specified |
-| C21 | State Events and Structural-dynamic Systems | ODE/DAE, hybrid | cataloged |
+| C21 | State Events and Structural-dynamic Systems | ODE/DAE, hybrid | specified |
 | C22 | Non-standard Queuing Policies | DES/queueing | implemented |
 | CP1 | Parallel Simulation Techniques | ODE, MOL/PDE, parallel study | implemented |
 | CP2 | Parallel and Distributed Simulation | Monte Carlo, LBM, MOL/PDE | implemented |
