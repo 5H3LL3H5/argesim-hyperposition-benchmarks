@@ -11,6 +11,7 @@ from .c01_lithium_cluster import (
     c01_task_c,
     solve_c01,
 )
+from .c02_flexible_assembly import solve_c02
 from .c06_emergency_department import (
     solve_c06_task_a,
     solve_c06_task_b,
@@ -140,6 +141,7 @@ __all__ = [
     "cp2_swinging_rope_initial_state",
     "cp2_swinging_rope_problem",
     "solve_c01",
+    "solve_c02",
     "solve_c06_task_a",
     "solve_c06_task_b",
     "solve_c06_task_c",
