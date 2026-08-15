@@ -1,7 +1,7 @@
 """Reproducible building blocks for the official ARGESIM benchmark suite."""
 
 from .catalog import BENCHMARKS, BenchmarkDefinition, BenchmarkStatus, ModelClass
-from .ivp import InitialValueProblem, IntegrationResult, SolverStats
+from .ivp import InitialValueProblem, IntegrationError, IntegrationResult, SolverStats
 from .models import (
     Barge,
     C01_INITIAL_STATE,
@@ -73,6 +73,7 @@ __all__ = [
     "Direction",
     "C17Parameters",
     "InitialValueProblem",
+    "IntegrationError",
     "IntegrationResult",
     "ModelClass",
     "SolverStats",
