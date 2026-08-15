@@ -59,9 +59,6 @@ from .c11_scara_robot import (
     C11Parameters,
     c11_problem,
     c11_rhs,
-    c11_task_a,
-    c11_task_b,
-    c11_task_c,
     solve_c11,
 )
 from .c12_collision import C12Parameters, c12_task_a, c12_task_b, c12_task_c
@@ -202,9 +199,6 @@ __all__ = [
     "c07_task_c",
     "c11_problem",
     "c11_rhs",
-    "c11_task_a",
-    "c11_task_b",
-    "c11_task_c",
     "c12_task_a",
     "c12_task_b",
     "c12_task_c",
