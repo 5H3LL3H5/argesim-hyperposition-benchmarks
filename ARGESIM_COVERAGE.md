@@ -23,7 +23,7 @@ have already been implemented.
 | C12 | Collision Processes in Rows of Spheres | hybrid mechanics, stochastic study | cataloged |
 | C13 | Crane and Embedded Control | DAE, sampled control | implemented |
 | C14 | Supply Chain | discrete-time dynamics | cataloged |
-| C15 | Clearance Identification | ODE identification | cataloged |
+| C15 | Clearance Identification | ODE identification | implemented |
 | C16 | Restaurant Business Dynamics | agent-based stochastic dynamics | cataloged |
 | C17R | SIR-type Epidemic with Cellular Automata and ODEs | ODE, CA, identification | implemented |
 | C18 | Identification of Nonlinear Dynamics | transfer functions, neural networks | cataloged |
