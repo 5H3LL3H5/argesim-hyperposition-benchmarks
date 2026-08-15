@@ -2,6 +2,11 @@ import math
 import unittest
 
 from argesim_benchmarks import InitialValueProblem, euler, rk4, rk45
+from argesim_benchmarks.ivp import (
+    IntegrationError,
+    IntegrationResult,
+    SolverStats,
+)
 
 
 def decay_problem(t_bound: float = 1.0) -> InitialValueProblem:
@@ -53,6 +58,43 @@ class ExplicitSolverTests(unittest.TestCase):
         problem = InitialValueProblem(lambda _time, _state: (1.0, 2.0), 0, (0,), 1)
         with self.assertRaises(ValueError):
             euler(problem, 0.1)
+
+    def test_evaluation_rejects_non_finite_inputs(self) -> None:
+        problem = decay_problem()
+        with self.assertRaises(ValueError):
+            problem.evaluate(math.inf, (1.0,))
+        with self.assertRaises(ValueError):
+            problem.evaluate(0.0, (math.nan,))
+
+    def test_step_limits_must_be_positive_integers(self) -> None:
+        with self.assertRaises(TypeError):
+            euler(decay_problem(), 0.1, max_steps=True)
+        with self.assertRaises(TypeError):
+            rk45(decay_problem(), max_steps=10.5)
+
+    def test_non_finite_state_update_is_an_integration_error(self) -> None:
+        maximum = float.fromhex("0x1.fffffffffffffp+1023")
+        problem = InitialValueProblem(
+            lambda _time, _state: (maximum,),
+            0.0,
+            (maximum,),
+            1.0,
+        )
+        with self.assertRaises(IntegrationError):
+            euler(problem, 1.0)
+
+    def test_rk45_rejects_inconsistent_step_bounds(self) -> None:
+        with self.assertRaises(ValueError):
+            rk45(decay_problem(), min_step=0.5, max_step=0.25)
+
+    def test_result_and_statistics_contracts_reject_invalid_samples(self) -> None:
+        with self.assertRaises(TypeError):
+            SolverStats(True, 0, 0)
+        stats = SolverStats(1, 0, 1)
+        with self.assertRaises(ValueError):
+            IntegrationResult("test", (0.0, math.inf), ((0.0,), (1.0,)), stats)
+        with self.assertRaises(ValueError):
+            IntegrationResult("test", (0.0, 1.0), ((0.0,), (math.nan,)), stats)
 
 
 if __name__ == "__main__":
