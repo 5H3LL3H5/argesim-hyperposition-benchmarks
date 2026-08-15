@@ -8,11 +8,11 @@ from __future__ import annotations
 
 import heapq
 import random
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from fractions import Fraction
 from typing import Any
 
-from nsa_devs.hypertime import HyperTime
+from nsa_devs import DesScheduler, HyperTime
 
 
 class AtomicModel:
@@ -20,10 +20,10 @@ class AtomicModel:
 
     def __init__(self, name: str):
         self.name = name
-        self.sigma: HyperTime = HyperTime(Fraction(0))
+        self.sigma: HyperTime | None = HyperTime(Fraction(0))
         self.phase: str = "active"
 
-    def time_advance(self) -> HyperTime:
+    def time_advance(self) -> HyperTime | None:
         """Return the time remaining before the next internal transition."""
         return self.sigma
 
@@ -40,55 +40,53 @@ class AtomicModel:
         return None
 
 
-@dataclass(order=True)
-class EventMsg:
-    time: HyperTime
-    priority: int
-    sequence: int
-    model: AtomicModel = field(compare=False)
-    payload: Any = field(default=None, compare=False)
-
-
 class DevsSimulator:
-    """Formal DEVS Execution Algorithm."""
+    """Single-atomic DEVS adapter using the shared HyperTime scheduler."""
 
     def __init__(self, model: AtomicModel):
+        if not isinstance(model, AtomicModel):
+            raise TypeError("model must be AtomicModel")
         self.model = model
-        self.time = HyperTime(Fraction(0))
-        self._sequence = 0
-        self.events: list[EventMsg] = []
+        self.scheduler = DesScheduler()
 
         # Schedule the first internal transition
         self.schedule_internal(model)
 
+    @property
+    def time(self) -> HyperTime:
+        return self.scheduler.time
+
+    @property
+    def events(self):
+        return self.scheduler.events
+
     def schedule_internal(self, model: AtomicModel) -> None:
         ta = model.time_advance()
         if ta is not None:
-            self._sequence += 1
             target = self.time
             if ta.macro > 0:
                 target = target.after_finite(ta.macro)
             if ta.micro > 0:
                 target = target.after_epsilon(ta.micro)
 
-            heapq.heappush(self.events, EventMsg(target, 0, self._sequence, model))
+            self.scheduler.schedule_at(
+                target,
+                f"{model.name}:internal",
+                self._execute_internal,
+                model,
+            )
 
-    def run(self) -> None:
-        while self.events:
-            event = heapq.heappop(self.events)
-            self.time = event.time
+    def _execute_internal(self, model: AtomicModel) -> None:
+        _ = model.output_function()
+        model.internal_transition()
+        self.schedule_internal(model)
 
-            # Since this is a standalone Atomic model simulation acting as a system,
-            # we just process internal transitions. External transitions will be routed
-            # through specific internal handlers.
-
-            # Output and internal transition
-            _ = event.model.output_function()
-            event.model.internal_transition()
-
-            # Note: in a true coupled DEVS, 'out' would be routed to other models via external transitions
-            # Here we just reschedule based on the new ta
-            self.schedule_internal(event.model)
+    def run(self, *, max_events: int = 1_000_000) -> int:
+        if not isinstance(max_events, int) or isinstance(max_events, bool):
+            raise TypeError("max_events must be an integer")
+        if max_events <= 0:
+            raise ValueError("max_events must be positive")
+        return self.scheduler.run_until_idle(max_events=max_events)
 
 
 @dataclass
@@ -100,6 +98,8 @@ class Entity:
     reneged: bool = False
     entity_class: int = 0
     assigned_queue: int = -1
+    in_service: bool = False
+    terminated: bool = False
 
 
 class BaseDevsSystem(AtomicModel):
@@ -112,6 +112,15 @@ class BaseDevsSystem(AtomicModel):
         rng: random.Random | None = None,
     ):
         super().__init__(name)
+        for option_name, option in (
+            ("stochastic", stochastic),
+            ("large", large),
+            ("variant", variant),
+        ):
+            if not isinstance(option, bool):
+                raise TypeError(f"{option_name} must be bool")
+        if rng is not None and not isinstance(rng, random.Random):
+            raise TypeError("rng must be random.Random")
         self.stochastic = stochastic
         self.large = large
         self.variant = variant
@@ -129,6 +138,7 @@ class BaseDevsSystem(AtomicModel):
 
         self.entities_created = 0
         self.entities_terminated = 0
+        self.creation_times: list[float] = []
 
         self.terminated_ids: list[int] = []
         self.termination_times: list[float] = []
@@ -148,12 +158,23 @@ class BaseDevsSystem(AtomicModel):
         self._internal_seq = 0
         self.current_time = HyperTime(Fraction(0))
 
-        self.schedule_event(0.0, 5 if not variant else 0, "arrive", None)
+        # C22 explicitly places the first entity at t=1 for every experiment.
+        self.schedule_event(1.0, 5 if not variant else 0, "arrive", None)
         self.update_sigma()
 
     def schedule_event(
         self, delay: float, priority: int, event_type: str, payload: Any = None
     ) -> None:
+        if isinstance(delay, bool) or not isinstance(delay, (int, float)):
+            raise TypeError("event delay must be a real number")
+        if delay < 0.0:
+            raise ValueError("event delay must be non-negative")
+        if not isinstance(priority, int) or isinstance(priority, bool):
+            raise TypeError("event priority must be an integer")
+        if priority < 0:
+            raise ValueError("event priority must be non-negative")
+        if not isinstance(event_type, str) or not event_type:
+            raise ValueError("event_type must be a non-empty string")
         self._internal_seq += 1
         # NSA-DEVS encoding: finite delay + epsilon priority
         if delay > 0:
@@ -161,9 +182,10 @@ class BaseDevsSystem(AtomicModel):
             if priority > 0:
                 target_time = target_time.after_epsilon(priority)
         else:
-            target_time = self.current_time
-            if priority > 0:
-                target_time = target_time.after_epsilon(priority)
+            target_time = HyperTime(
+                self.current_time.macro,
+                max(priority, self.current_time.micro + 1),
+            )
 
         heapq.heappush(
             self._internal_events,
@@ -173,10 +195,17 @@ class BaseDevsSystem(AtomicModel):
     def schedule_eps_event(
         self, priority: int, event_type: str, payload: Any = None
     ) -> None:
+        if not isinstance(priority, int) or isinstance(priority, bool):
+            raise TypeError("event priority must be an integer")
+        if priority < 0:
+            raise ValueError("event priority must be non-negative")
+        if not isinstance(event_type, str) or not event_type:
+            raise ValueError("event_type must be a non-empty string")
         self._internal_seq += 1
-        target_time = self.current_time
-        if priority > 0:
-            target_time = target_time.after_epsilon(priority)
+        target_time = HyperTime(
+            self.current_time.macro,
+            max(priority, self.current_time.micro + 1),
+        )
         heapq.heappush(
             self._internal_events,
             (target_time, priority, self._internal_seq, event_type, payload),
@@ -200,7 +229,7 @@ class BaseDevsSystem(AtomicModel):
             else:
                 self.sigma = HyperTime(macro_diff, next_time.micro)
 
-    def time_advance(self) -> HyperTime:
+    def time_advance(self) -> HyperTime | None:
         return self.sigma
 
     def internal_transition(self) -> None:
@@ -227,6 +256,7 @@ class BaseDevsSystem(AtomicModel):
         elif event_type == "operator":
             self.handle_operator()
 
+        self.lqt_max = max(self.lqt_max, sum(len(q) for q in self.queues))
         self.update_sigma()
 
     def update_stats(self) -> None:
@@ -270,6 +300,7 @@ class BaseDevsSystem(AtomicModel):
             return
 
         self.entities_created += 1
+        self.creation_times.append(float(self.current_time.macro))
         entity = Entity(
             id=self.entities_created, creation_time=float(self.current_time.macro)
         )
@@ -299,6 +330,8 @@ class BaseDevsSystem(AtomicModel):
             if entity.reneged:
                 return
             self.servers[q_idx] = entity
+            entity.assigned_queue = -1
+            entity.in_service = True
             entity.queue_wait_time += (
                 float(self.current_time.macro) - entity.enter_queue_time
             )
@@ -311,6 +344,8 @@ class BaseDevsSystem(AtomicModel):
         entity = self.servers[q_idx]
         self.servers[q_idx] = None
         if entity is not None:
+            entity.in_service = False
+            entity.terminated = True
             self.terminated_ids.append(entity.id)
             self.termination_times.append(float(self.current_time.macro))
             self.entities_terminated += 1
@@ -348,7 +383,7 @@ class JockeyingSystem(BaseDevsSystem):
         variant: bool = False,
         rng: random.Random | None = None,
     ):
-        super().__init__(name, stochastic, large, variant)
+        super().__init__(name, stochastic, large, variant, rng)
         self.jockey_events = 0
         self.jockey_records: list[tuple[float, int, int, int]] = []
 
@@ -407,7 +442,7 @@ class RenegingSystem(BaseDevsSystem):
         variant: bool = False,
         rng: random.Random | None = None,
     ):
-        super().__init__(name, stochastic, large, variant)
+        super().__init__(name, stochastic, large, variant, rng)
         self.t_r = 9.0
         self.renege_events = 0
         self.renege_records: list[tuple[float, int]] = []
@@ -417,19 +452,25 @@ class RenegingSystem(BaseDevsSystem):
         self.schedule_event(self.t_r, 3, "renege", entity)
 
     def handle_renege(self, entity: Entity) -> None:
-        if entity.assigned_queue != -1 and not entity.reneged:
-            # We don't remove it from the list here to avoid O(N).
-            # Instead we mark it reneged, and ignore it when it pops.
-            entity.reneged = True
-            entity.reneged = True
-            entity.queue_wait_time = self.t_r
-            self.wait_times.append(entity.queue_wait_time)
+        q_idx = entity.assigned_queue
+        if q_idx == -1 or entity.in_service or entity.terminated:
+            return
+        queue = self.queues[q_idx]
+        try:
+            queue.remove(entity)
+        except ValueError:
+            return
+        entity.assigned_queue = -1
+        entity.reneged = True
+        entity.terminated = True
+        entity.queue_wait_time += float(self.current_time.macro) - entity.enter_queue_time
+        self.wait_times.append(entity.queue_wait_time)
 
-            self.renege_events += 1
-            if not self.stochastic:
-                self.renege_records.append((float(self.current_time.macro), entity.id))
+        self.renege_events += 1
+        if not self.stochastic:
+            self.renege_records.append((float(self.current_time.macro), entity.id))
 
-            self.entities_terminated += 1
+        self.entities_terminated += 1
 
 
 class ClassingSystem(BaseDevsSystem):
@@ -441,28 +482,39 @@ class ClassingSystem(BaseDevsSystem):
         variant: bool = False,
         rng: random.Random | None = None,
     ):
-        super().__init__(name, stochastic, large, variant)
+        super().__init__(name, stochastic, large, variant, rng)
         self.n_c = 5
         self.t_c = 10.0
         self.current_class = 0
-        self.det_class_counter = 1
+        self.det_class_counter = self.n_c
+        self.operator_started = False
 
         self.schedule_event(self.t_c, 6, "operator")
         self.class_wait_times: dict[int, list[float]] = {
             i: [] for i in range(1, self.n_c + 1)
         }
 
+    def process_entity_arrival(self, entity: Entity) -> None:
+        super().process_entity_arrival(entity)
+        if self.operator_started and entity.entity_class == self.current_class:
+            q_idx = entity.assigned_queue
+            self.reorder_queues()
+            self.check_enter_server(q_idx)
+
     def handle_arrive(self) -> None:
         if self.entities_created >= self.num_entities:
             return
 
         self.entities_created += 1
+        self.creation_times.append(float(self.current_time.macro))
 
         if self.stochastic:
             c = self.rng.randint(1, self.n_c)
         else:
             c = self.det_class_counter
-            self.det_class_counter = (self.det_class_counter % self.n_c) + 1
+            self.det_class_counter -= 1
+            if self.det_class_counter == 0:
+                self.det_class_counter = self.n_c
 
         entity = Entity(
             id=self.entities_created,
@@ -472,7 +524,8 @@ class ClassingSystem(BaseDevsSystem):
         self.process_entity_arrival(entity)
 
         if (
-            self.current_class == 0
+            self.operator_started
+            and self.current_class == 0
             and sum(self.total_length(i) for i in range(self.num_queues)) > 0
         ):
             self.schedule_eps_event(6, "operator")
@@ -491,6 +544,8 @@ class ClassingSystem(BaseDevsSystem):
         """
         if self.entities_terminated >= self.num_entities:
             return
+
+        self.operator_started = True
 
         total_in_system = sum(self.total_length(i) for i in range(self.num_queues))
         if total_in_system == 0:
@@ -536,6 +591,8 @@ class ClassingSystem(BaseDevsSystem):
             if entity.reneged:
                 return
             self.servers[q_idx] = entity
+            entity.assigned_queue = -1
+            entity.in_service = True
             entity.queue_wait_time += (
                 float(self.current_time.macro) - entity.enter_queue_time
             )
@@ -576,7 +633,14 @@ def run_model(
     system = system_cls("C22_Model", stochastic, large, variant, rng)
     sim = DevsSimulator(system)
 
-    sim.run()
+    processed_events = sim.run()
+    active_entities = sum(len(queue) for queue in system.queues) + sum(
+        server is not None for server in system.servers
+    )
+    if system.entities_created != system.num_entities:
+        raise RuntimeError("C22 simulation did not create every configured entity")
+    if system.entities_terminated != system.num_entities or active_entities:
+        raise RuntimeError("C22 simulation ended with unterminated entities")
 
     avg_lqt = system.lqt_integral / float(sim.time.macro) if sim.time.macro > 0 else 0.0
     avg_wait = (
@@ -589,6 +653,11 @@ def run_model(
         "lqt_avg": avg_lqt,
         "tq_max": max_wait,
         "tq_avg": avg_wait,
+        "first_arrival_time": system.creation_times[0],
+        "entities_created": system.entities_created,
+        "entities_terminated": system.entities_terminated,
+        "active_entities": active_entities,
+        "processed_events": processed_events,
     }
 
     if not stochastic:

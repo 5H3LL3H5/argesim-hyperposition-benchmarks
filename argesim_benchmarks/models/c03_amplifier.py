@@ -6,8 +6,12 @@ import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 
-from ..ivp import InitialValueProblem, IntegrationResult, Rhs, SolverStats, Vector
-from ..solvers import euler, rk4, rk45
+from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
+from ..runtime import (
+    merge_integration_results,
+    normalise_solver_name,
+    solve_ivp,
+)
 
 C03_INITIAL_STATE: Vector = (0.0, 0.0, 0.0, 0.0)
 
@@ -188,8 +192,7 @@ def solve_c03(
     options: Mapping[str, object] | None = None,
 ) -> IntegrationResult:
     """Solve C03 with event-aligned segments at every switch boundary."""
-    configured = dict(options or {})
-    normalised = method.strip().lower()
+    normalised = normalise_solver_name(method)
     if normalised not in {"euler", "rk4", "rk45"}:
         raise ValueError(f"unsupported C03 solver: {method}")
     if not math.isfinite(t_bound) or t_bound <= 0.0:
@@ -212,9 +215,7 @@ def solve_c03(
         cycle += 1
 
     ordered = sorted(boundaries)
-    times: list[float] = []
-    states: list[Vector] = []
-    accepted = rejected = evaluations = 0
+    segments: list[IntegrationResult] = []
     state = tuple(float(value) for value in initial_state)
 
     for start, end in zip(ordered, ordered[1:]):
@@ -224,42 +225,26 @@ def solve_c03(
             t0=start,
             t_bound=end,
         )
-        if normalised == "euler":
-            segment = euler(problem, float(configured.get("step", 1.0e-10)))
-        elif normalised == "rk4":
-            segment = rk4(problem, float(configured.get("step", 1.0e-10)))
-        else:
-            span = end - start
-            segment = rk45(
-                problem,
-                rtol=float(configured.get("rtol", 1.0e-6)),
-                atol=float(configured.get("atol", 1.0e-8)),
-                min_step=float(
-                    configured.get(
-                        "min_step",
-                        min(1.0e-14, max(span * 1.0e-6, 1.0e-30)),
-                    )
-                ),
-                max_step=float(configured.get("max_step", 1.0e-7)),
-            )
-
-        if not times:
-            times.extend(segment.times)
-            states.extend(segment.states)
-        else:
-            times.extend(segment.times[1:])
-            states.extend(segment.states[1:])
+        span = end - start
+        defaults = {
+            "euler": {"step": 1.0e-10},
+            "rk4": {"step": 1.0e-10},
+            "rk45": {
+                "rtol": 1.0e-6,
+                "atol": 1.0e-8,
+                "min_step": min(1.0e-14, max(span * 1.0e-6, 1.0e-30)),
+                "max_step": 1.0e-7,
+            },
+        }
+        segment = solve_ivp(
+            problem,
+            normalised,
+            options=options,
+            defaults=defaults,
+        )
+        segments.append(segment)
         state = segment.final_state
-        accepted += segment.stats.accepted_steps
-        rejected += segment.stats.rejected_steps
-        evaluations += segment.stats.rhs_evaluations
-
-    return IntegrationResult(
-        normalised,
-        tuple(times),
-        tuple(states),
-        SolverStats(accepted, rejected, evaluations),
-    )
+    return merge_integration_results(segments, method=normalised)
 
 def c03_task_b(
     method: str = "rk45",

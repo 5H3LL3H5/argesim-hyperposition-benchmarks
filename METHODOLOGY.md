@@ -83,7 +83,7 @@ These experiments do not establish:
 - absence of data races or locks;
 - absence of Time Warp rollbacks;
 - parallel speedup;
-- compliance with official ARGESIM benchmark definitions.
+- benchmark readiness beyond the catalog's recorded evidence gate.
 
 ## 7. Solver comparisons
 
@@ -93,9 +93,25 @@ Adaptive and event-driven methods report accepted and rejected steps or events
 and right-hand-side evaluations in addition to wall time.
 
 Explicit methods are not presented as suitable stiff or DAE solvers merely
-because they can execute with a very small step. QSS2 and LIQSS results will
-not be published until their actual quantizer algorithms and convergence tests
-are present.
+because they can execute with a very small step. QSS2 now has an actual
+piecewise-linear quantizer, scaled directional derivative approximation and
+convergence/fast-nonlinearity regression tests. LIQSS remains unimplemented.
+
+Continuous benchmark wrappers use one strict dispatcher while Euler, RK4,
+RK45, QSS1 and QSS2 remain separate algorithms. Unknown option names are
+errors. Piecewise inputs are represented as contiguous autonomous segments for
+QSS; a non-autonomous problem is never mislabeled autonomous merely to make a
+backend accept it.
+
+Hybrid models use one event layer for both classical and quantized continuous
+modes. Every event declares a guard, direction, reset and target mode. The
+runtime localizes a crossing, records its standard time plus a microstep, then
+continues from the post-event state. A maximum-event guard turns Zeno behavior
+into an explicit failure or a model-defined resting mode.
+
+Callback DES workloads share the deterministic `HyperTime` scheduler. A
+finite horizon includes all microsteps at its terminal macro time; idle drains,
+cancellation and maximum-event limits are part of the public contract.
 
 ## 8. PDE and learned-operator protocol
 

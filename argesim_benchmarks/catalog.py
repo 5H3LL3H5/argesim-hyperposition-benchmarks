@@ -58,7 +58,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Flexible Assembly System",
         (ModelClass.DES,),
         _source("c02"),
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
         "C03",
@@ -162,7 +162,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
             ModelClass.IDENTIFICATION,
         ),
         _source("c17r"),
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.SPECIFIED,
     ),
     BenchmarkDefinition(
         "C18",
@@ -208,7 +208,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Parallel Simulation Techniques",
         (ModelClass.ODE, ModelClass.PDE, ModelClass.PARALLEL),
         _source("cp"),
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.SPECIFIED,
     ),
     BenchmarkDefinition(
         "CP2",
@@ -221,7 +221,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
             ModelClass.STOCHASTIC,
         ),
         _source("cp"),
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.SPECIFIED,
     ),
 )
 

@@ -2,6 +2,15 @@
 
 from .catalog import BENCHMARKS, BenchmarkDefinition, BenchmarkStatus, ModelClass
 from .ivp import InitialValueProblem, IntegrationError, IntegrationResult, SolverStats
+from .hybrid import (
+    HybridEventRecord,
+    HybridMode,
+    HybridReset,
+    HybridResult,
+    StateEvent,
+    simulate_hybrid,
+)
+from .runtime import merge_integration_results, normalise_solver_name, solve_ivp
 from .models import (
     Barge,
     C01_INITIAL_STATE,
@@ -75,8 +84,13 @@ __all__ = [
     "InitialValueProblem",
     "IntegrationError",
     "IntegrationResult",
+    "HybridEventRecord",
+    "HybridMode",
+    "HybridReset",
+    "HybridResult",
     "ModelClass",
     "SolverStats",
+    "StateEvent",
     "c01_problem",
     "c01_rhs",
     "c01_steady_state",
@@ -106,6 +120,8 @@ __all__ = [
     "heat_1d_ivp",
     "heat_sine_exact",
     "heat_sine_initial",
+    "merge_integration_results",
+    "normalise_solver_name",
     "qss1",
     "qss2",
     "render_task_a_svg",
@@ -120,5 +136,7 @@ __all__ = [
     "solve_c06_task_b",
     "solve_c06_task_c",
     "solve_c17",
+    "solve_ivp",
+    "simulate_hybrid",
     "wave_1d_ivp",
 ]

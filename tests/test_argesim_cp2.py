@@ -15,7 +15,7 @@ from argesim_benchmarks.models.cp2_parallel_and_distributed import (
 class CP2Tests(unittest.TestCase):
     def test_cp2_catalog_status(self) -> None:
         cp2 = next(b for b in BENCHMARKS if b.identifier == "CP2")
-        self.assertEqual(cp2.status, BenchmarkStatus.IMPLEMENTED)
+        self.assertEqual(cp2.status, BenchmarkStatus.SPECIFIED)
 
     def test_monte_carlo_parameters_must_be_positive_and_finite(self) -> None:
         with self.assertRaises(ValueError):
@@ -59,6 +59,11 @@ class CP2Tests(unittest.TestCase):
         top_middle = new_grid[2][1]
         rho_tm = sum(top_middle)
         self.assertAlmostEqual(rho_tm, 1.0)
+
+        with self.assertRaises(ValueError):
+            cp2_lbm_step(grid, nx, omega=2.0)
+        with self.assertRaises(ValueError):
+            cp2_lbm_step(grid[:-1], nx, omega=1.0)
 
     def test_swinging_rope_parameters_must_be_positive(self) -> None:
         with self.assertRaises(ValueError):

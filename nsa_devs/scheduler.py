@@ -49,6 +49,7 @@ class DesEvent:
     name: str = field(compare=False)
     handler: Callable[..., None] = field(compare=False)
     args: tuple[object, ...] = field(compare=False, default=())
+    cancelled: bool = field(compare=False, default=False)
 
 
 class DesScheduler:
@@ -67,7 +68,8 @@ class DesScheduler:
         name: str,
         handler: Callable[..., None],
         *args: object,
-    ) -> None:
+        microsteps: int = 1,
+    ) -> DesEvent:
         if isinstance(delay_minutes, bool):
             raise TypeError("delay must be a real number")
         delay = float(delay_minutes)
@@ -77,18 +79,65 @@ class DesScheduler:
             raise ValueError("name must be a non-empty string")
         if not callable(handler):
             raise TypeError("handler must be callable")
+        if not isinstance(microsteps, int) or isinstance(microsteps, bool):
+            raise TypeError("microsteps must be an integer")
+        if microsteps <= 0:
+            raise ValueError("microsteps must be positive")
         target_time = (
-            self.time.after_epsilon(1)
+            self.time.after_epsilon(microsteps)
             if delay == 0.0
             else self.time.after_finite(delay)
         )
+        return self.schedule_at(target_time, name, handler, *args)
+
+    def schedule_at(
+        self,
+        time: HyperTime,
+        name: str,
+        handler: Callable[..., None],
+        *args: object,
+    ) -> DesEvent:
+        """Schedule at an absolute superdense time and return a cancel token."""
+
+        if not isinstance(time, HyperTime):
+            raise TypeError("time must be HyperTime")
+        if time < self.time:
+            raise ValueError("cannot schedule an event in the past")
+        if not isinstance(name, str) or not name:
+            raise ValueError("name must be a non-empty string")
+        if not callable(handler):
+            raise TypeError("handler must be callable")
+        event = DesEvent(time, self.event_sequence, name, handler, args)
         heapq.heappush(
             self.events,
-            DesEvent(target_time, self.event_sequence, name, handler, args),
+            event,
         )
         self.event_sequence += 1
+        return event
 
-    def run(self, until: float, *, max_events: int = 1_000_000) -> None:
+    @staticmethod
+    def cancel(event: DesEvent) -> None:
+        """Cancel a pending event; cancellation is idempotent."""
+
+        if not isinstance(event, DesEvent):
+            raise TypeError("event must be DesEvent")
+        event.cancelled = True
+
+    def _process_next(self) -> bool:
+        while self.events:
+            event = heapq.heappop(self.events)
+            if event.cancelled:
+                continue
+            self.time = event.time
+            event.handler(*event.args)
+            return True
+        return False
+
+    def _discard_cancelled(self) -> None:
+        while self.events and self.events[0].cancelled:
+            heapq.heappop(self.events)
+
+    def run(self, until: float, *, max_events: int = 1_000_000) -> int:
         if isinstance(until, bool):
             raise TypeError("until must be a real number")
         until_value = float(until)
@@ -104,15 +153,32 @@ class DesScheduler:
         processed = 0
         # A finite macro-time horizon includes every microstep at that macro
         # time. This lets zero-delay event cascades settle before run returns.
-        while self.events and self.events[0].time.macro <= until_time.macro:
+        while True:
+            self._discard_cancelled()
+            if not self.events or self.events[0].time.macro > until_time.macro:
+                break
             if processed >= max_events:
                 raise RuntimeError("scheduler exceeded max_events")
-            event = heapq.heappop(self.events)
-            self.time = event.time
-            event.handler(*event.args)
-            processed += 1
+            if self._process_next():
+                processed += 1
         if self.time.macro < until_time.macro:
             self.time = until_time
+        return processed
+
+    def run_until_idle(self, *, max_events: int = 1_000_000) -> int:
+        """Drain the queue, including finite and infinitesimal event cascades."""
+
+        if not isinstance(max_events, int) or isinstance(max_events, bool):
+            raise TypeError("max_events must be an integer")
+        if max_events <= 0:
+            raise ValueError("max_events must be positive")
+        processed = 0
+        while self.events:
+            if processed >= max_events:
+                raise RuntimeError("scheduler exceeded max_events")
+            if self._process_next():
+                processed += 1
+        return processed
 
 
 @dataclass(order=True)

@@ -1,4 +1,5 @@
 import unittest
+import random
 import argesim_benchmarks.catalog as catalog
 from argesim_benchmarks.models.c20_complex_production import (
     WorkStationType,
@@ -32,6 +33,17 @@ class C20Tests(unittest.TestCase):
 
         env.run(until_macro=1000000.0)
         self.assertEqual(ws1.processed_count, len(orders))
+
+    def test_order_books_are_seeded_without_global_rng_side_effects(self):
+        random.seed(1234)
+        expected_next = random.random()
+        random.seed(1234)
+        first = generate_osc1_order_book(seed=7)
+        observed_next = random.random()
+        second = generate_osc1_order_book(seed=7)
+
+        self.assertEqual(first, second)
+        self.assertEqual(observed_next, expected_next)
 
 if __name__ == '__main__':
     unittest.main()

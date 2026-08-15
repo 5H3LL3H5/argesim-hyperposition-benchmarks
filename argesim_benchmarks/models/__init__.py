@@ -41,6 +41,7 @@ from .c10_dining_philosophers import (
     run_c10_simulation,
 )
 from .c06_emergency_department import (
+    solve_c06,
     solve_c06_task_a,
     solve_c06_task_b,
     solve_c06_task_c,
@@ -58,8 +59,20 @@ from .c11_scara_robot import (
     C11_TARGET_STATE,
     C11Parameters,
     c11_problem,
+    c11_inertia_terms,
     c11_rhs,
     solve_c11,
+)
+from .c21_state_events import (
+    C21BouncingBallParameters,
+    C21RLCDiodeParameters,
+    C21RotatingPendulumParameters,
+    c21_task_qss1_bouncing_ball,
+    c21_task_qss2_bouncing_ball,
+    simulate_c21_bouncing_ball_event_contact,
+    simulate_c21_rotating_pendulum,
+    solve_c21_bouncing_ball_event_contact,
+    solve_c21_rotating_pendulum,
 )
 from .c12_collision import C12Parameters, c12_task_a, c12_task_b, c12_task_c
 from .c12_collision.c12_collision_plots import (
@@ -174,6 +187,9 @@ __all__ = [
     "C17_INITIAL_STATE",
     "C17Parameters",
     "C19Parameters",
+    "C21BouncingBallParameters",
+    "C21RLCDiodeParameters",
+    "C21RotatingPendulumParameters",
     "CP2_LBM_REVERSE",
     "CP2_LBM_VELOCITIES",
     "CP2_LBM_WEIGHTS",
@@ -198,6 +214,7 @@ __all__ = [
     "c07_task_b",
     "c07_task_c",
     "c11_problem",
+    "c11_inertia_terms",
     "c11_rhs",
     "c12_task_a",
     "c12_task_b",
@@ -231,6 +248,8 @@ __all__ = [
     "c19_task_a",
     "c19_task_b",
     "c19_task_c",
+    "c21_task_qss1_bouncing_ball",
+    "c21_task_qss2_bouncing_ball",
     "c22_basic",
     "c22_classing",
     "c22_jockeying",
@@ -253,8 +272,13 @@ __all__ = [
     "solve_c06_task_a",
     "solve_c06_task_b",
     "solve_c06_task_c",
+    "solve_c06",
     "solve_c07",
     "solve_c11",
     "solve_c15",
     "solve_c17",
+    "simulate_c21_bouncing_ball_event_contact",
+    "simulate_c21_rotating_pendulum",
+    "solve_c21_bouncing_ball_event_contact",
+    "solve_c21_rotating_pendulum",
 ]

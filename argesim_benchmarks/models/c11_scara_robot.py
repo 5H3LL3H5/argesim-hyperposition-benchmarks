@@ -11,7 +11,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
-from ..solvers import euler, rk4, rk45
+from ..runtime import solve_ivp
 
 @dataclass(frozen=True)
 class C11Parameters:
@@ -73,12 +73,35 @@ class C11Parameters:
     # discontinuous control leads to Zeno chattering
     v_zero_threshold: float = 1e-4
 
+    def __post_init__(self) -> None:
+        values = tuple(
+            value
+            for name, value in vars(self).items()
+            if name != "x_obs"
+        )
+        if any(not math.isfinite(value) for value in (*values, self.x_obs)):
+            raise ValueError("C11 parameters must be finite")
+        if any(value <= 0.0 for value in values):
+            raise ValueError("C11 physical and controller parameters must be positive")
+
 
 _C11_DEFAULT_PARAMETERS = C11Parameters()
 
 C11_INITIAL_STATE: Vector = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
 C11_TARGET_STATE = (2.0, 2.0, 0.3)
+
+
+def c11_inertia_terms(
+    parameters: C11Parameters = _C11_DEFAULT_PARAMETERS,
+) -> tuple[float, float, float]:
+    """Return the three inertia coefficients from the official C11 model."""
+
+    m3 = parameters.m3A + parameters.m3L
+    theta1 = (parameters.m1 / 3.0 + parameters.m2 + m3) * parameters.L1**2
+    theta2 = (parameters.m2 / 2.0 + m3) * parameters.L1 * parameters.L2
+    theta3 = (parameters.m2 / 3.0 + m3) * parameters.L2**2
+    return theta1, theta2, theta3
 
 def c11_rhs(
     parameters: C11Parameters = _C11_DEFAULT_PARAMETERS,
@@ -88,10 +111,7 @@ def c11_rhs(
 
     p = parameters
 
-    m3 = p.m3A + p.m3L
-    Theta1 = (p.m1/3.0 + p.m2 + m3) * p.L1**2
-    Theta2 = (p.m2/3.0 + m3) * p.L1 * p.L2
-    Theta3 = (p.m2/3.0 + m3) * p.L2**2
+    Theta1, Theta2, Theta3 = c11_inertia_terms(p)
 
     I1_max = p.T1_max * p.phase_factor / p.kT1
     I2_max = p.T2_max * p.phase_factor / p.kT2
@@ -188,6 +208,9 @@ def c11_problem(
 ) -> InitialValueProblem:
     """Build the C11 initial-value problem."""
 
+    if task not in {"a", "b", "c"}:
+        raise ValueError("C11 task must be 'a', 'b', or 'c'")
+
     return InitialValueProblem(
         c11_rhs(parameters, task=task),
         0.0,
@@ -209,29 +232,28 @@ def solve_c11(
 ) -> IntegrationResult:
     """Solve C11 with an explicitly selected, auditable backend."""
 
-    configured = dict(options or {})
     problem = c11_problem(
         parameters=parameters,
         initial_state=initial_state,
         t_bound=t_bound,
         task=task,
     )
-    normalised = method.strip().lower()
-    if normalised == "euler":
-        return euler(problem, float(configured.get("step", 1.0e-5)))
-    if normalised == "rk4":
-        return rk4(problem, float(configured.get("step", 1.0e-4)))
-    if normalised == "rk45":
-        return rk45(
-            problem,
-            rtol=float(configured.get("rtol", 1.0e-6)),
-            atol=float(configured.get("atol", 1.0e-8)),
-            max_step=float(configured.get("max_step", 1.0e-2)),
-        )
-    if normalised == "qss1":
-        from ..solvers.qss import qss1
-        quantum = configured.get("quantum", (1.0e-2, 1.0e-3, 1.0e-4))
-        if not isinstance(quantum, (int, float, tuple, list)):
-            raise TypeError("qss1 quantum must be scalar or a finite sequence")
-        return qss1(problem, quantum)
-    raise ValueError(f"unsupported C11 solver: {method}")
+    default_quantum = (
+        1.0e-3,
+        1.0e-3,
+        1.0e-4,
+        1.0e-3,
+        1.0e-3,
+        1.0e-4,
+        1.0e-2,
+        1.0e-2,
+        1.0e-2,
+    )
+    defaults = {
+        "euler": {"step": 1.0e-5},
+        "rk4": {"step": 1.0e-4},
+        "rk45": {"rtol": 1.0e-6, "atol": 1.0e-8, "max_step": 1.0e-2},
+        "qss1": {"quantum": default_quantum},
+        "qss2": {"quantum": default_quantum},
+    }
+    return solve_ivp(problem, method, options=options, defaults=defaults)

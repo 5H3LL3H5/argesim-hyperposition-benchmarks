@@ -1,5 +1,7 @@
 import unittest
 
+from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
+
 from argesim_benchmarks.models.cp1_parallel import (
     cp1_task_a_ivp,
     cp1_task_b_ivp,
@@ -11,6 +13,10 @@ from argesim_benchmarks.models.cp1_parallel import (
 from argesim_benchmarks.solvers import rk45
 
 class CP1Tests(unittest.TestCase):
+    def test_cp1_catalog_status_reflects_missing_parallel_study(self) -> None:
+        cp1 = next(b for b in BENCHMARKS if b.identifier == "CP1")
+        self.assertEqual(cp1.status, BenchmarkStatus.SPECIFIED)
+
     def test_task_a_ivp_creation(self) -> None:
         ivp = cp1_task_a_ivp(1000.0)
         self.assertEqual(ivp.dimension, 2)
@@ -68,9 +74,8 @@ class CP1Tests(unittest.TestCase):
         )
 
         for candidate, expected in zip(result.final_state, expected_terminal):
-            # ARGESIM table says "Solutions obtained using ACSL in double precision (stepsize 0.01, RK4)".
-            # Adaptive RK45 might have a small difference, so we use a relatively loose tolerance.
-            self.assertAlmostEqual(candidate, expected, delta=0.5)
+            # Independent table values agree to roughly five decimal places.
+            self.assertAlmostEqual(candidate, expected, delta=1.1e-5)
 
     def test_task_c_ivp_creation(self) -> None:
         # Test with a small N to make it fast

@@ -9,18 +9,21 @@ two deliberately separate purposes:
 
 ## Current status
 
-The official inventory is complete for the catalog published in August 2026:
-C01-C22 plus CP1 and CP2. C17R and C19R are the active revised definitions.
-The inventory is machine-readable in `argesim_benchmarks.catalog`.
+The official inventory was re-audited on 2026-08-15: C01-C22 plus CP1 and
+CP2, with C17R and C19R as the active revised definitions. The machine-readable
+inventory in `argesim_benchmarks.catalog` deliberately distinguishes complete
+tasks from partial model kernels.
 
-ARGESIM C01 is the first model at the `implemented` gate.
-ARGESIM C17R is the second model at the `implemented` gate. The remaining 22
-definitions are cataloged only. Each benchmark must pass five evidence gates
-before it is benchmark-ready:
+C02 and C08 currently reach the `validated` gate. C01, C03, C06, C07,
+C10-C16, C19R and C22 reach `implemented`. C17R, C20, C21, CP1 and CP2 remain
+`specified` because their repositories contain useful executable parts but not
+every official task. C04, C05, C09 and C18 remain `cataloged`. Each benchmark
+must pass five evidence gates before it is benchmark-ready:
 
 `cataloged -> specified -> implemented -> validated -> benchmark-ready`
 
-See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status.
+See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status and
+[ARGESIM_AUDIT.md](ARGESIM_AUDIT.md) for the definition-by-definition review.
 
 ## Implemented numerical foundation
 
@@ -30,17 +33,20 @@ See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status.
 - asynchronous first-order QSS for autonomous ODE systems;
 - asynchronous second-order QSS2 using a scaled directional finite difference;
 - bracketed Brent root finding with explicit non-convergence reporting;
+- one strict solver dispatcher shared by model wrappers, including segmented
+  non-autonomous inputs;
+- directed state-event localization and mode/state resets shared by classical
+  and QSS backends, including dimension-changing transitions;
 - one-dimensional heat and wave equations through the Method of Lines;
 - exact rational macro time plus integer microsteps and a deterministic DES
-  scheduler for restricted NSA-DEVS;
-- a finite acyclic Mealy-style NSA-DEVS relay reference model.
-- ARGESIM C01 tasks A-C, including the official parameter sweep and analytical
-  steady states.
-- ARGESIM C17R (ODE part) task 1 parameters, ODE problem, and solvers.
+  scheduler with cancellation, finite horizons, idle draining and event caps;
+- a finite acyclic Mealy-style NSA-DEVS relay reference model;
+- executable benchmark modules at the evidence gates listed above.
 
-LIQSS, DAE handling, general hybrid-event localization, the modern
-`neuraloperator` backend and ARGESIM C02-C22/CP1/CP2 are tracked as work in
-progress. They are not silently mapped to simpler algorithms.
+LIQSS, a general DAE solver, the C21 RLC-diode DAE, full C17R cellular-automaton
+and identification tasks, complete C20 production control, CP1/CP2 parallel
+performance experiments and a trained neural-operator backend remain explicit
+work in progress. They are not silently mapped to simpler algorithms.
 
 ## Run the tests
 

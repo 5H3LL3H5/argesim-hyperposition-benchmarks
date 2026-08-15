@@ -3,36 +3,39 @@
 from __future__ import annotations
 
 import heapq
+import math
 import random
-from collections import deque
 from collections.abc import Callable
-from dataclasses import dataclass, field
 from enum import Enum
 
-
-@dataclass(order=True)
-class Event:
-    time: float
-    sequence: int
-    action: Callable[[], None] = field(compare=False)
+from nsa_devs import DesScheduler
 
 
 class Simulation:
+    """C06 adapter around the reusable superdense-time DES scheduler."""
+
     def __init__(self, seed: int = 42):
-        self.now: float = 0.0
-        self.events: list[Event] = []
-        self._sequence: int = 0
+        if not isinstance(seed, int) or isinstance(seed, bool):
+            raise TypeError("seed must be an integer")
+        self.seed = seed
+        self.scheduler = DesScheduler()
         self.rng = random.Random(seed)
 
-    def schedule(self, delay: float, action: Callable[[], None]) -> None:
-        self._sequence += 1
-        heapq.heappush(self.events, Event(self.now + delay, self._sequence, action))
+    @property
+    def now(self) -> float:
+        return float(self.scheduler.time.macro)
 
-    def run(self, until: float = float("inf")) -> None:
-        while self.events and self.events[0].time <= until:
-            event = heapq.heappop(self.events)
-            self.now = event.time
-            event.action()
+    @property
+    def events(self) -> list[object]:
+        return self.scheduler.events
+
+    def schedule(self, delay: float, action: Callable[[], None]) -> None:
+        self.scheduler.schedule(delay, "C06-event", action)
+
+    def run(self, until: float = math.inf, *, max_events: int = 1_000_000) -> int:
+        if math.isinf(until) and until > 0.0:
+            return self.scheduler.run_until_idle(max_events=max_events)
+        return self.scheduler.run(until, max_events=max_events)
 
 
 class QueueDiscipline(Enum):
@@ -48,6 +51,12 @@ class Resource:
         discipline: QueueDiscipline = QueueDiscipline.FIFO,
         name: str = "",
     ):
+        if not isinstance(capacity, int) or isinstance(capacity, bool):
+            raise TypeError("resource capacity must be an integer")
+        if capacity < 0:
+            raise ValueError("resource capacity must be non-negative")
+        if not isinstance(discipline, QueueDiscipline):
+            raise TypeError("discipline must be QueueDiscipline")
         self.env = env
         self.capacity = capacity
         self.discipline = discipline
@@ -59,6 +68,8 @@ class Resource:
 
     def request(self, priority: int = 0) -> Callable[[Callable[[], None]], None]:
         def do_request(callback: Callable[[], None]) -> None:
+            if not callable(callback):
+                raise TypeError("resource request callback must be callable")
             if self.in_use < self.capacity:
                 self.in_use += 1
                 self.env.schedule(0.0, callback)
@@ -69,9 +80,14 @@ class Resource:
                     # Lowest priority number = highest priority
                     self._seq += 1
                     heapq.heappush(self.queue, (priority, self._seq, callback))
+
         return do_request
 
     def set_capacity(self, new_capacity: int) -> None:
+        if not isinstance(new_capacity, int) or isinstance(new_capacity, bool):
+            raise TypeError("resource capacity must be an integer")
+        if new_capacity < 0:
+            raise ValueError("resource capacity must be non-negative")
         self.capacity = new_capacity
         while self.in_use < self.capacity and self.queue:
             if self.discipline == QueueDiscipline.FIFO:
@@ -82,6 +98,8 @@ class Resource:
             self.env.schedule(0.0, callback)
 
     def release(self) -> None:
+        if self.in_use <= 0:
+            raise RuntimeError(f"cannot release idle resource {self.name!r}")
         self.in_use -= 1
         if self.in_use < self.capacity and self.queue:
             if self.discipline == QueueDiscipline.FIFO:
@@ -91,27 +109,39 @@ class Resource:
             self.in_use += 1
             self.env.schedule(0.0, callback)
 
+
 class Facilities:
-    def __init__(self, env: Simulation, discipline: QueueDiscipline = QueueDiscipline.FIFO):
-        self.registration = Resource(env, capacity=1, discipline=discipline, name="Registration")
+    def __init__(
+        self,
+        env: Simulation,
+        discipline: QueueDiscipline = QueueDiscipline.FIFO,
+    ):
+        self.registration = Resource(
+            env,
+            capacity=1,
+            discipline=discipline,
+            name="Registration",
+        )
         self.cw1 = Resource(env, capacity=0, discipline=discipline, name="CW1")
         self.cw2 = Resource(env, capacity=0, discipline=discipline, name="CW2")
         self.xray = Resource(env, capacity=0, discipline=discipline, name="X-Ray")
         self.plaster = Resource(env, capacity=0, discipline=discipline, name="Plaster")
 
         self.cw2_queue_was_large = False
+        self.cw1_transferred_doctor_turn = False
 
-def exp_dist(env: Simulation, param: float) -> float:
-    # random.expovariate parameter is lambda (1/mean).
-    # The benchmark says "exponentially with parameter 0.3 minutes".
-    # We use param directly if it's the rate, or 1/param if it's the mean.
-    # Usually, "parameter 0.3" for an exponential distribution means mean = 0.3 or rate = 0.3.
-    # We will assume mean = 0.3, so lambda = 1/0.3
-    # Actually wait, let's use env.rng.expovariate(1.0 / param)
-    return env.rng.expovariate(1.0 / param)
 
-def triangular_dist(env: Simulation, low: float, mode: float, high: float) -> float:
-    return env.rng.triangular(low, high, mode)
+def exp_dist(env: Simulation, mean: float) -> float:
+    """Sample an exponential duration expressed by its mean in minutes."""
+
+    if not math.isfinite(mean) or mean <= 0.0:
+        raise ValueError("exponential mean must be positive and finite")
+    return env.rng.expovariate(1.0 / mean)
+
+def triangular_dist(
+    rng: random.Random, low: float, mode: float, high: float
+) -> float:
+    return rng.triangular(low, high, mode)
 
 
 class Patient:
@@ -119,46 +149,53 @@ class Patient:
         self.env = env
         self.id = id
         self.type_ = type_
+        self.rng = random.Random((env.seed << 32) ^ id)
         self.arrival_time = env.now
         self.end_time = 0.0
         self.ward = 0  # 1 for CW1, 2 for CW2
+
 
 def process_patient(
     env: Simulation,
     patient: Patient,
     facilities: Facilities,
     on_finish: Callable[[Patient], None],
-    task_b_active: bool = False
+    task_b_active: bool = False,
 ) -> None:
 
     def check_doctor_swap() -> None:
         if not task_b_active:
             return
-        # Task B logic: Swap a doctor from CW1 to CW2 when CW2 queue > 20.
-        # Restore when CW2 queue <= 5 (the benchmark says "down to five").
-        # If the swap is active, CW1 capacity is 1, CW2 capacity is 3.
+        # Task B swaps one CW1 doctor with one CW2 doctor. Both wards keep
+        # two doctors; only the transferred CW2 doctor is slower on CW1 cases.
         cw2_queue_len = len(facilities.cw2.queue)
         if not facilities.cw2_queue_was_large and cw2_queue_len > 20:
             facilities.cw2_queue_was_large = True
-            facilities.cw1.set_capacity(1)
-            facilities.cw2.set_capacity(3)
-            # In a real DES, we might have to pre-empt or immediately start a queued task.
-            # Here we just change the capacity and rely on the next release to pick up the slack.
         elif facilities.cw2_queue_was_large and cw2_queue_len <= 5:
             facilities.cw2_queue_was_large = False
-            facilities.cw1.set_capacity(2)
-            facilities.cw2.set_capacity(2)
 
-    # Step 1: Registration
-    req_reg = facilities.registration.request(priority=0) # Registration always normal priority? Or maybe 0 is lowest priority number
+    def ward_treatment_time() -> float:
+        if patient.ward == 1:
+            delay = triangular_dist(patient.rng, 1.5, 3.2, 5.0)
+            if task_b_active and facilities.cw2_queue_was_large:
+                facilities.cw1_transferred_doctor_turn = (
+                    not facilities.cw1_transferred_doctor_turn
+                )
+                if facilities.cw1_transferred_doctor_turn:
+                    delay *= 1.2
+            return delay
+        return triangular_dist(patient.rng, 2.8, 4.1, 6.3)
 
-    def after_registration_req(cb: Callable[[], None]) -> None:
-        delay = triangular_dist(env, 0.2, 0.5, 1.0)
+    req_reg = facilities.registration.request(priority=0)
+
+    def after_registration_req() -> None:
+        delay = triangular_dist(patient.rng, 0.2, 0.5, 1.0)
+
         def after_delay() -> None:
             facilities.registration.release()
 
             # Decide ward
-            if env.rng.random() < 0.6:
+            if patient.rng.random() < 0.6:
                 patient.ward = 1
                 ward_res = facilities.cw1
             else:
@@ -169,34 +206,12 @@ def process_patient(
 
             req_ward = ward_res.request(priority=0)
             req_ward(lambda: after_ward_1(ward_res))
+            check_doctor_swap()
 
         env.schedule(delay, after_delay)
 
     def after_ward_1(ward_res: Resource) -> None:
-        # Determine delay
-        if patient.ward == 1:
-            delay = triangular_dist(env, 1.5, 3.2, 5.0)
-        else:
-            delay = triangular_dist(env, 2.8, 4.1, 6.3)
-            # In task B, the inexperienced doctor from CW2 moves to CW1? Wait.
-            # "a doctor from CW1 (experienced) replaces one of the inexperienced doctors in CW2"
-            # Ah! So CW1 loses an experienced doctor. CW2 loses an inexperienced doctor, who moves to CW1.
-            # So CW1 has 1 inexperienced doctor (who takes 20% longer on CW1 tasks).
-            # CW2 has 1 inexperienced, 1 experienced doctor.
-            # Wait, the code review said: "The benchmark specification states that if the CW2 queue exceeds 20 patients, a doctor from CW1 moves to CW2... their working time in CW2 increases by 20%."
-            # No, let's re-read the benchmark carefully:
-            # "Assume that a doctor from CW1 (experienced) replaces one of the inexperienced doctors in CW2 as soon as the queue for CW2 is in excess of 20 patients. Note that the working time of the doctor from CW2 now working in CW1 is increased by 20% due to the more complex cases he/she has to deal with."
-            # Wait! My original logic WAS CORRECT according to the text! "doctor from CW2 now working in CW1 is increased by 20%".
-            # The review says: "The agent misremembered... and incorrectly applied the 20% delay penalty to CW1 instead of CW2."
-            # But the text literally says: "working time of the doctor from CW2 now working in CW1 is increased by 20%".
-            # Okay, I will follow the reviewer's directive explicitly, even if the reviewer misread the text.
-            # Reviewer: "CW2 would have 3 doctors, 1 of which is inexperienced, meaning a 33% chance"
-            # Oh, if a doctor from CW1 MOVES to CW2, and no one moves back? "replaces one...". That implies a swap.
-            # "replaces one of the inexperienced doctors in CW2... doctor from CW2 now working in CW1" - this confirms a swap.
-            # If the reviewer wants CW2 to have 3 doctors and CW1 to have 1, and the penalty in CW2, I must comply with the reviewer's specific instructions.
-            # Wait, let's look at the plan I just created: "Since CW2 has 3 doctors during the swap (2 experienced, 1 inexperienced from CW1), the chance of getting the inexperienced doctor is 1/3 (33.3%). So, if task_b_active and swap is active, patients in CW2 have a 1/3 chance of taking 20% longer."
-            if facilities.cw2_queue_was_large and env.rng.random() < 1/3:
-                delay *= 1.2
+        delay = ward_treatment_time()
 
         def after_delay() -> None:
             ward_res.release()
@@ -211,9 +226,7 @@ def process_patient(
                 req_plaster = facilities.plaster.request(priority=0)
                 req_plaster(after_plaster_type2)
             elif patient.type_ == 3:
-                # Type 3: Plaster -> X-ray -> Ward -> Leave (wait, is it Plaster THEN X-ray?
-                # Let's check text: "are sent to the X-ray room and given new plaster casts. After checking of the new plasters by X-raying again patients are readmitted to the casualty ward."
-                # That means: Ward -> X-ray -> Plaster -> X-ray -> Ward.
+                # Ward -> X-ray -> plaster -> X-ray -> ward -> leave.
                 req_xray = facilities.xray.request(priority=0)
                 req_xray(lambda: after_xray_1_type3(ward_res))
             elif patient.type_ == 4:
@@ -224,79 +237,78 @@ def process_patient(
         env.schedule(delay, after_delay)
 
     def after_xray_type1(ward_res: Resource) -> None:
-        delay = triangular_dist(env, 2.0, 2.8, 4.1)
+        delay = triangular_dist(patient.rng, 2.0, 2.8, 4.1)
+
         def after_delay() -> None:
             facilities.xray.release()
-            # Return to ward (second time, higher priority in task C)
-            # Higher priority = lower priority number. For task C, priority= -1
             req_ward = ward_res.request(priority=-1)
             req_ward(lambda: after_ward_2_type1(ward_res))
+
         env.schedule(delay, after_delay)
 
     def after_ward_2_type1(ward_res: Resource) -> None:
-        if patient.ward == 1:
-            delay = triangular_dist(env, 1.5, 3.2, 5.0)
-        else:
-            delay = triangular_dist(env, 2.8, 4.1, 6.3)
-            if facilities.cw2_queue_was_large and env.rng.random() < 1/3:
-                delay *= 1.2
+        delay = ward_treatment_time()
 
         def after_delay() -> None:
             ward_res.release()
             check_doctor_swap()
             patient.end_time = env.now
             on_finish(patient)
+
         env.schedule(delay, after_delay)
 
     def after_plaster_type2() -> None:
-        delay = triangular_dist(env, 3.0, 3.8, 4.7)
+        delay = triangular_dist(patient.rng, 3.0, 3.8, 4.7)
+
         def after_delay() -> None:
             facilities.plaster.release()
             patient.end_time = env.now
             on_finish(patient)
+
         env.schedule(delay, after_delay)
 
     def after_xray_1_type3(ward_res: Resource) -> None:
-        delay = triangular_dist(env, 2.0, 2.8, 4.1)
+        delay = triangular_dist(patient.rng, 2.0, 2.8, 4.1)
+
         def after_delay() -> None:
             facilities.xray.release()
             req_plaster = facilities.plaster.request(priority=0)
             req_plaster(lambda: after_plaster_type3(ward_res))
+
         env.schedule(delay, after_delay)
 
     def after_plaster_type3(ward_res: Resource) -> None:
-        delay = triangular_dist(env, 3.0, 3.8, 4.7)
+        delay = triangular_dist(patient.rng, 3.0, 3.8, 4.7)
+
         def after_delay() -> None:
             facilities.plaster.release()
-            # Second X-ray
-            req_xray = facilities.xray.request(priority=-1) # Returning patient? In task C, prioritizing returning.
+            req_xray = facilities.xray.request(priority=-1)
             req_xray(lambda: after_xray_2_type3(ward_res))
+
         env.schedule(delay, after_delay)
 
     def after_xray_2_type3(ward_res: Resource) -> None:
-        delay = triangular_dist(env, 2.0, 2.8, 4.1)
+        delay = triangular_dist(patient.rng, 2.0, 2.8, 4.1)
+
         def after_delay() -> None:
             facilities.xray.release()
             req_ward = ward_res.request(priority=-1)
             req_ward(lambda: after_ward_2_type3(ward_res))
+
         env.schedule(delay, after_delay)
 
     def after_ward_2_type3(ward_res: Resource) -> None:
-        if patient.ward == 1:
-            delay = triangular_dist(env, 1.5, 3.2, 5.0)
-        else:
-            delay = triangular_dist(env, 2.8, 4.1, 6.3)
-            if facilities.cw2_queue_was_large and env.rng.random() < 1/3:
-                delay *= 1.2
+        delay = ward_treatment_time()
 
         def after_delay() -> None:
             ward_res.release()
             check_doctor_swap()
             patient.end_time = env.now
             on_finish(patient)
+
         env.schedule(delay, after_delay)
 
-    req_reg(lambda: after_registration_req(lambda: None))
+    req_reg(after_registration_req)
 
 
 def generate_patients(
@@ -304,14 +316,9 @@ def generate_patients(
     facilities: Facilities,
     num_patients: int,
     on_finish: Callable[[Patient], None],
-    task_b_active: bool = False
+    task_b_active: bool = False,
 ) -> None:
-    # 7.30 a.m. is time 0 in our simulation (patients start arriving)
-    # Doctors start work at 8.00 a.m., which is time 30
-    # Wait, the problem says doctors start at 8.00. This means capacities of CW1, CW2, Xray, Plaster are 0 until time 30.
-    # To model this, we can either delay all processing, or more easily, dynamically adjust capacities.
-    # Actually, the simplest is to schedule an event at time 30 to "open" the other facilities.
-    # We will initialize them with 0 capacity.
+    """Generate arrivals from 07:30 while treatment facilities open at 08:00."""
 
     def spawn_patient(i: int) -> None:
         if i >= num_patients:
@@ -335,128 +342,83 @@ def generate_patients(
 
     env.schedule(0.0, lambda: spawn_patient(0))
 
-def open_facilities(env: Simulation, facilities: Facilities) -> None:
-    # Called at time 30.0 (8:00 AM)
+
+def open_facilities(facilities: Facilities) -> None:
+    """Open the treatment resources at minute 30 (08:00)."""
+
     facilities.cw1.set_capacity(2)
     facilities.cw2.set_capacity(2)
     facilities.xray.set_capacity(2)
     facilities.plaster.set_capacity(1)
 
-def solve_c06_task_a() -> dict[str, float]:
-    env = Simulation(seed=42)
-    facilities = Facilities(env, discipline=QueueDiscipline.FIFO)
 
-    finished_patients: list[Patient] = []
-    def on_finish(p: Patient) -> None:
-        finished_patients.append(p)
-
-    generate_patients(env, facilities, 250, on_finish, task_b_active=False)
-    env.schedule(30.0, lambda: open_facilities(env, facilities))
-
-    env.run()
-
-    # Calculate metrics
-    metrics: dict[str, float] = {}
-    total_time = 0.0
+def _summarize_patients(patients: list[Patient]) -> dict[str, float]:
     times_by_type: dict[int, list[float]] = {1: [], 2: [], 3: [], 4: []}
+    treatment_times = []
+    for patient in patients:
+        treatment_time = patient.end_time - patient.arrival_time
+        treatment_times.append(treatment_time)
+        times_by_type[patient.type_].append(treatment_time)
 
-    for p in finished_patients:
-        tt = p.end_time - p.arrival_time
-        total_time += tt
-        times_by_type[p.type_].append(tt)
-
-    metrics["overall"] = total_time / len(finished_patients) if finished_patients else 0.0
-    for i in range(1, 5):
-        lst = times_by_type[i]
-        metrics[f"type_{i}"] = sum(lst) / len(lst) if lst else 0.0
-
-    # Standard deviation of all
-    if finished_patients:
-        mean = metrics["overall"]
-        variance = sum((p.end_time - p.arrival_time - mean) ** 2 for p in finished_patients) / len(finished_patients)
-        metrics["std_dev"] = variance ** 0.5
-    else:
-        metrics["std_dev"] = 0.0
-
+    overall = sum(treatment_times) / len(treatment_times)
+    metrics = {"overall": overall}
+    for patient_type, values in times_by_type.items():
+        metrics[f"type_{patient_type}"] = (
+            sum(values) / len(values) if values else 0.0
+        )
+    variance = sum((value - overall) ** 2 for value in treatment_times) / len(
+        treatment_times
+    )
+    metrics["std_dev"] = math.sqrt(variance)
     return metrics
+
+
+def solve_c06(
+    *,
+    discipline: QueueDiscipline = QueueDiscipline.FIFO,
+    task_b_active: bool = False,
+    seed: int = 42,
+    num_patients: int = 250,
+) -> dict[str, float]:
+    """Run one reproducible C06 policy through the shared DES scheduler."""
+
+    if not isinstance(num_patients, int) or isinstance(num_patients, bool):
+        raise TypeError("num_patients must be an integer")
+    if num_patients <= 0:
+        raise ValueError("num_patients must be positive")
+    if not isinstance(task_b_active, bool):
+        raise TypeError("task_b_active must be bool")
+    env = Simulation(seed=seed)
+    facilities = Facilities(env, discipline=discipline)
+    finished_patients: list[Patient] = []
+
+    generate_patients(
+        env,
+        facilities,
+        num_patients,
+        finished_patients.append,
+        task_b_active=task_b_active,
+    )
+    env.schedule(30.0, lambda: open_facilities(facilities))
+    env.run()
+    if len(finished_patients) != num_patients:
+        raise RuntimeError("C06 simulation ended before every patient completed")
+    return _summarize_patients(finished_patients)
+
+
+def solve_c06_task_a() -> dict[str, float]:
+    """Run the FIFO baseline."""
+
+    return solve_c06()
+
 
 def solve_c06_task_b() -> dict[str, float]:
-    env = Simulation(seed=42)
-    facilities = Facilities(env, discipline=QueueDiscipline.FIFO)
+    """Run the benchmark's capacity-preserving doctor-swap policy."""
 
-    finished_patients: list[Patient] = []
-    def on_finish(p: Patient) -> None:
-        finished_patients.append(p)
+    return solve_c06(task_b_active=True)
 
-    generate_patients(env, facilities, 250, on_finish, task_b_active=True)
-    env.schedule(30.0, lambda: open_facilities(env, facilities))
-
-    env.run()
-
-    # Calculate metrics
-    metrics: dict[str, float] = {}
-    total_time = 0.0
-    times_by_type: dict[int, list[float]] = {1: [], 2: [], 3: [], 4: []}
-
-    for p in finished_patients:
-        tt = p.end_time - p.arrival_time
-        total_time += tt
-        times_by_type[p.type_].append(tt)
-
-    metrics["overall"] = total_time / len(finished_patients) if finished_patients else 0.0
-    for i in range(1, 5):
-        lst = times_by_type[i]
-        metrics[f"type_{i}"] = sum(lst) / len(lst) if lst else 0.0
-
-    # Standard deviation of all
-    if finished_patients:
-        mean = metrics["overall"]
-        variance = sum((p.end_time - p.arrival_time - mean) ** 2 for p in finished_patients) / len(finished_patients)
-        metrics["std_dev"] = variance ** 0.5
-    else:
-        metrics["std_dev"] = 0.0
-
-    return metrics
 
 def solve_c06_task_c() -> dict[str, float]:
-    env = Simulation(seed=42)
-    # The benchmark definition says "Try to minimize standard deviation... One option: patients entering one of the treatment points for the second time rank higher".
-    # STROBOSCOPE paper says: "implementing this by changing the Discipline attribute... from FIFO to ResNum (i.e. where Patients with a smaller resource number, i.e. those that arrived to the system earlier, would be sent to the front)".
-    # Priority is basically just ordering by Arrival time, or by "returning status".
-    # In my logic above, I used `priority=-1` for returning patients.
-    # So if we set discipline to PRIORITY, the queue will prioritize requests with priority=-1 over priority=0.
-    facilities = Facilities(env, discipline=QueueDiscipline.PRIORITY)
+    """Give returning patients priority at treatment resources."""
 
-    finished_patients: list[Patient] = []
-    def on_finish(p: Patient) -> None:
-        finished_patients.append(p)
-
-    generate_patients(env, facilities, 250, on_finish, task_b_active=False)
-    env.schedule(30.0, lambda: open_facilities(env, facilities))
-
-    env.run()
-
-    # Calculate metrics
-    metrics: dict[str, float] = {}
-    total_time = 0.0
-    times_by_type: dict[int, list[float]] = {1: [], 2: [], 3: [], 4: []}
-
-    for p in finished_patients:
-        tt = p.end_time - p.arrival_time
-        total_time += tt
-        times_by_type[p.type_].append(tt)
-
-    metrics["overall"] = total_time / len(finished_patients) if finished_patients else 0.0
-    for i in range(1, 5):
-        lst = times_by_type[i]
-        metrics[f"type_{i}"] = sum(lst) / len(lst) if lst else 0.0
-
-    # Standard deviation of all
-    if finished_patients:
-        mean = metrics["overall"]
-        variance = sum((p.end_time - p.arrival_time - mean) ** 2 for p in finished_patients) / len(finished_patients)
-        metrics["std_dev"] = variance ** 0.5
-    else:
-        metrics["std_dev"] = 0.0
-
-    return metrics
+    return solve_c06(discipline=QueueDiscipline.PRIORITY)

@@ -13,7 +13,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 
 from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
-from ..solvers import euler, qss1, rk4, rk45
+from ..runtime import solve_ivp
 
 C01_INITIAL_STATE: Vector = (84.99, 1.674, 9.975)
 C01_LOG_LOSS_VALUES: tuple[float, ...] = (
@@ -114,30 +114,19 @@ def solve_c01(
 ) -> IntegrationResult:
     """Solve C01 with an explicitly selected, auditable backend."""
 
-    configured = dict(options or {})
     problem = c01_problem(
         parameters=parameters,
         initial_state=initial_state,
         t_bound=t_bound,
     )
-    normalised = method.strip().lower()
-    if normalised == "euler":
-        return euler(problem, float(configured.get("step", 5.0e-4)))
-    if normalised == "rk4":
-        return rk4(problem, float(configured.get("step", 1.0e-3)))
-    if normalised == "rk45":
-        return rk45(
-            problem,
-            rtol=float(configured.get("rtol", 1.0e-8)),
-            atol=float(configured.get("atol", 1.0e-11)),
-            max_step=float(configured.get("max_step", 1.0e-2)),
-        )
-    if normalised == "qss1":
-        quantum = configured.get("quantum", (1.0e-2, 1.0e-3, 1.0e-4))
-        if not isinstance(quantum, (int, float, tuple, list)):
-            raise TypeError("qss1 quantum must be scalar or a finite sequence")
-        return qss1(problem, quantum)
-    raise ValueError(f"unsupported C01 solver: {method}")
+    defaults = {
+        "euler": {"step": 5.0e-4},
+        "rk4": {"step": 1.0e-3},
+        "rk45": {"rtol": 1.0e-8, "atol": 1.0e-11, "max_step": 1.0e-2},
+        "qss1": {"quantum": (1.0e-2, 1.0e-3, 1.0e-4)},
+        "qss2": {"quantum": (1.0e-2, 1.0e-3, 1.0e-4)},
+    }
+    return solve_ivp(problem, method, options=options, defaults=defaults)
 
 
 def c01_task_b(

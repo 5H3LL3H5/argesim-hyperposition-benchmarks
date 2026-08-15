@@ -94,6 +94,17 @@ class RelayChainTests(unittest.TestCase):
         self.assertEqual(scheduler.time.micro, 5)
         self.assertEqual(len(scheduler.events), 1)
 
+    def test_scheduler_can_cancel_and_drain_reusable_workloads(self) -> None:
+        scheduler = DesScheduler()
+        trace = []
+        cancelled = scheduler.schedule(1.0, "cancelled", trace.append, "bad")
+        scheduler.cancel(cancelled)
+        scheduler.schedule(2.0, "kept", trace.append, "good")
+
+        self.assertEqual(scheduler.run_until_idle(), 1)
+        self.assertEqual(trace, ["good"])
+        self.assertEqual(scheduler.time, HyperTime.at(2))
+
 
 if __name__ == "__main__":
     unittest.main()

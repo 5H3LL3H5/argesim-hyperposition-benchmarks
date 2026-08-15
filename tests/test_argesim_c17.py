@@ -13,7 +13,7 @@ from argesim_benchmarks.models.c17_sir_epidemic import (
 class C17Tests(unittest.TestCase):
     def test_c17r_catalog_status(self) -> None:
         c17r = next(b for b in BENCHMARKS if b.identifier == "C17R")
-        self.assertEqual(c17r.status, BenchmarkStatus.IMPLEMENTED)
+        self.assertEqual(c17r.status, BenchmarkStatus.SPECIFIED)
 
     def test_c17_parameters_validation(self) -> None:
         with self.assertRaises(ValueError):
