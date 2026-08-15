@@ -19,6 +19,7 @@ class ArgesimCatalogTests(unittest.TestCase):
         implemented = (
             "C01",
             "C02",
+            "C03",
             "C06",
             "C07",
             "C11",
