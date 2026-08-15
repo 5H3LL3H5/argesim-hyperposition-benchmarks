@@ -76,6 +76,13 @@ from .c15_clearance import (
     c15_task_c,
     solve_c15,
 )
+from .c16_restaurant_business import (
+    C16Parameters,
+    C16Simulation,
+    c16_task_a,
+    c16_task_b,
+    c16_task_c,
+)
 from .c17_sir_epidemic import (
     C17_INITIAL_STATE,
     C17Parameters,
@@ -134,6 +141,8 @@ __all__ = [
     "C15_MEASUREMENTS_TIME",
     "C15Bolus",
     "C15Parameters",
+    "C16Parameters",
+    "C16Simulation",
     "C17_INITIAL_STATE",
     "C17Parameters",
     "C19Parameters",
@@ -174,6 +183,9 @@ __all__ = [
     "c15_task_a",
     "c15_task_b",
     "c15_task_c",
+    "c16_task_a",
+    "c16_task_b",
+    "c16_task_c",
     "c17_problem",
     "c17_rhs",
     "c19_analytical_steady_state",
