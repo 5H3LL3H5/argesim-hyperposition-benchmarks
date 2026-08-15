@@ -30,6 +30,12 @@ class HyperTimeTests(unittest.TestCase):
             HyperTime.at(0, -1)
         with self.assertRaises(ValueError):
             HyperTime.at(0).after_epsilon(0)
+        with self.assertRaises(TypeError):
+            HyperTime.at(True)
+        with self.assertRaises(ValueError):
+            HyperTime.at(float("inf"))
+        with self.assertRaises(ValueError):
+            HyperTime.at(float("nan"))
 
 
 if __name__ == "__main__":
