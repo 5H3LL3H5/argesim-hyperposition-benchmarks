@@ -12,6 +12,16 @@ from .c01_lithium_cluster import (
     solve_c01,
 )
 from .c02_flexible_assembly import solve_c02
+from .c03_amplifier import (
+    C03_INITIAL_STATE,
+    C03Parameters,
+    c03_problem,
+    c03_rhs,
+    c03_task_a,
+    c03_task_b,
+    c03_task_c,
+    solve_c03,
+)
 from .c06_emergency_department import (
     solve_c06_task_a,
     solve_c06_task_b,
@@ -87,6 +97,8 @@ __all__ = [
     "C01_INITIAL_STATE",
     "C01_LOG_LOSS_VALUES",
     "C01Parameters",
+    "C03_INITIAL_STATE",
+    "C03Parameters",
     "C07Parameters",
     "C11_INITIAL_STATE",
     "C11_TARGET_STATE",
@@ -107,6 +119,11 @@ __all__ = [
     "c01_steady_state",
     "c01_task_b",
     "c01_task_c",
+    "c03_problem",
+    "c03_rhs",
+    "c03_task_a",
+    "c03_task_b",
+    "c03_task_c",
     "c07_rhs",
     "c07_task_a",
     "c07_task_b",
@@ -142,6 +159,7 @@ __all__ = [
     "cp2_swinging_rope_problem",
     "solve_c01",
     "solve_c02",
+    "solve_c03",
     "solve_c06_task_a",
     "solve_c06_task_b",
     "solve_c06_task_c",
