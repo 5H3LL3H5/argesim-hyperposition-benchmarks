@@ -125,5 +125,18 @@ class QssSolverTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             qss1(self.decay_problem(), 0.1, simultaneous_tolerance=True)
 
+    def test_simultaneous_events_respect_the_strict_event_limit(self) -> None:
+        problem = InitialValueProblem(
+            lambda _time, state: (state[0], state[1]),
+            0.0,
+            (1.0, 1.0),
+            1.0,
+            autonomous=True,
+        )
+        with self.assertRaisesRegex(RuntimeError, "exceeded max_events"):
+            qss1(problem, 0.1, max_events=1)
+        with self.assertRaisesRegex(RuntimeError, "exceeded max_events"):
+            qss2(problem, 0.1, max_events=1)
+
 if __name__ == "__main__":
     unittest.main()
