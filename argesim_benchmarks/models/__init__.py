@@ -53,6 +53,12 @@ from .c11_scara_robot import (
     c11_task_c,
     solve_c11,
 )
+from .c12_collision import C12Parameters, c12_task_a, c12_task_b, c12_task_c
+from .c12_collision.c12_collision_plots import (
+    render_task_a_svg,
+    render_task_b1_svg,
+    render_task_b2_svg,
+)
 from .c13_crane import (
     C13_INITIAL_STATE,
     C13Parameters,
@@ -142,6 +148,7 @@ __all__ = [
     "C11_INITIAL_STATE",
     "C11_TARGET_STATE",
     "C11Parameters",
+    "C12Parameters",
     "C13_INITIAL_STATE",
     "C13Parameters",
     "C15_INITIAL_STATE",
@@ -180,6 +187,9 @@ __all__ = [
     "c11_task_a",
     "c11_task_b",
     "c11_task_c",
+    "c12_task_a",
+    "c12_task_b",
+    "c12_task_c",
     "c13_linear_rhs",
     "c13_nonlinear_rhs",
     "c13_task_a",
@@ -219,6 +229,9 @@ __all__ = [
     "cp2_monte_carlo_rhs",
     "cp2_swinging_rope_initial_state",
     "cp2_swinging_rope_problem",
+    "render_task_a_svg",
+    "render_task_b1_svg",
+    "render_task_b2_svg",
     "solve_c01",
     "solve_c02",
     "solve_c03",
