@@ -82,6 +82,18 @@ class RelayChainTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             run_relay_chain(2, initial_payload=True)
 
+    def test_scheduler_stops_a_zero_delay_zeno_loop(self) -> None:
+        scheduler = DesScheduler()
+
+        def reschedule() -> None:
+            scheduler.schedule(0.0, "zeno", reschedule)
+
+        scheduler.schedule(0.0, "zeno", reschedule)
+        with self.assertRaisesRegex(RuntimeError, "exceeded max_events"):
+            scheduler.run(0.0, max_events=5)
+        self.assertEqual(scheduler.time.micro, 5)
+        self.assertEqual(len(scheduler.events), 1)
+
 
 if __name__ == "__main__":
     unittest.main()
