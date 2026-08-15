@@ -18,7 +18,7 @@ have already been implemented.
 | C07 | Constrained Pendulum | hybrid mechanics | implemented |
 | C08 | Canal-and-Lock System | stochastic DES | validated |
 | C09 | Fuzzy Control of a Two Tank System | hybrid sampled control | cataloged |
-| C10 | Dining Philosophers II | DES/concurrency | cataloged |
+| C10 | Dining Philosophers II | DES/concurrency | implemented |
 | C11 | SCARA Robot | DAE, hybrid control | implemented |
 | C12 | Collision Processes in Rows of Spheres | hybrid mechanics, stochastic study | implemented |
 | C13 | Crane and Embedded Control | DAE, sampled control | implemented |
