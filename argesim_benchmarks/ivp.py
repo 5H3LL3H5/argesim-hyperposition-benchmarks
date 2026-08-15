@@ -15,7 +15,16 @@ class IntegrationError(RuntimeError):
 
 
 def _finite_vector(values: Sequence[float], *, name: str) -> Vector:
-    result = tuple(float(value) for value in values)
+    try:
+        raw_values = tuple(values)
+    except TypeError as exc:
+        raise TypeError(f"{name} must be a finite numeric sequence") from exc
+    if any(isinstance(value, bool) for value in raw_values):
+        raise TypeError(f"{name} must contain real numbers, not bool")
+    try:
+        result = tuple(float(value) for value in raw_values)
+    except (TypeError, ValueError) as exc:
+        raise TypeError(f"{name} must be a finite numeric sequence") from exc
     if not result:
         raise ValueError(f"{name} must contain at least one value")
     if not all(math.isfinite(value) for value in result):
@@ -37,6 +46,12 @@ class InitialValueProblem:
     def __post_init__(self) -> None:
         if not callable(self.rhs):
             raise TypeError("rhs must be callable")
+        if isinstance(self.t0, bool) or isinstance(self.t_bound, bool):
+            raise TypeError("time bounds must be real numbers")
+        if not isinstance(self.name, str) or not self.name.strip():
+            raise ValueError("name must be a non-empty string")
+        if not isinstance(self.autonomous, bool):
+            raise TypeError("autonomous must be bool")
         t0 = float(self.t0)
         t_bound = float(self.t_bound)
         if not math.isfinite(t0) or not math.isfinite(t_bound):
@@ -52,10 +67,13 @@ class InitialValueProblem:
         return len(self.y0)
 
     def evaluate(self, t: float, y: Sequence[float]) -> Vector:
-        state = tuple(float(value) for value in y)
+        evaluation_time = float(t)
+        if not math.isfinite(evaluation_time):
+            raise ValueError("evaluation time must be finite")
+        state = _finite_vector(y, name="state")
         if len(state) != self.dimension:
             raise ValueError("state dimension does not match y0")
-        derivative = tuple(float(value) for value in self.rhs(float(t), state))
+        derivative = tuple(float(value) for value in self.rhs(evaluation_time, state))
         if len(derivative) != self.dimension:
             raise ValueError("rhs result dimension does not match y0")
         if not all(math.isfinite(value) for value in derivative):
@@ -70,8 +88,15 @@ class SolverStats:
     rhs_evaluations: int
 
     def __post_init__(self) -> None:
-        if min(self.accepted_steps, self.rejected_steps, self.rhs_evaluations) < 0:
-            raise ValueError("solver statistics must be non-negative")
+        for name, value in (
+            ("accepted_steps", self.accepted_steps),
+            ("rejected_steps", self.rejected_steps),
+            ("rhs_evaluations", self.rhs_evaluations),
+        ):
+            if not isinstance(value, int) or isinstance(value, bool):
+                raise TypeError(f"{name} must be an integer")
+            if value < 0:
+                raise ValueError("solver statistics must be non-negative")
 
 
 @dataclass(frozen=True)
@@ -82,13 +107,29 @@ class IntegrationResult:
     stats: SolverStats
 
     def __post_init__(self) -> None:
-        if not self.times or len(self.times) != len(self.states):
+        if not isinstance(self.method, str) or not self.method.strip():
+            raise ValueError("method must be a non-empty string")
+        if not isinstance(self.stats, SolverStats):
+            raise TypeError("stats must be SolverStats")
+        raw_times = tuple(self.times)
+        if any(isinstance(value, bool) for value in raw_times):
+            raise TypeError("result times must be real numbers, not bool")
+        times = tuple(float(value) for value in raw_times)
+        states = tuple(
+            _finite_vector(state, name=f"states[{index}]")
+            for index, state in enumerate(self.states)
+        )
+        if not times or len(times) != len(states):
             raise ValueError("times and states must be non-empty and equally sized")
-        if any(later < earlier for earlier, later in zip(self.times, self.times[1:])):
+        if not all(math.isfinite(value) for value in times):
+            raise ValueError("result times must be finite")
+        if any(later < earlier for earlier, later in zip(times, times[1:])):
             raise ValueError("result times must be non-decreasing")
-        dimension = len(self.states[0])
-        if dimension == 0 or any(len(state) != dimension for state in self.states):
+        dimension = len(states[0])
+        if any(len(state) != dimension for state in states):
             raise ValueError("all result states must have one common dimension")
+        object.__setattr__(self, "times", times)
+        object.__setattr__(self, "states", states)
 
     @property
     def final_time(self) -> float:
