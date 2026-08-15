@@ -22,7 +22,7 @@ have already been implemented.
 | C11 | SCARA Robot | DAE, hybrid control | implemented |
 | C12 | Collision Processes in Rows of Spheres | hybrid mechanics, stochastic study | cataloged |
 | C13 | Crane and Embedded Control | DAE, sampled control | implemented |
-| C14 | Supply Chain | discrete-time dynamics | cataloged |
+| C14 | Supply Chain | discrete-time dynamics | implemented |
 | C15 | Clearance Identification | ODE identification | implemented |
 | C16 | Restaurant Business Dynamics | agent-based stochastic dynamics | implemented |
 | C17R | SIR-type Epidemic with Cellular Automata and ODEs | ODE, CA, identification | implemented |
