@@ -13,7 +13,8 @@ The official inventory is complete for the catalog published in August 2026:
 C01-C22 plus CP1 and CP2. C17R and C19R are the active revised definitions.
 The inventory is machine-readable in `argesim_benchmarks.catalog`.
 
-ARGESIM C01 is the first model at the `implemented` gate. The remaining 23
+ARGESIM C01 is the first model at the `implemented` gate.
+ARGESIM C17R is the second model at the `implemented` gate. The remaining 22
 definitions are cataloged only. Each benchmark must pass five evidence gates
 before it is benchmark-ready:
 
@@ -26,7 +27,8 @@ See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status.
 - fixed-step explicit Euler;
 - fixed-step classical RK4;
 - adaptive Dormand-Prince RK45 with a 5(4) embedded error estimate;
-- asynchronous first- and second-order QSS for autonomous ODE systems;
+- asynchronous first-order QSS for autonomous ODE systems;
+- asynchronous second-order QSS2 using a scaled directional finite difference;
 - bracketed Brent root finding with explicit non-convergence reporting;
 - one-dimensional heat and wave equations through the Method of Lines;
 - exact rational macro time plus integer microsteps and a deterministic DES
@@ -34,6 +36,7 @@ See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status.
 - a finite acyclic Mealy-style NSA-DEVS relay reference model.
 - ARGESIM C01 tasks A-C, including the official parameter sweep and analytical
   steady states.
+- ARGESIM C17R (ODE part) task 1 parameters, ODE problem, and solvers.
 
 LIQSS, DAE handling, general hybrid-event localization, the modern
 `neuraloperator` backend and ARGESIM C02-C22/CP1/CP2 are tracked as work in
