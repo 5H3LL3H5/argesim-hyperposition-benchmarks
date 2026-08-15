@@ -11,7 +11,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 
 from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
-from ..solvers import rk45
+from ..runtime import solve_ivp
 
 
 @dataclass(frozen=True)
@@ -272,14 +272,71 @@ def c19_problem(
         autonomous=(facility_mode != "schedule")
     )
 
+
+def solve_c19(
+    method: str = "rk45",
+    *,
+    nx: int = 71,
+    ny: int = 41,
+    dx: float = 1.0,
+    dy: float = 1.0,
+    x_offset: float = -10.0,
+    y_offset: float = -20.0,
+    facility_mode: str = "none",
+    parameters: C19Parameters = _C19_DEFAULT_PARAMETERS,
+    t_bound: float = 150 * 24 * 3600,
+    initial_state: Sequence[float] | None = None,
+    max_step: float = 12 * 3600,
+    options: Mapping[str, object] | None = None,
+) -> IntegrationResult:
+    """Solve one C19R MOL problem through the shared backend dispatcher.
+
+    RK45 has a benchmark-scale default step cap. Fixed-step and quantized
+    methods deliberately require an explicit ``step`` or ``quantum`` option,
+    because their useful values depend on the grid and concentration scale.
+    QSS backends also correctly reject the schedule-driven non-autonomous task.
+    """
+
+    if isinstance(max_step, bool):
+        raise TypeError("max_step must be a real number")
+    max_step_value = float(max_step)
+    if not math.isfinite(max_step_value) or max_step_value <= 0.0:
+        raise ValueError("max_step must be positive and finite")
+    problem = c19_problem(
+        nx=nx,
+        ny=ny,
+        dx=dx,
+        dy=dy,
+        x_offset=x_offset,
+        y_offset=y_offset,
+        facility_mode=facility_mode,
+        parameters=parameters,
+        t_bound=t_bound,
+        initial_state=initial_state,
+    )
+    return solve_ivp(
+        problem,
+        method,
+        options=options,
+        defaults={"rk45": {"max_step": max_step_value}},
+    )
+
 def c19_task_a(nx: int = 71, ny: int = 41, dx: float = 1.0, dy: float = 1.0, x_offset: float = -10.0, y_offset: float = -20.0) -> IntegrationResult:
     """Task A: Simulation of unregulated pollution spread for 150 days."""
-    problem = c19_problem(nx=nx, ny=ny, dx=dx, dy=dy, x_offset=x_offset, y_offset=y_offset, facility_mode="none")
     # Using explicit RK45. The spatial discretization of diffusion makes the system stiff.
     # For a realistic grid (dx=1), the stability limit forces very small steps.
     # An implicit solver would be more appropriate, but explicit is used here out of necessity
     # to maintain benchmark framework compatibility.
-    return rk45(problem, max_step=12*3600)  # max step 12 hours
+    return solve_c19(
+        nx=nx,
+        ny=ny,
+        dx=dx,
+        dy=dy,
+        x_offset=x_offset,
+        y_offset=y_offset,
+        facility_mode="none",
+        max_step=12 * 3600,
+    )
 
 
 def _steady_state_grid(
@@ -311,10 +368,18 @@ def c19_task_b(nx: int = 71, ny: int = 41, dx: float = 1.0, dy: float = 1.0, x_o
     """
     state = _steady_state_grid(nx, ny, dx, dy, x_offset, y_offset)
 
-    problem = c19_problem(
-        nx=nx, ny=ny, dx=dx, dy=dy, x_offset=x_offset, y_offset=y_offset, facility_mode="continuous", initial_state=state, t_bound=100*24*3600
+    return solve_c19(
+        nx=nx,
+        ny=ny,
+        dx=dx,
+        dy=dy,
+        x_offset=x_offset,
+        y_offset=y_offset,
+        facility_mode="continuous",
+        initial_state=state,
+        t_bound=100 * 24 * 3600,
+        max_step=12 * 3600,
     )
-    return rk45(problem, max_step=12*3600)
 
 def c19_task_c(nx: int = 71, ny: int = 41, dx: float = 1.0, dy: float = 1.0, x_offset: float = -10.0, y_offset: float = -20.0) -> IntegrationResult:
     """Task C: Schedule-controlled pollution reduction.
@@ -323,7 +388,15 @@ def c19_task_c(nx: int = 71, ny: int = 41, dx: float = 1.0, dy: float = 1.0, x_o
     """
     state = _steady_state_grid(nx, ny, dx, dy, x_offset, y_offset)
 
-    problem = c19_problem(
-        nx=nx, ny=ny, dx=dx, dy=dy, x_offset=x_offset, y_offset=y_offset, facility_mode="schedule", initial_state=state, t_bound=150*24*3600
+    return solve_c19(
+        nx=nx,
+        ny=ny,
+        dx=dx,
+        dy=dy,
+        x_offset=x_offset,
+        y_offset=y_offset,
+        facility_mode="schedule",
+        initial_state=state,
+        t_bound=150 * 24 * 3600,
+        max_step=6 * 3600,
     )
-    return rk45(problem, max_step=6*3600)

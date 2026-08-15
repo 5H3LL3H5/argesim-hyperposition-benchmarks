@@ -134,6 +134,7 @@ from .c19_groundwater import (
     c19_task_a,
     c19_task_b,
     c19_task_c,
+    solve_c19,
 )
 from .c22_queuing_policies import (
     c22_basic,
@@ -248,6 +249,7 @@ __all__ = [
     "c19_task_a",
     "c19_task_b",
     "c19_task_c",
+    "solve_c19",
     "c21_task_qss1_bouncing_ball",
     "c21_task_qss2_bouncing_ball",
     "c22_basic",
