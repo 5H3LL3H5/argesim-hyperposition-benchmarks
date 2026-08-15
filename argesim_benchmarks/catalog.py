@@ -134,6 +134,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Clearance Identification",
         (ModelClass.ODE, ModelClass.IDENTIFICATION, ModelClass.STOCHASTIC),
         _source("c15"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C16",
