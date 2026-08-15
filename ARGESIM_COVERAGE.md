@@ -10,7 +10,7 @@ have already been implemented.
 | ID | Official benchmark | Model family | Status |
 |---|---|---|---|
 | C01 | Lithium-Cluster Dynamics | stiff ODE | implemented |
-| C02 | Flexible Assembly System | DES | cataloged |
+| C02 | Flexible Assembly System | DES | implemented |
 | C03 | Class-E Amplifier | ODE, hybrid | cataloged |
 | C04 | Dining Philosophers | DES/concurrency | cataloged |
 | C05 | Two State Model | stiff ODE, state events | cataloged |
@@ -53,6 +53,13 @@ driver; task B retains complete trajectories for the requested logarithmic
 loss-rate sweep; task C uses and verifies the analytical steady states. It is
 not yet `validated` because an independent published trajectory table or
 cross-tool reference data set has not been archived.
+
+`implemented` for C02 includes formal internal/external DEVS scheduling,
+finite B2 capacities, the published A2 and A3--A6 routing rules, warm-up and
+measurement windows, and explicit detection of the published 50--60 pallet
+deadlock region. Selected results reproduce the independent 2011 reference
+table within six percent; the remaining difference is retained transparently
+rather than being mislabeled as bit-for-bit validation.
 
 Euler, RK4 and RK45 are not applied to an unreduced DAE. QSS is applied to a
 PDE only after spatial discretization. A neural operator will be evaluated as
