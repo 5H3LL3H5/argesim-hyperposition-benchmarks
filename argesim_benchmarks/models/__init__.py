@@ -62,6 +62,14 @@ from .c13_crane import (
     c13_task_b,
     c13_task_c,
 )
+from .c14_supply_chain import (
+    c14_task_a1,
+    c14_task_a2,
+    c14_task_b1,
+    c14_task_b2,
+    c14_task_c1,
+    c14_task_c2,
+)
 from .c15_clearance import (
     C15_INITIAL_STATE,
     C15_MEASUREMENTS_CONC,
@@ -177,6 +185,12 @@ __all__ = [
     "c13_task_a",
     "c13_task_b",
     "c13_task_c",
+    "c14_task_a1",
+    "c14_task_a2",
+    "c14_task_b1",
+    "c14_task_b2",
+    "c14_task_c1",
+    "c14_task_c2",
     "c15_analytical",
     "c15_problem",
     "c15_rhs",
