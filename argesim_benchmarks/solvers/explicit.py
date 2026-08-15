@@ -9,10 +9,20 @@ from ..ivp import InitialValueProblem, IntegrationError, IntegrationResult, Solv
 
 
 def _positive_finite(value: float, *, name: str) -> float:
+    if isinstance(value, bool):
+        raise TypeError(f"{name} must be a real number")
     result = float(value)
     if not math.isfinite(result) or result <= 0.0:
         raise ValueError(f"{name} must be positive and finite")
     return result
+
+
+def _positive_integer(value: int, *, name: str) -> int:
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise TypeError(f"{name} must be an integer")
+    if value <= 0:
+        raise ValueError(f"{name} must be positive")
+    return value
 
 
 def _combine(
@@ -20,11 +30,14 @@ def _combine(
     h: float,
     terms: Sequence[tuple[float, Sequence[float]]],
 ) -> tuple[float, ...]:
-    return tuple(
+    result = tuple(
         value
         + h * sum(coefficient * derivative[index] for coefficient, derivative in terms)
         for index, value in enumerate(y)
     )
+    if not all(math.isfinite(value) for value in result):
+        raise IntegrationError("state update produced a non-finite value")
+    return result
 
 
 def _fixed_step(
@@ -39,8 +52,7 @@ def _fixed_step(
     max_steps: int,
 ) -> IntegrationResult:
     h_nominal = _positive_finite(step, name="step")
-    if max_steps <= 0:
-        raise ValueError("max_steps must be positive")
+    step_limit = _positive_integer(max_steps, name="max_steps")
 
     t = problem.t0
     y = tuple(problem.y0)
@@ -49,7 +61,7 @@ def _fixed_step(
     evaluations = 0
 
     while t < problem.t_bound:
-        if len(times) - 1 >= max_steps:
+        if len(times) - 1 >= step_limit:
             raise IntegrationError(f"{method} exceeded max_steps")
         h = min(h_nominal, problem.t_bound - t)
         if t + h == t:
@@ -116,7 +128,10 @@ def _rms_error(
         component / (atol + rtol * max(abs(before), abs(after)))
         for component, before, after in zip(error, old, new)
     ]
-    return math.sqrt(sum(value * value for value in scaled) / len(scaled))
+    norm = math.sqrt(sum(value * value for value in scaled) / len(scaled))
+    if not math.isfinite(norm):
+        raise IntegrationError("rk45 produced a non-finite error estimate")
+    return norm
 
 
 def rk45(
@@ -134,11 +149,14 @@ def rk45(
     relative_tolerance = _positive_finite(rtol, name="rtol")
     absolute_tolerance = _positive_finite(atol, name="atol")
     minimum_step = _positive_finite(min_step, name="min_step")
+    if isinstance(max_step, bool):
+        raise TypeError("max_step must be a real number")
     maximum_step = float(max_step)
     if math.isnan(maximum_step) or maximum_step <= 0.0:
         raise ValueError("max_step must be positive")
-    if max_steps <= 0:
-        raise ValueError("max_steps must be positive")
+    if minimum_step > maximum_step:
+        raise ValueError("min_step must not exceed max_step")
+    step_limit = _positive_integer(max_steps, name="max_steps")
 
     span = problem.t_bound - problem.t0
     h = (
@@ -156,7 +174,7 @@ def rk45(
     evaluations = 0
 
     while t < problem.t_bound:
-        if accepted + rejected >= max_steps:
+        if accepted + rejected >= step_limit:
             raise IntegrationError("rk45 exceeded max_steps")
         h = min(h, maximum_step, problem.t_bound - t)
         if h < minimum_step or t + h == t:
