@@ -103,5 +103,27 @@ class QssSolverTests(unittest.TestCase):
         self.assertEqual(result.final_time, 2.0)
         self.assertGreater(result.stats.accepted_steps, 0)
 
+    def test_qss2_scales_finite_difference_against_fast_nonlinearity(self) -> None:
+        problem = InitialValueProblem(
+            lambda _time, state: (1.0e8 * state[0] ** 2,),
+            0.0,
+            (1.0,),
+            1.0e-9,
+            autonomous=True,
+        )
+        result = qss2(problem, 1.0e-3, max_events=100)
+        self.assertLess(result.stats.accepted_steps, 20)
+        self.assertAlmostEqual(result.final_state[0], 1.0 / 0.9, delta=2.0e-4)
+
+    def test_controls_reject_boolean_and_fractional_event_limits(self) -> None:
+        with self.assertRaises(TypeError):
+            qss1(self.decay_problem(), True)
+        with self.assertRaises(TypeError):
+            qss2(self.decay_problem(), (0.1, True))
+        with self.assertRaises(TypeError):
+            qss2(self.decay_problem(), 0.1, max_events=10.5)
+        with self.assertRaises(TypeError):
+            qss1(self.decay_problem(), 0.1, simultaneous_tolerance=True)
+
 if __name__ == "__main__":
     unittest.main()
