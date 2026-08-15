@@ -173,6 +173,7 @@ def qss1(
             direction = 1.0 if derivative[index] > 0.0 else -1.0
             q[index] += direction * quanta[index]
             x[index] = q[index]
+        q = _finite_state(q, method="qss1 quantizer")
         events += len(due)
         times.append(t)
         states.append(tuple(x))
