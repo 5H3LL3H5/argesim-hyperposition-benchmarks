@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import heapq
+import math
 from dataclasses import dataclass, field
 from fractions import Fraction
+from collections.abc import Callable
 
 from .hypertime import HyperTime
 
@@ -36,6 +38,58 @@ class RelayResult:
                 + event.output_payload
             ) % 2_147_483_647
         return value
+
+
+@dataclass(order=True)
+class DesEvent:
+    """A generic discrete event for DES scheduling."""
+
+    time: HyperTime
+    sequence: int
+    name: str = field(compare=False)
+    handler: Callable[..., None] = field(compare=False)
+    args: tuple[object, ...] = field(compare=False, default=())
+
+
+class DesScheduler:
+    """A deterministic HyperTime discrete-event scheduler."""
+
+    def __init__(self, initial_time: HyperTime | None = None):
+        self.time = initial_time or HyperTime.at(0)
+        self.events: list[DesEvent] = []
+        self.event_sequence = 0
+
+    def schedule(
+        self,
+        delay_minutes: float,
+        name: str,
+        handler: Callable[..., None],
+        *args: object,
+    ) -> None:
+        if not math.isfinite(delay_minutes) or delay_minutes < 0.0:
+            raise ValueError("delay must be finite and non-negative")
+        target_time = (
+            self.time.after_epsilon(1)
+            if delay_minutes == 0.0
+            else self.time.after_finite(delay_minutes)
+        )
+        heapq.heappush(
+            self.events,
+            DesEvent(target_time, self.event_sequence, name, handler, args),
+        )
+        self.event_sequence += 1
+
+    def run(self, until: float) -> None:
+        if not math.isfinite(until):
+            raise ValueError("until must be finite")
+        until_time = HyperTime.at(until)
+        if until_time < self.time:
+            raise ValueError("until cannot precede the current scheduler time")
+        while self.events and self.events[0].time <= until_time:
+            event = heapq.heappop(self.events)
+            self.time = event.time
+            event.handler(*event.args)
+        self.time = until_time
 
 
 @dataclass(order=True)
