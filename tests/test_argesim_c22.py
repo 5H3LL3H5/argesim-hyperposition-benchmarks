@@ -50,6 +50,8 @@ class C22Tests(unittest.TestCase):
         self.assertEqual(results["deterministic"]["tq_max"], 9.0)
         self.assertEqual(results["deterministic"]["active_entities"], 0)
         self.assertEqual(results["deterministic"]["entities_terminated"], 100)
+        self.assertEqual(len(results["deterministic"]["ids_out"]), 20)
+        self.assertEqual(len(set(results["deterministic"]["ids_out"])), 20)
 
     def test_c22_classing_runs(self) -> None:
         results = c22_classing()

@@ -5,14 +5,13 @@ Agent-based stochastic dynamics of restaurants and customers in a spatial grid.
 
 from __future__ import annotations
 
-import heapq
 import math
 import random
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, replace
 from enum import Enum, auto
 from typing import Sequence
 
-from nsa_devs import HyperTime
+from nsa_devs import DesScheduler, HyperTime
 
 @dataclass(frozen=True)
 class C16Parameters:
@@ -207,14 +206,6 @@ class EventType(Enum):
     DINNER = auto()
     END_OF_WEEK = auto()
 
-@dataclass(order=True)
-class ScheduledEvent:
-    time: HyperTime
-    priority: int
-    sequence: int
-    event_type: EventType = field(compare=False)
-    person_idx: int = field(compare=False, default=-1)
-
 class C16Simulation:
     def __init__(self, parameters: C16Parameters = _C16_DEFAULT_PARAMETERS, seed: int | None = None):
         self.parameters = parameters
@@ -226,10 +217,8 @@ class C16Simulation:
         self._cumulative_revenue = 0.0
         self._closed_new_restaurant_revenues: list[float] = []
         self._next_restaurant_id = len(self.restaurants)
-        self.current_time = HyperTime.at(0)
-
-        self.queue: list[ScheduledEvent] = []
-        self._seq = 0
+        self.scheduler = DesScheduler()
+        self._active_tax_rate = parameters.initial_tax_rate
 
         # Schedule initial events
         for idx, p in enumerate(self.people):
@@ -238,34 +227,54 @@ class C16Simulation:
             self._schedule(t, EventType.DINNER, person_idx=idx)
         self._schedule(HyperTime.at(7), EventType.END_OF_WEEK)
 
+    @property
+    def current_time(self) -> HyperTime:
+        return self.scheduler.time
+
+    @property
+    def queue(self):
+        """Expose the shared scheduler queue for compatibility and inspection."""
+
+        return self.scheduler.events
+
     def _schedule(self, time: HyperTime, event_type: EventType, person_idx: int = -1) -> None:
         # All dinners at a week boundary contribute before financial accounting.
-        priority = 0 if event_type == EventType.DINNER else 1
-        heapq.heappush(
-            self.queue,
-            ScheduledEvent(time, priority, self._seq, event_type, person_idx),
+        microstep = 0 if event_type == EventType.DINNER else 1
+        target = HyperTime(time.macro, microstep)
+        self.scheduler.schedule_at(
+            target,
+            f"C16:{event_type.name.lower()}",
+            self._dispatch,
+            event_type,
+            person_idx,
         )
-        self._seq += 1
 
-    def run_until(self, max_days: int, tax_rate: float | None = None) -> None:
+    def _dispatch(self, event_type: EventType, person_idx: int) -> None:
+        if event_type == EventType.DINNER:
+            self._handle_dinner(person_idx)
+        elif event_type == EventType.END_OF_WEEK:
+            self._handle_end_of_week(self._active_tax_rate)
+
+    def run_until(
+        self,
+        max_days: int | float,
+        tax_rate: float | None = None,
+        *,
+        max_events: int = 1_000_000,
+    ) -> int:
         """Run the event-driven simulation until the specified macro time."""
         if tax_rate is None:
             tax_rate = self.parameters.initial_tax_rate
+        if isinstance(max_days, bool) or not isinstance(max_days, (int, float)):
+            raise TypeError("max_days must be a real number")
         if not math.isfinite(max_days) or max_days < float(self.current_time.macro):
             raise ValueError("max_days must be finite and cannot move time backwards")
+        if isinstance(tax_rate, bool) or not isinstance(tax_rate, (int, float)):
+            raise TypeError("tax_rate must be a real number")
         if not math.isfinite(tax_rate) or not 0.0 <= tax_rate <= 1.0:
             raise ValueError("tax_rate must be finite and between zero and one")
-
-        bound = HyperTime.at(max_days)
-
-        while self.queue and self.queue[0].time <= bound:
-            event = heapq.heappop(self.queue)
-            self.current_time = event.time
-
-            if event.event_type == EventType.DINNER:
-                self._handle_dinner(event.person_idx)
-            elif event.event_type == EventType.END_OF_WEEK:
-                self._handle_end_of_week(tax_rate)
+        self._active_tax_rate = tax_rate
+        return self.scheduler.run(max_days, max_events=max_events)
 
     def _handle_dinner(self, person_idx: int) -> None:
         person = self.people[person_idx]
