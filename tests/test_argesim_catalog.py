@@ -24,6 +24,7 @@ class ArgesimCatalogTests(unittest.TestCase):
             "C07",
             "C11",
             "C13",
+            "C15",
             "C17R",
             "C19R",
             "C22",
