@@ -3,11 +3,14 @@
 from .catalog import BENCHMARKS, BenchmarkDefinition, BenchmarkStatus, ModelClass
 from .ivp import InitialValueProblem, IntegrationResult, SolverStats
 from .models import (
+    Barge,
     C01_INITIAL_STATE,
     C01_LOG_LOSS_VALUES,
     C01Parameters,
     C03_INITIAL_STATE,
     C03Parameters,
+    CanalAndLock,
+    Direction,
     C17_INITIAL_STATE,
     C17Parameters,
     c01_problem,
@@ -20,6 +23,7 @@ from .models import (
     c03_task_a,
     c03_task_b,
     c03_task_c,
+    c08_task_c,
     c17_problem,
     c17_rhs,
     cp2_lbm_initial_state,
@@ -30,6 +34,7 @@ from .models import (
     cp2_swinging_rope_problem,
     solve_c01,
     solve_c03,
+    run_c08_replication,
     solve_c06_task_a,
     solve_c06_task_b,
     solve_c06_task_c,
@@ -40,6 +45,7 @@ from .solvers import euler, qss1, qss2, rk4, rk45
 
 __all__ = [
     "BENCHMARKS",
+    "Barge",
     "C01_INITIAL_STATE",
     "C01_LOG_LOSS_VALUES",
     "C17_INITIAL_STATE",
@@ -48,6 +54,8 @@ __all__ = [
     "C01Parameters",
     "C03_INITIAL_STATE",
     "C03Parameters",
+    "CanalAndLock",
+    "Direction",
     "C17Parameters",
     "InitialValueProblem",
     "IntegrationResult",
@@ -63,6 +71,7 @@ __all__ = [
     "c03_task_a",
     "c03_task_b",
     "c03_task_c",
+    "c08_task_c",
     "c17_problem",
     "c17_rhs",
     "cp2_lbm_initial_state",
@@ -79,6 +88,7 @@ __all__ = [
     "qss2",
     "rk4",
     "rk45",
+    "run_c08_replication",
     "solve_c01",
     "solve_c03",
     "solve_c06_task_a",
