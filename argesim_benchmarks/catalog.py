@@ -54,7 +54,11 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
-        "C02", "Flexible Assembly System", (ModelClass.DES,), _source("c02")
+        "C02",
+        "Flexible Assembly System",
+        (ModelClass.DES,),
+        _source("c02"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C03",
