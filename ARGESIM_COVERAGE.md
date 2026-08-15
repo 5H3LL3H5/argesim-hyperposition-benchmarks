@@ -11,7 +11,7 @@ have already been implemented.
 |---|---|---|---|
 | C01 | Lithium-Cluster Dynamics | stiff ODE | implemented |
 | C02 | Flexible Assembly System | DES | implemented |
-| C03 | Class-E Amplifier | ODE, hybrid | cataloged |
+| C03 | Class-E Amplifier | ODE, hybrid | implemented |
 | C04 | Dining Philosophers | DES/concurrency | cataloged |
 | C05 | Two State Model | stiff ODE, state events | cataloged |
 | C06 | Emergency Department - Follow-up Treatment | stochastic DES | implemented |
