@@ -9,6 +9,7 @@ from argesim_benchmarks.models.c19_groundwater import (
     c19_analytical_transient,
     c19_problem,
     c19_task_a,
+    solve_c19,
 )
 
 
@@ -67,12 +68,27 @@ class C19GroundwaterTests(unittest.TestCase):
             C19Parameters(porosity=0.0)
 
     def test_task_a_runs_on_coarse_grid(self) -> None:
-        # Just run a tiny grid for a short time to verify it doesn't crash
-        problem = c19_problem(nx=3, ny=3, t_bound=3600.0)
-        from argesim_benchmarks.solvers import rk45
-        result = rk45(problem, max_step=3600.0)
+        # Run the shared dispatcher on a tiny grid and an independent RK4 backend.
+        result = solve_c19(
+            "rk4",
+            nx=3,
+            ny=3,
+            t_bound=3600.0,
+            options={"step": 900.0},
+        )
         self.assertGreaterEqual(len(result.times), 2)
         self.assertEqual(len(result.final_state), 9)
+
+    def test_schedule_task_refuses_non_autonomous_qss(self) -> None:
+        with self.assertRaisesRegex(ValueError, "autonomous"):
+            solve_c19(
+                "qss2",
+                nx=3,
+                ny=3,
+                facility_mode="schedule",
+                t_bound=60.0,
+                options={"quantum": 1.0e-3},
+            )
 
 
 if __name__ == "__main__":
