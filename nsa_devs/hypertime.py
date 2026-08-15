@@ -10,14 +10,19 @@ from __future__ import annotations
 from dataclasses import dataclass
 from fractions import Fraction
 from functools import total_ordering
+import math
 
 Scalar = int | float | str | Fraction
 
 
 def _as_fraction(value: Scalar) -> Fraction:
+    if isinstance(value, bool):
+        raise TypeError("time values must be numeric, not bool")
     if isinstance(value, Fraction):
         return value
     if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("time values must be finite")
         return Fraction(str(value))
     return Fraction(value)
 
