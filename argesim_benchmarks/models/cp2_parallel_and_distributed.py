@@ -103,6 +103,8 @@ def cp2_lbm_initial_state(
     nx: int = 257,
 ) -> tuple[tuple[tuple[float, ...], ...], ...]:
     """Create the initial D2Q9 grid for Task 2."""
+    if not isinstance(nx, int) or isinstance(nx, bool):
+        raise TypeError("grid size nx must be an integer")
     if nx < 3:
         raise ValueError("grid size nx must be at least 3")
 
@@ -137,6 +139,30 @@ def cp2_lbm_step(
     u0_x: float = 0.1,
 ) -> tuple[tuple[tuple[float, ...], ...], ...]:
     """Perform one LBM collision and propagation step."""
+
+    if not isinstance(nx, int) or isinstance(nx, bool):
+        raise TypeError("nx must be an integer")
+    if nx < 3:
+        raise ValueError("nx must be at least 3")
+    if isinstance(omega, bool) or not math.isfinite(float(omega)):
+        raise ValueError("omega must be finite")
+    if not 0.0 < float(omega) < 2.0:
+        raise ValueError("omega must lie in the BGK stability interval (0, 2)")
+    if isinstance(u0_x, bool) or not math.isfinite(float(u0_x)):
+        raise ValueError("u0_x must be finite")
+    if abs(float(u0_x)) >= 1.0:
+        raise ValueError("u0_x magnitude must be below the lattice speed")
+    if len(grid) != nx or any(len(row) != nx for row in grid):
+        raise ValueError("grid shape must be nx by nx")
+    if any(len(cell) != 9 for row in grid for cell in row):
+        raise ValueError("each D2Q9 cell must contain nine populations")
+    if any(
+        not math.isfinite(float(value))
+        for row in grid
+        for cell in row
+        for value in cell
+    ):
+        raise ValueError("LBM populations must be finite")
 
     # Collision
     f_post_collision = []
@@ -219,6 +245,10 @@ class CP2SwingingRopeParameters:
             raise ValueError("length must be positive and finite")
         if not math.isfinite(self.h):
             raise ValueError("h must be finite")
+        if not isinstance(self.interior_points, int) or isinstance(
+            self.interior_points, bool
+        ):
+            raise TypeError("interior_points must be an integer")
         if self.interior_points < 1:
             raise ValueError("interior_points must be positive")
 

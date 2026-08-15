@@ -11,7 +11,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 
 from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
-from ..solvers import euler, rk4, rk45
+from ..solvers import rk45
 
 
 @dataclass(frozen=True)
@@ -23,7 +23,21 @@ class C19Parameters:
     pore_velocity_x: float = 1.7 / (24 * 3600)  # ux (m/s)
     dispersivity: float = 0.05  # alpha_T = alpha_L (m)
     retardation: float = 1.0  # R
-    degradation: float = 0.0  # lambda (1/s)
+    degradation: float = 1.0e-6 * math.log(10.0)  # lambda (1/s)
+
+    def __post_init__(self) -> None:
+        positive = (
+            self.mass_rate,
+            self.thickness,
+            self.porosity,
+            self.pore_velocity_x,
+            self.dispersivity,
+            self.retardation,
+        )
+        if any(not math.isfinite(value) or value <= 0.0 for value in positive):
+            raise ValueError("C19 transport parameters must be positive and finite")
+        if not math.isfinite(self.degradation) or self.degradation < 0.0:
+            raise ValueError("degradation must be non-negative and finite")
 
 
 _C19_DEFAULT_PARAMETERS = C19Parameters()
@@ -76,7 +90,7 @@ def c19_analytical_steady_state(
     """Steady-state analytical approximation (without degradation)."""
     r = math.sqrt(x * x + y * y)
     if r == 0.0:
-        return 0.0
+        return math.inf
     c0 = parameters.mass_rate / (
         parameters.thickness * parameters.porosity * parameters.pore_velocity_x
     )
@@ -90,17 +104,17 @@ def c19_analytical_transient(
     x: float, y: float, t: float, parameters: C19Parameters = _C19_DEFAULT_PARAMETERS
 ) -> float:
     """Transient analytical approximation for homogeneous spread."""
+    if t <= 0:
+        return 0.0
     r = math.sqrt(x * x + y * y)
     if r == 0.0:
-        return 0.0
+        return math.inf
     u = parameters.pore_velocity_x
     alpha = parameters.dispersivity
     c0 = parameters.mass_rate / (parameters.thickness * parameters.porosity * u)
 
     term1 = c0 / (4.0 * math.sqrt(math.pi * alpha) * math.sqrt(r))
     term2 = math.exp((x - r) / (2.0 * alpha))
-    if t <= 0:
-        return 0.0
     arg = (r - u * t) / math.sqrt(2.0 * alpha * u * t)
     term3 = math.erfc(arg)
 
@@ -117,7 +131,16 @@ def c19_rhs(
     facility_mode: str = "none"
 ) -> Rhs:
     """Return the right-hand side function for the 2D Method of Lines."""
-    # facility_mode can be "none", "continuous", or "schedule"
+    if not isinstance(nx, int) or isinstance(nx, bool) or nx < 2:
+        raise ValueError("nx must be an integer of at least two")
+    if not isinstance(ny, int) or isinstance(ny, bool) or ny < 2:
+        raise ValueError("ny must be an integer of at least two")
+    if any(not math.isfinite(value) or value <= 0.0 for value in (dx, dy)):
+        raise ValueError("dx and dy must be positive and finite")
+    if any(not math.isfinite(value) for value in (x_offset, y_offset)):
+        raise ValueError("grid offsets must be finite")
+    if facility_mode not in {"none", "continuous", "schedule"}:
+        raise ValueError("facility_mode must be 'none', 'continuous', or 'schedule'")
     ux = parameters.pore_velocity_x
     R = parameters.retardation
     alpha_L = parameters.dispersivity
@@ -132,7 +155,7 @@ def c19_rhs(
     # Upwind convection coefficient (assuming ux > 0, uy = 0)
     conv_x = (ux / R) / dx
 
-    deg_val = 1e-6 * math.log(10.0)  # lambda = 10^-6 * ln(10)
+    deg_val = parameters.degradation
 
     source_term = [0.0] * (nx * ny)
     # The source is a point source M at (0,0). In a discrete grid, it corresponds to the cell
@@ -258,18 +281,35 @@ def c19_task_a(nx: int = 71, ny: int = 41, dx: float = 1.0, dy: float = 1.0, x_o
     # to maintain benchmark framework compatibility.
     return rk45(problem, max_step=12*3600)  # max step 12 hours
 
+
+def _steady_state_grid(
+    nx: int,
+    ny: int,
+    dx: float,
+    dy: float,
+    x_offset: float,
+    y_offset: float,
+) -> list[float]:
+    """Sample the analytical field with a finite source-cell regularization."""
+
+    state = []
+    source_radius = 0.5 * min(dx, dy)
+    for j in range(ny):
+        y = y_offset + j * dy
+        for i in range(nx):
+            x = x_offset + i * dx
+            if x == 0.0 and y == 0.0:
+                state.append(c19_analytical_steady_state(source_radius, 0.0))
+            else:
+                state.append(c19_analytical_steady_state(x, y))
+    return state
+
 def c19_task_b(nx: int = 71, ny: int = 41, dx: float = 1.0, dy: float = 1.0, x_offset: float = -10.0, y_offset: float = -20.0) -> IntegrationResult:
     """Task B: Pollution reduction with continuous facility operation.
 
     Starts from the steady-state approximation.
     """
-    # Initialize from analytical steady state
-    state = []
-    for j in range(ny):
-        y = y_offset + j * dy
-        for i in range(nx):
-            x = x_offset + i * dx
-            state.append(c19_analytical_steady_state(x, y))
+    state = _steady_state_grid(nx, ny, dx, dy, x_offset, y_offset)
 
     problem = c19_problem(
         nx=nx, ny=ny, dx=dx, dy=dy, x_offset=x_offset, y_offset=y_offset, facility_mode="continuous", initial_state=state, t_bound=100*24*3600
@@ -281,13 +321,7 @@ def c19_task_c(nx: int = 71, ny: int = 41, dx: float = 1.0, dy: float = 1.0, x_o
 
     Starts from the steady-state approximation.
     """
-    # Initialize from analytical steady state
-    state = []
-    for j in range(ny):
-        y = y_offset + j * dy
-        for i in range(nx):
-            x = x_offset + i * dx
-            state.append(c19_analytical_steady_state(x, y))
+    state = _steady_state_grid(nx, ny, dx, dy, x_offset, y_offset)
 
     problem = c19_problem(
         nx=nx, ny=ny, dx=dx, dy=dy, x_offset=x_offset, y_offset=y_offset, facility_mode="schedule", initial_state=state, t_bound=150*24*3600

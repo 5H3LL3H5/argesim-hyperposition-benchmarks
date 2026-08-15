@@ -1,7 +1,7 @@
 """ARGESIM CP1: Parallel Simulation Techniques.
 
 This file provides the numerical benchmark models for the CP1 tasks:
-- Task A: Monte Carlo study of a damped mass-spring system.
+- Task A: parallel parameter study of a damped mass-spring system.
 - Task B: Coupled predator-prey population model (10 ODEs).
 - Task C: Swinging rope PDE discretized by the method of lines.
 """
@@ -14,7 +14,7 @@ from collections.abc import Sequence
 from ..ivp import InitialValueProblem, Rhs, Vector
 
 
-# --- Task A: Monte Carlo Study ---
+# --- Task A: Parameter Sweep ---
 
 def cp1_task_a_ivp(
     damping_factor: float,
@@ -23,7 +23,7 @@ def cp1_task_a_ivp(
     stiffness: float = 9000.0,
     t_bound: float = 2.0,
 ) -> InitialValueProblem:
-    """Create the IVP for the Monte Carlo mass-spring study.
+    """Create one IVP for the parallel damping-parameter study.
 
     Equation: m x'' + d x' + k x = 0
     State vector: (x, x')
@@ -33,8 +33,10 @@ def cp1_task_a_ivp(
     m = float(mass)
     k = float(stiffness)
     d = float(damping_factor)
-    if m <= 0.0:
-        raise ValueError("mass must be positive")
+    if any(not math.isfinite(value) for value in (m, k, d)):
+        raise ValueError("mass, stiffness, and damping must be finite")
+    if m <= 0.0 or k <= 0.0 or d < 0.0:
+        raise ValueError("mass and stiffness must be positive; damping non-negative")
 
     def rhs(_time: float, state: Sequence[float]) -> Vector:
         x, v = state
@@ -166,10 +168,14 @@ def cp1_task_c_ivp(
     Boundary: u(0, t) = 0, u(L, t) = b * exp(-d*t) * sin(omega*t)
     Initial: u(x, 0) = u_t(x, 0) = 0
     """
+    if not isinstance(interior_points, int) or isinstance(interior_points, bool):
+        raise TypeError("interior_points must be an integer")
     if interior_points < 1:
         raise ValueError("interior_points must be positive")
-    if length <= 0.0:
-        raise ValueError("length must be positive")
+    if any(not math.isfinite(value) for value in (a, b, d, omega, length)):
+        raise ValueError("CP1 task-C parameters must be finite")
+    if a <= 0.0 or length <= 0.0 or d < 0.0:
+        raise ValueError("a and length must be positive; d must be non-negative")
 
     # N is the number of intervals. N = interior_points + 1
     n_intervals = interior_points + 1

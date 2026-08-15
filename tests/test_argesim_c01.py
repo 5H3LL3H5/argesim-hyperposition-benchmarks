@@ -42,6 +42,7 @@ class C01Tests(unittest.TestCase):
             "rk4": 4.0e-6,
             "rk45": 2.0e-9,
             "qss1": 4.0e-3,
+            "qss2": 3.0e-3,
         }
         for method, tolerance in tolerances.items():
             with self.subTest(method=method):

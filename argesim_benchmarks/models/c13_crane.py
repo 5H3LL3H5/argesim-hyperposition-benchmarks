@@ -9,8 +9,8 @@ import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
-from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector, SolverStats
-from ..solvers.explicit import rk45
+from ..ivp import InitialValueProblem, IntegrationResult, Rhs, SolverStats, Vector
+from ..runtime import solve_ivp
 
 C13_INITIAL_STATE: Vector = (0.0, 0.0, 0.0, 0.0, 0.0)
 
@@ -24,6 +24,13 @@ class C13Parameters:
     dc: float = 0.5
     dcBrake: float = 100000.0
     dl: float = 0.01
+
+    def __post_init__(self) -> None:
+        if any(
+            not math.isfinite(value) or value <= 0.0
+            for value in (self.mc, self.ml, self.r, self.g, self.dc, self.dcBrake, self.dl)
+        ):
+            raise ValueError("C13 parameters must be positive and finite")
 
 
 _C13_DEFAULT_PARAMETERS = C13Parameters()
@@ -120,6 +127,9 @@ def c13_nonlinear_rhs(
 def solve_c13_task_a(fd_dist: float) -> dict[str, float]:
     """Solve task A, returning the steady state position of the load."""
 
+    if not math.isfinite(float(fd_dist)):
+        raise ValueError("fd_dist must be finite")
+
     def get_segments():
         return [
             (0.0, 4.0, 0.0, 160.0),
@@ -141,7 +151,7 @@ def solve_c13_task_a(fd_dist: float) -> dict[str, float]:
                 t1,
                 name="ARGESIM-C13-task-a",
             )
-            res = rk45(prob, max_step=1.0)
+            res = solve_ivp(prob, "rk45", options={"max_step": 1.0})
             state = res.final_state
         return state
 
@@ -180,6 +190,8 @@ class C13Controller:
     """Discrete controller for C13 with 10 ms cycle time."""
 
     def __init__(self, with_diagnosis: bool = False):
+        if not isinstance(with_diagnosis, bool):
+            raise TypeError("with_diagnosis must be bool")
         self.with_diagnosis = with_diagnosis
         self.q = (0.0, 0.0, 0.0, 0.0, 0.0)
         self.fc_desired = 0.0
@@ -257,11 +269,6 @@ def solve_c13_task_b_c(
 ) -> tuple[IntegrationResult, tuple[float, ...], tuple[bool, ...]]:
     """Solve task B or C with discrete controller and continuous dynamics."""
 
-    configured = dict(options or {})
-    max_step = float(configured.get("max_step", 0.01))
-    rtol = float(configured.get("rtol", 1.0e-6))
-    atol = float(configured.get("atol", 1.0e-9))
-
     controller = C13Controller(with_diagnosis=with_diagnosis)
 
     t = 0.0
@@ -307,7 +314,14 @@ def solve_c13_task_b_c(
         )
 
         prob = InitialValueProblem(rhs, t, state, t + dt, name="ARGESIM-C13-controlled")
-        res = rk45(prob, max_step=max_step, rtol=rtol, atol=atol)
+        res = solve_ivp(
+            prob,
+            "rk45",
+            options=options,
+            defaults={
+                "rk45": {"max_step": 0.01, "rtol": 1.0e-6, "atol": 1.0e-9}
+            },
+        )
         # Note: The original specification creates extreme stiffness when the brake is engaged (dcBrake=100000).
         # An explicit solver like RK45 will limit max steps towards zero or require huge iteration counts.
         # This implementation uses the explicit RK45 solver for demonstration, limiting max_step.

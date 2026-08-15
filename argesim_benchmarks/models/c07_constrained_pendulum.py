@@ -7,11 +7,11 @@ C07 definition. State order is ``(phi, phi_dot)``.
 from __future__ import annotations
 
 import math
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
-from ..ivp import InitialValueProblem, IntegrationError, IntegrationResult, Rhs, SolverStats, Vector
-from ..solvers import rk45
+from ..hybrid import HybridMode, StateEvent, simulate_hybrid
+from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
 
 
 @dataclass(frozen=True)
@@ -27,10 +27,17 @@ class C07Parameters:
     linear: bool = False
 
     def __post_init__(self) -> None:
+        values = (self.m, self.l, self.l_p, self.g, self.d, self.phi_p)
+        if any(not math.isfinite(value) for value in values):
+            raise ValueError("C07 parameters must be finite")
         if self.l_p >= self.l or self.l_p < 0.0:
             raise ValueError("l_p must be in [0, l)")
-        if self.m <= 0.0 or self.l <= 0.0:
-            raise ValueError("m and l must be positive")
+        if self.m <= 0.0 or self.l <= 0.0 or self.g <= 0.0:
+            raise ValueError("m, l, and g must be positive")
+        if self.d < 0.0:
+            raise ValueError("d must be non-negative")
+        if not isinstance(self.linear, bool):
+            raise TypeError("linear must be bool")
 
     @property
     def l_s(self) -> float:
@@ -41,7 +48,11 @@ _C07_DEFAULT_PARAMETERS = C07Parameters()
 
 
 def c07_rhs(parameters: C07Parameters = _C07_DEFAULT_PARAMETERS) -> Rhs:
-    """Return the rate equations. Does not include event logic."""
+    """Return a pointwise branch evaluator, without transition/reset logic.
+
+    Use :func:`solve_c07` for trajectories that can cross the pin. The hybrid
+    solver keeps each branch fixed until the localized state event.
+    """
 
     def rhs(_time: float, state: Sequence[float]) -> Vector:
         phi, phi_dot = state
@@ -66,20 +77,50 @@ def c07_rhs(parameters: C07Parameters = _C07_DEFAULT_PARAMETERS) -> Rhs:
     return rhs
 
 
+def _c07_mode_rhs(parameters: C07Parameters, length: float) -> Rhs:
+    """Return one fixed-constraint mode; event handling selects the length."""
+
+    def rhs(_time: float, state: Sequence[float]) -> Vector:
+        phi, phi_dot = state
+        angle = phi if parameters.linear else math.sin(phi)
+        return (
+            phi_dot,
+            -(parameters.g / length) * angle - (parameters.d / parameters.m) * phi_dot,
+        )
+
+    return rhs
+
+
 def c07_problem(
     *,
     parameters: C07Parameters = _C07_DEFAULT_PARAMETERS,
     initial_state: Sequence[float],
     t_bound: float = 10.0,
+    mode: str | None = None,
 ) -> InitialValueProblem:
-    """Build the C07 initial-value problem."""
+    """Build one fixed-mode C07 segment, stopping conceptually at its event."""
+
+    state = tuple(float(value) for value in initial_state)
+    if len(state) != 2:
+        raise ValueError("C07 initial_state must contain phi and phi_dot")
+    selected_mode = mode
+    if selected_mode is None:
+        selected_mode = (
+            "long"
+            if state[0] > parameters.phi_p
+            or (state[0] == parameters.phi_p and state[1] >= 0.0)
+            else "short"
+        )
+    if selected_mode not in {"long", "short"}:
+        raise ValueError("C07 mode must be 'long' or 'short'")
+    length = parameters.l if selected_mode == "long" else parameters.l_s
 
     return InitialValueProblem(
-        c07_rhs(parameters),
+        _c07_mode_rhs(parameters, length),
         0.0,
-        initial_state,
+        state,
         t_bound,
-        name="ARGESIM-C07-constrained-pendulum",
+        name=f"ARGESIM-C07-constrained-pendulum-{selected_mode}",
         autonomous=True,
     )
 
@@ -90,155 +131,60 @@ def solve_c07(
     initial_state: Sequence[float],
     t_bound: float = 10.0,
     max_step: float = 1.0e-2,
+    method: str = "rk45",
+    options: Mapping[str, object] | None = None,
 ) -> IntegrationResult:
-    """Solve C07 with rk45, handling state events explicitly."""
+    """Solve C07 through the shared hybrid runtime using RK or QSS backends."""
 
-    t = 0.0
-    state = tuple(float(x) for x in initial_state)
+    state = tuple(float(value) for value in initial_state)
+    if len(state) != 2:
+        raise ValueError("C07 initial_state must contain phi and phi_dot")
 
-    times = [t]
-    states = [state]
+    def pin_guard(_time: float, values: Sequence[float]) -> float:
+        return float(values[0]) - parameters.phi_p
 
-    accepted = 0
-    rejected = 0
-    evals = 0
+    def hit_pin(_time: float, values: Sequence[float]) -> Vector:
+        return (parameters.phi_p, float(values[1]) * parameters.l / parameters.l_s)
 
-    while t < t_bound:
-        step_bound = min(t + max_step, t_bound)
-        phi_current = state[0]
+    def release_pin(_time: float, values: Sequence[float]) -> Vector:
+        return (parameters.phi_p, float(values[1]) * parameters.l_s / parameters.l)
 
-        prob = InitialValueProblem(
-            c07_rhs(parameters),
-            t,
-            state,
-            step_bound,
-            autonomous=True
-        )
-
-        res = rk45(prob, max_step=max_step)
-
-        accepted += res.stats.accepted_steps
-        rejected += res.stats.rejected_steps
-        evals += res.stats.rhs_evaluations
-
-        cross_index = -1
-
-
-        crossing_direction = 0 # -1 for down, 1 for up
-
-        for i in range(1, len(res.times)):
-            phi_next = res.states[i][0]
-            if phi_current > parameters.phi_p >= phi_next:
-                cross_index = i
-                crossing_direction = -1
-                break
-            elif phi_current < parameters.phi_p <= phi_next:
-                cross_index = i
-                crossing_direction = 1
-                break
-            phi_current = phi_next
-
-        if cross_index != -1:
-            t_left = res.times[cross_index - 1]
-            t_right = res.times[cross_index]
-            y_left = res.states[cross_index - 1]
-            y_right = res.states[cross_index]
-
-            # Simple bisection for root
-            for _ in range(30):
-                t_mid = (t_left + t_right) / 2.0
-                if t_mid == t_left or t_mid == t_right:
-                    break
-
-                # Check step size before calling rk45 to avoid IntegrationError min_step
-                step_size = t_mid - t_left
-                if step_size < 1e-13:
-                    break
-
-                prob_mid = InitialValueProblem(
-                    c07_rhs(parameters),
-                    t_left,
-                    y_left,
-                    t_mid,
-                    autonomous=True
-                )
-                try:
-                    res_mid = rk45(prob_mid, max_step=step_size)
-                    y_mid = res_mid.final_state
-                    accepted += res_mid.stats.accepted_steps
-                    rejected += res_mid.stats.rejected_steps
-                    evals += res_mid.stats.rhs_evaluations
-                except IntegrationError:
-                    # If it fails due to min step or whatever, we just assume root is here
-                    break
-
-                if (crossing_direction == -1 and y_mid[0] > parameters.phi_p) or \
-                   (crossing_direction == 1 and y_mid[0] < parameters.phi_p):
-                    t_left = t_mid
-                    y_left = y_mid
-                else:
-                    t_right = t_mid
-                    y_right = y_mid
-
-            t_event = t_right
-
-            # Append trajectory up to event
-            if t_event > t:
-                step_size = t_event - t
-                if step_size > 1e-13:
-                    prob_event = InitialValueProblem(
-                        c07_rhs(parameters),
-                        t,
-                        state,
-                        t_event,
-                        autonomous=True
-                    )
-                    try:
-                        res_event = rk45(prob_event, max_step=max_step)
-                        accepted += res_event.stats.accepted_steps
-                        rejected += res_event.stats.rejected_steps
-                        evals += res_event.stats.rhs_evaluations
-
-                        for i in range(1, len(res_event.times)):
-                            times.append(res_event.times[i])
-                            states.append(res_event.states[i])
-
-                        phi, phi_dot = res_event.final_state
-                    except IntegrationError:
-                        phi, phi_dot = y_right
-                else:
-                    phi, phi_dot = y_right
-            else:
-                phi, phi_dot = y_right
-
-            if crossing_direction == -1:
-                # Hits the pin
-                new_phi_dot = phi_dot * (parameters.l / parameters.l_s)
-                new_phi = parameters.phi_p
-            else:
-                # Releases from the pin
-                new_phi_dot = phi_dot * (parameters.l_s / parameters.l)
-                new_phi = parameters.phi_p
-
-            state = (new_phi, new_phi_dot)
-            t = t_event
-
-            times.append(t)
-            states.append(state)
-
-        else:
-            for i in range(1, len(res.times)):
-                times.append(res.times[i])
-                states.append(res.states[i])
-            t = res.final_time
-            state = res.final_state
-
-    return IntegrationResult(
-        "rk45-hybrid",
-        tuple(times),
-        tuple(states),
-        SolverStats(accepted, rejected, evals),
+    modes = {
+        "long": HybridMode(
+            "long",
+            _c07_mode_rhs(parameters, parameters.l),
+            (StateEvent("hit-pin", pin_guard, hit_pin, "short", -1),),
+        ),
+        "short": HybridMode(
+            "short",
+            _c07_mode_rhs(parameters, parameters.l_s),
+            (StateEvent("release-pin", pin_guard, release_pin, "long", 1),),
+        ),
+    }
+    initial_mode = (
+        "long"
+        if state[0] > parameters.phi_p
+        or (state[0] == parameters.phi_p and state[1] >= 0.0)
+        else "short"
     )
+    defaults = {
+        "euler": {"step": max_step},
+        "rk4": {"step": max_step},
+        "rk45": {"rtol": 1.0e-8, "atol": 1.0e-10, "max_step": max_step},
+        "qss1": {"quantum": (1.0e-4, 1.0e-3)},
+        "qss2": {"quantum": (1.0e-4, 1.0e-3)},
+    }
+    result = simulate_hybrid(
+        modes,
+        initial_mode=initial_mode,
+        initial_state=state,
+        t_bound=t_bound,
+        method=method,
+        solver_options=options,
+        solver_defaults=defaults,
+        max_events=10_000,
+    )
+    return IntegrationResult(result.method, result.times, result.states, result.stats)
 
 
 def c07_task_a() -> dict[str, IntegrationResult]:

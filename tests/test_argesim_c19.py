@@ -36,6 +36,13 @@ class C19GroundwaterTests(unittest.TestCase):
         val = c19_analytical_steady_state(10.0, 0.0)
         self.assertGreater(val, 0.0)
 
+    def test_point_source_singularity_is_not_reported_as_zero(self) -> None:
+        self.assertEqual(c19_analytical_steady_state(0.0, 0.0), math.inf)
+        self.assertEqual(
+            c19_analytical_transient(0.0, 0.0, 3600.0),
+            math.inf,
+        )
+
     def test_c19_problem_creation(self) -> None:
         problem = c19_problem(nx=3, ny=3)
         self.assertEqual(problem.dimension, 9)
@@ -48,6 +55,16 @@ class C19GroundwaterTests(unittest.TestCase):
     def test_c19_problem_schedule_is_non_autonomous(self) -> None:
         problem = c19_problem(nx=3, ny=3, facility_mode="schedule")
         self.assertFalse(problem.autonomous)
+
+    def test_grid_and_transport_parameters_are_validated(self) -> None:
+        with self.assertRaises(ValueError):
+            c19_problem(nx=1)
+        with self.assertRaises(ValueError):
+            c19_problem(dx=0.0)
+        with self.assertRaises(ValueError):
+            c19_problem(facility_mode="sometimes")
+        with self.assertRaises(ValueError):
+            C19Parameters(porosity=0.0)
 
     def test_task_a_runs_on_coarse_grid(self) -> None:
         # Just run a tiny grid for a short time to verify it doesn't crash

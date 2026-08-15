@@ -1,6 +1,6 @@
 # Official ARGESIM coverage
 
-Inventory date: 2026-08-06. Primary catalog:
+Inventory date: 2026-08-15. Primary catalog:
 [ARGESIM Benchmarks](https://www.argesim.org/benchmarks).
 
 `cataloged` means that the official identity and model family were checked. It
@@ -10,7 +10,7 @@ have already been implemented.
 | ID | Official benchmark | Model family | Status |
 |---|---|---|---|
 | C01 | Lithium-Cluster Dynamics | stiff ODE | implemented |
-| C02 | Flexible Assembly System | DES | implemented |
+| C02 | Flexible Assembly System | DES | validated |
 | C03 | Class-E Amplifier | ODE, hybrid | implemented |
 | C04 | Dining Philosophers | DES/concurrency | cataloged |
 | C05 | Two State Model | stiff ODE, state events | cataloged |
@@ -25,14 +25,14 @@ have already been implemented.
 | C14 | Supply Chain | discrete-time dynamics | implemented |
 | C15 | Clearance Identification | ODE identification | implemented |
 | C16 | Restaurant Business Dynamics | agent-based stochastic dynamics | implemented |
-| C17R | SIR-type Epidemic with Cellular Automata and ODEs | ODE, CA, identification | implemented |
+| C17R | SIR-type Epidemic with Cellular Automata and ODEs | ODE, CA, identification | specified (ODE part) |
 | C18 | Identification of Nonlinear Dynamics | transfer functions, neural networks | cataloged |
 | C19R | Pollution in Groundwater Flow | PDE/distributed system | implemented |
-| C20 | Complex Production System | DES | specified |
-| C21 | State Events and Structural-dynamic Systems | ODE/DAE, hybrid | specified |
+| C20 | Complex Production System | DES | specified (partial runtime/model) |
+| C21 | State Events and Structural-dynamic Systems | ODE/DAE, hybrid | specified (RLC incomplete) |
 | C22 | Non-standard Queuing Policies | DES/queueing | implemented |
-| CP1 | Parallel Simulation Techniques | ODE, MOL/PDE, parallel study | implemented |
-| CP2 | Parallel and Distributed Simulation | Monte Carlo, LBM, MOL/PDE | implemented |
+| CP1 | Parallel Simulation Techniques | ODE, MOL/PDE, parallel study | specified (models only) |
+| CP2 | Parallel and Distributed Simulation | Monte Carlo, LBM, MOL/PDE | specified (kernels only) |
 
 ## Solver applicability
 
@@ -42,24 +42,22 @@ have already been implemented.
 | RK4 | explicit ODE and MOL systems | implemented and tested |
 | RK45 | non-stiff explicit ODE and MOL systems | implemented and tested |
 | QSS1 | autonomous explicit ODE and MOL systems | implemented and tested |
-| QSS2 | piecewise-linear quantized trajectories | implemented and tested |
+| QSS2 | autonomous explicit ODE/MOL and hybrid continuous modes | implemented and tested |
 | LIQSS | compatible stiff ODE/MOL structures | not implemented |
-| DES/NSA-DEVS | discrete and hybrid event execution | restricted relay reference only |
+| Hybrid runtime | directed guards, localized transitions, mode/state reset | RK/Euler and QSS1/QSS2 backends |
+| DES/NSA-DEVS | deterministic callback DES and restricted superdense time | reusable scheduler plus benchmark adapters |
 | Neural operator | trained surrogate for a fixed PDE family | not integrated |
 
 `implemented` for C01 means that all three official tasks are represented:
-task A exposes Euler, RK4, RK45 and QSS1 runs plus an accuracy-gated timing
+task A exposes Euler, RK4, RK45, QSS1 and QSS2 runs plus an accuracy-gated timing
 driver; task B retains complete trajectories for the requested logarithmic
 loss-rate sweep; task C uses and verifies the analytical steady states. It is
 not yet `validated` because an independent published trajectory table or
 cross-tool reference data set has not been archived.
 
-`implemented` for C02 includes formal internal/external DEVS scheduling,
-finite B2 capacities, the published A2 and A3--A6 routing rules, warm-up and
-measurement windows, and explicit detection of the published 50--60 pallet
-deadlock region. Selected results reproduce the independent 2011 reference
-table within six percent; the remaining difference is retained transparently
-rather than being mislabeled as bit-for-bit validation.
+Partial modules never inherit the status of their finished kernels: C17R lacks
+the cellular-automaton, identification and intervention tasks; C21 lacks the
+complete RLC/diode DAE variants; CP1/CP2 lack the required parallel experiments.
 
 Euler, RK4 and RK45 are not applied to an unreduced DAE. QSS is applied to a
 PDE only after spatial discretization. A neural operator will be evaluated as

@@ -19,6 +19,10 @@ class C22Tests(unittest.TestCase):
         self.assertIn("deterministic", results)
         self.assertIn("stochastic", results)
         self.assertEqual(len(results["deterministic"]["ids_out"]), 20)
+        self.assertEqual(results["deterministic"]["first_arrival_time"], 1.0)
+        self.assertEqual(results["deterministic"]["entities_created"], 100)
+        self.assertEqual(results["deterministic"]["entities_terminated"], 100)
+        self.assertEqual(results["deterministic"]["active_entities"], 0)
         # Structural check against expected bounds
         self.assertAlmostEqual(results["deterministic"]["tq_avg"], 6.7, places=1)
         self.assertAlmostEqual(results["deterministic"]["tq_max"], 13.5, places=1)
@@ -44,6 +48,8 @@ class C22Tests(unittest.TestCase):
         self.assertIn("renege_table", results["deterministic"])
         self.assertIn("renege_events", results["stochastic"])
         self.assertEqual(results["deterministic"]["tq_max"], 9.0)
+        self.assertEqual(results["deterministic"]["active_entities"], 0)
+        self.assertEqual(results["deterministic"]["entities_terminated"], 100)
 
     def test_c22_classing_runs(self) -> None:
         results = c22_classing()
@@ -53,6 +59,8 @@ class C22Tests(unittest.TestCase):
 
         det_stats = results["deterministic"]["class_stats"]
         self.assertEqual(len(det_stats), 5)
+        self.assertEqual(results["deterministic"]["first_arrival_time"], 1.0)
+        self.assertEqual(results["deterministic"]["active_entities"], 0)
 
         # Classes should have non-negative avg wait times
         for c in range(1, 6):

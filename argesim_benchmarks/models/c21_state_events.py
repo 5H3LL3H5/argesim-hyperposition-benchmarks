@@ -6,12 +6,17 @@ The equations, parameters, and tasks follow the official C21 definition (SNE 26(
 from __future__ import annotations
 
 import math
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 
-from ..ivp import InitialValueProblem, Rhs, Vector
-from ..solvers.explicit import euler
-from ..solvers.qss import qss1
+from ..hybrid import (
+    HybridMode,
+    HybridReset,
+    HybridResult,
+    StateEvent,
+    simulate_hybrid,
+)
+from ..ivp import Rhs, Vector
 
 
 @dataclass(frozen=True)
@@ -23,6 +28,15 @@ class C21BouncingBallParameters:
     g: float = 9.81
     k: float = 1.0e6
     d: float = 500.0
+
+    def __post_init__(self) -> None:
+        values = (self.mu, self.beta, self.g, self.k, self.d)
+        if any(not math.isfinite(value) for value in values):
+            raise ValueError("bouncing-ball parameters must be finite")
+        if not 0.0 <= self.mu <= 1.0:
+            raise ValueError("mu must be in [0, 1]")
+        if self.beta < 0.0 or self.g <= 0.0 or self.k <= 0.0 or self.d <= 0.0:
+            raise ValueError("beta must be non-negative; g, k, and d must be positive")
 
 
 @dataclass(frozen=True)
@@ -37,6 +51,11 @@ class C21RLCDiodeParameters:
     u_t: float = 26.0e-3
     f: float = 0.15e6
 
+    def __post_init__(self) -> None:
+        values = (self.r1, self.r2, self.l, self.c, self.i_s, self.u_t, self.f)
+        if any(not math.isfinite(value) or value <= 0.0 for value in values):
+            raise ValueError("RLC-diode parameters must be positive and finite")
+
 
 @dataclass(frozen=True)
 class C21RotatingPendulumParameters:
@@ -46,6 +65,13 @@ class C21RotatingPendulumParameters:
     k: float = 0.9
     l: float = 1.0  # noqa: E741
     g: float = 9.81
+
+    def __post_init__(self) -> None:
+        values = (self.m, self.k, self.l, self.g)
+        if any(not math.isfinite(value) for value in values):
+            raise ValueError("rotating-pendulum parameters must be finite")
+        if self.m <= 0.0 or self.l <= 0.0 or self.g <= 0.0 or self.k < 0.0:
+            raise ValueError("m, l, and g must be positive; k must be non-negative")
 
 
 def c21_bouncing_ball_event_contact(parameters: C21BouncingBallParameters) -> Rhs:
@@ -277,108 +303,165 @@ def c21_rotating_pendulum_action_s(
     return (phi, dphi)
 
 
+def simulate_c21_bouncing_ball_event_contact(
+    parameters: C21BouncingBallParameters = C21BouncingBallParameters(),
+    initial_state: Sequence[float] = (10.0, 0.0),
+    t_bound: float = 30.0,
+    max_bounces: int = 100,
+    *,
+    method: str = "rk45",
+    options: Mapping[str, object] | None = None,
+    settle_velocity: float = 1.0e-3,
+) -> HybridResult:
+    """Run the event-contact ball with a classical or quantized backend."""
+
+    if not isinstance(max_bounces, int) or isinstance(max_bounces, bool):
+        raise TypeError("max_bounces must be an integer")
+    if max_bounces <= 0:
+        raise ValueError("max_bounces must be positive")
+    if not math.isfinite(settle_velocity) or settle_velocity <= 0.0:
+        raise ValueError("settle_velocity must be positive and finite")
+    state = tuple(float(value) for value in initial_state)
+    if len(state) != 2 or state[0] < 0.0:
+        raise ValueError("initial_state must be a non-negative height and velocity")
+
+    def height(_time: float, values: Sequence[float]) -> float:
+        return float(values[0])
+
+    def bounce(_time: float, values: Sequence[float]) -> Vector | HybridReset:
+        rebound = -parameters.mu * float(values[1])
+        if rebound <= settle_velocity:
+            return HybridReset((0.0, 0.0), mode="rest")
+        return (0.0, rebound)
+
+    def rest(_time: float, _values: Sequence[float]) -> Vector:
+        return (0.0, 0.0)
+
+    modes = {
+        "flight": HybridMode(
+            "flight",
+            c21_bouncing_ball_event_contact(parameters),
+            (StateEvent("bounce", height, bounce, "flight", -1),),
+        ),
+        "rest": HybridMode("rest", rest),
+    }
+    defaults = {
+        "euler": {"step": 1.0e-3},
+        "rk4": {"step": 1.0e-3},
+        "rk45": {"rtol": 1.0e-8, "atol": 1.0e-10, "max_step": 1.0e-2},
+        "qss1": {"quantum": (1.0e-4, 1.0e-3)},
+        "qss2": {"quantum": (1.0e-4, 1.0e-3)},
+    }
+    initial_mode = "rest" if state == (0.0, 0.0) else "flight"
+    return simulate_hybrid(
+        modes,
+        initial_mode=initial_mode,
+        initial_state=state,
+        t_bound=t_bound,
+        method=method,
+        solver_options=options,
+        solver_defaults=defaults,
+        max_events=max_bounces,
+    )
+
+
 def solve_c21_bouncing_ball_event_contact(
     parameters: C21BouncingBallParameters = C21BouncingBallParameters(),
     initial_state: Sequence[float] = (10.0, 0.0),
     t_bound: float = 30.0,
     max_bounces: int = 100,
+    *,
+    method: str = "rk45",
+    options: Mapping[str, object] | None = None,
 ) -> tuple[list[float], list[Vector]]:
-    """Task: Simulate event contact model using Euler integration to demonstrate scatter."""
-    t = 0.0
-    y = list(initial_state)
-    times = [t]
-    states = [tuple(y)]
-    dt = 0.001
-    rhs = c21_bouncing_ball_event_contact(parameters)
-    bounces = 0
+    """Compatibility wrapper returning the shared hybrid trajectory arrays."""
 
-    while t < t_bound and bounces < max_bounces:
-        # Instead of manual integration, use the built-in euler solver for one step
-        problem = InitialValueProblem(
-            rhs=rhs, t0=t, y0=y, t_bound=min(t + dt, t_bound)
-        )
-        res = euler(problem, step=dt)
-        y_next = res.states[-1]
+    result = simulate_c21_bouncing_ball_event_contact(
+        parameters,
+        initial_state,
+        t_bound,
+        max_bounces,
+        method=method,
+        options=options,
+    )
+    return list(result.times), list(result.states)
 
-        if y[0] > 0 and y_next[0] <= 0:
-            # Event triggered (crossing 0 negatively)
-            # Linear interpolation for zero crossing
-            denominator = y[0] - y_next[0]
-            dt_event = (y[0] / denominator) * dt if denominator != 0.0 else dt / 2.0
 
-            t_event = t + dt_event
-            problem_event = InitialValueProblem(
-                rhs=rhs, t0=t, y0=y, t_bound=t_event
-            )
-            res_event = euler(problem_event, step=dt_event)
-            y_event = res_event.states[-1]
+def simulate_c21_rotating_pendulum(
+    parameters: C21RotatingPendulumParameters = C21RotatingPendulumParameters(),
+    initial_state: Sequence[float] = (math.pi / 4.0, 15.0),  # phi, dphi
+    t_bound: float = 5.0,
+    *,
+    method: str = "rk45",
+    options: Mapping[str, object] | None = None,
+) -> HybridResult:
+    """Run the structural-dynamic pendulum with dimension-changing events."""
 
-            times.append(t_event)
-            states.append(y_event)
+    state = tuple(float(value) for value in initial_state)
+    if len(state) != 2:
+        raise ValueError("rotating-pendulum initial_state must contain phi and dphi")
 
-            # Action
-            y = list(c21_bouncing_ball_action_b(y_event, parameters))
-            t = t_event
-            times.append(t)
-            states.append(tuple(y))
-            bounces += 1
-        else:
-            t = res.final_time
-            y = list(y_next)
-            times.append(t)
-            states.append(tuple(y))
+    def fall_guard(_time: float, values: Sequence[float]) -> float:
+        return c21_rotating_pendulum_h_f(values, parameters)
 
-    return times, states
+    def swing_guard(_time: float, values: Sequence[float]) -> float:
+        return c21_rotating_pendulum_h_s(values, parameters)
+
+    def fall_reset(_time: float, values: Sequence[float]) -> Vector:
+        return c21_rotating_pendulum_action_f(values, parameters)
+
+    def swing_reset(_time: float, values: Sequence[float]) -> Vector:
+        return c21_rotating_pendulum_action_s(values, parameters)
+
+    modes = {
+        "swinging": HybridMode(
+            "swinging",
+            c21_rotating_pendulum_swinging(parameters),
+            (StateEvent("fall", fall_guard, fall_reset, "falling", -1),),
+        ),
+        "falling": HybridMode(
+            "falling",
+            c21_rotating_pendulum_falling(parameters),
+            (StateEvent("catch", swing_guard, swing_reset, "swinging", 1),),
+        ),
+    }
+    defaults = {
+        "euler": {"step": 1.0e-3},
+        "rk4": {"step": 1.0e-3},
+        "rk45": {"rtol": 1.0e-8, "atol": 1.0e-10, "max_step": 1.0e-3},
+        "qss1": {"quantum": 1.0e-4},
+        "qss2": {"quantum": 1.0e-4},
+    }
+    return simulate_hybrid(
+        modes,
+        initial_mode="swinging",
+        initial_state=state,
+        t_bound=t_bound,
+        method=method,
+        solver_options=options,
+        solver_defaults=defaults,
+        max_events=1_000,
+    )
 
 
 def solve_c21_rotating_pendulum(
     parameters: C21RotatingPendulumParameters = C21RotatingPendulumParameters(),
-    initial_state: Sequence[float] = (math.pi / 4.0, 15.0),  # phi, dphi
+    initial_state: Sequence[float] = (math.pi / 4.0, 15.0),
     t_bound: float = 5.0,
+    *,
+    method: str = "rk45",
+    options: Mapping[str, object] | None = None,
 ) -> tuple[list[float], list[Vector]]:
-    """Task: Simulate the rotating pendulum using simple Euler with event switching."""
-    t = 0.0
-    y = list(initial_state)
-    phase = "swinging"
-    times = [t]
-    states = [tuple(y)]
-    dt = 0.001
+    """Compatibility wrapper returning the shared hybrid trajectory arrays."""
 
-    rhs_s = c21_rotating_pendulum_swinging(parameters)
-    rhs_f = c21_rotating_pendulum_falling(parameters)
-
-    while t < t_bound:
-        if phase == "swinging":
-            problem = InitialValueProblem(
-                rhs=rhs_s, t0=t, y0=y, t_bound=min(t + dt, t_bound)
-            )
-            res = euler(problem, step=dt)
-            y_next = res.states[-1]
-            h_curr = c21_rotating_pendulum_h_f(y, parameters)
-            h_next = c21_rotating_pendulum_h_f(y_next, parameters)
-            if h_curr > 0 and h_next <= 0:
-                y = list(c21_rotating_pendulum_action_f(y_next, parameters))
-                phase = "falling"
-            else:
-                y = list(y_next)
-        else:
-            problem = InitialValueProblem(
-                rhs=rhs_f, t0=t, y0=y, t_bound=min(t + dt, t_bound)
-            )
-            res = euler(problem, step=dt)
-            y_next = res.states[-1]
-            h_curr = c21_rotating_pendulum_h_s(y, parameters)
-            h_next = c21_rotating_pendulum_h_s(y_next, parameters)
-            if h_curr < 0 and h_next >= 0:
-                y = list(c21_rotating_pendulum_action_s(y_next, parameters))
-                phase = "swinging"
-            else:
-                y = list(y_next)
-        t = res.final_time
-        times.append(t)
-        states.append(tuple(y))
-
-    return times, states
+    result = simulate_c21_rotating_pendulum(
+        parameters,
+        initial_state,
+        t_bound,
+        method=method,
+        options=options,
+    )
+    return list(result.times), list(result.states)
 
 
 def c21_task_bouncing_ball() -> dict[str, float]:
@@ -388,14 +471,25 @@ def c21_task_bouncing_ball() -> dict[str, float]:
 
 
 def c21_task_qss1_bouncing_ball() -> dict[str, float]:
-    """Execute the bouncing ball task using QSS1 without state events."""
-    params = C21BouncingBallParameters()
-    rhs = c21_bouncing_ball_event_contact(params)
-    ivp = InitialValueProblem(
-        rhs=rhs, t0=0.0, y0=(10.0, 0.0), t_bound=2.0, autonomous=True
+    """Execute the bouncing ball with QSS1 and the same state-event layer."""
+
+    result = simulate_c21_bouncing_ball_event_contact(
+        t_bound=2.0,
+        method="qss1",
+        options={"quantum": (1.0e-3, 1.0e-3)},
     )
-    res = qss1(ivp, quantum=0.01)
-    return {"final_time": res.times[-1]}
+    return {"final_time": result.final_time, "events": float(len(result.events))}
+
+
+def c21_task_qss2_bouncing_ball() -> dict[str, float]:
+    """Execute the bouncing ball with QSS2 and shared event localization."""
+
+    result = simulate_c21_bouncing_ball_event_contact(
+        t_bound=2.0,
+        method="qss2",
+        options={"quantum": (1.0e-3, 1.0e-3)},
+    )
+    return {"final_time": result.final_time, "events": float(len(result.events))}
 
 
 def c21_task_rotating_pendulum() -> dict[str, float]:
@@ -405,5 +499,6 @@ def c21_task_rotating_pendulum() -> dict[str, float]:
 
 
 def c21_task_rlc_diode() -> dict[str, float]:
-    """Execute the RLC diode task (stub)."""
-    return {"final_time": 0.0}
+    """Refuse to report success for the not-yet-complete RLC/DAE task."""
+
+    raise NotImplementedError("C21 RLC-diode task requires the complete DAE modes")

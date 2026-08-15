@@ -11,7 +11,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
-from ..solvers import euler, qss1, qss2, rk4, rk45
+from ..runtime import solve_ivp
 
 C17_INITIAL_STATE: Vector = (9500.0, 500.0, 0.0)
 
@@ -26,6 +26,11 @@ class C17Parameters:
     beta: float = 0.1
 
     def __post_init__(self) -> None:
+        if any(
+            not math.isfinite(value)
+            for value in (self.n, self.c, self.alpha, self.beta)
+        ):
+            raise ValueError("C17R parameters must be finite")
         if self.n <= 0.0:
             raise ValueError("Population size n must be strictly positive")
         if self.c < 0.0 or self.alpha < 0.0 or self.beta < 0.0:
@@ -62,10 +67,18 @@ def c17_problem(
     t_bound: float = 100.0,
 ) -> InitialValueProblem:
     """Build the C17R initial-value problem."""
+
+    state = tuple(float(value) for value in initial_state)
+    if len(state) != 3 or any(not math.isfinite(value) for value in state):
+        raise ValueError("C17R initial_state must contain three finite values")
+    if any(value < 0.0 for value in state):
+        raise ValueError("C17R populations must be non-negative")
+    if not math.isclose(sum(state), parameters.n, rel_tol=1.0e-12, abs_tol=1.0e-9):
+        raise ValueError("C17R initial populations must sum to n")
     return InitialValueProblem(
         c17_rhs(parameters),
         0.0,
-        initial_state,
+        state,
         t_bound,
         name="ARGESIM-C17R-sir-epidemic",
         autonomous=True,
@@ -81,32 +94,16 @@ def solve_c17(
     options: Mapping[str, object] | None = None,
 ) -> IntegrationResult:
     """Solve C17R with an explicitly selected, auditable backend."""
-    configured = dict(options or {})
     problem = c17_problem(
         parameters=parameters,
         initial_state=initial_state,
         t_bound=t_bound,
     )
-    normalised = method.strip().lower()
-    if normalised == "euler":
-        return euler(problem, float(configured.get("step", 0.1)))
-    if normalised == "rk4":
-        return rk4(problem, float(configured.get("step", 0.1)))
-    if normalised == "rk45":
-        return rk45(
-            problem,
-            rtol=float(configured.get("rtol", 1.0e-8)),
-            atol=float(configured.get("atol", 1.0e-11)),
-            max_step=float(configured.get("max_step", 1.0)),
-        )
-    if normalised == "qss1":
-        quantum = configured.get("quantum", (1.0, 1.0, 1.0))
-        if not isinstance(quantum, (int, float, tuple, list)):
-            raise TypeError("qss1 quantum must be scalar or a finite sequence")
-        return qss1(problem, quantum)
-    if normalised == "qss2":
-        quantum = configured.get("quantum", (1.0, 1.0, 1.0))
-        if not isinstance(quantum, (int, float, tuple, list)):
-            raise TypeError("qss2 quantum must be scalar or a finite sequence")
-        return qss2(problem, quantum)
-    raise ValueError(f"unsupported C17 solver: {method}")
+    defaults = {
+        "euler": {"step": 0.1},
+        "rk4": {"step": 0.1},
+        "rk45": {"rtol": 1.0e-8, "atol": 1.0e-11, "max_step": 1.0},
+        "qss1": {"quantum": (1.0, 1.0, 1.0)},
+        "qss2": {"quantum": (1.0, 1.0, 1.0)},
+    }
+    return solve_ivp(problem, method, options=options, defaults=defaults)

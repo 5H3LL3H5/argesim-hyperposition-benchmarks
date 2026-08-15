@@ -122,18 +122,26 @@ class C15Tests(unittest.TestCase):
             c15_task_c(iterations=1)
 
 
-    def test_qss1_trajectory_matches_reference(self) -> None:
+    def test_segmented_qss_trajectories_match_reference(self) -> None:
         params = C15Parameters(k01=0.1, k21=0.2, k12=0.3, v1=1.0)
         bolus = C15Bolus(d=10.0, tau=2.0)
         t_test = 5.0
 
         ana_x1, ana_x2 = c15_analytical(t_test, params, bolus)
 
-        num_res = solve_c15("qss1", parameters=params, bolus=bolus, t_bound=t_test, options={"quantum": 0.01})
-        num_x1, num_x2 = num_res.final_state
+        for method in ("qss1", "qss2"):
+            with self.subTest(method=method):
+                num_res = solve_c15(
+                    method,
+                    parameters=params,
+                    bolus=bolus,
+                    t_bound=t_test,
+                    options={"quantum": 0.01},
+                )
+                num_x1, num_x2 = num_res.final_state
 
-        self.assertAlmostEqual(ana_x1, num_x1, places=1)
-        self.assertAlmostEqual(ana_x2, num_x2, places=1)
+                self.assertAlmostEqual(ana_x1, num_x1, places=1)
+                self.assertAlmostEqual(ana_x2, num_x2, places=1)
 
 if __name__ == "__main__":
     unittest.main()

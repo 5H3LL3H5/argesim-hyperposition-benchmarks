@@ -11,8 +11,12 @@ import random
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
-from ..ivp import InitialValueProblem, IntegrationResult, Rhs, SolverStats, Vector
-from ..solvers import euler, qss1, rk4, rk45
+from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
+from ..runtime import (
+    merge_integration_results,
+    normalise_solver_name,
+    solve_ivp,
+)
 
 C15_INITIAL_STATE: Vector = (0.0, 0.0)
 
@@ -107,32 +111,25 @@ def solve_c15(
 ) -> IntegrationResult:
     """Solve C15 with an explicitly selected backend."""
 
-    configured = dict(options or {})
     problem = c15_problem(
         parameters=parameters,
         bolus=bolus,
         initial_state=initial_state,
         t_bound=t_bound,
     )
-    normalised = method.strip().lower()
-    if normalised == "euler":
-        return euler(problem, float(configured.get("step", 1.0e-2)))
-    if normalised == "rk4":
-        return rk4(problem, float(configured.get("step", 1.0e-2)))
-    if normalised == "rk45":
-        return rk45(
-            problem,
-            rtol=float(configured.get("rtol", 1.0e-8)),
-            atol=float(configured.get("atol", 1.0e-11)),
-            max_step=float(configured.get("max_step", 1.0)),
-        )
-    if normalised == "qss1":
-        quantum = configured.get("quantum", (1.0, 1.0))
-        if not isinstance(quantum, (int, float, tuple, list)):
-            raise TypeError("qss1 quantum must be scalar or a finite sequence")
+    normalised = normalise_solver_name(method)
+    defaults = {
+        "euler": {"step": 1.0e-2},
+        "rk4": {"step": 1.0e-2},
+        "rk45": {"rtol": 1.0e-8, "atol": 1.0e-11, "max_step": 1.0},
+        "qss1": {"quantum": (1.0, 1.0)},
+        "qss2": {"quantum": (1.0, 1.0)},
+    }
+    if normalised not in {"qss1", "qss2"}:
+        return solve_ivp(problem, normalised, options=options, defaults=defaults)
 
-        # QSS1 requires autonomous ODEs, so we split the problem at bolus.tau
-        def rhs_phase1(t, state):
+    # QSS requires autonomous ODEs, so expose the bolus switch as two segments.
+    def rhs_phase1(_time: float, state: Sequence[float]) -> Vector:
             x1, x2 = state
             f_t = bolus.d / bolus.tau
             return (
@@ -140,32 +137,46 @@ def solve_c15(
                 parameters.k21 * x1 - parameters.k12 * x2,
             )
 
-        def rhs_phase2(t, state):
+    def rhs_phase2(_time: float, state: Sequence[float]) -> Vector:
             x1, x2 = state
             return (
                 -(parameters.k01 + parameters.k21) * x1 + parameters.k12 * x2,
                 parameters.k21 * x1 - parameters.k12 * x2,
             )
 
-        prob1 = InitialValueProblem(rhs_phase1, 0.0, initial_state, min(bolus.tau, t_bound), autonomous=True)
-        res1 = qss1(prob1, quantum)
+    first_end = min(bolus.tau, t_bound)
+    first_problem = InitialValueProblem(
+        rhs_phase1,
+        0.0,
+        initial_state,
+        first_end,
+        name="ARGESIM-C15-bolus-on",
+        autonomous=True,
+    )
+    first = solve_ivp(
+        first_problem,
+        normalised,
+        options=options,
+        defaults=defaults,
+    )
+    if t_bound <= bolus.tau:
+        return first
 
-        if t_bound <= bolus.tau:
-            return res1
-
-        prob2 = InitialValueProblem(rhs_phase2, bolus.tau, res1.final_state, t_bound, autonomous=True)
-        res2 = qss1(prob2, quantum)
-
-        merged_times = res1.times + res2.times[1:]
-        merged_states = res1.states + res2.states[1:]
-        merged_stats = SolverStats(
-            accepted_steps=res1.stats.accepted_steps + res2.stats.accepted_steps,
-            rejected_steps=res1.stats.rejected_steps + res2.stats.rejected_steps,
-            rhs_evaluations=res1.stats.rhs_evaluations + res2.stats.rhs_evaluations,
-        )
-        return IntegrationResult("qss1", merged_times, merged_states, merged_stats)
-
-    raise ValueError(f"unsupported C15 solver: {method}")
+    second_problem = InitialValueProblem(
+        rhs_phase2,
+        bolus.tau,
+        first.final_state,
+        t_bound,
+        name="ARGESIM-C15-bolus-off",
+        autonomous=True,
+    )
+    second = solve_ivp(
+        second_problem,
+        normalised,
+        options=options,
+        defaults=defaults,
+    )
+    return merge_integration_results((first, second), method=normalised)
 
 
 def c15_analytical(
