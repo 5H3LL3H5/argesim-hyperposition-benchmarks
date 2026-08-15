@@ -18,15 +18,76 @@ def _quantum_vector(
     quantum: float | Sequence[float],
     dimension: int,
 ) -> tuple[float, ...]:
+    if isinstance(quantum, bool):
+        raise TypeError("quantum must be a real number or numeric sequence")
     if isinstance(quantum, (int, float)):
         values = (float(quantum),) * dimension
     else:
-        values = tuple(float(value) for value in quantum)
+        raw_values = tuple(quantum)
+        if any(isinstance(value, bool) for value in raw_values):
+            raise TypeError("quantum values must be real numbers, not bool")
+        values = tuple(float(value) for value in raw_values)
         if len(values) != dimension:
             raise ValueError("quantum dimension does not match the problem")
     if not all(math.isfinite(value) and value > 0.0 for value in values):
         raise ValueError("all quantum values must be positive and finite")
     return values
+
+
+def _positive_integer(value: int, *, name: str) -> int:
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise TypeError(f"{name} must be an integer")
+    if value <= 0:
+        raise ValueError(f"{name} must be positive")
+    return value
+
+
+def _finite_state(values: Sequence[float], *, method: str) -> list[float]:
+    result = [float(value) for value in values]
+    if not all(math.isfinite(value) for value in result):
+        raise IntegrationError(f"{method} produced a non-finite state")
+    return result
+
+
+def _smallest_nonnegative_root(
+    a: float,
+    b: float,
+    c: float,
+    tolerance: float,
+) -> float:
+    """Return the earliest non-negative root of ``a*t**2 + b*t + c``."""
+
+    if not all(math.isfinite(value) for value in (a, b, c)):
+        raise IntegrationError("qss2 produced non-finite event coefficients")
+    if a == 0.0:
+        if b == 0.0:
+            return 0.0 if c == 0.0 else math.inf
+        root = -c / b
+        return max(0.0, root) if root >= -tolerance else math.inf
+
+    scale = max(abs(a), abs(b), abs(c))
+    scaled_a = a / scale
+    scaled_b = b / scale
+    scaled_c = c / scale
+    discriminant = scaled_b * scaled_b - 4.0 * scaled_a * scaled_c
+    roundoff = 16.0 * sys.float_info.epsilon * (
+        scaled_b * scaled_b + abs(4.0 * scaled_a * scaled_c)
+    )
+    if discriminant < -roundoff:
+        return math.inf
+    square_root = math.sqrt(max(0.0, discriminant))
+    root_product = -0.5 * (
+        scaled_b + math.copysign(square_root, scaled_b)
+    )
+    candidates: list[float] = []
+    if root_product != 0.0:
+        candidates.extend(
+            (root_product / scaled_a, scaled_c / root_product)
+        )
+    else:
+        candidates.append(-scaled_b / (2.0 * scaled_a))
+    eligible = [max(0.0, root) for root in candidates if root >= -tolerance]
+    return min(eligible, default=math.inf)
 
 
 def qss1(
@@ -46,8 +107,9 @@ def qss1(
 
     if not problem.autonomous:
         raise ValueError("qss1 requires problem.autonomous=True")
-    if max_events <= 0:
-        raise ValueError("max_events must be positive")
+    event_limit = _positive_integer(max_events, name="max_events")
+    if isinstance(simultaneous_tolerance, bool):
+        raise TypeError("simultaneous_tolerance must be a real number")
     tolerance = float(simultaneous_tolerance)
     if not math.isfinite(tolerance) or tolerance < 0.0:
         raise ValueError("simultaneous_tolerance must be finite and non-negative")
@@ -62,7 +124,7 @@ def qss1(
     evaluations = 0
 
     while t < problem.t_bound:
-        if events >= max_events:
+        if events >= event_limit:
             raise IntegrationError("qss1 exceeded max_events")
         derivative = problem.evaluate(t, q)
         evaluations += 1
@@ -83,13 +145,19 @@ def qss1(
         elapsed = min(crossings)
         remaining = problem.t_bound - t
         if math.isinf(elapsed) or elapsed >= remaining:
-            x = [value + slope * remaining for value, slope in zip(x, derivative)]
+            x = _finite_state(
+                [value + slope * remaining for value, slope in zip(x, derivative)],
+                method="qss1",
+            )
             t = problem.t_bound
             times.append(t)
             states.append(tuple(x))
             break
 
-        x = [value + slope * elapsed for value, slope in zip(x, derivative)]
+        x = _finite_state(
+            [value + slope * elapsed for value, slope in zip(x, derivative)],
+            method="qss1",
+        )
         t += elapsed
         threshold = tolerance * max(1.0, abs(t), abs(elapsed))
         due = [
@@ -99,6 +167,8 @@ def qss1(
         ]
         if not due:
             raise IntegrationError("qss1 failed to identify the imminent quantizer")
+        if events + len(due) > event_limit:
+            raise IntegrationError("qss1 exceeded max_events")
         for index in due:
             direction = 1.0 if derivative[index] > 0.0 else -1.0
             q[index] += direction * quanta[index]
@@ -124,8 +194,9 @@ def qss2(
 ) -> IntegrationResult:
     """Integrate an autonomous ODE with classical second-order QSS.
 
-    The quantized trajectory ``q`` tracks the state ``x`` with piecewise linear segments.
-    The state ``x`` evolves quadratically. An event occurs when ``|x_i(t) - q_i(t)| = quantum``.
+    The quantized trajectory ``q`` tracks the state ``x`` with piecewise linear
+    segments. The state ``x`` evolves quadratically. An event occurs when
+    ``|x_i(t) - q_i(t)| = quantum``.
     At an event for component ``i``, ``q_i`` is updated to ``x_i`` and its slope is
     updated to the current derivative ``x_i'``.
 
@@ -135,8 +206,9 @@ def qss2(
 
     if not problem.autonomous:
         raise ValueError("qss2 requires problem.autonomous=True")
-    if max_events <= 0:
-        raise ValueError("max_events must be positive")
+    event_limit = _positive_integer(max_events, name="max_events")
+    if isinstance(simultaneous_tolerance, bool):
+        raise TypeError("simultaneous_tolerance must be a real number")
     tolerance = float(simultaneous_tolerance)
     if not math.isfinite(tolerance) or tolerance < 0.0:
         raise ValueError("simultaneous_tolerance must be finite and non-negative")
@@ -156,70 +228,79 @@ def qss2(
     eps_sqrt = math.sqrt(sys.float_info.epsilon)
 
     while t < problem.t_bound:
-        if events >= max_events:
+        if events >= event_limit:
             raise IntegrationError("qss2 exceeded max_events")
 
         derivative = problem.evaluate(t, q)
         evaluations += 1
 
-        # Use finite difference to estimate the second derivative (x'')
-        # Scaled step size for finite differences based on state scale.
-        dt_fd = eps_sqrt * max(1.0, max(abs(qs) for qs in q_slope))
-        if dt_fd == 0.0:
-            dt_fd = eps_sqrt
+        # Approximate J_f(q) @ q_slope while keeping the perturbation of q at
+        # sqrt(machine epsilon) times the state scale. Scaling the step in the
+        # same direction as q_slope would catastrophically over-perturb fast
+        # nonlinear systems.
+        state_scale = max(1.0, max(abs(value) for value in q))
+        slope_scale = max(1.0, max(abs(value) for value in q_slope))
+        dt_fd = eps_sqrt * state_scale / slope_scale
 
-        q_fd = [qv + qs * dt_fd for qv, qs in zip(q, q_slope)]
+        q_fd = _finite_state(
+            [qv + qs * dt_fd for qv, qs in zip(q, q_slope)],
+            method="qss2 finite difference",
+        )
         derivative_fd = problem.evaluate(t, q_fd)
         evaluations += 1
 
-        x_second_deriv = [(dfd - d) / dt_fd for d, dfd in zip(derivative, derivative_fd)]
+        x_second_deriv = _finite_state(
+            [(dfd - d) / dt_fd for d, dfd in zip(derivative, derivative_fd)],
+            method="qss2 second derivative",
+        )
 
         crossings: list[float] = []
-        for state, q_val, qs_val, dx, ddx, delta in zip(x, q, q_slope, derivative, x_second_deriv, quanta):
+        coefficients = zip(
+            x,
+            q,
+            q_slope,
+            derivative,
+            x_second_deriv,
+            quanta,
+        )
+        for state, q_val, qs_val, dx, ddx, delta in coefficients:
             c = state - q_val
             b = dx - qs_val
             a = 0.5 * ddx
 
-            roots = []
-            for target in (delta, -delta):
-                c_eff = c - target
-                if abs(a) < 1e-14:
-                    if abs(b) > 1e-14:
-                        r = -c_eff / b
-                        if r > -tolerance:
-                            roots.append(r if r > 0 else 0.0)
-                else:
-                    discriminant = b*b - 4*a*c_eff
-                    if discriminant >= 0:
-                        sqrt_d = math.sqrt(discriminant)
-                        # Numerically stable quadratic formula
-                        q_root = -0.5 * (b + math.copysign(sqrt_d, b))
-                        r1 = q_root / a if a != 0.0 else 0.0
-                        r2 = c_eff / q_root if q_root != 0.0 else 0.0
-
-                        if r1 > -tolerance:
-                            roots.append(r1 if r1 > 0 else 0.0)
-                        if r2 > -tolerance:
-                            roots.append(r2 if r2 > 0 else 0.0)
-
-            if roots:
-                crossings.append(min(roots))
-            else:
-                crossings.append(math.inf)
+            crossings.append(
+                min(
+                    _smallest_nonnegative_root(a, b, c - delta, tolerance),
+                    _smallest_nonnegative_root(a, b, c + delta, tolerance),
+                )
+            )
 
         elapsed = min(crossings)
         remaining = problem.t_bound - t
         if math.isinf(elapsed) or elapsed >= remaining:
-            x = [state + dx * remaining + 0.5 * ddx * remaining**2
-                 for state, dx, ddx in zip(x, derivative, x_second_deriv)]
+            x = _finite_state(
+                [
+                    state + dx * remaining + 0.5 * ddx * remaining**2
+                    for state, dx, ddx in zip(x, derivative, x_second_deriv)
+                ],
+                method="qss2",
+            )
             t = problem.t_bound
             times.append(t)
             states.append(tuple(x))
             break
 
-        x = [state + dx * elapsed + 0.5 * ddx * elapsed**2
-             for state, dx, ddx in zip(x, derivative, x_second_deriv)]
-        q = [qv + qs * elapsed for qv, qs in zip(q, q_slope)]
+        x = _finite_state(
+            [
+                state + dx * elapsed + 0.5 * ddx * elapsed**2
+                for state, dx, ddx in zip(x, derivative, x_second_deriv)
+            ],
+            method="qss2",
+        )
+        q = _finite_state(
+            [qv + qs * elapsed for qv, qs in zip(q, q_slope)],
+            method="qss2 quantizer",
+        )
         t += elapsed
 
         threshold = tolerance * max(1.0, abs(t), abs(elapsed))
@@ -231,6 +312,8 @@ def qss2(
 
         if not due:
             raise IntegrationError("qss2 failed to identify the imminent quantizer")
+        if events + len(due) > event_limit:
+            raise IntegrationError("qss2 exceeded max_events")
 
         for index in due:
             q[index] = x[index]
