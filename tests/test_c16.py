@@ -38,6 +38,24 @@ class TestC16RestaurantBusiness(unittest.TestCase):
         sim.run_until(7)
         self.assertTrue(all(restaurant.weekly_revenue == 0.0 for restaurant in sim.restaurants))
 
+    def test_incremental_and_single_horizon_runs_are_equivalent(self):
+        params = C16Parameters(total_people=40)
+        direct = C16Simulation(params, seed=19)
+        split = C16Simulation(params, seed=19)
+
+        direct.run_until(21)
+        split.run_until(7)
+        split.run_until(14)
+        split.run_until(21)
+
+        self.assertEqual(direct.current_time, split.current_time)
+        self.assertEqual(direct.restaurants, split.restaurants)
+        self.assertEqual(direct.total_tax, split.total_tax)
+        self.assertEqual(
+            direct.new_restaurant_revenues(),
+            split.new_restaurant_revenues(),
+        )
+
     def test_new_restaurant_revenue_excludes_initial_restaurants(self):
         params = C16Parameters(total_people=10, initial_restaurants=1)
         sim = C16Simulation(parameters=params, seed=1)
