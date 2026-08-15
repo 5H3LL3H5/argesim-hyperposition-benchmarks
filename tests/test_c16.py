@@ -1,6 +1,8 @@
 import math
 import unittest
 
+from nsa_devs import DesScheduler
+
 from argesim_benchmarks.models.c16_restaurant_business import (
     C16Parameters,
     C16Simulation,
@@ -30,6 +32,7 @@ class TestC16RestaurantBusiness(unittest.TestCase):
 
     def test_week_boundary_processes_dinners_before_reset(self):
         sim = C16Simulation(seed=123)
+        self.assertIsInstance(sim.scheduler, DesScheduler)
         sim.run_until(6)
         sim.restaurants[0].weekly_revenue = 1000.0
         sim.run_until(7)
@@ -91,6 +94,11 @@ class TestC16RestaurantBusiness(unittest.TestCase):
             sim.run_until(9)
         with self.assertRaises(ValueError):
             sim.run_until(11, tax_rate=float("nan"))
+        with self.assertRaises(RuntimeError):
+            C16Simulation(C16Parameters(total_people=20), seed=1).run_until(
+                10,
+                max_events=1,
+            )
 
 
 if __name__ == "__main__":

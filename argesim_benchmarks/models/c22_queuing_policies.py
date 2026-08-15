@@ -470,7 +470,10 @@ class RenegingSystem(BaseDevsSystem):
         if not self.stochastic:
             self.renege_records.append((float(self.current_time.macro), entity.id))
 
+        self.terminated_ids.append(entity.id)
+        self.termination_times.append(float(self.current_time.macro))
         self.entities_terminated += 1
+        self.check_enter_server(q_idx)
 
 
 class ClassingSystem(BaseDevsSystem):
@@ -641,6 +644,12 @@ def run_model(
         raise RuntimeError("C22 simulation did not create every configured entity")
     if system.entities_terminated != system.num_entities or active_entities:
         raise RuntimeError("C22 simulation ended with unterminated entities")
+    if (
+        len(system.terminated_ids) != system.num_entities
+        or len(set(system.terminated_ids)) != system.num_entities
+        or len(system.termination_times) != system.num_entities
+    ):
+        raise RuntimeError("C22 entity lifecycle contains a missing or duplicate exit")
 
     avg_lqt = system.lqt_integral / float(sim.time.macro) if sim.time.macro > 0 else 0.0
     avg_wait = (
