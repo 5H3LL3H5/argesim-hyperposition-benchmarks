@@ -55,7 +55,9 @@ class DesScheduler:
     """A deterministic HyperTime discrete-event scheduler."""
 
     def __init__(self, initial_time: HyperTime | None = None):
-        self.time = initial_time or HyperTime.at(0)
+        if initial_time is not None and not isinstance(initial_time, HyperTime):
+            raise TypeError("initial_time must be HyperTime")
+        self.time = initial_time if initial_time is not None else HyperTime.at(0)
         self.events: list[DesEvent] = []
         self.event_sequence = 0
 
@@ -66,12 +68,19 @@ class DesScheduler:
         handler: Callable[..., None],
         *args: object,
     ) -> None:
-        if not math.isfinite(delay_minutes) or delay_minutes < 0.0:
+        if isinstance(delay_minutes, bool):
+            raise TypeError("delay must be a real number")
+        delay = float(delay_minutes)
+        if not math.isfinite(delay) or delay < 0.0:
             raise ValueError("delay must be finite and non-negative")
+        if not isinstance(name, str) or not name:
+            raise ValueError("name must be a non-empty string")
+        if not callable(handler):
+            raise TypeError("handler must be callable")
         target_time = (
             self.time.after_epsilon(1)
-            if delay_minutes == 0.0
-            else self.time.after_finite(delay_minutes)
+            if delay == 0.0
+            else self.time.after_finite(delay)
         )
         heapq.heappush(
             self.events,
@@ -79,17 +88,31 @@ class DesScheduler:
         )
         self.event_sequence += 1
 
-    def run(self, until: float) -> None:
-        if not math.isfinite(until):
+    def run(self, until: float, *, max_events: int = 1_000_000) -> None:
+        if isinstance(until, bool):
+            raise TypeError("until must be a real number")
+        until_value = float(until)
+        if not math.isfinite(until_value):
             raise ValueError("until must be finite")
-        until_time = HyperTime.at(until)
-        if until_time < self.time:
+        if not isinstance(max_events, int) or isinstance(max_events, bool):
+            raise TypeError("max_events must be an integer")
+        if max_events <= 0:
+            raise ValueError("max_events must be positive")
+        until_time = HyperTime.at(until_value)
+        if until_time.macro < self.time.macro:
             raise ValueError("until cannot precede the current scheduler time")
-        while self.events and self.events[0].time <= until_time:
+        processed = 0
+        # A finite macro-time horizon includes every microstep at that macro
+        # time. This lets zero-delay event cascades settle before run returns.
+        while self.events and self.events[0].time.macro <= until_time.macro:
+            if processed >= max_events:
+                raise RuntimeError("scheduler exceeded max_events")
             event = heapq.heappop(self.events)
             self.time = event.time
             event.handler(*event.args)
-        self.time = until_time
+            processed += 1
+        if self.time.macro < until_time.macro:
+            self.time = until_time
 
 
 @dataclass(order=True)
@@ -117,10 +140,18 @@ def run_relay_chain(
         raise TypeError("length must be an integer")
     if length <= 0:
         raise ValueError("length must be positive")
+    if not isinstance(input_delay_microsteps, int) or isinstance(
+        input_delay_microsteps, bool
+    ):
+        raise TypeError("input delay must be an integer")
     if input_delay_microsteps <= 0:
         raise ValueError("input delay must be positive")
+    if not isinstance(initial_payload, int) or isinstance(initial_payload, bool):
+        raise TypeError("initial_payload must be an integer")
+    if start_time is not None and not isinstance(start_time, HyperTime):
+        raise TypeError("start_time must be HyperTime")
 
-    initial_time = start_time or HyperTime(Fraction(0), 0)
+    initial_time = start_time if start_time is not None else HyperTime(Fraction(0), 0)
     queue: list[_QueuedInput] = [_QueuedInput(initial_time, 0, 0, initial_payload)]
     trace: list[ProcessedEvent] = []
     sequence = 1
