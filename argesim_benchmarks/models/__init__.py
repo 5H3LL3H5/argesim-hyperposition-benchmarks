@@ -22,6 +22,13 @@ from .c03_amplifier import (
     c03_task_c,
     solve_c03,
 )
+from .c08_canal_and_lock import (
+    Barge,
+    CanalAndLock,
+    Direction,
+    c08_task_c,
+    run_c08_replication,
+)
 from .c06_emergency_department import (
     solve_c06_task_a,
     solve_c06_task_b,
@@ -94,11 +101,14 @@ from .cp2_parallel_and_distributed import (
 )
 
 __all__ = [
+    "Barge",
     "C01_INITIAL_STATE",
     "C01_LOG_LOSS_VALUES",
     "C01Parameters",
     "C03_INITIAL_STATE",
     "C03Parameters",
+    "CanalAndLock",
+    "Direction",
     "C07Parameters",
     "C11_INITIAL_STATE",
     "C11_TARGET_STATE",
@@ -124,6 +134,7 @@ __all__ = [
     "c03_task_a",
     "c03_task_b",
     "c03_task_c",
+    "c08_task_c",
     "c07_rhs",
     "c07_task_a",
     "c07_task_b",
@@ -160,6 +171,7 @@ __all__ = [
     "solve_c01",
     "solve_c02",
     "solve_c03",
+    "run_c08_replication",
     "solve_c06_task_a",
     "solve_c06_task_b",
     "solve_c06_task_c",
