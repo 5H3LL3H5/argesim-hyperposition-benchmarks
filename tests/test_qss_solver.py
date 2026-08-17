@@ -3,6 +3,7 @@ import unittest
 from itertools import pairwise
 
 from argesim_benchmarks import InitialValueProblem, cqss1, qss1, qss2
+from argesim_benchmarks.runtime import normalise_solver_name
 
 
 class QssSolverTests(unittest.TestCase):
@@ -98,6 +99,7 @@ class QssSolverTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(RuntimeError, "no hysteresis"):
             cqss1(problem, 0.1)
+        self.assertEqual(normalise_solver_name("CQSS"), "cqss1")
 
     def test_qss2_uses_asynchronous_quantization_events(self) -> None:
         problem = InitialValueProblem(

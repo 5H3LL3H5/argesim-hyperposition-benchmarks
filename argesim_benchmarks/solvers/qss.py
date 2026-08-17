@@ -1,4 +1,4 @@
-"""Event-driven first-order and second-order Quantized State System integration."""
+"""Event-driven QSS1, centered CQSS1 and QSS2 integration."""
 
 from __future__ import annotations
 
