@@ -9,13 +9,16 @@ from argesim_benchmarks.models.cp1_parallel import (
     cp1_task_c_ivp,
     CP1_TASK_B_EQUILIBRIUM,
     CP1_TASK_B_TERMINAL_VALUES,
+    cp1_task_a_study,
+    cp1_task_b_compare_execution,
+    cp1_task_c_solve,
 )
 from argesim_benchmarks.solvers import rk45
 
 class CP1Tests(unittest.TestCase):
-    def test_cp1_catalog_status_reflects_missing_parallel_study(self) -> None:
+    def test_cp1_catalog_status_reflects_external_table_validation(self) -> None:
         cp1 = next(b for b in BENCHMARKS if b.identifier == "CP1")
-        self.assertEqual(cp1.status, BenchmarkStatus.SPECIFIED)
+        self.assertEqual(cp1.status, BenchmarkStatus.VALIDATED)
 
     def test_task_a_ivp_creation(self) -> None:
         ivp = cp1_task_a_ivp(1000.0)
@@ -86,6 +89,33 @@ class CP1Tests(unittest.TestCase):
         self.assertEqual(ivp.y0, (0.0,) * 18)
         derivative = ivp.evaluate(0.0, ivp.y0)
         self.assertEqual(len(derivative), 18)
+
+    def test_complete_parallel_workloads_are_numerically_identical(self) -> None:
+        task_a = cp1_task_a_study(
+            samples=8,
+            t_bound=0.02,
+            step=0.001,
+            output_step=0.01,
+            workers=2,
+        )
+        self.assertEqual(task_a.execution.maximum_error, 0.0)
+        task_b = cp1_task_b_compare_execution(t_bound=0.05, step=0.01, workers=2)
+        self.assertEqual(task_b.maximum_error, 0.0)
+        serial = cp1_task_c_solve(
+            interior_points=9,
+            t_bound=0.01,
+            step=0.005,
+            output_step=0.005,
+            workers=1,
+        )
+        parallel = cp1_task_c_solve(
+            interior_points=9,
+            t_bound=0.01,
+            step=0.005,
+            output_step=0.005,
+            workers=2,
+        )
+        self.assertEqual(serial.displacement, parallel.displacement)
 
 if __name__ == "__main__":
     unittest.main()

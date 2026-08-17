@@ -49,7 +49,7 @@ The only intended difference is representation and dispatch overhead.
 
 ## 4. Timing protocol
 
-- use `time.perf_counter_ns()`;
+- use the monotonic `time.perf_counter()`/`perf_counter_ns()` clock;
 - perform untimed warm-up runs;
 - record complete-run durations;
 - use an odd repetition count of at least  nine for exploratory results;
@@ -105,9 +105,11 @@ backend accept it.
 
 Hybrid models use one event layer for both classical and quantized continuous
 modes. Every event declares a guard, direction, reset and target mode. The
-runtime localizes a crossing, records its standard time plus a microstep, then
-continues from the post-event state. A maximum-event guard turns Zeno behavior
-into an explicit failure or a model-defined resting mode.
+runtime localizes a classical crossing against cubic-Hermite dense state
+output (or deliberately uses fixed-step endpoint semantics when localization
+is disabled), records its standard time plus a microstep, then continues from
+the post-event state. A maximum-event guard turns Zeno behavior into an
+explicit failure or a model-defined resting mode.
 
 Callback DES workloads share the deterministic `HyperTime` scheduler. A
 finite horizon includes all microsteps at its terminal macro time; idle drains,
@@ -136,3 +138,45 @@ endpoint agrees with a tighter, independently configured RK45 run within a
 method-specific threshold. The tight RK45 result is a numerical oracle, not a
 published reference solution; consequently C01 remains below the `validated`
 gate until cross-tool or published reference trajectories are archived.
+
+## 10. Parallel and distributed workload protocol
+
+CP1 and CP2 use `argesim_benchmarks.parallel.OrderedExecutor`. Worker pools are
+constructed once and reused across time steps or Runge-Kutta stages. Serial and
+parallel paths receive the same ordered input tuple and callable. Every timing
+report retains all repeat samples and records the maximum result error before
+calculating speedup and efficiency. A measured speedup below one is a valid
+negative result, explicitly expected for the fine-grained CP1-B system.
+
+Official full sizes remain defaults in workload entry points. CI uses smaller
+parameter values to verify the same code path; it does not present reduced-run
+timings as official benchmark results.
+
+## 11. Completed-family reference protocol
+
+- C05 uses exact local linear solutions and published switch times. It is the
+  only newly completed hybrid family promoted to `validated` solely on event
+  evidence.
+- C09 implements the stable `change-level` FIS signal shown in the published
+  Simulink solution and retains the contradictory literal printed error
+  difference as an explicit alternative. The qualitative reference behaviour
+  is tested without inventing numeric curve samples.
+- C17R checks the CA population invariant and the published lattice/contact
+  identification formula. Random seeds are local to each replication.
+- C18 keeps data provenance in `C18DataSet`. Figure digitizations are not
+  labelled as recovered measurements. Synthetic ARX recovery tests algorithmic
+  correctness independently of those digitizations. Error trends and both
+  teacher-forced and free-running ANN predictions are retained separately.
+- C20 uses at least ten replications for official summary calls and reports
+  median, first/third quartiles and IQR. Reduced CI calls test scenario logic,
+  not performance or production statistics.
+- C21 checks published event-contact limits, pendulum stop/kick outputs and
+  dynamic-contact samples as well as the RLC algebraic residual for DAE,
+  interpolated and explicit index-reduced forms. Agreement does not imply a
+  general-purpose DAE solver.
+- CP2 uses the peer-reviewed correction `nu=0.06`, 500 spatial intervals,
+  `dt=0.01` and a 0-10 s horizon. Its implicit tridiagonal rope scheme is
+  checked against the independent Fourier series. The printed `nu=0.6`
+  variant remains explicit for provenance. LBM collision/streaming follows the
+  archived full-way bounce-back MATLAB implementation, including imposed lid
+  velocity in the reported output field.

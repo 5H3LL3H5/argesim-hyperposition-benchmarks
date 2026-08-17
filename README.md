@@ -9,16 +9,15 @@ two deliberately separate purposes:
 
 ## Current status
 
-The official inventory was re-audited on 2026-08-15: C01-C22 plus CP1 and
+The official inventory was re-audited on 2026-08-17: C01-C22 plus CP1 and
 CP2, with C17R and C19R as the active revised definitions. The machine-readable
-inventory in `argesim_benchmarks.catalog` deliberately distinguishes complete
-tasks from partial model kernels.
+inventory in `argesim_benchmarks.catalog` records the evidence reached by each
+complete task family instead of treating file presence as implementation.
 
-C02 and C08 currently reach the `validated` gate. C01, C03, C06, C07,
-C10-C16, C19R and C22 reach `implemented`. C17R, C20, C21, CP1 and CP2 remain
-`specified` because their repositories contain useful executable parts but not
-every official task. C04, C05, C09 and C18 remain `cataloged`. Each benchmark
-must pass five evidence gates before it is benchmark-ready:
+C02, C05, C08, C21, CP1 and CP2 currently reach the `validated` gate. Every
+other catalog family reaches `implemented`: all required task types have an
+executable path, while independent external full-output references are still
+missing for several families. Each benchmark must pass five evidence gates:
 
 `cataloged -> specified -> implemented -> validated -> benchmark-ready`
 
@@ -35,18 +34,26 @@ See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status and
 - bracketed Brent root finding with explicit non-convergence reporting;
 - one strict solver dispatcher shared by model wrappers, including segmented
   non-autonomous inputs;
-- directed state-event localization and mode/state resets shared by classical
-  and QSS backends, including dimension-changing transitions;
+- directed state-event localization (cubic-Hermite dense guards for classical
+  steps) and mode/state resets shared by classical and QSS backends, including
+  dimension-changing transitions;
 - one-dimensional heat and wave equations through the Method of Lines;
 - exact rational macro time plus integer microsteps and a deterministic DES
   scheduler with cancellation, finite horizons, idle draining and event caps;
 - a finite acyclic Mealy-style NSA-DEVS relay reference model;
+- a reusable ordered serial/thread/process execution and timing layer;
+- complete C04 fairness/deadlock statistics, exact C05 event references,
+  reference-convention C09 fuzzy control, FHP-I/random-movement C17R,
+  C18 ARX/static/dynamic ANN identification, dimensioned C20 transport and
+  all C21 event/pendulum/diode forms;
+- complete CP1 and CP2 workload entry points, including D2Q9 LBGK and an
+  implicit string solver checked against its Fourier series and the corrected
+  published `nu=0.06` parameter set;
 - executable benchmark modules at the evidence gates listed above.
 
-LIQSS, a general DAE solver, the C21 RLC-diode DAE, full C17R cellular-automaton
-and identification tasks, complete C20 production control, CP1/CP2 parallel
-performance experiments and a trained neural-operator backend remain explicit
-work in progress. They are not silently mapped to simpler algorithms.
+LIQSS, a general-purpose implicit DAE solver and a trained neural-operator
+backend remain explicit non-goals. C21 implements the benchmark's specified
+index-1 reduction; it is not silently presented as a general DAE facility.
 
 ## Run the tests
 
