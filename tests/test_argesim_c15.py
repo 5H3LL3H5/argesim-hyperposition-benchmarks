@@ -129,7 +129,19 @@ class C15Tests(unittest.TestCase):
 
         ana_x1, ana_x2 = c15_analytical(t_test, params, bolus)
 
-        for method in ("qss1", "qss2"):
+        methods = (
+            "qss1",
+            "qss2",
+            "qss3",
+            "qss4",
+            "liqss",
+            "liqss2",
+            "liqss3",
+            "mliqss",
+            "mliqss2",
+            "mliqss3",
+        )
+        for method in methods:
             with self.subTest(method=method):
                 num_res = solve_c15(
                     method,

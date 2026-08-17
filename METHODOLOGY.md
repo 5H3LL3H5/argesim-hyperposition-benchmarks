@@ -93,15 +93,26 @@ Adaptive and event-driven methods report accepted and rejected steps or events
 and right-hand-side evaluations in addition to wall time.
 
 Explicit methods are not presented as suitable stiff or DAE solvers merely
-because they can execute with a very small step. QSS2 now has an actual
-piecewise-linear quantizer, scaled directional derivative approximation and
-convergence/fast-nonlinearity regression tests. LIQSS remains unimplemented.
+because they can execute with a very small step. QSS2 has an actual
+piecewise-linear quantizer and scaled directional derivative approximation.
+QSS3/QSS4 use polynomial quantizers and isolate every real event root through
+degree four rather than sampling for a sign change. Their black-box right-hand
+side Taylor coefficients use symmetric polynomial stencils.
+
+LIQSS1/2/3 use a diagonal local linearization. mLIQSS1/2/3 additionally detect
+mutually influential pairs and solve a bounded two-state linearly implicit
+polynomial update. An exact model Jacobian may be supplied; the portable
+fallback evaluates a dense centered finite-difference Jacobian. Tests cover
+quantum convergence, a diagonal stiff system, pairwise stiff oscillation and
+exact-versus-numerical Jacobian parity. These are ODE solvers, not DAE solvers.
 
 Continuous benchmark wrappers use one strict dispatcher while Euler, RK4,
-RK45, QSS1 and QSS2 remain separate algorithms. Unknown option names are
-errors. Piecewise inputs are represented as contiguous autonomous segments for
-QSS; a non-autonomous problem is never mislabeled autonomous merely to make a
-backend accept it.
+RK45 and every QSS/LIQSS order remain separate algorithms. Unknown option
+names are errors. Existing per-model QSS2 quanta are inherited by newer
+quantized methods unless a method-specific default is supplied. Piecewise
+inputs are represented as contiguous autonomous segments for QSS; a
+non-autonomous problem is never mislabeled autonomous merely to make a backend
+accept it.
 
 Hybrid models use one event layer for both classical and quantized continuous
 modes. Every event declares a guard, direction, reset and target mode. The

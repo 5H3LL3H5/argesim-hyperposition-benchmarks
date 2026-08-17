@@ -253,11 +253,9 @@ def c03_task_b(
 ) -> IntegrationResult:
     """Compute the task-B trajectory over [0, 100E-6]."""
 
-    # Note on QSS1/2: This model contains an explicitly non-autonomous component
-    # `r_t(time)` representing the switched resistance. The framework's QSS solvers
-    # (`qss1`, `qss2`) strictly enforce that the RHS must be autonomous (`autonomous=True`).
-    # Because `r_t` directly depends on `time`, QSS solvers will aggressively reject
-    # this InitialValueProblem upon initialization.
+    # This model contains the explicitly time-dependent switched resistance
+    # `r_t(time)`. QSS/LIQSS methods require autonomous right-hand sides, so
+    # they reject this InitialValueProblem instead of hiding the input events.
 
     return solve_c03(
         method=method,

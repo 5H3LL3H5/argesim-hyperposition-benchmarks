@@ -5,7 +5,21 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 
 from .ivp import InitialValueProblem, IntegrationResult, SolverStats
-from .solvers import euler, qss1, qss2, rk4, rk45
+from .solvers import (
+    euler,
+    liqss1,
+    liqss2,
+    liqss3,
+    mliqss1,
+    mliqss2,
+    mliqss3,
+    qss1,
+    qss2,
+    qss3,
+    qss4,
+    rk4,
+    rk45,
+)
 
 SolverOptions = Mapping[str, object]
 
@@ -17,6 +31,42 @@ _ALLOWED_OPTIONS: dict[str, frozenset[str]] = {
     ),
     "qss1": frozenset({"quantum", "max_events", "simultaneous_tolerance"}),
     "qss2": frozenset({"quantum", "max_events", "simultaneous_tolerance"}),
+    "qss3": frozenset(
+        {"quantum", "max_events", "simultaneous_tolerance", "derivative_step"}
+    ),
+    "qss4": frozenset(
+        {"quantum", "max_events", "simultaneous_tolerance", "derivative_step"}
+    ),
+}
+
+_LIQSS_OPTIONS = frozenset(
+    {
+        "quantum",
+        "jacobian",
+        "jacobian_step",
+        "max_events",
+        "simultaneous_tolerance",
+        "derivative_step",
+    }
+)
+for _method in ("liqss1", "liqss2", "liqss3"):
+    _ALLOWED_OPTIONS[_method] = _LIQSS_OPTIONS
+for _method in ("mliqss1", "mliqss2", "mliqss3"):
+    _ALLOWED_OPTIONS[_method] = _LIQSS_OPTIONS | {"coupling_tolerance"}
+
+_ALIASES = {"liqss": "liqss1", "mliqss": "mliqss1"}
+_QUANTISED_METHODS = frozenset(_ALLOWED_OPTIONS) - {"euler", "rk4", "rk45"}
+_QUANTISED_SOLVERS = {
+    "qss1": qss1,
+    "qss2": qss2,
+    "qss3": qss3,
+    "qss4": qss4,
+    "liqss1": liqss1,
+    "liqss2": liqss2,
+    "liqss3": liqss3,
+    "mliqss1": mliqss1,
+    "mliqss2": mliqss2,
+    "mliqss3": mliqss3,
 }
 
 
@@ -25,9 +75,10 @@ def normalise_solver_name(method: str) -> str:
 
     if not isinstance(method, str):
         raise TypeError("solver method must be a string")
-    name = method.strip().lower()
+    requested = method.strip().lower()
+    name = _ALIASES.get(requested, requested)
     if name not in _ALLOWED_OPTIONS:
-        supported = ", ".join(_ALLOWED_OPTIONS)
+        supported = ", ".join((*_ALLOWED_OPTIONS, *_ALIASES))
         raise ValueError(f"unsupported solver {method!r}; choose one of: {supported}")
     return name
 
@@ -39,7 +90,10 @@ def _configured_options(
 ) -> dict[str, object]:
     configured: dict[str, object] = {}
     if defaults is not None:
-        configured.update(defaults.get(method, {}))
+        inherited = defaults.get(method)
+        if inherited is None and method in _QUANTISED_METHODS:
+            inherited = defaults.get("qss2", defaults.get("qss1", {}))
+        configured.update(inherited or {})
     if options is not None:
         if not isinstance(options, Mapping):
             raise TypeError("solver options must be a mapping")
@@ -82,7 +136,7 @@ def solve_ivp(
     if "quantum" not in configured:
         raise ValueError(f"{name} requires a quantum option")
     quantum = configured.pop("quantum")
-    solver = qss1 if name == "qss1" else qss2
+    solver = _QUANTISED_SOLVERS[name]
     return solver(problem, quantum, **configured)  # type: ignore[arg-type]
 
 
