@@ -1,63 +1,75 @@
 # ARGESIM implementation audit
 
-Audit date: 2026-08-15. Definitions were checked from the
-[official ARGESIM catalog](https://www.argesim.org/benchmarks/) and linked
-primary definition papers. The evidence-gate meanings are defined in
-`METHODOLOGY.md`.
+Audit date: 2026-08-17. Definitions were checked against the official catalog
+and primary papers. Gate meanings are defined in `METHODOLOGY.md`.
 
 ## Runtime separation
 
 | Concern | Reusable implementation | Benchmark use |
 |---|---|---|
-| Explicit ODE | independent Euler, RK4 and adaptive RK45 modules | C01, C03, C07, C11, C15, C17R, C19R, CP1/CP2 kernels |
-| Quantized ODE | independent QSS1 and QSS2 modules | C01, C07, C11, C15, C17R, C21 |
-| Solver selection | strict `solve_ivp` dispatcher; unknown options fail | shared model wrapper contract |
-| Piecewise input | contiguous autonomous segments plus checked merge | C03 switch boundaries, C15 bolus switch |
-| Hybrid state events | directed guards, localized roots, resets and mode changes | C07 and C21 classical/QSS execution |
-| Callback DES | deterministic `HyperTime` scheduler with cancellation and event cap | C06, C08, C16 and partial C20 model |
-| DEVS/NSA ordering | macro time plus ordered microsteps | C02, C10, C22 and relay reference |
+| Explicit ODE | separate Euler, RK4 and adaptive RK45 | continuous benchmark families |
+| Quantized ODE | separate QSS1 and QSS2 | C01, C07, C11, C15, C17R, C21 |
+| Hybrid events | directed guards, cubic-Hermite localization, optional fixed-step endpoint semantics, state/mode reset | C05, C07, C17R, C21 |
+| Callback DES | deterministic `HyperTime` scheduler and event caps | DES families and C20 components |
+| Parallel execution | persistent ordered executor, warm-up, repeat samples and parity error | CP1 and CP2 |
+| PDE | explicit MOL, implicit tridiagonal time stepping and analytical references | C19R, CP1, CP2 |
 
-The hybrid layer is deliberately independent of the continuous solver. This
-allows one state-event model to run in a classical continuous world or with a
-DEVS-style QSS1/QSS2 backend. A benchmark-specific queue policy remains model
-logic; event ordering and progress protection belong to the shared runtime.
+The event layer is independent of its continuous solver. Benchmark policy stays
+inside the model; event ordering, executor lifetime and timing summaries stay
+in shared runtime code.
 
-## Per-definition findings
+## Per-definition result
 
-| ID | Gate | Review result and remaining boundary |
+| ID | Gate | Audit result |
 |---|---|---|
-| C01 | implemented | Tasks A-C and all five solver choices are executable; no archived independent trajectory reference yet. |
-| C02 | validated | Tasks track the published throughput/transit table within declared tolerances, including its deadlock region. |
-| C03 | implemented | Switch boundaries are solver-aligned; QSS is correctly refused for the directly time-driven RHS. |
-| C04 | cataloged | Official identity only; no C04 executable model. |
-| C05 | cataloged | The stiff two-state/state-event definition has no executable model. |
-| C06 | implemented | Uses shared DES scheduling. Task B now swaps doctors without changing 2/2 capacity and slows the transferred CW2 doctor in CW1 by 20%. |
-| C07 | implemented | Long/short pendulum dynamics are explicit modes; the mode no longer changes inside root localization before the velocity reset. RK45 and QSS2 share the event model. |
-| C08 | validated | Independent table/replication checks are present; the model already composes the shared DES scheduler. |
-| C09 | cataloged | Continuous tanks plus sampled fuzzy controller are not implemented. |
-| C10 | implemented | Concurrency and deadlock tasks are executable; this does not substitute for C04. |
-| C11 | implemented | The official mixed inertia coefficient is `(m2/2 + m3) L1 L2`; QSS defaults now cover all nine states and QSS2 is selectable. |
-| C12 | implemented | Deterministic, boundary-value and stochastic collision tasks are present; validation remains internal. |
-| C13 | implemented | Nonlinear/linear crane and embedded-control tasks are present; a general implicit DAE solver is still outside the runtime. |
-| C14 | implemented | All discrete supply-chain tasks are executable. |
-| C15 | implemented | Identification and Monte Carlo tasks are present; QSS1/QSS2 use the explicit bolus switch as two autonomous segments. |
-| C16 | implemented | Agent/DES restaurant tasks use the shared scheduler, preserve dinner-before-week-close microsteps and provide seeded stochastic runs. |
-| C17R | specified | The ODE model is executable with classical and QSS solvers; cellular automaton, identification and intervention tasks are missing. |
-| C18 | cataloged | Required identification datasets, transfer functions and neural-network comparisons are absent. |
-| C19R | implemented | All three MOL tasks are present. Grid/parameter contracts and the analytical point-source singularity are explicit; no implicit stiff solver is claimed. |
-| C20 | specified | Order books and workstation/conveyor components use isolated RNG and shared scheduling; the full production-control experiments are incomplete. |
-| C21 | specified | Bouncing ball and rotating pendulum now share classical/QSS hybrid execution; the RLC-diode DAE task remains explicitly unimplemented. |
-| C22 | implemented | First arrival is at `t=1`; concurrency priorities match the four policies; reneging cannot terminate an entity twice; classing observes the initial `tC=10` wait. |
-| CP1 | specified | The three numerical model families and published task-B terminal values are present; required parallel execution/performance studies are not. |
-| CP2 | specified | Monte Carlo IVP, D2Q9 step and rope MOL kernels are present; complete workloads and distributed comparisons are not. |
+| C01 | implemented | Tasks A-C and five solver selections execute; independent published trajectories are not archived. |
+| C02 | validated | Published throughput/transit references pass. |
+| C03 | implemented | Switch boundaries are aligned; non-autonomous QSS misuse is rejected. |
+| C04 | implemented | Unsafe, waiter, cleaning/ordered-fork and put-back strategies execute with seeded replications, resource-cycle deadlock detection, per-philosopher meals/fairness and complete state-time accounting. C10 remains a separate definition. |
+| C05 | validated | Closed-form modes reproduce five default events, all 62 Task-D events and both published endpoints. |
+| C06 | implemented | Shared DES scheduling and doctor-transfer semantics execute. |
+| C07 | implemented | Explicit hybrid modes share classical/QSS event handling. |
+| C08 | validated | Independent table/replication checks pass. |
+| C09 | implemented | I-FC1, I-FC2 and P-FC surfaces plus the complete 60,000 s experiment execute. The published Simulink `change-level` convention gives final I-FC errors below 0.02 mm and disturbance rejection; the contradictory literal printed error difference remains selectable. |
+| C10 | implemented | Concurrency/deadlock tasks execute independently of C04. |
+| C11 | implemented | Official inertia coupling and nine-state solver options execute. |
+| C12 | implemented | Deterministic, boundary-value and stochastic collision tasks execute. |
+| C13 | implemented | Nonlinear/linear crane and embedded-control tasks execute. |
+| C14 | implemented | All discrete supply-chain tasks execute. |
+| C15 | implemented | Identification/Monte Carlo tasks and explicit bolus segments execute. |
+| C16 | implemented | Agent/DES restaurant tasks preserve deterministic microstep ordering. |
+| C17R | implemented | Task-1 sweeps, ODE/CA comparison, FHP-I collisions, homogeneous random movement, persistent soft measures and repeatable hard/spatial threshold interventions execute through classical or QSS2 hybrid paths. |
+| C18 | implemented | ARX, parallel residual ANN and free-running dynamic ANN execute and return models, trajectories, correlations and error trends on user data or provenance-labelled digitizations. Original measurement files remain an external-data gap, not a hidden substitution. |
+| C19R | implemented | Three MOL tasks and analytical checks execute. |
+| C20 | implemented | All 3x4 scenarios and 5000-order defaults execute with alternative process plans, workstation generations, constraints, repairs and median/IQR output. Source/inter-operation/sink transport uses a dimensioned two-ring network, 1 m/s belt speed, finite 1 m-part capacity and PSc4 failures/rerouting. |
+| C21 | validated | Ball event/dynamic/shortcut studies, pendulum basic/kick studies and algebraic/interpolated/index-reduced Shockley RLC forms execute. Published stop time, kick angles, contact limits and dynamic-contact samples pass declared tolerances. |
+| C22 | implemented | Four queue policies and their concurrency semantics execute. |
+| CP1 | validated | All three serial/parallel workloads execute; task-B endpoint matches the published table. |
+| CP2 | validated | Sample/time Monte Carlo, reference full-way D2Q9 LBGK with reusable collision workers, and the corrected 499-unknown implicit/Fourier rope study execute. Serial/parallel LBM populations agree exactly; full rope traces/profiles stay below 5e-4/3e-4 error. |
+
+## Primary completion sources
+
+- [C05 semi-analytical solution](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C05/C5-solution-Maple-semi-analyt.pdf)
+- [C04 comparative solution](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_28_1/articles/sne.28.1.10406.bn04.OA.pdf)
+- [C09R definition](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C09/C9R-revised-definition.pdf) and [classic solution](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C09/C9R-solution-MATLAB-Simulink-Fuzzy.pdf)
+- [C17R definition](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_25_1/articles/sne.25.1.10283.bn17r.OA.pdf)
+- [C18 definition](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-definition.pdf) and [classic MATLAB solution](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-solution-MATLAB-02.pdf)
+- [C20 definition](https://www.argesim.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_21_34/articles/sne.21.34.10097.bn20.OA.pdf)
+- [C21 definition](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_26_2/articles/sne.26.2.10339.bn21.OA.pdf), [Modelica solution](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_28_2/articles/sne.28.2.10411.bn21.OA.pdf) and [Simulink solution](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_31_1/articles/sne.31.1.10556.bn21.OA.pdf)
+- [CP1 definition](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/CP/CP1-definition.pdf)
+- [CP2 definition](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/CP/CP2-definition.pdf), [corrected PDE/Monte-Carlo solution](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_32_4/articles/sne.32.4.10625.bncp2.OA.pdf), [LBM solution](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_33_2/articles/sne.33.2.10646.bncp2.OA.pdf) and [reference code](https://github.com/cea-wismar/ArgesimCP2)
 
 ## Deliberate non-claims
 
-- `HyperTime` is a restricted superdense-time representation, not the complete
-  hyperreal field.
-- QSS2 is an event-driven ODE backend; it is not LIQSS and not an implicit DAE
-  solver.
-- A partial benchmark kernel does not satisfy every official task and therefore
-  cannot advance past `specified`.
-- Only C02 and C08 currently have archived independent reference checks strong
-  enough for the `validated` gate.
+- Internal conservation or cross-form agreement is verification, not an
+  independent published validation.
+- A hardware-dependent speedup is reported, never required to exceed one.
+- The 2007 CP2 text printed `nu=0.6`; the peer-reviewed 2022 correction and
+  reference code specify `nu=0.06`, 0-10 s, and profiles at 5 s and 8 s. The
+  printed variant remains available explicitly for provenance experiments.
+- C20's conveyor is a dimensioned reference-control abstraction of the
+  published two-ring layout, not a claim to encode every drawing junction and
+  buffer as an individual object.
+- C18 reports teacher-forced and free-running dynamic-ANN metrics separately;
+  the former is not presented as closed-loop simulation evidence.
+- No general-purpose implicit DAE or LIQSS solver is claimed.

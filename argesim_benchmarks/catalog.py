@@ -68,13 +68,18 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
-        "C04", "Dining Philosophers", (ModelClass.DES,), _source("c04")
+        "C04",
+        "Dining Philosophers",
+        (ModelClass.DES,),
+        _source("c04"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C05",
         "Two State Model",
         (ModelClass.STIFF_ODE, ModelClass.HYBRID),
         _source("c05"),
+        BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
         "C06",
@@ -102,6 +107,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Fuzzy Control of a Two Tank System",
         (ModelClass.ODE, ModelClass.HYBRID, ModelClass.DISCRETE_TIME),
         _source("c09"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C10",
@@ -162,7 +168,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
             ModelClass.IDENTIFICATION,
         ),
         _source("c17r"),
-        BenchmarkStatus.SPECIFIED,
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C18",
@@ -174,6 +180,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
             ModelClass.MACHINE_LEARNING,
         ),
         _source("c18"),
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C19R",
@@ -187,14 +194,14 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Complex Production System",
         (ModelClass.DES,),
         _source("c20"),
-        BenchmarkStatus.SPECIFIED,
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C21",
         "State Events and Structural-dynamic Systems",
         (ModelClass.ODE, ModelClass.DAE, ModelClass.HYBRID),
         _source("c21"),
-        BenchmarkStatus.SPECIFIED,
+        BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
         "C22",
@@ -208,7 +215,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Parallel Simulation Techniques",
         (ModelClass.ODE, ModelClass.PDE, ModelClass.PARALLEL),
         _source("cp"),
-        BenchmarkStatus.SPECIFIED,
+        BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
         "CP2",
@@ -221,7 +228,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
             ModelClass.STOCHASTIC,
         ),
         _source("cp"),
-        BenchmarkStatus.SPECIFIED,
+        BenchmarkStatus.VALIDATED,
     ),
 )
 

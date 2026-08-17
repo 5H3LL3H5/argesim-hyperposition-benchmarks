@@ -1,19 +1,27 @@
 import unittest
-import math
 
 from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
 from argesim_benchmarks.models.c17_sir_epidemic import (
+    C17_INITIAL_STATE,
+    C17HardMeasure,
+    C17Intervention,
+    C17Movement,
     C17Parameters,
+    C17SoftParameter,
+    c17_contact_rate,
+    c17_lattice_size,
     c17_rhs,
-    c17_problem,
+    c17_task1_parameter_study,
+    simulate_c17_ca,
+    simulate_c17_ode_intervention,
     solve_c17,
-    C17_INITIAL_STATE
 )
+
 
 class C17Tests(unittest.TestCase):
     def test_c17r_catalog_status(self) -> None:
         c17r = next(b for b in BENCHMARKS if b.identifier == "C17R")
-        self.assertEqual(c17r.status, BenchmarkStatus.SPECIFIED)
+        self.assertEqual(c17r.status, BenchmarkStatus.IMPLEMENTED)
 
     def test_c17_parameters_validation(self) -> None:
         with self.assertRaises(ValueError):
@@ -62,5 +70,76 @@ class C17Tests(unittest.TestCase):
         with self.assertRaises(ValueError):
             solve_c17("unsupported_solver")
 
-if __name__ == '__main__':
+    def test_fhp_ca_identification_and_population_conservation(self) -> None:
+        size = c17_lattice_size(10000, 4.0)
+        self.assertEqual(size, 46)
+        self.assertAlmostEqual(c17_contact_rate(10000, size), 3.9381646317447814)
+        for movement in C17Movement:
+            result = simulate_c17_ca(steps=5, seed=3, movement=movement)
+            self.assertTrue(
+                all(
+                    susceptible + infected + recovered == 10000
+                    for susceptible, infected, recovered in zip(
+                        result.susceptible, result.infected, result.recovered
+                    )
+                )
+            )
+
+    def test_threshold_intervention_is_recorded(self) -> None:
+        intervention = C17Intervention(
+            0.04,
+            soft_factor=0.5,
+            duration=3,
+            hard_measure=C17HardMeasure.VACCINATION,
+            hard_fraction=0.1,
+        )
+        result = simulate_c17_ca(steps=2, seed=4, intervention=intervention)
+        self.assertEqual({event.kind for event in result.interventions}, {"soft", "vaccination"})
+
+    def test_soft_parameter_is_separate_and_persists(self) -> None:
+        intervention = C17Intervention(
+            0.0,
+            soft_factor=0.0,
+            soft_parameter=C17SoftParameter.INFECTION,
+            duration=0,
+        )
+        ca = simulate_c17_ca(steps=5, seed=4, intervention=intervention)
+        self.assertEqual(ca.susceptible, (9500,) * 6)
+
+        ode = simulate_c17_ode_intervention(
+            intervention,
+            t_bound=5.0,
+            method="rk45",
+        )
+        self.assertEqual(len(ode.events), 1)
+        self.assertAlmostEqual(ode.final_state[0], 9500.0, delta=1.0e-8)
+        self.assertAlmostEqual(sum(ode.final_state), 10000.0, delta=1.0e-8)
+
+    def test_ode_intervention_uses_shared_qss2_hybrid_runtime(self) -> None:
+        result = simulate_c17_ode_intervention(
+            C17Intervention(
+                0.06,
+                hard_measure=C17HardMeasure.QUARANTINE,
+                hard_fraction=0.25,
+            ),
+            t_bound=5.0,
+            method="qss2",
+            options={"quantum": (1.0, 1.0, 1.0)},
+        )
+        self.assertTrue(result.method.startswith("qss2"))
+        self.assertEqual(len(result.events), 1)
+        self.assertEqual(result.events[0].name, "threshold-intervention")
+        self.assertAlmostEqual(sum(result.final_state), 10000.0, delta=1.0e-8)
+
+    def test_task1_parameter_study_accepts_initial_infection_sweeps(self) -> None:
+        cases = c17_task1_parameter_study(
+            cases=(("I0-test", C17Parameters(), (9900, 100, 0)),),
+            steps=2,
+            replications=2,
+        )
+        self.assertEqual(cases[0].initial_state, (9900, 100, 0))
+        self.assertEqual(len(cases[0].comparison.ca_mean), 3)
+
+
+if __name__ == "__main__":
     unittest.main()

@@ -19,6 +19,8 @@ class ArgesimCatalogTests(unittest.TestCase):
         implemented = (
             "C01",
             "C03",
+            "C04",
+            "C09",
             "C10",
             "C12",
             "C06",
@@ -28,27 +30,29 @@ class ArgesimCatalogTests(unittest.TestCase):
             "C14",
             "C15",
             "C16",
+            "C17R",
+            "C18",
             "C19R",
+            "C20",
             "C22",
         )
         for identifier in implemented:
             self.assertEqual(statuses[identifier], BenchmarkStatus.IMPLEMENTED)
         self.assertEqual(statuses["C02"], BenchmarkStatus.VALIDATED)
         self.assertEqual(statuses["C08"], BenchmarkStatus.VALIDATED)
+        self.assertEqual(statuses["C21"], BenchmarkStatus.VALIDATED)
+        self.assertEqual(statuses["CP2"], BenchmarkStatus.VALIDATED)
         self.assertTrue(
             all(
                 status is BenchmarkStatus.CATALOGED
                 for identifier, status in statuses.items()
                 if identifier not in implemented
                 and identifier
-                not in {"C02", "C08", "C17R", "C20", "C21", "CP1", "CP2"}
+                not in {"C02", "C05", "C08", "C21", "CP1", "CP2"}
             )
         )
-        self.assertEqual(statuses["C17R"], BenchmarkStatus.SPECIFIED)
-        self.assertEqual(statuses["C20"], BenchmarkStatus.SPECIFIED)
-        self.assertEqual(statuses["C21"], BenchmarkStatus.SPECIFIED)
-        self.assertEqual(statuses["CP1"], BenchmarkStatus.SPECIFIED)
-        self.assertEqual(statuses["CP2"], BenchmarkStatus.SPECIFIED)
+        self.assertEqual(statuses["C05"], BenchmarkStatus.VALIDATED)
+        self.assertEqual(statuses["CP1"], BenchmarkStatus.VALIDATED)
 
     def test_sources_are_official_and_lookup_is_strict(self) -> None:
         self.assertTrue(

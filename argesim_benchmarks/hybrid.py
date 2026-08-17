@@ -106,16 +106,37 @@ def _crosses(before: float, after: float, direction: int, tolerance: float) -> b
     )
 
 
-def _interpolate(
-    left: Sequence[float], right: Sequence[float], fraction: float
+def _hermite_interpolate(
+    left_derivative: Vector,
+    state_left: Vector,
+    right_derivative: Vector,
+    state_right: Vector,
+    span: float,
+    fraction: float,
 ) -> Vector:
+    """Cubic-Hermite state interpolation for event localization."""
+
+    s = fraction
+    h00 = 2.0 * s**3 - 3.0 * s**2 + 1.0
+    h10 = s**3 - 2.0 * s**2 + s
+    h01 = -2.0 * s**3 + 3.0 * s**2
+    h11 = s**3 - s**2
     return tuple(
-        before + fraction * (after - before)
-        for before, after in zip(left, right)
+        h00 * left
+        + h10 * span * left_rate
+        + h01 * right
+        + h11 * span * right_rate
+        for left, left_rate, right, right_rate in zip(
+            state_left,
+            left_derivative,
+            state_right,
+            right_derivative,
+        )
     )
 
 
 def _locate_event(
+    mode: HybridMode,
     event: StateEvent,
     t_left: float,
     state_left: Vector,
@@ -124,9 +145,28 @@ def _locate_event(
     tolerance: float,
 ) -> tuple[float, Vector]:
     span = t_right - t_left
+    left_derivative = tuple(float(value) for value in mode.rhs(t_left, state_left))
+    right_derivative = tuple(float(value) for value in mode.rhs(t_right, state_right))
+    if (
+        len(left_derivative) != len(state_left)
+        or len(right_derivative) != len(state_right)
+        or any(
+            not math.isfinite(value)
+            for values in (left_derivative, right_derivative)
+            for value in values
+        )
+    ):
+        raise IntegrationError("hybrid RHS returned an invalid event derivative")
 
     def interpolated_guard(fraction: float) -> float:
-        state = _interpolate(state_left, state_right, fraction)
+        state = _hermite_interpolate(
+            left_derivative,
+            state_left,
+            right_derivative,
+            state_right,
+            span,
+            fraction,
+        )
         value = float(event.guard(t_left + fraction * span, state))
         if not math.isfinite(value):
             raise IntegrationError(f"event {event.name!r} returned a non-finite guard")
@@ -145,8 +185,13 @@ def _locate_event(
             1.0,
             tol=max(1.0e-14, tolerance),
         )
-    return t_left + fraction * span, _interpolate(
-        state_left, state_right, fraction
+    return t_left + fraction * span, _hermite_interpolate(
+        left_derivative,
+        state_left,
+        right_derivative,
+        state_right,
+        span,
+        fraction,
     )
 
 
@@ -155,9 +200,11 @@ def _first_event(
     times: tuple[float, ...],
     states: tuple[Vector, ...],
     tolerance: float,
-) -> tuple[int, StateEvent, float, Vector] | None:
+    localize_events: bool,
+) -> tuple[int, StateEvent, float, Vector, int] | None:
     for index in range(1, len(times)):
         candidates: list[tuple[float, StateEvent, Vector]] = []
+        locator_evaluations = 0
         for event in mode.events:
             before = float(event.guard(times[index - 1], states[index - 1]))
             after = float(event.guard(times[index], states[index]))
@@ -166,20 +213,26 @@ def _first_event(
                     f"event {event.name!r} returned a non-finite guard"
                 )
             if _crosses(before, after, event.direction, tolerance):
-                event_time, event_state = _locate_event(
-                    event,
-                    times[index - 1],
-                    states[index - 1],
-                    times[index],
-                    states[index],
-                    tolerance,
-                )
+                if localize_events:
+                    event_time, event_state = _locate_event(
+                        mode,
+                        event,
+                        times[index - 1],
+                        states[index - 1],
+                        times[index],
+                        states[index],
+                        tolerance,
+                    )
+                    locator_evaluations += 2
+                else:
+                    event_time = times[index]
+                    event_state = states[index]
                 candidates.append((event_time, event, event_state))
         if candidates:
             event_time, event, event_state = min(
                 candidates, key=lambda candidate: candidate[0]
             )
-            return index, event, event_time, event_state
+            return index, event, event_time, event_state, locator_evaluations
     return None
 
 
@@ -195,8 +248,15 @@ def simulate_hybrid(
     solver_defaults: Mapping[str, SolverOptions] | None = None,
     event_tolerance: float = 1.0e-10,
     max_events: int = 10_000,
+    segment_span: float | None = None,
+    localize_events: bool = True,
 ) -> HybridResult:
-    """Integrate continuous modes and execute localized state transitions."""
+    """Integrate continuous modes and execute state transitions.
+
+    ``localize_events=False`` deliberately switches at the first solver output
+    after a crossing. This supports fixed-step real-time experiments where
+    iterative backtracking is unavailable.
+    """
 
     if not isinstance(modes, Mapping) or not modes:
         raise ValueError("modes must be a non-empty mapping")
@@ -220,6 +280,14 @@ def simulate_hybrid(
         raise TypeError("max_events must be an integer")
     if max_events <= 0:
         raise ValueError("max_events must be positive")
+    if not isinstance(localize_events, bool):
+        raise TypeError("localize_events must be a boolean")
+    if segment_span is not None:
+        if isinstance(segment_span, bool):
+            raise TypeError("segment_span must be a real number")
+        segment_span = float(segment_span)
+        if not math.isfinite(segment_span) or segment_span <= 0.0:
+            raise ValueError("segment_span must be positive and finite")
 
     solver_name = normalise_solver_name(method)
     time = float(t0)
@@ -242,11 +310,16 @@ def simulate_hybrid(
 
     while time < final_time and not terminated:
         mode = mode_map[current_mode]
+        segment_bound = (
+            final_time
+            if segment_span is None
+            else min(final_time, time + segment_span)
+        )
         problem = InitialValueProblem(
             mode.rhs,
             time,
             state,
-            final_time,
+            segment_bound,
             name=f"hybrid:{current_mode}",
             autonomous=mode.autonomous,
         )
@@ -259,7 +332,13 @@ def simulate_hybrid(
         accepted += segment.stats.accepted_steps
         rejected += segment.stats.rejected_steps
         evaluations += segment.stats.rhs_evaluations
-        located = _first_event(mode, segment.times, segment.states, tolerance)
+        located = _first_event(
+            mode,
+            segment.times,
+            segment.states,
+            tolerance,
+            localize_events,
+        )
 
         if located is None:
             times.extend(segment.times[1:])
@@ -267,11 +346,14 @@ def simulate_hybrid(
             trajectory_modes.extend([current_mode] * (len(segment.times) - 1))
             time = segment.final_time
             state = segment.final_state
-            break
+            if time >= final_time:
+                break
+            continue
 
         if len(records) >= max_events:
             raise IntegrationError("hybrid simulation exceeded max_events")
-        index, event, event_time, state_before = located
+        index, event, event_time, state_before, locator_evaluations = located
+        evaluations += locator_evaluations
         for sample_time, sample_state in zip(
             segment.times[1:index], segment.states[1:index]
         ):
