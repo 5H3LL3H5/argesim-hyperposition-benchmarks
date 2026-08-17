@@ -16,11 +16,11 @@ under the label "QSS", but they are not interchangeable solver variants.
 | mLIQSS3 | 3 | engine-level higher-order pair extension | implemented, explicitly experimental |
 | eLIQSS / EQSS | 1-3 | extended update policy with larger bounded segments | implemented |
 | CheQSS | 1-3 | Chebyshev minimax difference polynomial | implemented |
-| CQSS | 1 in the defining publication | geometric integration of suitable Hamiltonian systems | documented; not exposed as a general IVP solver |
-| LIQSS-BDF | engine backend | experimental backward-difference quantizer | documented; no independent public contract was identified |
+| CQSS | 1 in the defining publication | geometric integration of suitable Hamiltonian systems | implemented with explicit no-hysteresis cycle detection |
+| LIQSS-BDF | LIQSS2 + BDF | mixed state/time discretization | implemented with persistent LIQSS2 and an independent BDF1/2 backend |
 
-The newest general LIQSS construction is the 2025 preprint
-[On General Linearly Implicit Quantized State System Methods](https://arxiv.org/abs/2512.17855).
+The newest general LIQSS construction is the 2026 publication
+[On General Linearly Implicit Quantized State System Methods](https://doi.org/10.1007/s40314-026-03858-3).
 It defines `eLIQSS1`-`eLIQSS3` and `CheQSS1`-`CheQSS3`. The former retains the
 LIQSS difference polynomial but waits until the full error boundary is reached;
 the latter selects a shifted Chebyshev polynomial and maximizes the locally
@@ -36,9 +36,20 @@ implementations; they are compatibility spellings, not duplicate algorithms.
 CQSS is a different specialization. Its defining publication constructs a
 memoryless centered quantizer for Hamiltonian systems and notes both its useful
 geometric properties and its lack of hysteresis, which can cause infinitely
-fast oscillation on general systems. The current black-box IVP dispatcher does
-not pretend that this domain-specific method is a safe general replacement for
-QSS/LIQSS.
+fast oscillation on general systems. The runtime exposes the published
+first-order method as `cqss` / `cqss1`, detects exact zero-time cell cycles and
+does not pretend that the domain-specific method is a safe general replacement
+for QSS/LIQSS. Experimental CIFASIS methods bearing `CQSS1`-`CQSS3` names are
+not treated as published higher-order centered-quantizer contracts here.
+
+LIQSS-BDF is not a new scalar quantizer. The defining mixed-mode paper splits
+the state into an LIQSS2 partition and a classical BDF partition, exchanging
+order-compatible interface polynomials at classic time steps. The reference
+backend here preserves LIQSS2 quantizer polynomials across accepted BDF macro
+steps, uses linear waveform relaxation at the interface and advances the time
+partition with backward Euler followed by variable-step BDF2. The paper's
+prototype uses LIQSS2 plus CVODE-BDF; this implementation deliberately uses an
+independent dense Python BDF backend and makes no CVODE equivalence claim.
 
 ## Implementation details
 
@@ -83,6 +94,12 @@ The benchmark refuses to report timings unless every endpoint remains within
 implementation's event policy; they are not presented as a reproduction of C
 runtime measurements from the paper.
 
+`python benchmarks/benchmark_cqss_liqss_bdf.py --repeat 9 --warmup 1`
+separately gates CQSS1 by the harmonic-oscillator energy span and the mixed
+LIQSS2-BDF solver by the exact endpoint of a partitioned triangular system.
+This separation avoids applying CQSS outside the Hamiltonian problem class for
+which it was defined.
+
 ## Policies and execution architectures
 
 | Layer | State of practice | Repository boundary |
@@ -91,6 +108,7 @@ runtime measurements from the paper.
 | Dependency handling | generated incidence matrices and sparse affected-state updates | dense recomputation after every event for reference clarity |
 | Execution | DEVS atomic models or a stand-alone priority scheduler | deterministic stand-alone Python event loop |
 | Hybrid behavior | zero crossings, external events and local resets | provided by the separate reusable hybrid runtime |
+| Mixed state/time | LIQSS2 partition coordinated with CVODE-BDF | persistent LIQSS2 plus independent BDF1/2, selected by `bdf_partition` |
 | Parallelism | partitioned/shared/distributed schedulers in production research engines | ordered process/thread utilities exist, but no false parallel-QSS claim |
 | Model frontend | symbolic/code-generated Modelica subset in CIFASIS | explicit Python `rhs(time, state)` and optional Jacobian |
 
@@ -108,8 +126,10 @@ execution policy remain separate reusable layers.
 - F. Di Pietro et al., [Improving Linearly Implicit Quantized State System
   Methods](https://www.fceia.unr.edu.ar/~kofman/files/liqss_imp_v2.pdf).
 - M. Bergonzi et al., [On General Linearly Implicit Quantized State System
-  Methods](https://arxiv.org/abs/2512.17855) (preprint, 2025).
+  Methods](https://doi.org/10.1007/s40314-026-03858-3) (2026).
 - M. Bortolotto et al., [Integration by Quantization in Hamiltonian Systems
   (CQSS)](https://usuarios.fceia.unr.edu.ar/~kofman/files/CQSS.pdf).
+- M. Di Pietro et al., [Mixed-Mode State-Time Discretization in ODE Numerical
+  Integration](https://fceia.unr.edu.ar/~kofman/files/mixed_mode_v5.pdf).
 - [CIFASIS Stand-Alone QSS Solver](https://github.com/CIFASIS/qss-solver/tree/qss-solver-dev)
   and its [GPL-3.0-or-later license](https://github.com/CIFASIS/qss-solver/blob/qss-solver-dev/LICENSE).

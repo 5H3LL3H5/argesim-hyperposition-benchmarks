@@ -2,7 +2,7 @@ import math
 import unittest
 from itertools import pairwise
 
-from argesim_benchmarks import InitialValueProblem, qss1, qss2
+from argesim_benchmarks import InitialValueProblem, cqss1, qss1, qss2
 
 
 class QssSolverTests(unittest.TestCase):
@@ -55,6 +55,49 @@ class QssSolverTests(unittest.TestCase):
         )
         # QSS2 should be more accurate for the same quantum than QSS1.
         self.assertLess(errors[-1], 0.005)
+
+    def test_centered_qss_preserves_harmonic_oscillator_energy(self) -> None:
+        problem = InitialValueProblem(
+            lambda _time, state: (state[1], -state[0]),
+            0.0,
+            (1.0, 0.0),
+            100.0,
+            name="cqss-harmonic-oscillator",
+            autonomous=True,
+        )
+        result = cqss1(problem, 0.05)
+        energies = [
+            0.5 * (state[0] ** 2 + state[1] ** 2)
+            for state in result.states
+        ]
+        self.assertEqual(result.final_time, 100.0)
+        self.assertLess(max(energies) - min(energies), 6.0e-4)
+
+    def test_centered_qss_uses_cell_midpoints(self) -> None:
+        samples = []
+
+        def rhs(_time, state):
+            samples.append(tuple(state))
+            return (1.0,)
+
+        problem = InitialValueProblem(
+            rhs, 0.0, (0.21,), 0.25, autonomous=True
+        )
+        result = cqss1(problem, 0.1)
+        self.assertEqual(samples[0], (0.25,))
+        self.assertEqual(samples[1], (0.35000000000000003,))
+        self.assertAlmostEqual(result.final_state[0], 0.46)
+
+    def test_centered_qss_reports_its_no_hysteresis_cycle(self) -> None:
+        problem = InitialValueProblem(
+            lambda _time, state: (-state[0],),
+            0.0,
+            (0.0,),
+            1.0,
+            autonomous=True,
+        )
+        with self.assertRaisesRegex(RuntimeError, "no hysteresis"):
+            cqss1(problem, 0.1)
 
     def test_qss2_uses_asynchronous_quantization_events(self) -> None:
         problem = InitialValueProblem(

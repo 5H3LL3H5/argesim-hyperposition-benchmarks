@@ -26,7 +26,8 @@ from .advanced_qss import (
     qss4,
 )
 from .explicit import euler, rk4, rk45
-from .qss import qss1, qss2
+from .mixed_qss import liqss_bdf, liqssbdf
+from .qss import cqss, cqss1, qss1, qss2
 from .roots import brentq
 
 __all__ = [
@@ -36,6 +37,8 @@ __all__ = [
     "cheqss1",
     "cheqss2",
     "cheqss3",
+    "cqss",
+    "cqss1",
     "eliqss",
     "eliqss1",
     "eliqss2",
@@ -49,6 +52,8 @@ __all__ = [
     "liqss1",
     "liqss2",
     "liqss3",
+    "liqss_bdf",
+    "liqssbdf",
     "mliqss",
     "mliqss1",
     "mliqss2",

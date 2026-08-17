@@ -1,7 +1,7 @@
 # QSS and LIQSS solver guide
 
 The repository contains independent, dependency-free reference backends for
-the following autonomous ODE methods:
+the following ODE methods:
 
 | Runtime name | Quantized polynomial | Intended use |
 |---|---:|---|
@@ -9,6 +9,7 @@ the following autonomous ODE methods:
 | `qss2` | linear | second-order black-box QSS |
 | `qss3` | quadratic | smooth problems with fewer events |
 | `qss4` | cubic | smooth problems where fourth-order event sections help |
+| `cqss` / `cqss1` | centered constant | suitable Hamiltonian systems; published order one only |
 | `liqss` / `liqss1` | constant | stiffness dominated by Jacobian diagonal entries |
 | `liqss2` | linear | second-order linearly implicit QSS |
 | `liqss3` | quadratic | third-order linearly implicit QSS |
@@ -21,11 +22,12 @@ the following autonomous ODE methods:
 | `mliqss` / `mliqss1` | constant | mutually coupled stiff state pairs |
 | `mliqss2` | linear | second-order coupled implicit update |
 | `mliqss3` | quadratic | third-order coupled implicit update |
+| `liqss-bdf` | LIQSS2 plus BDF1/2 | mixed state/time discretization with an explicit partition |
 
-All methods use `quantum`, scalar or one value per state. `max_events` and
-`simultaneous_tolerance` have the same meaning across the family. QSS3/QSS4
-and the implicit variants also accept an absolute `derivative_step` override
-for their right-hand-side Taylor stencil.
+All quantized methods use `quantum`, scalar or one value per state.
+`max_events` and `simultaneous_tolerance` have the same meaning across the
+family. QSS3/QSS4 and the implicit variants also accept an absolute
+`derivative_step` override for their right-hand-side Taylor stencil.
 
 ## Jacobian contract
 
@@ -60,9 +62,10 @@ result = mliqss2(
 
 The dispatcher accepts the same methods. `eqss`, `eqss1`, `eqss2` and `eqss3`
 are compatibility spellings for the canonical `eliqss*` names used by the
-paper. When a model already supplies only a `qss2` default quantum, QSS3/QSS4
-and every LIQSS family inherit that quantum; an explicit method-specific
-default or user option still wins.
+paper. `liqss_bdf` and `liqssbdf` normalize to `liqss-bdf`. When a model
+already supplies only a `qss2` default quantum, CQSS, QSS3/QSS4 and every
+LIQSS family inherit that quantum; an explicit method-specific default or user
+option still wins.
 
 ## Numerical definition
 
@@ -99,6 +102,58 @@ self-event is kept distinct from a guard event caused by another quantized
 state changing. This prevents harmless interior Chebyshev tangencies from
 becoming artificial events.
 
+## Centered QSS
+
+CQSS1 implements the defining centered, memoryless quantizer
+
+```text
+q_i = (floor(x_i / quantum_i) + 1/2) * quantum_i
+```
+
+and keeps the continuous state on its piecewise-linear trajectory when a cell
+boundary is crossed. The published geometric result is specialized to
+suitable Hamiltonian systems; `cqss1` is therefore exposed explicitly rather
+than advertised as a general QSS replacement. Its lack of hysteresis is part
+of the method. An exact zero-time cell cycle raises `IntegrationError` instead
+of silently consuming `max_events`. The defining publication specifies order
+one only, so this repository does not invent `cqss2` or `cqss3` contracts.
+
+## LIQSS-BDF mixed mode
+
+`liqss_bdf(problem, quantum, bdf_partition=...)` implements the published
+state/time split. Indices in `bdf_partition` use backward Euler for the first
+accepted macro step and variable-step BDF2 thereafter. The complement keeps a
+persistent LIQSS2 quantizer state. A linear interface polynomial and fixed
+point iteration couple both sides; rejected BDF trials do not mutate the
+accepted LIQSS state.
+
+```python
+from argesim_benchmarks import InitialValueProblem, liqss_bdf
+
+problem = InitialValueProblem(
+    lambda _t, x: (-x[0] + x[1], -10.0 * x[1]),
+    0.0,
+    (0.0, 1.0),
+    1.0,
+    autonomous=True,
+)
+
+result = liqss_bdf(
+    problem,
+    quantum=(5.0e-4, 1.0e-6),
+    bdf_partition=(1,),
+    jacobian=lambda _t, _x: ((-1.0, 1.0), (0.0, -10.0)),
+)
+```
+
+With `bdf_partition=None`, every state uses BDF. That is the only deterministic
+automatic choice available to a plain IVP with no event/dependency metadata,
+and it also permits a non-autonomous right-hand side. A partial partition
+requires `problem.autonomous=True`; known external switches belong in explicit
+segments. The implementation uses its own dense BDF1/2 reference backend,
+not CVODE. `rtol`, scalar/vector `atol`, step bounds, Newton controls and
+interface-iteration controls are all validated dispatcher options.
+
 ## CIFASIS engine assessment
 
 [`CIFASIS/qss-solver`](https://github.com/CIFASIS/qss-solver/tree/qss-solver-dev)
@@ -122,15 +177,20 @@ Primary algorithm references:
 - F. Di Pietro et al., [Improving Linearly Implicit Quantized State System
   Methods](https://www.fceia.unr.edu.ar/~kofman/files/liqss_imp_v2.pdf).
 - M. Bergonzi et al., [On General Linearly Implicit Quantized State System
-  Methods](https://arxiv.org/abs/2512.17855) (2025 preprint).
+  Methods](https://doi.org/10.1007/s40314-026-03858-3) (2026).
+- M. Bortolotto et al., [Integration by Quantization in Hamiltonian Systems
+  (CQSS)](https://usuarios.fceia.unr.edu.ar/~kofman/files/CQSS.pdf).
+- M. Di Pietro et al., [Mixed-Mode State-Time Discretization in ODE Numerical
+  Integration](https://fceia.unr.edu.ar/~kofman/files/mixed_mode_v5.pdf).
 
 See [QSS_STATE_OF_THE_ART.md](QSS_STATE_OF_THE_ART.md) for the dated variant
 matrix, architecture separation, implementation status and work comparison.
 
 ## Limits
 
-- These backends require `problem.autonomous=True`. Known input changes must be
-  represented as autonomous segments, as elsewhere in the benchmark runtime.
+- Quantized partitions require `problem.autonomous=True`. Known input changes
+  must be represented as autonomous segments. A full BDF partition is the
+  exception and supports a non-autonomous right-hand side directly.
 - A smooth right-hand side is required for orders greater than one. Hybrid
   discontinuities belong in the repository's event/reset layer.
 - The implementation deliberately recomputes dense derivatives after each
@@ -138,3 +198,5 @@ matrix, architecture separation, implementation status and work comparison.
   replacement for a production engine.
 - LIQSS solves stiff ODEs. It does not solve algebraic constraints or provide a
   general-purpose DAE integrator.
+- CQSS's conservation guarantees are not claimed outside the Hamiltonian class
+  of its defining paper.
