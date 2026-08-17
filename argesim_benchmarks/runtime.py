@@ -9,6 +9,7 @@ from .solvers import (
     cheqss1,
     cheqss2,
     cheqss3,
+    cqss1,
     eliqss1,
     eliqss2,
     eliqss3,
@@ -16,6 +17,7 @@ from .solvers import (
     liqss1,
     liqss2,
     liqss3,
+    liqss_bdf,
     mliqss1,
     mliqss2,
     mliqss3,
@@ -43,6 +45,7 @@ _ALLOWED_OPTIONS: dict[str, frozenset[str]] = {
     "qss4": frozenset(
         {"quantum", "max_events", "simultaneous_tolerance", "derivative_step"}
     ),
+    "cqss1": frozenset({"quantum", "max_events", "simultaneous_tolerance"}),
 }
 
 _LIQSS_OPTIONS = frozenset(
@@ -69,8 +72,30 @@ for _method in (
     _ALLOWED_OPTIONS[_method] = _LIQSS_OPTIONS
 for _method in ("mliqss1", "mliqss2", "mliqss3"):
     _ALLOWED_OPTIONS[_method] = _LIQSS_OPTIONS | {"coupling_tolerance"}
+_ALLOWED_OPTIONS["liqss-bdf"] = frozenset(
+    {
+        "quantum",
+        "bdf_partition",
+        "jacobian",
+        "jacobian_step",
+        "rtol",
+        "atol",
+        "initial_step",
+        "min_step",
+        "max_step",
+        "max_steps",
+        "max_events",
+        "simultaneous_tolerance",
+        "derivative_step",
+        "max_newton_iterations",
+        "newton_tolerance",
+        "max_coupling_iterations",
+        "coupling_tolerance",
+    }
+)
 
 _ALIASES = {
+    "cqss": "cqss1",
     "liqss": "liqss1",
     "mliqss": "mliqss1",
     "eliqss": "eliqss1",
@@ -79,6 +104,8 @@ _ALIASES = {
     "eqss2": "eliqss2",
     "eqss3": "eliqss3",
     "cheqss": "cheqss1",
+    "liqss_bdf": "liqss-bdf",
+    "liqssbdf": "liqss-bdf",
 }
 _QUANTISED_METHODS = frozenset(_ALLOWED_OPTIONS) - {"euler", "rk4", "rk45"}
 _QUANTISED_SOLVERS = {
@@ -86,6 +113,7 @@ _QUANTISED_SOLVERS = {
     "qss2": qss2,
     "qss3": qss3,
     "qss4": qss4,
+    "cqss1": cqss1,
     "eliqss1": eliqss1,
     "eliqss2": eliqss2,
     "eliqss3": eliqss3,
@@ -98,6 +126,7 @@ _QUANTISED_SOLVERS = {
     "mliqss1": mliqss1,
     "mliqss2": mliqss2,
     "mliqss3": mliqss3,
+    "liqss-bdf": liqss_bdf,
 }
 
 

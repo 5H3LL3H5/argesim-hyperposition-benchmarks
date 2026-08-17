@@ -186,6 +186,151 @@ def qss1(
     )
 
 
+def cqss1(
+    problem: InitialValueProblem,
+    quantum: float | Sequence[float],
+    *,
+    max_events: int = 1_000_000,
+    simultaneous_tolerance: float = 1e-12,
+) -> IntegrationResult:
+    """Integrate a Hamiltonian IVP with published first-order Centered QSS.
+
+    CQSS replaces every state by the centre of its fixed quantum cell.  Unlike
+    QSS1, the quantizer is memoryless and has no hysteresis.  The latter is a
+    defining property of the method, but it also means that a general ODE can
+    enter an infinitely fast cell-switching cycle.  This implementation
+    detects an exact zero-time cycle and reports it instead of exhausting the
+    event budget.
+
+    The caller remains responsible for using CQSS only where its geometric
+    assumptions are meaningful.  In particular, the strongest conservation
+    result in the defining paper applies to suitable Hamiltonian systems.
+    """
+
+    if not problem.autonomous:
+        raise ValueError("cqss1 requires problem.autonomous=True")
+    event_limit = _positive_integer(max_events, name="max_events")
+    if isinstance(simultaneous_tolerance, bool):
+        raise TypeError("simultaneous_tolerance must be a real number")
+    tolerance = float(simultaneous_tolerance)
+    if not math.isfinite(tolerance) or tolerance < 0.0:
+        raise ValueError("simultaneous_tolerance must be finite and non-negative")
+
+    quanta = _quantum_vector(quantum, problem.dimension)
+    t = problem.t0
+    x = list(problem.y0)
+    cells = [math.floor(value / delta) for value, delta in zip(x, quanta)]
+    q = [
+        (cell + 0.5) * delta
+        for cell, delta in zip(cells, quanta)
+    ]
+    q = _finite_state(q, method="cqss1 quantizer")
+    times = [t]
+    states = [tuple(x)]
+    events = 0
+    evaluations = 0
+    zero_time_signatures: set[tuple[int, ...]] = {tuple(cells)}
+
+    while t < problem.t_bound:
+        if events >= event_limit:
+            raise IntegrationError("cqss1 exceeded max_events")
+        derivative = problem.evaluate(t, q)
+        evaluations += 1
+        crossings: list[float] = []
+        for index, (state, slope, delta) in enumerate(
+            zip(x, derivative, quanta)
+        ):
+            lower = cells[index] * delta
+            upper = lower + delta
+            invariant_tolerance = tolerance * max(
+                1.0, abs(state), abs(lower), abs(upper)
+            )
+            if (
+                state < lower - invariant_tolerance
+                or state > upper + invariant_tolerance
+            ):
+                raise IntegrationError("cqss1 quantizer invariant was violated")
+            if slope > 0.0:
+                crossing = (upper - state) / slope
+            elif slope < 0.0:
+                crossing = (lower - state) / slope
+            else:
+                crossing = math.inf
+            if crossing < 0.0 and crossing >= -invariant_tolerance:
+                crossing = 0.0
+            if crossing < 0.0:
+                raise IntegrationError("cqss1 quantizer invariant was violated")
+            crossings.append(crossing)
+
+        elapsed = min(crossings)
+        remaining = problem.t_bound - t
+        if math.isinf(elapsed) or elapsed >= remaining:
+            x = _finite_state(
+                [value + slope * remaining for value, slope in zip(x, derivative)],
+                method="cqss1",
+            )
+            t = problem.t_bound
+            times.append(t)
+            states.append(tuple(x))
+            break
+
+        x = _finite_state(
+            [value + slope * elapsed for value, slope in zip(x, derivative)],
+            method="cqss1",
+        )
+        previous_time = t
+        t += elapsed
+        threshold = tolerance * max(1.0, abs(t), abs(elapsed))
+        due = [
+            index
+            for index, crossing in enumerate(crossings)
+            if abs(crossing - elapsed) <= threshold
+        ]
+        if not due:
+            raise IntegrationError("cqss1 failed to identify the imminent quantizer")
+        if events + len(due) > event_limit:
+            raise IntegrationError("cqss1 exceeded max_events")
+
+        for index in due:
+            boundary = (
+                (cells[index] + 1) * quanta[index]
+                if derivative[index] > 0.0
+                else cells[index] * quanta[index]
+            )
+            # Coalesced simultaneous events may differ by a few ulps.  The
+            # exact trajectory is on the shared cell boundary, so project the
+            # continuous state onto that boundary before changing cells.
+            x[index] = boundary
+            cells[index] += 1 if derivative[index] > 0.0 else -1
+            q[index] = (cells[index] + 0.5) * quanta[index]
+        q = _finite_state(q, method="cqss1 quantizer")
+
+        if t == previous_time:
+            signature = tuple(cells)
+            if signature in zero_time_signatures:
+                raise IntegrationError(
+                    "cqss1 encountered a zero-time quantizer cycle; "
+                    "Centered QSS has no hysteresis"
+                )
+            zero_time_signatures.add(signature)
+        else:
+            zero_time_signatures = {tuple(cells)}
+
+        events += len(due)
+        times.append(t)
+        states.append(tuple(x))
+
+    return IntegrationResult(
+        method="cqss1",
+        times=tuple(times),
+        states=tuple(states),
+        stats=SolverStats(events, 0, evaluations),
+    )
+
+
+cqss = cqss1
+
+
 def qss2(
     problem: InitialValueProblem,
     quantum: float | Sequence[float],

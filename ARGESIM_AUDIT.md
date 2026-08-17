@@ -8,7 +8,7 @@ and primary papers. Gate meanings are defined in `METHODOLOGY.md`.
 | Concern | Reusable implementation | Benchmark use |
 |---|---|---|
 | Explicit ODE | separate Euler, RK4 and adaptive RK45 | continuous benchmark families |
-| Quantized ODE | QSS1-4, LIQSS1-3 and mLIQSS1-3 | C01, C07, C11, C15, C17R, C21 |
+| Quantized ODE | QSS1-4, CQSS1, LIQSS1-3, mLIQSS1-3 and LIQSS2-BDF | C01, C07, C11, C15, C17R, C21 |
 | Hybrid events | directed guards, cubic-Hermite localization, optional fixed-step endpoint semantics, state/mode reset | C05, C07, C17R, C21 |
 | Callback DES | deterministic `HyperTime` scheduler and event caps | DES families and C20 components |
 | Parallel execution | persistent ordered executor, warm-up, repeat samples and parity error | CP1 and CP2 |
@@ -72,5 +72,5 @@ in shared runtime code.
   buffer as an individual object.
 - C18 reports teacher-forced and free-running dynamic-ANN metrics separately;
   the former is not presented as closed-loop simulation evidence.
-- No general-purpose implicit DAE solver is claimed; LIQSS support is limited
-  to autonomous ODEs with an exact or numerically estimated Jacobian.
+- No general-purpose implicit DAE solver is claimed. Quantized partitions are
+  limited to autonomous ODEs; the full BDF partition may be non-autonomous.

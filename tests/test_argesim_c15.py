@@ -146,6 +146,7 @@ class C15Tests(unittest.TestCase):
             "mliqss",
             "mliqss2",
             "mliqss3",
+            "liqss-bdf",
         )
         for method in methods:
             with self.subTest(method=method):

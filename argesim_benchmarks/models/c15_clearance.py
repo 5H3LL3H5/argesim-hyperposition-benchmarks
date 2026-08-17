@@ -142,6 +142,7 @@ def solve_c15(
         "mliqss1",
         "mliqss2",
         "mliqss3",
+        "liqss-bdf",
     }
     if normalised not in quantized_methods:
         return solve_ivp(problem, normalised, options=options, defaults=defaults)

@@ -106,6 +106,18 @@ fallback evaluates a dense centered finite-difference Jacobian. Tests cover
 quantum convergence, a diagonal stiff system, pairwise stiff oscillation and
 exact-versus-numerical Jacobian parity. These are ODE solvers, not DAE solvers.
 
+CQSS1 uses the defining memoryless cell-center quantizer. Its Hamiltonian
+conservation test is kept separate from general IVP convergence tests, and an
+exact zero-time cell cycle is reported because the method intentionally has no
+hysteresis. No unpublished higher-order centered CQSS contract is inferred
+from similarly named experimental engine files.
+
+LIQSS-BDF is evaluated as a mixed state/time method, not a renamed quantizer.
+Tests cover the full-BDF stiff limit, tolerance convergence, a partitioned
+triangular system, persistent LIQSS events and strict partition validation.
+The implementation uses backward Euler startup and variable-step BDF2 rather
+than claiming to embed the paper prototype's CVODE backend.
+
 Continuous benchmark wrappers use one strict dispatcher while Euler, RK4,
 RK45 and every QSS/LIQSS order remain separate algorithms. Unknown option
 names are errors. Existing per-model QSS2 quanta are inherited by newer

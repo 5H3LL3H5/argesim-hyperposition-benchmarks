@@ -37,6 +37,10 @@ See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status and
   Jacobian and a checked dense finite-difference fallback;
 - eLIQSS1/2/3 and CheQSS1/2/3 with published generalized difference
   polynomials, planned self-events and cross-state error guards;
+- published first-order centered CQSS for suitable Hamiltonian systems, with
+  explicit detection of its no-hysteresis zero-time cycles;
+- partitioned LIQSS2-BDF mixed-mode integration with persistent quantizer
+  state, linear interfaces and an independent adaptive BDF1/2 backend;
 - bracketed Brent root finding with explicit non-convergence reporting;
 - one strict solver dispatcher shared by model wrappers, including segmented
   non-autonomous inputs;
@@ -83,6 +87,7 @@ python benchmarks/benchmark_event_chain.py --length 1000 --repeat 21
 python benchmarks/benchmark_euler_convergence.py
 python benchmarks/benchmark_argesim_c01.py --repeat 9 --warmup 1
 python benchmarks/benchmark_qss_variants.py --repeat 9 --warmup 1
+python benchmarks/benchmark_cqss_liqss_bdf.py --repeat 9 --warmup 1
 ```
 
 The event-chain benchmark validates result parity before recording timing. It
