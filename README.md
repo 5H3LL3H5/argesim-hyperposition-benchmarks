@@ -35,6 +35,8 @@ See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status and
   event-root isolation;
 - LIQSS1/2/3 and mLIQSS1/2/3 for stiff autonomous ODEs, with an optional exact
   Jacobian and a checked dense finite-difference fallback;
+- eLIQSS1/2/3 and CheQSS1/2/3 with published generalized difference
+  polynomials, planned self-events and cross-state error guards;
 - bracketed Brent root finding with explicit non-convergence reporting;
 - one strict solver dispatcher shared by model wrappers, including segmented
   non-autonomous inputs;
@@ -61,7 +63,9 @@ an algebraic system into an ODE. C21 implements the benchmark's specified
 index-1 reduction and is not silently presented as a general DAE facility.
 
 See [QSS_SOLVERS.md](QSS_SOLVERS.md) for solver selection, Jacobian contracts,
-the mLIQSS3 status and the assessment of the external CIFASIS engine.
+the mLIQSS3 status and the assessment of the external CIFASIS engine. The dated
+[QSS state-of-the-art matrix](QSS_STATE_OF_THE_ART.md) separates numerical
+families, quantum policies and execution architectures.
 
 ## Run the tests
 
@@ -78,6 +82,7 @@ python -m compileall -q .
 python benchmarks/benchmark_event_chain.py --length 1000 --repeat 21
 python benchmarks/benchmark_euler_convergence.py
 python benchmarks/benchmark_argesim_c01.py --repeat 9 --warmup 1
+python benchmarks/benchmark_qss_variants.py --repeat 9 --warmup 1
 ```
 
 The event-chain benchmark validates result parity before recording timing. It

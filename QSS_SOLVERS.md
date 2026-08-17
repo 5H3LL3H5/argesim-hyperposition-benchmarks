@@ -12,6 +12,12 @@ the following autonomous ODE methods:
 | `liqss` / `liqss1` | constant | stiffness dominated by Jacobian diagonal entries |
 | `liqss2` | linear | second-order linearly implicit QSS |
 | `liqss3` | quadratic | third-order linearly implicit QSS |
+| `eliqss` / `eliqss1` | constant | extended first-order LIQSS; identical to CheQSS1 |
+| `eliqss2` | linear | extended second-order full-boundary update |
+| `eliqss3` | quadratic | extended third-order full-boundary update |
+| `cheqss` / `cheqss1` | constant | first-order Chebyshev LIQSS; identical to eLIQSS1 |
+| `cheqss2` | linear | second-order minimax difference polynomial |
+| `cheqss3` | quadratic | third-order minimax difference polynomial |
 | `mliqss` / `mliqss1` | constant | mutually coupled stiff state pairs |
 | `mliqss2` | linear | second-order coupled implicit update |
 | `mliqss3` | quadratic | third-order coupled implicit update |
@@ -23,7 +29,7 @@ for their right-hand-side Taylor stencil.
 
 ## Jacobian contract
 
-LIQSS and mLIQSS accept
+LIQSS, eLIQSS, CheQSS and mLIQSS accept
 
 ```python
 jacobian(time, state) -> square numeric matrix
@@ -52,9 +58,11 @@ result = mliqss2(
 )
 ```
 
-The dispatcher accepts the same methods. When a model already supplies only a
-`qss2` default quantum, QSS3/QSS4 and LIQSS/mLIQSS inherit that quantum; an
-explicit method-specific default or user option still wins.
+The dispatcher accepts the same methods. `eqss`, `eqss1`, `eqss2` and `eqss3`
+are compatibility spellings for the canonical `eliqss*` names used by the
+paper. When a model already supplies only a `qss2` default quantum, QSS3/QSS4
+and every LIQSS family inherit that quantum; an explicit method-specific
+default or user option still wins.
 
 ## Numerical definition
 
@@ -84,6 +92,13 @@ formally derives only orders one and two. Tests therefore validate this
 implementation by convergence and coupled-stiff-system behavior rather than
 claiming line-by-line equivalence with that engine.
 
+eLIQSS and CheQSS use the generalized difference polynomial
+`p_i(t) = x_i(t) - q_i(t)`. eLIQSS retains the LIQSS polynomial but uses the
+full bounded interval; CheQSS uses shifted Chebyshev polynomials. Their planned
+self-event is kept distinct from a guard event caused by another quantized
+state changing. This prevents harmless interior Chebyshev tangencies from
+becoming artificial events.
+
 ## CIFASIS engine assessment
 
 [`CIFASIS/qss-solver`](https://github.com/CIFASIS/qss-solver/tree/qss-solver-dev)
@@ -106,6 +121,11 @@ Primary algorithm references:
   for stiff ordinary differential equations](https://people.inf.ethz.ch/cellier/Pubs/Sim/simpat_13b.pdf).
 - F. Di Pietro et al., [Improving Linearly Implicit Quantized State System
   Methods](https://www.fceia.unr.edu.ar/~kofman/files/liqss_imp_v2.pdf).
+- M. Bergonzi et al., [On General Linearly Implicit Quantized State System
+  Methods](https://arxiv.org/abs/2512.17855) (2025 preprint).
+
+See [QSS_STATE_OF_THE_ART.md](QSS_STATE_OF_THE_ART.md) for the dated variant
+matrix, architecture separation, implementation status and work comparison.
 
 ## Limits
 
