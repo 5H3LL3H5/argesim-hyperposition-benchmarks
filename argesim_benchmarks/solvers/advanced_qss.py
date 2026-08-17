@@ -389,6 +389,224 @@ def _estimated_derivative_polynomial(
     return result
 
 
+def _first_positive_unbounded_root(coefficients: Sequence[float]) -> float:
+    """Return the first positive root of a low-degree polynomial.
+
+    The generalized LIQSS construction produces degree-three-or-lower
+    equations for a local segment horizon.  Coefficient-balance estimates and
+    geometric interval growth turn that unbounded problem into the finite
+    interval required by the shared, tangency-aware root isolator.  Starting
+    from the smallest balance scale avoids losing a small first root when a
+    later root is many orders of magnitude larger.
+    """
+
+    values = [float(value) for value in coefficients]
+    if not values or not all(math.isfinite(value) for value in values):
+        raise IntegrationError("LIQSS horizon polynomial is not finite")
+    if max(abs(value) for value in values) == 0.0:
+        raise IntegrationError("LIQSS horizon polynomial is identically zero")
+    while len(values) > 1 and values[-1] == 0.0:
+        values.pop()
+    while len(values) > 1 and values[0] == 0.0:
+        values.pop(0)
+    if len(values) <= 1:
+        raise IntegrationError("LIQSS horizon polynomial has no positive root")
+    if len(values) == 2:
+        root = -values[0] / values[1]
+        if not math.isfinite(root) or root <= 0.0:
+            raise IntegrationError("LIQSS horizon polynomial has no positive root")
+        return root
+
+    constant = abs(values[0])
+    balance_scales: list[float] = []
+    for power, coefficient in enumerate(values[1:], start=1):
+        if coefficient == 0.0:
+            continue
+        try:
+            balance = math.exp(
+                (math.log(constant) - math.log(abs(coefficient))) / power
+            )
+        except OverflowError:
+            balance = math.inf
+        if math.isfinite(balance) and balance > 0.0:
+            balance_scales.append(balance)
+    upper_bound = min(balance_scales, default=1.0)
+    for _ in range(1024):
+        root = first_positive_root(
+            values,
+            upper_bound,
+            time_tolerance=256.0 * sys.float_info.epsilon * upper_bound,
+        )
+        if math.isfinite(root) and root > 0.0:
+            return root
+        if upper_bound > sys.float_info.max / 2.0:
+            break
+        upper_bound *= 2.0
+    raise IntegrationError("LIQSS horizon polynomial has no positive root")
+
+
+def _generalised_segment_times(
+    family: str,
+    order: int,
+    diagonal: float,
+    derivative_ratio: float,
+) -> tuple[float, float]:
+    """Return ``(shape_time, event_horizon)`` for eLIQSS or CheQSS."""
+
+    if order == 1:
+        denominator = derivative_ratio + diagonal
+        if denominator <= 0.0:
+            raise IntegrationError("first-order LIQSS horizon is not positive")
+        shape_time = 1.0 / denominator
+        return shape_time, 2.0 * shape_time
+
+    if family == "extended":
+        if order == 2:
+            shape_time = _first_positive_unbounded_root(
+                (-2.0, 2.0 * diagonal, derivative_ratio - diagonal**2)
+            )
+        else:
+            shape_time = _first_positive_unbounded_root(
+                (
+                    -6.0,
+                    6.0 * diagonal,
+                    -3.0 * diagonal**2,
+                    derivative_ratio + diagonal**3,
+                )
+            )
+        return shape_time, 2.0 * shape_time
+
+    if order == 2:
+        horizon = _first_positive_unbounded_root(
+            (-16.0, 8.0 * diagonal, derivative_ratio - diagonal**2)
+        )
+    else:
+        horizon = _first_positive_unbounded_root(
+            (
+                -192.0,
+                96.0 * diagonal,
+                -18.0 * diagonal**2,
+                derivative_ratio + diagonal**3,
+            )
+        )
+    return horizon, horizon
+
+
+def _difference_coefficients(
+    family: str,
+    order: int,
+    signed_quantum: float,
+    shape_time: float,
+) -> list[float]:
+    """Build the local polynomial ``p = x - q`` in Taylor form."""
+
+    if family == "extended":
+        initial = ((-1.0) ** order) * signed_quantum
+        return [
+            initial
+            * math.comb(order, power)
+            * (-1.0 / shape_time) ** power
+            for power in range(order + 1)
+        ]
+    if order == 1:
+        return [
+            -signed_quantum,
+            2.0 * signed_quantum / shape_time,
+        ]
+    if order == 2:
+        return [
+            signed_quantum,
+            -8.0 * signed_quantum / shape_time,
+            8.0 * signed_quantum / shape_time**2,
+        ]
+    return [
+        -signed_quantum,
+        18.0 * signed_quantum / shape_time,
+        -48.0 * signed_quantum / shape_time**2,
+        32.0 * signed_quantum / shape_time**3,
+    ]
+
+
+def _generalised_liqss_candidate(
+    state_index: int,
+    x: Sequence[Sequence[float]],
+    q: Sequence[Sequence[float]],
+    rhs_coefficients: Sequence[Sequence[float]],
+    jacobian: Sequence[Sequence[float]],
+    quantum: float,
+    order: int,
+    family: str,
+) -> tuple[list[float], float]:
+    """Construct one published eLIQSS or CheQSS quantized segment."""
+
+    diagonal = jacobian[state_index][state_index]
+    inputs = _input_coefficients(
+        state_index, q, rhs_coefficients, jacobian, order
+    )
+
+    nth_derivative = x[state_index][0]
+    for derivative_order in range(1, order + 1):
+        nth_derivative = (
+            diagonal * nth_derivative
+            + math.factorial(derivative_order - 1)
+            * inputs[derivative_order - 1]
+        )
+    derivative_scale = max(
+        1.0,
+        abs(nth_derivative),
+        abs(diagonal) ** order * max(1.0, abs(x[state_index][0])),
+        *(abs(value) for value in inputs),
+    )
+    zero_floor = 512.0 * sys.float_info.epsilon * derivative_scale
+    diagonal_floor = 512.0 * sys.float_info.epsilon * max(1.0, abs(diagonal))
+
+    if abs(diagonal) > diagonal_floor:
+        equilibrium_bound = abs(diagonal) ** order * quantum
+        if abs(nth_derivative) <= equilibrium_bound * (1.0 + 1.0e-12):
+            difference = nth_derivative / diagonal**order
+            candidate = [x[state_index][0] - difference]
+            for power in range(1, order):
+                candidate.append(
+                    (
+                        diagonal * candidate[power - 1]
+                        + inputs[power - 1]
+                    )
+                    / power
+                )
+            if all(math.isfinite(value) for value in candidate):
+                return candidate, math.inf
+
+    if abs(nth_derivative) <= zero_floor:
+        candidate = [x[state_index][0]]
+        for power in range(1, order):
+            candidate.append(
+                (diagonal * candidate[power - 1] + inputs[power - 1])
+                / power
+            )
+        return candidate, math.inf
+
+    direction = 1.0 if nth_derivative > 0.0 else -1.0
+    derivative_ratio = abs(nth_derivative) / quantum
+    shape_time, horizon = _generalised_segment_times(
+        family, order, diagonal, derivative_ratio
+    )
+    difference = _difference_coefficients(
+        family, order, direction * quantum, shape_time
+    )
+    candidate = [x[state_index][0] - difference[0]]
+    for power in range(1, order):
+        state_coefficient = (
+            diagonal * candidate[power - 1] + inputs[power - 1]
+        ) / power
+        candidate.append(state_coefficient - difference[power])
+    if not all(math.isfinite(value) for value in (*candidate, horizon)):
+        raise IntegrationError("generalized LIQSS update produced non-finite values")
+    minimum_horizon = 1024.0 * sys.float_info.epsilon
+    if horizon <= minimum_horizon:
+        raise IntegrationError("generalized LIQSS update cannot advance time")
+    return candidate, horizon
+
+
 def _liqss_candidate(
     state_index: int,
     x: Sequence[Sequence[float]],
@@ -870,6 +1088,184 @@ def _liqss_family(
     )
 
 
+def _generalised_liqss_family(
+    problem: InitialValueProblem,
+    quantum: float | Sequence[float],
+    *,
+    order: int,
+    family: str,
+    method: str,
+    jacobian: Jacobian | None,
+    jacobian_step: float,
+    max_events: int,
+    simultaneous_tolerance: float,
+    derivative_step: float | None,
+) -> IntegrationResult:
+    """Integrate with the extended or Chebyshev LIQSS quantizer policy."""
+
+    if family not in {"extended", "chebyshev"}:
+        raise ValueError("unknown generalized LIQSS family")
+    event_limit, tolerance, finite_difference_step = _validate_common_controls(
+        problem,
+        max_events,
+        simultaneous_tolerance,
+        derivative_step,
+        method=method,
+    )
+    if isinstance(jacobian_step, bool):
+        raise TypeError("jacobian_step must be a real number")
+    jacobian_delta = float(jacobian_step)
+    if not math.isfinite(jacobian_delta) or jacobian_delta <= 0.0:
+        raise ValueError("jacobian_step must be positive and finite")
+
+    quanta = _quantum_vector(quantum, problem.dimension)
+    time = problem.t0
+    q, x, evaluations = _bootstrap_explicit_polynomials(
+        problem, time, problem.y0, order, finite_difference_step
+    )
+    x, rhs_coefficients, matrix, used = _linearised_dynamics(
+        problem,
+        time,
+        problem.y0,
+        q,
+        order,
+        finite_difference_step,
+        jacobian,
+        jacobian_delta,
+    )
+    evaluations += used
+
+    next_self = [math.inf] * problem.dimension
+    for index in range(problem.dimension):
+        candidate, horizon = _generalised_liqss_candidate(
+            index,
+            x,
+            q,
+            rhs_coefficients,
+            matrix,
+            quanta[index],
+            order,
+            family,
+        )
+        q[index] = candidate
+        if math.isfinite(horizon):
+            next_self[index] = time + horizon
+
+    x, rhs_coefficients, matrix, used = _linearised_dynamics(
+        problem,
+        time,
+        problem.y0,
+        q,
+        order,
+        finite_difference_step,
+        jacobian,
+        jacobian_delta,
+    )
+    evaluations += used
+
+    times = [time]
+    states = [tuple(problem.y0)]
+    events = 0
+    guard_multiplier = 1.001
+    while time < problem.t_bound:
+        if events >= event_limit:
+            raise IntegrationError(f"{method} exceeded max_events")
+        remaining = problem.t_bound - time
+        root_tolerance = tolerance * max(1.0, abs(time))
+        crossings: list[float] = []
+        for index in range(problem.dimension):
+            scheduled = next_self[index] - time
+            if scheduled < 0.0:
+                scheduled = 0.0
+            guard = _boundary_time(
+                x[index],
+                q[index],
+                guard_multiplier * quanta[index],
+                remaining,
+                root_tolerance,
+            )
+            crossings.append(min(scheduled, guard))
+
+        elapsed = min(crossings)
+        if math.isinf(elapsed) or elapsed >= remaining:
+            final_state = _finite_state(
+                [evaluate_polynomial(polynomial, remaining) for polynomial in x],
+                method=method,
+            )
+            time = problem.t_bound
+            times.append(time)
+            states.append(tuple(final_state))
+            break
+
+        x = [shift_polynomial(polynomial, elapsed) for polynomial in x]
+        q = [shift_polynomial(polynomial, elapsed) for polynomial in q]
+        time += elapsed
+        threshold = tolerance * max(1.0, abs(time), abs(elapsed))
+        due = [
+            index
+            for index, crossing in enumerate(crossings)
+            if abs(crossing - elapsed) <= threshold
+        ]
+        if not due:
+            raise IntegrationError(
+                f"{method} failed to identify the imminent quantizer"
+            )
+        if events + len(due) > event_limit:
+            raise IntegrationError(f"{method} exceeded max_events")
+
+        current_values = [polynomial[0] for polynomial in x]
+        x, rhs_coefficients, matrix, used = _linearised_dynamics(
+            problem,
+            time,
+            current_values,
+            q,
+            order,
+            finite_difference_step,
+            jacobian,
+            jacobian_delta,
+        )
+        evaluations += used
+        updates: dict[int, tuple[list[float], float]] = {}
+        for index in due:
+            updates[index] = _generalised_liqss_candidate(
+                index,
+                x,
+                q,
+                rhs_coefficients,
+                matrix,
+                quanta[index],
+                order,
+                family,
+            )
+        for index, (candidate, horizon) in updates.items():
+            q[index] = candidate
+            next_self[index] = (
+                time + horizon if math.isfinite(horizon) else math.inf
+            )
+
+        x, rhs_coefficients, matrix, used = _linearised_dynamics(
+            problem,
+            time,
+            current_values,
+            q,
+            order,
+            finite_difference_step,
+            jacobian,
+            jacobian_delta,
+        )
+        evaluations += used
+        events += len(due)
+        times.append(time)
+        states.append(tuple(current_values))
+
+    return IntegrationResult(
+        method,
+        tuple(times),
+        tuple(states),
+        SolverStats(events, 0, evaluations),
+    )
+
+
 def liqss1(
     problem: InitialValueProblem,
     quantum: float | Sequence[float],
@@ -945,6 +1341,162 @@ def liqss3(
         jacobian=jacobian,
         jacobian_step=jacobian_step,
         coupling_tolerance=0.0,
+        max_events=max_events,
+        simultaneous_tolerance=simultaneous_tolerance,
+        derivative_step=derivative_step,
+    )
+
+
+def eliqss1(
+    problem: InitialValueProblem,
+    quantum: float | Sequence[float],
+    *,
+    jacobian: Jacobian | None = None,
+    jacobian_step: float = math.sqrt(sys.float_info.epsilon),
+    max_events: int = 1_000_000,
+    simultaneous_tolerance: float = 1e-12,
+    derivative_step: float | None = None,
+) -> IntegrationResult:
+    """First-order extended LIQSS; equivalent to first-order CheQSS."""
+
+    return _generalised_liqss_family(
+        problem,
+        quantum,
+        order=1,
+        family="extended",
+        method="eliqss1",
+        jacobian=jacobian,
+        jacobian_step=jacobian_step,
+        max_events=max_events,
+        simultaneous_tolerance=simultaneous_tolerance,
+        derivative_step=derivative_step,
+    )
+
+
+def eliqss2(
+    problem: InitialValueProblem,
+    quantum: float | Sequence[float],
+    *,
+    jacobian: Jacobian | None = None,
+    jacobian_step: float = math.sqrt(sys.float_info.epsilon),
+    max_events: int = 1_000_000,
+    simultaneous_tolerance: float = 1e-12,
+    derivative_step: float | None = None,
+) -> IntegrationResult:
+    """Second-order extended LIQSS with the full-quantum update policy."""
+
+    return _generalised_liqss_family(
+        problem,
+        quantum,
+        order=2,
+        family="extended",
+        method="eliqss2",
+        jacobian=jacobian,
+        jacobian_step=jacobian_step,
+        max_events=max_events,
+        simultaneous_tolerance=simultaneous_tolerance,
+        derivative_step=derivative_step,
+    )
+
+
+def eliqss3(
+    problem: InitialValueProblem,
+    quantum: float | Sequence[float],
+    *,
+    jacobian: Jacobian | None = None,
+    jacobian_step: float = math.sqrt(sys.float_info.epsilon),
+    max_events: int = 1_000_000,
+    simultaneous_tolerance: float = 1e-12,
+    derivative_step: float | None = None,
+) -> IntegrationResult:
+    """Third-order extended LIQSS with the full-quantum update policy."""
+
+    return _generalised_liqss_family(
+        problem,
+        quantum,
+        order=3,
+        family="extended",
+        method="eliqss3",
+        jacobian=jacobian,
+        jacobian_step=jacobian_step,
+        max_events=max_events,
+        simultaneous_tolerance=simultaneous_tolerance,
+        derivative_step=derivative_step,
+    )
+
+
+def cheqss1(
+    problem: InitialValueProblem,
+    quantum: float | Sequence[float],
+    *,
+    jacobian: Jacobian | None = None,
+    jacobian_step: float = math.sqrt(sys.float_info.epsilon),
+    max_events: int = 1_000_000,
+    simultaneous_tolerance: float = 1e-12,
+    derivative_step: float | None = None,
+) -> IntegrationResult:
+    """First-order Chebyshev LIQSS; equivalent to first-order eLIQSS."""
+
+    return _generalised_liqss_family(
+        problem,
+        quantum,
+        order=1,
+        family="chebyshev",
+        method="cheqss1",
+        jacobian=jacobian,
+        jacobian_step=jacobian_step,
+        max_events=max_events,
+        simultaneous_tolerance=simultaneous_tolerance,
+        derivative_step=derivative_step,
+    )
+
+
+def cheqss2(
+    problem: InitialValueProblem,
+    quantum: float | Sequence[float],
+    *,
+    jacobian: Jacobian | None = None,
+    jacobian_step: float = math.sqrt(sys.float_info.epsilon),
+    max_events: int = 1_000_000,
+    simultaneous_tolerance: float = 1e-12,
+    derivative_step: float | None = None,
+) -> IntegrationResult:
+    """Second-order CheQSS with a minimax difference polynomial."""
+
+    return _generalised_liqss_family(
+        problem,
+        quantum,
+        order=2,
+        family="chebyshev",
+        method="cheqss2",
+        jacobian=jacobian,
+        jacobian_step=jacobian_step,
+        max_events=max_events,
+        simultaneous_tolerance=simultaneous_tolerance,
+        derivative_step=derivative_step,
+    )
+
+
+def cheqss3(
+    problem: InitialValueProblem,
+    quantum: float | Sequence[float],
+    *,
+    jacobian: Jacobian | None = None,
+    jacobian_step: float = math.sqrt(sys.float_info.epsilon),
+    max_events: int = 1_000_000,
+    simultaneous_tolerance: float = 1e-12,
+    derivative_step: float | None = None,
+) -> IntegrationResult:
+    """Third-order CheQSS with a minimax difference polynomial."""
+
+    return _generalised_liqss_family(
+        problem,
+        quantum,
+        order=3,
+        family="chebyshev",
+        method="cheqss3",
+        jacobian=jacobian,
+        jacobian_step=jacobian_step,
         max_events=max_events,
         simultaneous_tolerance=simultaneous_tolerance,
         derivative_step=derivative_step,
@@ -1035,13 +1587,31 @@ def mliqss3(
     )
 
 
-# Common engine spelling: first-order LIQSS/mLIQSS omit the numeric suffix.
+# Common engine spellings and the CIFASIS ``EQSS`` compatibility spelling.
 liqss = liqss1
 mliqss = mliqss1
+eliqss = eliqss1
+cheqss = cheqss1
+eqss = eliqss1
+eqss1 = eliqss1
+eqss2 = eliqss2
+eqss3 = eliqss3
 
 
 __all__ = [
     "Jacobian",
+    "cheqss",
+    "cheqss1",
+    "cheqss2",
+    "cheqss3",
+    "eliqss",
+    "eliqss1",
+    "eliqss2",
+    "eliqss3",
+    "eqss",
+    "eqss1",
+    "eqss2",
+    "eqss3",
     "liqss",
     "liqss1",
     "liqss2",

@@ -6,6 +6,12 @@ from collections.abc import Mapping, Sequence
 
 from .ivp import InitialValueProblem, IntegrationResult, SolverStats
 from .solvers import (
+    cheqss1,
+    cheqss2,
+    cheqss3,
+    eliqss1,
+    eliqss2,
+    eliqss3,
     euler,
     liqss1,
     liqss2,
@@ -49,18 +55,43 @@ _LIQSS_OPTIONS = frozenset(
         "derivative_step",
     }
 )
-for _method in ("liqss1", "liqss2", "liqss3"):
+for _method in (
+    "liqss1",
+    "liqss2",
+    "liqss3",
+    "eliqss1",
+    "eliqss2",
+    "eliqss3",
+    "cheqss1",
+    "cheqss2",
+    "cheqss3",
+):
     _ALLOWED_OPTIONS[_method] = _LIQSS_OPTIONS
 for _method in ("mliqss1", "mliqss2", "mliqss3"):
     _ALLOWED_OPTIONS[_method] = _LIQSS_OPTIONS | {"coupling_tolerance"}
 
-_ALIASES = {"liqss": "liqss1", "mliqss": "mliqss1"}
+_ALIASES = {
+    "liqss": "liqss1",
+    "mliqss": "mliqss1",
+    "eliqss": "eliqss1",
+    "eqss": "eliqss1",
+    "eqss1": "eliqss1",
+    "eqss2": "eliqss2",
+    "eqss3": "eliqss3",
+    "cheqss": "cheqss1",
+}
 _QUANTISED_METHODS = frozenset(_ALLOWED_OPTIONS) - {"euler", "rk4", "rk45"}
 _QUANTISED_SOLVERS = {
     "qss1": qss1,
     "qss2": qss2,
     "qss3": qss3,
     "qss4": qss4,
+    "eliqss1": eliqss1,
+    "eliqss2": eliqss2,
+    "eliqss3": eliqss3,
+    "cheqss1": cheqss1,
+    "cheqss2": cheqss2,
+    "cheqss3": cheqss3,
     "liqss1": liqss1,
     "liqss2": liqss2,
     "liqss3": liqss3,
