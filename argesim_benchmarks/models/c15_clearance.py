@@ -125,7 +125,19 @@ def solve_c15(
         "qss1": {"quantum": (1.0, 1.0)},
         "qss2": {"quantum": (1.0, 1.0)},
     }
-    if normalised not in {"qss1", "qss2"}:
+    quantized_methods = {
+        "qss1",
+        "qss2",
+        "qss3",
+        "qss4",
+        "liqss1",
+        "liqss2",
+        "liqss3",
+        "mliqss1",
+        "mliqss2",
+        "mliqss3",
+    }
+    if normalised not in quantized_methods:
         return solve_ivp(problem, normalised, options=options, defaults=defaults)
 
     # QSS requires autonomous ODEs, so expose the bolus switch as two segments.

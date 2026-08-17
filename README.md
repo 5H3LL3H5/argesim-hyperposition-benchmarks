@@ -31,6 +31,10 @@ See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status and
 - adaptive Dormand-Prince RK45 with a 5(4) embedded error estimate;
 - asynchronous first-order QSS for autonomous ODE systems;
 - asynchronous second-order QSS2 using a scaled directional finite difference;
+- dependency-free QSS3 and QSS4 polynomial quantizers with exact low-degree
+  event-root isolation;
+- LIQSS1/2/3 and mLIQSS1/2/3 for stiff autonomous ODEs, with an optional exact
+  Jacobian and a checked dense finite-difference fallback;
 - bracketed Brent root finding with explicit non-convergence reporting;
 - one strict solver dispatcher shared by model wrappers, including segmented
   non-autonomous inputs;
@@ -51,9 +55,13 @@ See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status and
   published `nu=0.06` parameter set;
 - executable benchmark modules at the evidence gates listed above.
 
-LIQSS, a general-purpose implicit DAE solver and a trained neural-operator
-backend remain explicit non-goals. C21 implements the benchmark's specified
-index-1 reduction; it is not silently presented as a general DAE facility.
+A general-purpose implicit DAE solver and a trained neural-operator backend
+remain explicit non-goals. LIQSS handles stiff ODE structure; it does not turn
+an algebraic system into an ODE. C21 implements the benchmark's specified
+index-1 reduction and is not silently presented as a general DAE facility.
+
+See [QSS_SOLVERS.md](QSS_SOLVERS.md) for solver selection, Jacobian contracts,
+the mLIQSS3 status and the assessment of the external CIFASIS engine.
 
 ## Run the tests
 
