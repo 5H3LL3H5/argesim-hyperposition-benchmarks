@@ -7,6 +7,7 @@ The status is an evidence gate, not a code-size label. `implemented` means all
 required task types have an executable path and tests; `validated` additionally
 requires an external analytical or published numeric reference.
 
+<!-- BEGIN GENERATED BENCHMARK STATUS -->
 | ID | Official benchmark | Model family | Status |
 |---|---|---|---|
 | C01 | Lithium-Cluster Dynamics | stiff ODE | implemented |
@@ -25,14 +26,15 @@ requires an external analytical or published numeric reference.
 | C14 | Supply Chain | discrete-time dynamics | implemented |
 | C15 | Clearance Identification | ODE identification | implemented |
 | C16 | Restaurant Business Dynamics | agent-based stochastic dynamics | implemented |
-| C17R | SIR Epidemic with CA and ODEs | ODE, FHP-I CA, interventions | implemented |
-| C18 | Identification of Nonlinear Dynamics | ARX, static/dynamic ANN | implemented |
+| C17R | SIR-type Epidemic with Cellular Automata and ODEs | ODE, FHP-I CA, interventions | implemented |
+| C18 | Identification of Nonlinear Dynamics - Neural Networks versus Transfer Functions | ARX, static/dynamic ANN | implemented |
 | C19R | Pollution in Groundwater Flow | PDE/distributed system | implemented |
 | C20 | Complex Production System | stochastic production DES | implemented |
 | C21 | State Events and Structural-dynamic Systems | ODE/DAE, hybrid | validated |
 | C22 | Non-standard Queuing Policies | DES/queueing | implemented |
 | CP1 | Parallel Simulation Techniques | ODE, MOL/PDE, parallel study | validated |
 | CP2 | Parallel and Distributed Simulation | Monte Carlo, LBM, implicit PDE/Fourier | validated |
+<!-- END GENERATED BENCHMARK STATUS -->
 
 ## Newly completed benchmark scope
 
