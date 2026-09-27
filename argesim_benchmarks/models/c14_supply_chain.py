@@ -204,20 +204,9 @@ class SupplyChainSim:
                 # find factory mapping
                 f_id = TASK_A_B_MAPPING[d_id][p]
 
-                # Minimum supply time logic could apply but definition says "regardless of strategy"
-                # actually definition says: "regardless of the ordering strategy used ... order 10 pieces ... to fill their storages"
-                # From table 3 or minimal? Let's use minimal for task c if requested, but table 3 is standard.
-                if self.task == "c":
-                    # Task c orders initial 10 from minimal time
-                    best_f = None
-                    min_time = float("inf")
-                    for cand_f in range(1, 5):
-                        if p in self.factories[cand_f].products:
-                            if SUPPLY_LEAD_TIMES[(d_id, cand_f)] < min_time:
-                                min_time = SUPPLY_LEAD_TIMES[(d_id, cand_f)]
-                                best_f = cand_f
-                    f_id = best_f
-
+                # The definition explicitly makes this day-8 initial fill
+                # independent of the later ordering strategy. Use Table 3
+                # mappings for A, B, and C alike.
                 # Force order? Definition says "If an order cannot be fulfilled, it is postponed"
                 # We will add it to backlog if it can't be fulfilled.
                 success = self.place_factory_order(d_id, f_id, p, 10, self.current_time)
