@@ -70,6 +70,25 @@ class C17Tests(unittest.TestCase):
         with self.assertRaises(ValueError):
             solve_c17("unsupported_solver")
 
+    def test_revised_lattice_identification_rounds_up(self) -> None:
+        self.assertEqual(c17_lattice_size(1000, 4.0), 15)
+
+    def test_discrete_hard_measure_rounds_affected_population_down(self) -> None:
+        intervention = C17Intervention(
+            0.0,
+            hard_measure=C17HardMeasure.VACCINATION,
+            hard_fraction=0.0002,
+        )
+        result = simulate_c17_ca(
+            steps=1,
+            seed=4,
+            intervention=intervention,
+        )
+        vaccination = next(
+            event for event in result.interventions if event.kind == "vaccination"
+        )
+        self.assertEqual(vaccination.affected, 1)
+
     def test_fhp_ca_identification_and_population_conservation(self) -> None:
         size = c17_lattice_size(10000, 4.0)
         self.assertEqual(size, 46)
