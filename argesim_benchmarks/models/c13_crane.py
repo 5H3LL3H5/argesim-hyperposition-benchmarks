@@ -197,7 +197,7 @@ def _mat_vec(m: Sequence[Sequence[float]], v: Sequence[float]) -> tuple[float, .
 
 
 class C13Controller:
-    """Discrete controller for C13 with 10 ms cycle time."""
+    """Discrete controller for C13 with 100 ms cycle time."""
 
     def __init__(self, with_diagnosis: bool = False):
         if not isinstance(with_diagnosis, bool):
