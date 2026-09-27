@@ -152,12 +152,17 @@ from .c12_collision.c12_collision_plots import (
 )
 from .c13_crane import (
     C13_INITIAL_STATE,
+    C13ControlledStudy,
     C13Parameters,
+    C13Controller,
+    c13_controlled_study,
     c13_linear_rhs,
     c13_nonlinear_rhs,
     c13_task_a,
     c13_task_b,
+    c13_task_b_study,
     c13_task_c,
+    c13_task_c_study,
 )
 from .c14_supply_chain import (
     c14_task_a1,
@@ -352,6 +357,11 @@ __all__ = [
     "C12Parameters",
     "C13_INITIAL_STATE",
     "C13Parameters",
+    "c13_task_c_study",
+    "c13_task_b_study",
+    "c13_controlled_study",
+    "C13Controller",
+    "C13ControlledStudy",
     "C15_INITIAL_STATE",
     "C15_MEASUREMENTS_CONC",
     "C15_MEASUREMENTS_TIME",
