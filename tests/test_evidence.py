@@ -12,6 +12,17 @@ from argesim_benchmarks.evidence import (
 
 
 class EvidenceTests(unittest.TestCase):
+    @patch("argesim_benchmarks.evidence.subprocess.run")
+    def test_git_sha_is_resolved_from_package_repository(self, run) -> None:
+        run.return_value.stdout = "abc123\n"
+        self.assertEqual(
+            __import__("argesim_benchmarks.evidence", fromlist=["_git_sha"])._git_sha(),
+            "abc123",
+        )
+        command = run.call_args.args[0]
+        self.assertEqual(command[:2], ("git", "-C"))
+        self.assertEqual(command[-2:], ("rev-parse", "HEAD"))
+
     def test_timing_summary_keeps_raw_samples(self) -> None:
         timing = TimingEvidence.from_samples((3.0, 1.0, 2.0), warmup=2)
         self.assertEqual(timing.samples, (3.0, 1.0, 2.0))
@@ -27,6 +38,10 @@ class EvidenceTests(unittest.TestCase):
             TimingEvidence.from_samples((-1.0,))
         with self.assertRaises(ValueError):
             TimingEvidence.from_samples((1.0,), unit="")
+        with self.assertRaises(ValueError):
+            TimingEvidence.from_samples((float("nan"),))
+        with self.assertRaises(ValueError):
+            TimingEvidence.from_samples((float("inf"),))
 
     def test_empty_timing_is_explicit(self) -> None:
         timing = TimingEvidence.from_samples(())
