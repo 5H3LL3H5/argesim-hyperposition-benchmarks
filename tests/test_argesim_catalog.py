@@ -67,7 +67,6 @@ class ArgesimCatalogTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             benchmark("C17")
 
-
     def test_coverage_document_is_generated_from_catalog(self) -> None:
         root = Path(__file__).resolve().parents[1]
         verify_coverage_document(root / "ARGESIM_COVERAGE.md")
