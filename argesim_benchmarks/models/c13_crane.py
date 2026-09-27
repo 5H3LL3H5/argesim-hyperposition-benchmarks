@@ -271,95 +271,16 @@ class C13Controller:
 
 
 def solve_c13_task_b_c(
-    # Warning: The system becomes extremely stiff when brake is active.
-    # Ideally an implicit solver should be used. Here we use an explicit solver
-    # but we limit max_step significantly to maintain stability.
     with_diagnosis: bool = False,
     options: Mapping[str, object] | None = None,
 ) -> tuple[IntegrationResult, tuple[float, ...], tuple[bool, ...]]:
-    """Solve task B or C with discrete controller and continuous dynamics."""
+    """Compatibility adapter returning the historical Task-B/C tuple."""
 
-    controller = C13Controller(with_diagnosis=with_diagnosis)
-
-    t = 0.0
-    t_end = 60.0
-    dt = controller.dt
-
-    state = C13_INITIAL_STATE
-
-    times = [0.0]
-    states = [state]
-    evals = 0
-    accepted = 0
-    rejected = 0
-
-    xl_traj = [state[0] + _C13_DEFAULT_PARAMETERS.r * math.sin(state[2])]
-    brake_traj = [controller.brake_active]
-    emergency_traj = [controller.emergency_mode]
-
-    while t < t_end - 1e-9:
-        if t >= 36.0:
-            PosDesired = 3.8
-        elif t >= 16.0:
-            PosDesired = -0.5
-        else:
-            PosDesired = 3.0
-
-        fd = 0.0
-        if 42.0 <= t < 43.0:
-            fd = -200.0
-        if with_diagnosis and 46.0 <= t < 47.0:
-            fd = 200.0
-
-        controller.step(state[0], PosDesired)
-
-        dc_val = (
-            _C13_DEFAULT_PARAMETERS.dcBrake
-            if controller.brake_active
-            else _C13_DEFAULT_PARAMETERS.dc
-        )
-
-        rhs = c13_nonlinear_rhs(
-            _C13_DEFAULT_PARAMETERS,
-            fd=fd,
-            fc_desired=controller.fc_desired,
-            dc_current=dc_val,
-        )
-
-        prob = InitialValueProblem(rhs, t, state, t + dt, name="ARGESIM-C13-controlled")
-        res = solve_ivp(
-            prob,
-            "rk45",
-            options=options,
-            defaults={
-                "rk45": {"max_step": 0.01, "rtol": 1.0e-6, "atol": 1.0e-9}
-            },
-        )
-        # Note: The original specification creates extreme stiffness when the brake is engaged (dcBrake=100000).
-        # An explicit solver like RK45 will limit max steps towards zero or require huge iteration counts.
-        # This implementation uses the explicit RK45 solver for demonstration, limiting max_step.
-        # A BDF or Radau implicit solver would be vastly more efficient here.
-
-        state = res.final_state
-        evals += res.stats.rhs_evaluations
-        accepted += res.stats.accepted_steps
-        rejected += res.stats.rejected_steps
-        t += dt
-
-        times.append(t)
-        states.append(state)
-        xl_traj.append(state[0] + _C13_DEFAULT_PARAMETERS.r * math.sin(state[2]))
-        brake_traj.append(controller.brake_active)
-        emergency_traj.append(controller.emergency_mode)
-
-    final_res = IntegrationResult(
-        method="rk45-dormand-prince-5(4)",
-        times=tuple(times),
-        states=tuple(states),
-        stats=SolverStats(accepted, rejected, evals),
+    study = c13_controlled_study(
+        with_diagnosis=with_diagnosis,
+        options=options,
     )
-
-    return final_res, tuple(xl_traj), tuple(brake_traj)
+    return study.result, study.load_position, study.brake_active
 
 
 def c13_controlled_study(
