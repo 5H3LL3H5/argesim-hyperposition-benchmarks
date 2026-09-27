@@ -239,10 +239,7 @@ def c17_lattice_size(population: int, contacts: float) -> int:
     if not math.isfinite(contacts) or contacts <= 0.0:
         raise ValueError("contacts must be positive and finite")
     estimate = math.sqrt((5.0 * (population - 1) + contacts) / (6.0 * contacts))
-    size = max(1, int(math.floor(estimate + 0.5)))
-    while 6 * size * size < population:
-        size += 1
-    return size
+    return max(1, math.ceil(estimate))
 
 
 def c17_contact_rate(population: int, lattice_size: int) -> float:
@@ -538,7 +535,7 @@ def simulate_c17_ca(
                     for index, value in enumerate(health)
                     if value == target_health
                 ]
-                number = int(round(intervention.hard_fraction * len(candidates)))
+                number = math.floor(intervention.hard_fraction * len(candidates))
                 infected_cells = {
                     cells[index]
                     for index, value in enumerate(health)
