@@ -378,6 +378,28 @@ def c13_controlled_study(
     )
 
 
+def c13_task_b_study(
+    options: Mapping[str, object] | None = None,
+) -> C13ControlledStudy:
+    """Run the complete controlled-system Task B output surface."""
+
+    return c13_controlled_study(
+        with_diagnosis=False,
+        options=options,
+    )
+
+
+def c13_task_c_study(
+    options: Mapping[str, object] | None = None,
+) -> C13ControlledStudy:
+    """Run the complete diagnosis Task C output surface."""
+
+    return c13_controlled_study(
+        with_diagnosis=True,
+        options=options,
+    )
+
+
 def c13_task_b() -> IntegrationResult:
     """Run task B and return the historical integration-result API."""
     return c13_controlled_study(with_diagnosis=False).result
