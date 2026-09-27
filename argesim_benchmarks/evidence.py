@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -13,6 +14,7 @@ from typing import Any, Mapping, Sequence
 
 
 SCHEMA_VERSION = 1
+TIMING_UNITS = frozenset({"seconds", "milliseconds", "microseconds", "nanoseconds"})
 
 
 def _git_sha() -> str | None:
@@ -21,8 +23,9 @@ def _git_sha() -> str | None:
         if value:
             return value
     try:
+        repository_root = Path(__file__).resolve().parents[1]
         completed = subprocess.run(
-            ("git", "rev-parse", "HEAD"),
+            ("git", "-C", str(repository_root), "rev-parse", "HEAD"),
             check=True,
             capture_output=True,
             text=True,
@@ -138,11 +141,12 @@ class TimingEvidence:
     ) -> "TimingEvidence":
         if warmup < 0:
             raise ValueError("warmup must be non-negative")
-        if not unit.strip():
-            raise ValueError("timing unit must be non-empty")
+        if unit not in TIMING_UNITS:
+            allowed = ", ".join(sorted(TIMING_UNITS))
+            raise ValueError(f"timing unit must be one of: {allowed}")
         values = tuple(float(value) for value in samples)
-        if any(value < 0.0 for value in values):
-            raise ValueError("timing samples must be non-negative")
+        if any(not math.isfinite(value) or value < 0.0 for value in values):
+            raise ValueError("timing samples must be finite and non-negative")
         if not values:
             return cls(
                 warmup=warmup,
