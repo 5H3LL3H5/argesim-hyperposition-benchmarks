@@ -283,6 +283,16 @@ def solve_c13_task_b_c(
     return study.result, study.load_position, study.brake_active
 
 
+def _c13_disturbance_force(time: float, *, with_diagnosis: bool) -> float:
+    """Return the revised C13 Task-B/C disturbance scenario."""
+
+    if 42.0 <= time < 43.0:
+        return -200.0
+    if with_diagnosis and 46.0 <= time < 47.0:
+        return 200.0
+    return 0.0
+
+
 def c13_controlled_study(
     *,
     with_diagnosis: bool,
@@ -310,11 +320,7 @@ def c13_controlled_study(
         else:
             pos_desired = 3.0
 
-        fd = 0.0
-        if 42.0 <= t < 43.0:
-            fd = -200.0
-        if with_diagnosis and 46.0 <= t < 47.0:
-            fd = 200.0
+        fd = _c13_disturbance_force(t, with_diagnosis=with_diagnosis)
 
         controller.step(state[0], pos_desired)
         dc_val = (
