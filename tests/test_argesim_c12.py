@@ -1,5 +1,10 @@
 import unittest
-from argesim_benchmarks.models.c12_collision import c12_task_a, c12_task_b, c12_task_c
+from argesim_benchmarks.models.c12_collision import (
+    C12_QUASI_PLASTIC_E,
+    c12_task_a,
+    c12_task_b,
+    c12_task_c,
+)
 
 class ArgesimC12Tests(unittest.TestCase):
     def test_c12_task_a(self) -> None:
@@ -11,14 +16,19 @@ class ArgesimC12Tests(unittest.TestCase):
         """
         result = c12_task_a()
         self.assertEqual(len(result["a2_elastic_velocities"]), 4)
-        self.assertEqual(len(result["a2_plastic_velocities"]), 4)
+        self.assertEqual(len(result["a2_quasi_plastic_velocities"]), 4)
+        self.assertEqual(result["a2_quasi_plastic_e"], C12_QUASI_PLASTIC_E)
         # Elastic: sphere 1 stops, others transfer momentum, sphere 4 gets all
         self.assertAlmostEqual(result["a2_elastic_velocities"][3], 1.0)
         self.assertAlmostEqual(result["a2_elastic_velocities"][0], 0.0)
-        # Quasi-plastic: the event cascade converges to the momentum-conserving
-        # common velocity; it is not collapsed artificially at t=0.
-        for velocity in result["a2_plastic_velocities"]:
-            self.assertAlmostEqual(velocity, 0.25, places=8)
+        # Quasi-plastic: the published e=0.18 event cascade converges closely
+        # to the common momentum-conserving velocity.
+        for velocity in result["a2_quasi_plastic_velocities"]:
+            self.assertAlmostEqual(velocity, 0.25, delta=1.0e-6)
+        self.assertEqual(
+            result["a2_plastic_velocities"],
+            result["a2_quasi_plastic_velocities"],
+        )
         first_collision = result["a1_trajectory"][1]
         self.assertAlmostEqual(first_collision[0], 1.0)
         self.assertEqual(result["a1_trajectory"][0][1], [1.0, 0.0, 0.0])
@@ -28,13 +38,14 @@ class ArgesimC12Tests(unittest.TestCase):
 
         Verifies the parameter sweep across e from 0.0 to 1.0. Checks that exactly
         3 collisions occur in the perfectly elastic case. Also verifies that the
-        plastic case resolves correctly to the expected merged state (3 logical hits).
+        quasi-plastic lower boundary resolves to the expected common velocity.
         """
         result = c12_task_b()
         self.assertIn("sweep", result)
         sweep = result["sweep"]
         self.assertEqual(sweep[1.0]["collisions"], 3)
-        self.assertGreater(sweep[0.0]["collisions"], 3)
+        self.assertEqual(min(sweep), C12_QUASI_PLASTIC_E)
+        self.assertGreater(sweep[C12_QUASI_PLASTIC_E]["collisions"], 3)
 
     def test_c12_task_c(self) -> None:
         """Validates Task C (Boundary value problem and stochastic study).
@@ -47,7 +58,7 @@ class ArgesimC12Tests(unittest.TestCase):
         result = c12_task_c()
         self.assertGreater(result["c1_target_e"], 0.0)
         self.assertLess(result["c1_target_e"], 1.0)
-        self.assertAlmostEqual(result["c1_target_e"], 0.587, places=3)
+        self.assertAlmostEqual(result["c1_target_e"], 0.5874011, delta=2.0e-6)
 
         self.assertGreater(result["c2_mean_v4"], 0.0)
         self.assertGreater(result["c2_std_v4"], 0.0)
