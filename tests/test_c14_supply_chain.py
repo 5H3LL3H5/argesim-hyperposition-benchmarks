@@ -57,6 +57,25 @@ class TestC14SupplyChain(unittest.TestCase):
         self.assertEqual(sim.distributors[4].wholesaler_demand[12], 1)
         self.assertEqual(sim.distributors[4].unfulfilled_wholesaler_demand[12], 1)
 
+    def test_day_eight_initial_fill_is_strategy_independent(self):
+        sim = SupplyChainSim("c", seed=1)
+        for factory in sim.factories.values():
+            factory.next_production_time = math.inf
+            for product in factory.stock:
+                factory.stock[product] = 100
+
+        sim.run(days=8)
+
+        d1_product1 = [
+            delivery
+            for delivery in sim.distributors[1].incoming_deliveries
+            if delivery[1] == 1
+        ]
+        self.assertEqual(
+            d1_product1,
+            [(168 * SECONDS_PER_HOUR + 16 * SECONDS_PER_HOUR, 1, 10)],
+        )
+
     def test_single_run_tasks_return_full_stock_vectors(self):
         for task in (c14_task_a1, c14_task_b1):
             history = task(seed=123)
