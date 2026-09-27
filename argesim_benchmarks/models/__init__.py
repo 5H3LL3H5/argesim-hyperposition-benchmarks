@@ -94,10 +94,15 @@ from .c07_constrained_pendulum import (
 from .c11_scara_robot import (
     C11_INITIAL_STATE,
     C11_TARGET_STATE,
+    C11CollisionStudy,
     C11Parameters,
+    C11TaskAReport,
     c11_problem,
     c11_inertia_terms,
     c11_rhs,
+    c11_task_a,
+    c11_task_b,
+    c11_task_c,
     solve_c11,
 )
 from .c21_state_events import (
@@ -339,6 +344,11 @@ __all__ = [
     "C11_INITIAL_STATE",
     "C11_TARGET_STATE",
     "C11Parameters",
+    "c11_task_c",
+    "c11_task_b",
+    "c11_task_a",
+    "C11TaskAReport",
+    "C11CollisionStudy",
     "C12Parameters",
     "C13_INITIAL_STATE",
     "C13Parameters",
