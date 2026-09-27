@@ -9,7 +9,6 @@ from pathlib import Path
 import platform
 import statistics
 import subprocess
-import sys
 from typing import Any, Mapping, Sequence
 
 
@@ -125,27 +124,46 @@ class WorkEvidence:
 class TimingEvidence:
     warmup: int
     samples: tuple[float, ...]
+    unit: str
     median: float | None
     iqr: float | None
 
     @classmethod
     def from_samples(
-        cls, samples: Sequence[float], *, warmup: int = 0
+        cls,
+        samples: Sequence[float],
+        *,
+        warmup: int = 0,
+        unit: str = "seconds",
     ) -> "TimingEvidence":
         if warmup < 0:
             raise ValueError("warmup must be non-negative")
+        if not unit.strip():
+            raise ValueError("timing unit must be non-empty")
         values = tuple(float(value) for value in samples)
         if any(value < 0.0 for value in values):
             raise ValueError("timing samples must be non-negative")
         if not values:
-            return cls(warmup=warmup, samples=(), median=None, iqr=None)
+            return cls(
+                warmup=warmup,
+                samples=(),
+                unit=unit,
+                median=None,
+                iqr=None,
+            )
         median = statistics.median(values)
         if len(values) < 2:
             iqr = 0.0
         else:
             quartiles = statistics.quantiles(values, n=4, method="inclusive")
             iqr = quartiles[2] - quartiles[0]
-        return cls(warmup=warmup, samples=values, median=median, iqr=iqr)
+        return cls(
+            warmup=warmup,
+            samples=values,
+            unit=unit,
+            median=median,
+            iqr=iqr,
+        )
 
 
 @dataclass(frozen=True)
