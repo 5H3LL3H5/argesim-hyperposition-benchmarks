@@ -18,12 +18,15 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual(timing.median, 2.0)
         self.assertEqual(timing.iqr, 1.0)
         self.assertEqual(timing.warmup, 2)
+        self.assertEqual(timing.unit, "seconds")
 
     def test_timing_summary_rejects_invalid_input(self) -> None:
         with self.assertRaises(ValueError):
             TimingEvidence.from_samples((1.0,), warmup=-1)
         with self.assertRaises(ValueError):
             TimingEvidence.from_samples((-1.0,))
+        with self.assertRaises(ValueError):
+            TimingEvidence.from_samples((1.0,), unit="")
 
     def test_empty_timing_is_explicit(self) -> None:
         timing = TimingEvidence.from_samples(())
@@ -62,14 +65,17 @@ class EvidenceTests(unittest.TestCase):
                 passed=True,
             ),
             work=WorkEvidence(accepted_steps=10, rejected_steps=1),
-            timing=TimingEvidence.from_samples((0.5, 0.4, 0.6), warmup=1),
+            timing=TimingEvidence.from_samples(
+                (500.0, 400.0, 600.0), warmup=1, unit="milliseconds"
+            ),
         )
         payload = json.loads(record.to_json())
         self.assertEqual(payload["schema_version"], 1)
         self.assertEqual(payload["implementation_git_sha"], "deadbeef")
         self.assertEqual(payload["benchmark"], "CP2")
         self.assertEqual(payload["environment"]["cpu_affinity"], [0, 1])
-        self.assertEqual(payload["timing"]["samples"], [0.5, 0.4, 0.6])
+        self.assertEqual(payload["timing"]["samples"], [500.0, 400.0, 600.0])
+        self.assertEqual(payload["timing"]["unit"], "milliseconds")
         self.assertTrue(payload["validation"]["passed"])
 
 
