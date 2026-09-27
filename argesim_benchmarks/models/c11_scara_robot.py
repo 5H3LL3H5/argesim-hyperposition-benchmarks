@@ -92,6 +92,27 @@ C11_INITIAL_STATE: Vector = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 C11_TARGET_STATE = (2.0, 2.0, 0.3)
 
 
+@dataclass(frozen=True)
+class C11TaskAReport:
+    """Machine-readable description of the implemented Task-A formulation."""
+
+    formulation: str
+    state_order: tuple[str, ...]
+    inertia_terms: tuple[float, float, float]
+    state_dimension: int
+    algebraic_state_dimension: int
+
+
+@dataclass(frozen=True)
+class C11CollisionStudy:
+    """Task-C trajectory together with the quantities requested for plotting."""
+
+    result: IntegrationResult
+    x_tip: tuple[float, ...]
+    vertical_clearance: tuple[float, ...]
+    obstacle_x: tuple[float, ...]
+
+
 def c11_inertia_terms(
     parameters: C11Parameters = _C11_DEFAULT_PARAMETERS,
 ) -> tuple[float, float, float]:
@@ -257,3 +278,81 @@ def solve_c11(
         "qss2": {"quantum": default_quantum},
     }
     return solve_ivp(problem, method, options=options, defaults=defaults)
+
+def c11_task_a(
+    parameters: C11Parameters = _C11_DEFAULT_PARAMETERS,
+) -> C11TaskAReport:
+    """Describe the explicit first-order state-space formulation used here."""
+
+    return C11TaskAReport(
+        formulation="explicit-first-order-state-space",
+        state_order=(
+            "q1",
+            "q2",
+            "q3",
+            "dq1",
+            "dq2",
+            "dq3",
+            "I1",
+            "I2",
+            "I3",
+        ),
+        inertia_terms=c11_inertia_terms(parameters),
+        state_dimension=9,
+        algebraic_state_dimension=0,
+    )
+
+
+def c11_task_b(
+    method: str = "rk45",
+    *,
+    parameters: C11Parameters = _C11_DEFAULT_PARAMETERS,
+    initial_state: Sequence[float] = C11_INITIAL_STATE,
+    t_bound: float = 2.0,
+    options: Mapping[str, object] | None = None,
+) -> IntegrationResult:
+    """Run the point-to-point PD-control experiment without collision avoidance."""
+
+    return solve_c11(
+        method,
+        parameters=parameters,
+        initial_state=initial_state,
+        t_bound=t_bound,
+        task="b",
+        options=options,
+    )
+
+
+def c11_task_c(
+    method: str = "rk45",
+    *,
+    parameters: C11Parameters = _C11_DEFAULT_PARAMETERS,
+    initial_state: Sequence[float] = C11_INITIAL_STATE,
+    t_bound: float = 2.0,
+    options: Mapping[str, object] | None = None,
+) -> C11CollisionStudy:
+    """Run collision avoidance and expose the official diagnostic trajectories."""
+
+    result = solve_c11(
+        method,
+        parameters=parameters,
+        initial_state=initial_state,
+        t_bound=t_bound,
+        task="c",
+        options=options,
+    )
+    x_tip = tuple(
+        parameters.L1 * math.cos(state[0])
+        + parameters.L2 * math.cos(state[0] + state[1])
+        for state in result.states
+    )
+    vertical_clearance = tuple(
+        state[2] - parameters.h_obs for state in result.states
+    )
+    obstacle_x = tuple(parameters.x_obs for _ in result.times)
+    return C11CollisionStudy(
+        result=result,
+        x_tip=x_tip,
+        vertical_clearance=vertical_clearance,
+        obstacle_x=obstacle_x,
+    )
