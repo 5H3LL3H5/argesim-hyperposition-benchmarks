@@ -28,6 +28,8 @@ class UnifiedRunnerTests(unittest.TestCase):
             contract("C17")
         with self.assertRaises(BenchmarkTaskError):
             contract("C01").task("missing")
+        with self.assertRaises(BenchmarkTaskError):
+            contract("C01").run("A", {"unknown_argument": 1})
 
     def test_to_jsonable_handles_nested_reference_types(self) -> None:
         self.assertEqual(
@@ -48,6 +50,14 @@ class UnifiedRunnerTests(unittest.TestCase):
         description = json.loads(output.getvalue())
         self.assertEqual(description["id"], "CP2")
         self.assertEqual(description["tasks"], ["1", "2", "3"])
+
+    def test_cli_run_uses_same_task_contract(self) -> None:
+        output = StringIO()
+        with redirect_stdout(output):
+            self.assertEqual(main(["run", "C01", "C"]), 0)
+        result = json.loads(output.getvalue())
+        self.assertEqual(set(result), {"bombardment", "no-bombardment"})
+        self.assertEqual(len(result["bombardment"]), 3)
 
 
 if __name__ == "__main__":
