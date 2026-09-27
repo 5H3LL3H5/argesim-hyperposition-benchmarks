@@ -335,8 +335,8 @@ def c10_task_a() -> TaskAResult:
 
 def c10_task_b(runs: int = 50) -> TaskBResult:
     """Task ii: Performing at least 50 simulation runs (ending in a deadlock)."""
-    if isinstance(runs, bool) or not isinstance(runs, int) or runs <= 0:
-        raise ValueError("runs must be a positive integer")
+    if isinstance(runs, bool) or not isinstance(runs, int) or runs < 50:
+        raise ValueError("runs must be an integer of at least 50")
     termination_times = []
     for i in range(runs):
         res = run_c10_simulation(seed=i)
