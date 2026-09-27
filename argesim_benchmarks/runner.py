@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import asdict, is_dataclass
 from enum import Enum
 import importlib
+import inspect
 from typing import Any, Mapping
 
 from .catalog import BENCHMARKS, benchmark as catalog_benchmark
@@ -52,12 +53,14 @@ class BenchmarkContract:
 
     def run(self, name: str, kwargs: Mapping[str, Any] | None = None) -> Any:
         function = self.task(name).resolve()
+        arguments = dict(kwargs or {})
         try:
-            return function(**dict(kwargs or {}))
+            inspect.signature(function).bind(**arguments)
         except TypeError as exc:
             raise BenchmarkTaskError(
                 f"invalid arguments for {self.identifier}:{name}: {exc}"
             ) from exc
+        return function(**arguments)
 
 
 def _m(function: str) -> str:
@@ -154,7 +157,8 @@ def to_jsonable(value: Any) -> Any:
     if isinstance(value, (tuple, list)):
         return [to_jsonable(item) for item in value]
     if isinstance(value, set):
-        return sorted(to_jsonable(item) for item in value)
+        converted = [to_jsonable(item) for item in value]
+        return sorted(converted, key=repr)
     if isinstance(value, (str, int, float, bool)) or value is None:
         return value
     if hasattr(value, "__dict__"):
