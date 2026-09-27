@@ -34,11 +34,11 @@ in shared runtime code.
 | C10 | implemented | Concurrency/deadlock tasks execute independently of C04, including the specified simultaneous-access priority and the Task-B minimum of 50 deadlock runs. |
 | C11 | implemented | Official inertia coupling and nine-state explicit formulation execute; Tasks A/B/C are separate entry points and Task C returns x_tip, q3-h_obs and x_obs diagnostic trajectories. No implicit-formulation performance comparison is claimed. |
 | C12 | implemented | Deterministic, boundary-value and stochastic collision tasks execute; the published quasi-plastic e=0.18 boundary and C1 restitution root are regression-checked. |
-| C13 | implemented | Nonlinear/linear crane and embedded-control tasks execute. |
-| C14 | implemented | All discrete supply-chain tasks execute. |
+| C13 | implemented | Revised nonlinear/linear crane and embedded-control tasks execute with d_l=0.001 kg/s, 0.1 s digital-controller sampling, the specified Task-B/Task-C disturbance sequences, and complete load/brake/emergency diagnostic trajectories. |
+| C14 | implemented | All discrete supply-chain tasks execute; the day-8 ten-piece initial fill is strategy-independent as specified, with strategy-specific ordering starting only afterwards. |
 | C15 | implemented | Identification/Monte Carlo tasks and explicit bolus segments execute. |
 | C16 | implemented | Agent/DES restaurant tasks preserve deterministic microstep ordering. |
-| C17R | implemented | Task-1 sweeps, ODE/CA comparison, FHP-I collisions, homogeneous random movement, persistent soft measures and repeatable hard/spatial threshold interventions execute through classical or QSS2 hybrid paths. |
+| C17R | implemented | Task-1 sweeps, ODE/CA comparison, FHP-I collisions, homogeneous random movement, persistent soft measures and repeatable hard/spatial threshold interventions execute through classical or QSS2 hybrid paths; revised lattice sizing uses ceiling and discrete hard-measure populations are rounded down. |
 | C18 | implemented | ARX, parallel residual ANN and free-running dynamic ANN execute and return models, trajectories, correlations and error trends on user data or provenance-labelled digitizations. Original measurement files remain an external-data gap, not a hidden substitution. |
 | C19R | implemented | Three MOL tasks and analytical checks execute. |
 | C20 | implemented | All 3x4 scenarios and 5000-order defaults execute with alternative process plans, workstation generations, constraints, repairs and median/IQR output. Source/inter-operation/sink transport uses a dimensioned two-ring network, 1 m/s belt speed, finite 1 m-part capacity and PSc4 failures/rerouting. |
