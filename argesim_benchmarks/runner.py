@@ -89,7 +89,11 @@ _TASKS: dict[str, dict[str, str]] = {
         "main": _m("solve_c11"),
     },
     "C12": {"A": _m("c12_task_a"), "B": _m("c12_task_b"), "C": _m("c12_task_c")},
-    "C13": {"A": _m("c13_task_a"), "B": _m("c13_task_b"), "C": _m("c13_task_c")},
+    "C13": {
+        "A": _m("c13_task_a"),
+        "B": _m("c13_task_b_study"),
+        "C": _m("c13_task_c_study"),
+    },
     "C14": {
         "A1": _m("c14_task_a1"),
         "A2": _m("c14_task_a2"),
