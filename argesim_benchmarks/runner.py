@@ -82,7 +82,12 @@ _TASKS: dict[str, dict[str, str]] = {
     "C08": {"replication": _m("run_c08_replication"), "C": _m("c08_task_c")},
     "C09": {"run": _m("c09_run_benchmark"), "validate": _m("c09_validate")},
     "C10": {"A": _m("c10_task_a"), "B": _m("c10_task_b")},
-    "C11": {"main": _m("solve_c11")},
+    "C11": {
+        "A": _m("c11_task_a"),
+        "B": _m("c11_task_b"),
+        "C": _m("c11_task_c"),
+        "main": _m("solve_c11"),
+    },
     "C12": {"A": _m("c12_task_a"), "B": _m("c12_task_b"), "C": _m("c12_task_c")},
     "C13": {"A": _m("c13_task_a"), "B": _m("c13_task_b"), "C": _m("c13_task_c")},
     "C14": {
