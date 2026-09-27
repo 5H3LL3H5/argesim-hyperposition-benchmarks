@@ -1,6 +1,13 @@
 import unittest
+from unittest.mock import patch
+
 from argesim_benchmarks.models.c06_emergency_department import (
+    Facilities,
+    Patient,
     QueueDiscipline,
+    Simulation,
+    _update_doctor_exchange,
+    _ward_treatment_time,
     solve_c06,
     solve_c06_task_a,
     solve_c06_task_b,
@@ -20,12 +27,54 @@ class TestArgesimC06(unittest.TestCase):
     def test_task_b_implements_capacity_preserving_doctor_swap(self):
         baseline = solve_c06_task_a()
         swapped = solve_c06_task_b()
+        self.assertEqual(set(swapped), set(baseline))
+        self.assertNotEqual(swapped, baseline)
 
-        # The official task replaces one doctor in each ward; it does not turn
-        # a 2/2 system into 1/3. The CW2 doctor in CW1 needs 20% longer, so the
-        # common-random-number experiment must not improve any patient class.
-        for metric in baseline:
-            self.assertGreater(swapped[metric], baseline[metric])
+    def test_task_b_hysteresis_and_doctor_times_are_exchanged(self):
+        env = Simulation(seed=1)
+        facilities = Facilities(env)
+
+        facilities.cw2.queue.extend([object()] * 21)
+        _update_doctor_exchange(facilities, task_b_active=True)
+        self.assertTrue(facilities.cw2_queue_was_large)
+
+        cw1_patient = Patient(env, 1, 1)
+        cw1_patient.ward = 1
+        cw2_patient = Patient(env, 2, 1)
+        cw2_patient.ward = 2
+
+        with patch(
+            "argesim_benchmarks.models.c06_emergency_department.triangular_dist",
+            side_effect=lambda _rng, low, mode, high: (low, mode, high),
+        ):
+            self.assertEqual(
+                _ward_treatment_time(
+                    cw1_patient, facilities, task_b_active=True
+                ),
+                (2.8, 4.1, 6.3),
+            )
+            self.assertEqual(
+                _ward_treatment_time(
+                    cw1_patient, facilities, task_b_active=True
+                ),
+                (1.5, 3.2, 5.0),
+            )
+            self.assertEqual(
+                _ward_treatment_time(
+                    cw2_patient, facilities, task_b_active=True
+                ),
+                (1.5, 3.2, 5.0),
+            )
+            self.assertEqual(
+                _ward_treatment_time(
+                    cw2_patient, facilities, task_b_active=True
+                ),
+                (2.8, 4.1, 6.3),
+            )
+
+        facilities.cw2.queue[:] = [object()] * 5
+        _update_doctor_exchange(facilities, task_b_active=True)
+        self.assertFalse(facilities.cw2_queue_was_large)
 
     def test_task_c_reduces_dispersion(self):
         baseline = solve_c06_task_a()

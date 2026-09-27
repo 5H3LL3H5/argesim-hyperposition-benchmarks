@@ -3,6 +3,8 @@ from argesim_benchmarks import (
     C03Parameters,
     c03_rhs,
     c03_task_a,
+    c03_task_b,
+    c03_task_c,
     solve_c03,
 )
 
@@ -63,6 +65,27 @@ class C03Tests(unittest.TestCase):
         self.assertGreater(len(result.times), 2)
         self.assertAlmostEqual(result.times[-1], 1.0e-6)
         self.assertIn(C03Parameters().trf, result.times)
+
+    def test_task_b_contract_reaches_official_horizon(self) -> None:
+        result = c03_task_b(
+            options={"rtol": 1.0e-4, "atol": 1.0e-6, "max_step": 1.0e-6}
+        )
+        self.assertAlmostEqual(result.final_time, 100.0e-6)
+        self.assertEqual(result.times[0], 0.0)
+        self.assertIn(C03Parameters().period * 0.5, result.times)
+
+    def test_task_c_uses_official_rise_fall_parameter_study(self) -> None:
+        initial_state = (1.0, 2.0, 3.0, 4.0)
+        values = (1.0e-15, 1.0e-9)
+        results = c03_task_c(
+            values,
+            initial_state=initial_state,
+            options={"rtol": 1.0e-4, "atol": 1.0e-6, "max_step": 1.0e-6},
+        )
+        self.assertEqual(tuple(results), values)
+        for result in results.values():
+            self.assertEqual(result.states[0], initial_state)
+            self.assertAlmostEqual(result.final_time, 9.0e-6)
 
     def test_invalid_parameters_are_rejected(self) -> None:
         with self.assertRaises(ValueError):
