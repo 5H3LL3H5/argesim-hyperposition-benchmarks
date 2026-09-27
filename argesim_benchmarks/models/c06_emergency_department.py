@@ -129,6 +129,7 @@ class Facilities:
 
         self.cw2_queue_was_large = False
         self.cw1_transferred_doctor_turn = False
+        self.cw2_transferred_doctor_turn = False
 
 
 def exp_dist(env: Simulation, mean: float) -> float:
@@ -155,6 +156,64 @@ class Patient:
         self.ward = 0  # 1 for CW1, 2 for CW2
 
 
+
+_CW1_TREATMENT = (1.5, 3.2, 5.0)
+_CW2_TREATMENT = (2.8, 4.1, 6.3)
+
+
+def _update_doctor_exchange(
+    facilities: Facilities,
+    *,
+    task_b_active: bool,
+) -> None:
+    """Apply the Task-B hysteresis for exchanging one CW1 and CW2 doctor."""
+
+    if not task_b_active:
+        return
+    cw2_queue_len = len(facilities.cw2.queue)
+    if not facilities.cw2_queue_was_large and cw2_queue_len > 20:
+        facilities.cw2_queue_was_large = True
+    elif facilities.cw2_queue_was_large and cw2_queue_len <= 5:
+        facilities.cw2_queue_was_large = False
+
+
+def _ward_treatment_time(
+    patient: Patient,
+    facilities: Facilities,
+    *,
+    task_b_active: bool,
+) -> float:
+    """Sample the treating doctor's service time for the selected casualty ward.
+
+    Task B exchanges one of the two doctors between CW1 and CW2 while the
+    CW2 queue is above the hysteresis threshold.  The ward capacities remain
+    unchanged; one alternating service in each ward therefore uses the other
+    ward's doctor-time distribution.
+    """
+
+    if patient.ward not in (1, 2):
+        raise ValueError("patient must be assigned to CW1 or CW2 before treatment")
+
+    local = _CW1_TREATMENT if patient.ward == 1 else _CW2_TREATMENT
+    if not task_b_active or not facilities.cw2_queue_was_large:
+        return triangular_dist(patient.rng, *local)
+
+    if patient.ward == 1:
+        facilities.cw1_transferred_doctor_turn = (
+            not facilities.cw1_transferred_doctor_turn
+        )
+        transferred = facilities.cw1_transferred_doctor_turn
+        distribution = _CW2_TREATMENT if transferred else _CW1_TREATMENT
+    else:
+        facilities.cw2_transferred_doctor_turn = (
+            not facilities.cw2_transferred_doctor_turn
+        )
+        transferred = facilities.cw2_transferred_doctor_turn
+        distribution = _CW1_TREATMENT if transferred else _CW2_TREATMENT
+
+    return triangular_dist(patient.rng, *distribution)
+
+
 def process_patient(
     env: Simulation,
     patient: Patient,
@@ -164,27 +223,14 @@ def process_patient(
 ) -> None:
 
     def check_doctor_swap() -> None:
-        if not task_b_active:
-            return
-        # Task B swaps one CW1 doctor with one CW2 doctor. Both wards keep
-        # two doctors; only the transferred CW2 doctor is slower on CW1 cases.
-        cw2_queue_len = len(facilities.cw2.queue)
-        if not facilities.cw2_queue_was_large and cw2_queue_len > 20:
-            facilities.cw2_queue_was_large = True
-        elif facilities.cw2_queue_was_large and cw2_queue_len <= 5:
-            facilities.cw2_queue_was_large = False
+        _update_doctor_exchange(facilities, task_b_active=task_b_active)
 
     def ward_treatment_time() -> float:
-        if patient.ward == 1:
-            delay = triangular_dist(patient.rng, 1.5, 3.2, 5.0)
-            if task_b_active and facilities.cw2_queue_was_large:
-                facilities.cw1_transferred_doctor_turn = (
-                    not facilities.cw1_transferred_doctor_turn
-                )
-                if facilities.cw1_transferred_doctor_turn:
-                    delay *= 1.2
-            return delay
-        return triangular_dist(patient.rng, 2.8, 4.1, 6.3)
+        return _ward_treatment_time(
+            patient,
+            facilities,
+            task_b_active=task_b_active,
+        )
 
     req_reg = facilities.registration.request(priority=0)
 
