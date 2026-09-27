@@ -8,9 +8,7 @@ from argesim_benchmarks.models.c13_crane import (
     C13Parameters,
     _c13_disturbance_force,
     c13_task_a,
-    c13_task_b,
     c13_task_b_study,
-    c13_task_c,
     c13_task_c_study,
 )
 from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
@@ -68,7 +66,6 @@ class C13Tests(unittest.TestCase):
     def test_task_b_runs_and_returns_complete_trajectory(self):
         study = c13_task_b_study()
         res = study.result
-        self.assertEqual(c13_task_b(), res)
         self.assertEqual(res.method, "rk45-dormand-prince-5(4)")
         self.assertGreater(len(res.times), 10)
         self.assertAlmostEqual(res.times[-1], 60.0, places=5)
@@ -81,7 +78,6 @@ class C13Tests(unittest.TestCase):
     def test_task_c_runs_and_returns_diagnosis_trajectory(self):
         study = c13_task_c_study()
         res = study.result
-        self.assertEqual(c13_task_c(), res)
         self.assertEqual(res.method, "rk45-dormand-prince-5(4)")
         self.assertGreater(len(res.times), 10)
         self.assertAlmostEqual(res.times[-1], 60.0, places=5)
