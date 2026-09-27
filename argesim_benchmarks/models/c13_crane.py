@@ -23,7 +23,7 @@ class C13Parameters:
     g: float = 9.81
     dc: float = 0.5
     dcBrake: float = 100000.0
-    dl: float = 0.01
+    dl: float = 0.001
 
     def __post_init__(self) -> None:
         if any(
@@ -34,6 +34,16 @@ class C13Parameters:
 
 
 _C13_DEFAULT_PARAMETERS = C13Parameters()
+
+
+@dataclass(frozen=True)
+class C13ControlledStudy:
+    """Controlled C13 trajectory including all quantities requested by the tasks."""
+
+    result: IntegrationResult
+    load_position: tuple[float, ...]
+    brake_active: tuple[bool, ...]
+    emergency_stop: tuple[bool, ...]
 
 
 def c13_linear_rhs(
@@ -202,7 +212,7 @@ class C13Controller:
         self.V = 109.5
         self.ForceMax = 160.0
         self.BrakeCondition = 0.01
-        self.dt = 0.01
+        self.dt = 0.1
         self.MaxPos = 5.0
         self.MinPos = -5.0
         self.BrakeTimeout = 3.0
@@ -285,6 +295,7 @@ def solve_c13_task_b_c(
 
     xl_traj = [state[0] + _C13_DEFAULT_PARAMETERS.r * math.sin(state[2])]
     brake_traj = [controller.brake_active]
+    emergency_traj = [controller.emergency_mode]
 
     while t < t_end - 1e-9:
         if t >= 36.0:
@@ -296,7 +307,9 @@ def solve_c13_task_b_c(
 
         fd = 0.0
         if 42.0 <= t < 43.0:
-            fd = 200.0 if with_diagnosis else -200.0
+            fd = -200.0
+        if with_diagnosis and 46.0 <= t < 47.0:
+            fd = 200.0
 
         controller.step(state[0], PosDesired)
 
@@ -337,6 +350,7 @@ def solve_c13_task_b_c(
         states.append(state)
         xl_traj.append(state[0] + _C13_DEFAULT_PARAMETERS.r * math.sin(state[2]))
         brake_traj.append(controller.brake_active)
+        emergency_traj.append(controller.emergency_mode)
 
     final_res = IntegrationResult(
         method="rk45-dormand-prince-5(4)",
@@ -348,11 +362,100 @@ def solve_c13_task_b_c(
     return final_res, tuple(xl_traj), tuple(brake_traj)
 
 
+def c13_controlled_study(
+    *,
+    with_diagnosis: bool,
+    options: Mapping[str, object] | None = None,
+) -> C13ControlledStudy:
+    """Run Task B/C and retain the complete documented output surface."""
+
+    controller = C13Controller(with_diagnosis=with_diagnosis)
+    t = 0.0
+    t_end = 60.0
+    dt = controller.dt
+    state = C13_INITIAL_STATE
+    times = [0.0]
+    states = [state]
+    xl_traj = [state[0] + _C13_DEFAULT_PARAMETERS.r * math.sin(state[2])]
+    brake_traj = [controller.brake_active]
+    emergency_traj = [controller.emergency_mode]
+    evals = accepted = rejected = 0
+
+    while t < t_end - 1.0e-9:
+        if t >= 36.0:
+            pos_desired = 3.8
+        elif t >= 16.0:
+            pos_desired = -0.5
+        else:
+            pos_desired = 3.0
+
+        fd = 0.0
+        if 42.0 <= t < 43.0:
+            fd = -200.0
+        if with_diagnosis and 46.0 <= t < 47.0:
+            fd = 200.0
+
+        controller.step(state[0], pos_desired)
+        dc_val = (
+            _C13_DEFAULT_PARAMETERS.dcBrake
+            if controller.brake_active
+            else _C13_DEFAULT_PARAMETERS.dc
+        )
+        rhs = c13_nonlinear_rhs(
+            _C13_DEFAULT_PARAMETERS,
+            fd=fd,
+            fc_desired=controller.fc_desired,
+            dc_current=dc_val,
+        )
+        prob = InitialValueProblem(
+            rhs,
+            t,
+            state,
+            t + dt,
+            name="ARGESIM-C13-controlled",
+        )
+        res = solve_ivp(
+            prob,
+            "rk45",
+            options=options,
+            defaults={
+                "rk45": {
+                    "max_step": min(0.01, dt),
+                    "rtol": 1.0e-6,
+                    "atol": 1.0e-9,
+                }
+            },
+        )
+        state = res.final_state
+        evals += res.stats.rhs_evaluations
+        accepted += res.stats.accepted_steps
+        rejected += res.stats.rejected_steps
+        t += dt
+        times.append(t)
+        states.append(state)
+        xl_traj.append(state[0] + _C13_DEFAULT_PARAMETERS.r * math.sin(state[2]))
+        brake_traj.append(controller.brake_active)
+        emergency_traj.append(controller.emergency_mode)
+
+    result = IntegrationResult(
+        method="rk45-dormand-prince-5(4)",
+        times=tuple(times),
+        states=tuple(states),
+        stats=SolverStats(accepted, rejected, evals),
+    )
+    return C13ControlledStudy(
+        result=result,
+        load_position=tuple(xl_traj),
+        brake_active=tuple(brake_traj),
+        emergency_stop=tuple(emergency_traj),
+    )
+
+
 def c13_task_b() -> IntegrationResult:
-    """Run task B and return integration result."""
-    return solve_c13_task_b_c(with_diagnosis=False)[0]
+    """Run task B and return the historical integration-result API."""
+    return c13_controlled_study(with_diagnosis=False).result
 
 
 def c13_task_c() -> IntegrationResult:
-    """Run task C and return integration result."""
-    return solve_c13_task_b_c(with_diagnosis=True)[0]
+    """Run task C and return the historical integration-result API."""
+    return c13_controlled_study(with_diagnosis=True).result
