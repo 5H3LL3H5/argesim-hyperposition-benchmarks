@@ -4,6 +4,9 @@ version = "0.6.0"
 description = "Scientific ARGESIM rebuild with NSA-DEVS and numerical references"
 requires-python = ">=3.10"
 
+[project.scripts]
+argesim = "argesim_benchmarks.cli:main"
+
 [tool.ruff]
 line-length = 88
 target-version = "py310"
