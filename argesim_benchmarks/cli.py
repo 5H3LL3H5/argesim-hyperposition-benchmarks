@@ -48,7 +48,7 @@ def main(argv: list[str] | None = None) -> int:
             }
             for entry in BENCHMARKS
         ]
-        print(json.dumps(payload, indent=2))
+        print(json.dumps(payload, indent=2, allow_nan=False))
         return 0
 
     try:
@@ -66,7 +66,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0
 
         result = benchmark_contract.run(arguments.task, arguments.kwargs_json)
-        print(json.dumps(to_jsonable(result), indent=2, sort_keys=True))
+        print(json.dumps(to_jsonable(result), indent=2, sort_keys=True, allow_nan=False))
         return 0
     except BenchmarkTaskError as exc:
         raise SystemExit(str(exc)) from exc
