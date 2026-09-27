@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Regenerate generated status sections from the canonical catalog."""
 
+import sys
 from pathlib import Path
-
-from argesim_benchmarks.status_docs import render_coverage_document
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from argesim_benchmarks.status_docs import render_coverage_document
 COVERAGE = ROOT / "ARGESIM_COVERAGE.md"
 
 
