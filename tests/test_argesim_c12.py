@@ -36,7 +36,7 @@ class ArgesimC12Tests(unittest.TestCase):
     def test_c12_task_b(self) -> None:
         """Validates Task B (Number of collisions and final velocities over e).
 
-        Verifies the parameter sweep across e from 0.0 to 1.0. Checks that exactly
+        Verifies the parameter sweep from e=1.0 down to the quasi-plastic boundary.\n        Checks that exactly
         3 collisions occur in the perfectly elastic case. Also verifies that the
         quasi-plastic lower boundary resolves to the expected common velocity.
         """
