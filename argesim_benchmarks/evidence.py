@@ -19,10 +19,9 @@ TIMING_UNITS = frozenset({"seconds", "milliseconds", "microseconds", "nanosecond
 
 
 def _git_sha() -> str | None:
-    for key in ("ARGESIM_GIT_SHA", "GITHUB_SHA"):
-        value = os.environ.get(key)
-        if value:
-            return value
+    explicit_sha = os.environ.get("ARGESIM_GIT_SHA")
+    if explicit_sha:
+        return explicit_sha
     try:
         repository_root = Path(__file__).resolve().parents[1]
         completed = subprocess.run(
