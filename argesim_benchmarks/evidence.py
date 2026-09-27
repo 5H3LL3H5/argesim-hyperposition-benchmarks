@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
+from datetime import datetime, timezone
 import json
 import math
 import os
@@ -114,6 +115,13 @@ class ValidationEvidence:
     tolerance: float | None = None
     passed: bool | None = None
 
+    def __post_init__(self) -> None:
+        for name, value in (("error", self.error), ("tolerance", self.tolerance)):
+            if value is not None and not math.isfinite(value):
+                raise ValueError(f"validation {name} must be finite")
+        if self.tolerance is not None and self.tolerance < 0.0:
+            raise ValueError("validation tolerance must be non-negative")
+
 
 @dataclass(frozen=True)
 class WorkEvidence:
@@ -121,6 +129,16 @@ class WorkEvidence:
     events: int | None = None
     accepted_steps: int | None = None
     rejected_steps: int | None = None
+
+    def __post_init__(self) -> None:
+        for name, value in (
+            ("rhs_evaluations", self.rhs_evaluations),
+            ("events", self.events),
+            ("accepted_steps", self.accepted_steps),
+            ("rejected_steps", self.rejected_steps),
+        ):
+            if value is not None and value < 0:
+                raise ValueError(f"work counter {name} must be non-negative")
 
 
 @dataclass(frozen=True)
@@ -180,6 +198,9 @@ class ExperimentRecord:
     seed: int | None = None
     benchmark_revision: str | None = None
     implementation_git_sha: str | None = None
+    captured_at_utc: str = field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
     environment: RuntimeEnvironment = field(
         default_factory=RuntimeEnvironment.capture
     )
