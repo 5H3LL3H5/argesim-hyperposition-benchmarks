@@ -66,7 +66,6 @@ class C03Tests(unittest.TestCase):
         self.assertAlmostEqual(result.times[-1], 1.0e-6)
         self.assertIn(C03Parameters().trf, result.times)
 
-
     def test_task_b_contract_reaches_official_horizon(self) -> None:
         result = c03_task_b(
             options={"rtol": 1.0e-4, "atol": 1.0e-6, "max_step": 1.0e-6}
