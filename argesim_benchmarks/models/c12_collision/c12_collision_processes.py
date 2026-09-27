@@ -45,6 +45,7 @@ class C12Parameters:
 
 
 _C12_DEFAULT_PARAMETERS = C12Parameters()
+C12_QUASI_PLASTIC_E = 0.18
 
 def _simulate(
     params: C12Parameters = _C12_DEFAULT_PARAMETERS,
@@ -117,21 +118,27 @@ def c12_task_a() -> dict[str, object]:
 
     # a2
     _, v_elastic, _, _ = _simulate(C12Parameters(e=1.0, v0=1.0))
-    _, v_plastic, _, _ = _simulate(C12Parameters(e=0.0, v0=1.0))
+    _, v_quasi_plastic, _, _ = _simulate(
+        C12Parameters(e=C12_QUASI_PLASTIC_E, v0=1.0)
+    )
 
     return {
         "a1_trajectory": history,
         "a2_elastic_velocities": v_elastic,
-        "a2_plastic_velocities": v_plastic,
+        "a2_quasi_plastic_e": C12_QUASI_PLASTIC_E,
+        "a2_quasi_plastic_velocities": v_quasi_plastic,
+        # Compatibility alias retained for callers of the historical API.
+        "a2_plastic_velocities": v_quasi_plastic,
     }
 
 def c12_task_b() -> dict[str, object]:
     """Task B: Number of collisions and final velocities over e."""
-    steps = 100
     results = {}
-    for i in range(steps + 1):
-        e_val = 1.0 - i / steps
-        cols, v, t, _ = _simulate(C12Parameters(e=e_val, v0=1.0))
+    step = 0.01
+    count = int(round((1.0 - C12_QUASI_PLASTIC_E) / step))
+    for i in range(count + 1):
+        e_val = round(1.0 - i * step, 2)
+        cols, v, _t, _ = _simulate(C12Parameters(e=e_val, v0=1.0))
         results[e_val] = {"collisions": cols, "velocities": v}
     return {"sweep": results}
 
