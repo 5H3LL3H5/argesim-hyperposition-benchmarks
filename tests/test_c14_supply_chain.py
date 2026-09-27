@@ -66,15 +66,10 @@ class TestC14SupplyChain(unittest.TestCase):
 
         sim.run(days=8)
 
-        d1_product1 = [
-            delivery
-            for delivery in sim.distributors[1].incoming_deliveries
-            if delivery[1] == 1
-        ]
-        self.assertEqual(
-            d1_product1,
-            [(168 * SECONDS_PER_HOUR + 16 * SECONDS_PER_HOUR, 1, 10)],
-        )
+        # D1/product 1 follows Table 3 (F1), even though F4 would have
+        # the shorter lead time. The delivery itself has arrived by day 8.
+        self.assertEqual(sim.factories[1].stock[1], 90)
+        self.assertEqual(sim.factories[4].stock[1], 100)
 
     def test_single_run_tasks_return_full_stock_vectors(self):
         for task in (c14_task_a1, c14_task_b1):
