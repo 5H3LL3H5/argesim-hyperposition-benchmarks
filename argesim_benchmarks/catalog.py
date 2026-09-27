@@ -38,6 +38,7 @@ class BenchmarkDefinition:
     title: str
     model_classes: tuple[ModelClass, ...]
     primary_source: str
+    coverage_family: str
     status: BenchmarkStatus = BenchmarkStatus.CATALOGED
 
 
@@ -51,6 +52,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Lithium-Cluster Dynamics",
         (ModelClass.STIFF_ODE,),
         _source("c01"),
+        "stiff ODE",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -58,6 +60,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Flexible Assembly System",
         (ModelClass.DES,),
         _source("c02"),
+        "DES",
         BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
@@ -65,6 +68,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Class-E Amplifier",
         (ModelClass.ODE, ModelClass.HYBRID),
         _source("c03"),
+        "ODE, hybrid",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -72,6 +76,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Dining Philosophers",
         (ModelClass.DES,),
         _source("c04"),
+        "DES/concurrency",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -79,6 +84,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Two State Model",
         (ModelClass.STIFF_ODE, ModelClass.HYBRID),
         _source("c05"),
+        "stiff ODE, state events",
         BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
@@ -86,6 +92,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Emergency Department - Follow-up Treatment",
         (ModelClass.DES, ModelClass.STOCHASTIC),
         _source("c06"),
+        "stochastic DES",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -93,6 +100,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Constrained Pendulum",
         (ModelClass.ODE, ModelClass.HYBRID),
         _source("c07"),
+        "hybrid mechanics",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -100,6 +108,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Canal-and-Lock System",
         (ModelClass.DES, ModelClass.STOCHASTIC),
         _source("c08"),
+        "stochastic DES",
         BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
@@ -107,6 +116,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Fuzzy Control of a Two Tank System",
         (ModelClass.ODE, ModelClass.HYBRID, ModelClass.DISCRETE_TIME),
         _source("c09"),
+        "nonlinear ODE, sampled fuzzy control",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -114,6 +124,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Dining Philosophers II",
         (ModelClass.DES,),
         _source("c10"),
+        "DES/concurrency",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -121,6 +132,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "SCARA Robot",
         (ModelClass.DAE, ModelClass.HYBRID),
         _source("c11"),
+        "DAE, hybrid control",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -128,6 +140,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Collision Processes in Rows of Spheres",
         (ModelClass.ODE, ModelClass.HYBRID, ModelClass.STOCHASTIC),
         _source("c12"),
+        "hybrid mechanics, stochastic study",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -135,6 +148,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Crane and Embedded Control",
         (ModelClass.DAE, ModelClass.HYBRID, ModelClass.DISCRETE_TIME),
         _source("c13"),
+        "DAE, sampled control",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -142,6 +156,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Supply Chain",
         (ModelClass.DISCRETE_TIME,),
         _source("c14"),
+        "discrete-time dynamics",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -149,6 +164,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Clearance Identification",
         (ModelClass.ODE, ModelClass.IDENTIFICATION, ModelClass.STOCHASTIC),
         _source("c15"),
+        "ODE identification",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -156,6 +172,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Restaurant Business Dynamics",
         (ModelClass.DES, ModelClass.AGENT_BASED, ModelClass.STOCHASTIC),
         _source("c16"),
+        "agent-based stochastic dynamics",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -168,6 +185,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
             ModelClass.IDENTIFICATION,
         ),
         _source("c17r"),
+        "ODE, FHP-I CA, interventions",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -180,6 +198,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
             ModelClass.MACHINE_LEARNING,
         ),
         _source("c18"),
+        "ARX, static/dynamic ANN",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -187,6 +206,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Pollution in Groundwater Flow",
         (ModelClass.PDE, ModelClass.HYBRID),
         _source("c19"),
+        "PDE/distributed system",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -194,6 +214,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Complex Production System",
         (ModelClass.DES,),
         _source("c20"),
+        "stochastic production DES",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -201,6 +222,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "State Events and Structural-dynamic Systems",
         (ModelClass.ODE, ModelClass.DAE, ModelClass.HYBRID),
         _source("c21"),
+        "ODE/DAE, hybrid",
         BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
@@ -208,6 +230,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Non-standard Queuing Policies",
         (ModelClass.DES,),
         _source("c22"),
+        "DES/queueing",
         BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
@@ -215,6 +238,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         "Parallel Simulation Techniques",
         (ModelClass.ODE, ModelClass.PDE, ModelClass.PARALLEL),
         _source("cp"),
+        "ODE, MOL/PDE, parallel study",
         BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
@@ -228,6 +252,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
             ModelClass.STOCHASTIC,
         ),
         _source("cp"),
+        "Monte Carlo, LBM, implicit PDE/Fourier",
         BenchmarkStatus.VALIDATED,
     ),
 )

@@ -1,6 +1,8 @@
 import unittest
+from pathlib import Path
 
 from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus, benchmark
+from argesim_benchmarks.status_docs import verify_coverage_document
 
 
 class ArgesimCatalogTests(unittest.TestCase):
@@ -64,6 +66,13 @@ class ArgesimCatalogTests(unittest.TestCase):
         self.assertEqual(benchmark("C22").title, "Non-standard Queuing Policies")
         with self.assertRaises(KeyError):
             benchmark("C17")
+
+    def test_coverage_document_is_generated_from_catalog(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        verify_coverage_document(root / "ARGESIM_COVERAGE.md")
+
+    def test_coverage_families_are_present(self) -> None:
+        self.assertTrue(all(entry.coverage_family.strip() for entry in BENCHMARKS))
 
 
 if __name__ == "__main__":
