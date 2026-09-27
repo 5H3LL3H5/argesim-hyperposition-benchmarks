@@ -28,12 +28,12 @@ in shared runtime code.
 | C04 | implemented | Unsafe, waiter, cleaning/ordered-fork and put-back strategies execute with seeded replications, resource-cycle deadlock detection, per-philosopher meals/fairness and complete state-time accounting. C10 remains a separate definition. |
 | C05 | validated | Closed-form modes reproduce five default events, all 62 Task-D events and both published endpoints. |
 | C06 | implemented | Shared DES scheduling executes all three tasks; Task B preserves two-doctor ward capacity and models the specified hysteretic CW1/CW2 doctor-time exchange by alternating the two service distributions in each aggregate two-server ward. Persistent individual server identity is not claimed. |
-| C07 | implemented | Explicit hybrid modes share classical/QSS event handling. |
+| C07 | implemented | Explicit hybrid modes share classical/QSS event handling; Task C reproduces the published initial angular velocity for the -pi/2 target within declared tolerance. |
 | C08 | validated | Independent table/replication checks pass. |
 | C09 | implemented | I-FC1, I-FC2 and P-FC surfaces plus the complete 60,000 s experiment execute. The published Simulink `change-level` convention gives final I-FC errors below 0.02 mm and disturbance rejection; the contradictory literal printed error difference remains selectable. |
-| C10 | implemented | Concurrency/deadlock tasks execute independently of C04. |
-| C11 | implemented | Official inertia coupling and nine-state solver options execute. |
-| C12 | implemented | Deterministic, boundary-value and stochastic collision tasks execute. |
+| C10 | implemented | Concurrency/deadlock tasks execute independently of C04, including the specified simultaneous-access priority and the Task-B minimum of 50 deadlock runs. |
+| C11 | implemented | Official inertia coupling and nine-state explicit formulation execute; Tasks A/B/C are separate entry points and Task C returns x_tip, q3-h_obs and x_obs diagnostic trajectories. No implicit-formulation performance comparison is claimed. |
+| C12 | implemented | Deterministic, boundary-value and stochastic collision tasks execute; the published quasi-plastic e=0.18 boundary and C1 restitution root are regression-checked. |
 | C13 | implemented | Nonlinear/linear crane and embedded-control tasks execute. |
 | C14 | implemented | All discrete supply-chain tasks execute. |
 | C15 | implemented | Identification/Monte Carlo tasks and explicit bolus segments execute. |

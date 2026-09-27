@@ -5,6 +5,7 @@ from .c12_collision_plots import (
 )
 from .c12_collision_processes import (
     C12Parameters,
+    C12_QUASI_PLASTIC_E,
     c12_task_a,
     c12_task_b,
     c12_task_c,
@@ -12,6 +13,7 @@ from .c12_collision_processes import (
 
 __all__ = [
     "C12Parameters",
+    "C12_QUASI_PLASTIC_E",
     "c12_task_a",
     "c12_task_b",
     "c12_task_c",

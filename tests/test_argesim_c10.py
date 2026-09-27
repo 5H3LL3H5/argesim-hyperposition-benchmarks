@@ -31,7 +31,7 @@ class C10Tests(unittest.TestCase):
         self.assertLessEqual(result.overall_chopstick_utilisation, 1.0)
 
     def test_c10_task_b_runs_multiple_simulations_and_returns_bounds(self) -> None:
-        runs = 5
+        runs = 50
         result = c10_task_b(runs)
         self.assertIsInstance(result, TaskBResult)
         self.assertEqual(result.runs_count, runs)
@@ -71,7 +71,7 @@ class C10Tests(unittest.TestCase):
         self.assertEqual(traces[0].winner_id, 0)
 
     def test_task_b_rejects_empty_run_set(self) -> None:
-        for value in (0, -1, 1.5, True):
+        for value in (0, 1, 49, -1, 1.5, True):
             with self.subTest(value=value):
                 with self.assertRaises(ValueError):
                     c10_task_b(value)

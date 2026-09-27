@@ -80,3 +80,4 @@ class TestC07(unittest.TestCase):
         v = c07_task_c()
         self.assertTrue(math.isfinite(v))
         self.assertLess(v, 0.0)
+        self.assertAlmostEqual(v, -2.1846992883, delta=2.0e-8)
