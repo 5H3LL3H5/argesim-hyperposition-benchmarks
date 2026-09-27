@@ -1,5 +1,7 @@
 import json
 import unittest
+
+import argesim_benchmarks.evidence as evidence
 from unittest.mock import patch
 
 from argesim_benchmarks.evidence import (
@@ -15,10 +17,7 @@ class EvidenceTests(unittest.TestCase):
     @patch("argesim_benchmarks.evidence.subprocess.run")
     def test_git_sha_is_resolved_from_package_repository(self, run) -> None:
         run.return_value.stdout = "abc123\n"
-        self.assertEqual(
-            __import__("argesim_benchmarks.evidence", fromlist=["_git_sha"])._git_sha(),
-            "abc123",
-        )
+        self.assertEqual(evidence._git_sha(), "abc123")
         command = run.call_args.args[0]
         self.assertEqual(command[:2], ("git", "-C"))
         self.assertEqual(command[-2:], ("rev-parse", "HEAD"))
@@ -47,6 +46,14 @@ class EvidenceTests(unittest.TestCase):
         timing = TimingEvidence.from_samples(())
         self.assertIsNone(timing.median)
         self.assertIsNone(timing.iqr)
+
+    def test_validation_and_work_reject_impossible_numbers(self) -> None:
+        with self.assertRaises(ValueError):
+            ValidationEvidence(error=float("nan"))
+        with self.assertRaises(ValueError):
+            ValidationEvidence(tolerance=-1.0)
+        with self.assertRaises(ValueError):
+            WorkEvidence(events=-1)
 
     @patch("argesim_benchmarks.evidence._git_sha", return_value="deadbeef")
     @patch(
@@ -88,6 +95,7 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual(payload["schema_version"], 1)
         self.assertEqual(payload["implementation_git_sha"], "deadbeef")
         self.assertEqual(payload["benchmark"], "CP2")
+        self.assertTrue(payload["captured_at_utc"].endswith("+00:00"))
         self.assertEqual(payload["environment"]["cpu_affinity"], [0, 1])
         self.assertEqual(payload["timing"]["samples"], [500.0, 400.0, 600.0])
         self.assertEqual(payload["timing"]["unit"], "milliseconds")
