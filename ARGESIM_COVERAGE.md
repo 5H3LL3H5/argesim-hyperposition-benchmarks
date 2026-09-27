@@ -59,7 +59,15 @@ requires an external analytical or published numeric reference.
 | Hybrid runtime | directed guards, cubic-Hermite localized transitions, optional fixed-step endpoint semantics, dimension-changing reset | classical and QSS backends |
 | DES/NSA-DEVS | deterministic callbacks and restricted superdense time | reusable scheduler plus adapters |
 | Parallel runtime | ordered reusable thread/process workers and timing parity | CP1/CP2 |
-| LIQSS | linearly implicit quantized integration | not implemented |
+| QSS1/QSS2 | autonomous explicit ODE/MOL and hybrid continuous modes | separate implementations, tested |
+| QSS3/QSS4 | higher-order smooth autonomous ODE/MOL sections | implemented and tested |
+| CQSS1 | centered first-order quantization for suitable Hamiltonian systems | implemented and tested |
+| LIQSS1/2/3 | linearly implicit quantized integration for stiff autonomous ODEs | implemented and tested |
+| mLIQSS1/2 | coupled stiff state pairs | implemented and tested |
+| mLIQSS3 | higher-order coupled stiff state-pair reference extension | implemented, experimental |
+| eLIQSS1/2/3 | generalized linearly implicit quantized integration | implemented and tested |
+| CheQSS1/2/3 | Chebyshev generalized linearly implicit quantized integration | implemented and tested |
+| LIQSS2-BDF | mixed state/time integration with LIQSS2 and BDF1/2 | implemented and tested |
 | General implicit DAE | arbitrary high-index DAE | not implemented; C21 uses its specified index-1 reduction |
 
 ## Evidence boundaries
