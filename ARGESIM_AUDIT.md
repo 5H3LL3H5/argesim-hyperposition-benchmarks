@@ -27,7 +27,7 @@ in shared runtime code.
 | C03 | implemented | Switch boundaries are aligned; non-autonomous QSS misuse is rejected. |
 | C04 | implemented | Unsafe, waiter, cleaning/ordered-fork and put-back strategies execute with seeded replications, resource-cycle deadlock detection, per-philosopher meals/fairness and complete state-time accounting. C10 remains a separate definition. |
 | C05 | validated | Closed-form modes reproduce five default events, all 62 Task-D events and both published endpoints. |
-| C06 | implemented | Shared DES scheduling and doctor-transfer semantics execute. |
+| C06 | implemented | Shared DES scheduling executes all three tasks; Task B uses the specified hysteretic exchange of one CW1 and one CW2 doctor's treatment-time distributions while preserving two-doctor ward capacity. |
 | C07 | implemented | Explicit hybrid modes share classical/QSS event handling. |
 | C08 | validated | Independent table/replication checks pass. |
 | C09 | implemented | I-FC1, I-FC2 and P-FC surfaces plus the complete 60,000 s experiment execute. The published Simulink `change-level` convention gives final I-FC errors below 0.02 mm and disturbance rejection; the contradictory literal printed error difference remains selectable. |
