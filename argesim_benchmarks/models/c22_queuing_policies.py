@@ -489,7 +489,9 @@ class ClassingSystem(BaseDevsSystem):
         self.n_c = 5
         self.t_c = 10.0
         self.current_class = 0
-        self.det_class_counter = self.n_c
+        # C22 §4 assigns deterministic classes 1, 2, ..., nC, 1, ...
+        # The operator itself calls them in the opposite direction.
+        self.det_class_counter = 1
         self.operator_started = False
 
         self.schedule_event(self.t_c, 6, "operator")
@@ -515,9 +517,7 @@ class ClassingSystem(BaseDevsSystem):
             c = self.rng.randint(1, self.n_c)
         else:
             c = self.det_class_counter
-            self.det_class_counter -= 1
-            if self.det_class_counter == 0:
-                self.det_class_counter = self.n_c
+            self.det_class_counter = c % self.n_c + 1
 
         entity = Entity(
             id=self.entities_created,

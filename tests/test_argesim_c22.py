@@ -7,6 +7,7 @@ from argesim_benchmarks.models import (
     c22_jockeying,
     c22_reneging,
 )
+from argesim_benchmarks.models.c22_queuing_policies import ClassingSystem
 
 
 class C22Tests(unittest.TestCase):
@@ -67,6 +68,19 @@ class C22Tests(unittest.TestCase):
         # Classes should have non-negative avg wait times
         for c in range(1, 6):
             self.assertGreaterEqual(det_stats[c]["avg"], 0.0)
+
+    def test_c22_deterministic_classes_ascend_before_first_operator_call(self) -> None:
+        # C22 §4: assignment starts at 1; calls start at 5 after t=10.
+        system = ClassingSystem("classing")
+        from argesim_benchmarks.models.c22_queuing_policies import DevsSimulator
+
+        simulator = DevsSimulator(system)
+        simulator.scheduler.run(9.0)
+        assigned = {entity.id: entity.entity_class for queue in system.queues for entity in queue}
+        self.assertEqual([assigned[i] for i in range(1, 10)], [1, 2, 3, 4, 5, 1, 2, 3, 4])
+        self.assertEqual(system.entities_terminated, 0)
+        simulator.scheduler.run(10.0)
+        self.assertEqual(system.current_class, 5)
 
 
 if __name__ == "__main__":
