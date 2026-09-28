@@ -1,7 +1,21 @@
 # ARGESIM implementation audit
 
-Audit date: 2026-08-17. Definitions were checked against the official catalog
-and primary papers. Gate meanings are defined in `METHODOLOGY.md`.
+Baseline audit date: 2026-08-17. Focused C19R–C22 delta review: 2026-09-28.
+Definitions were checked against the official catalog and primary papers.
+Gate meanings are defined in `METHODOLOGY.md`.
+
+## Focused C19R–C22 review (2026-09-28)
+
+This review used qualified `main` after PR #43 as its starting point and
+reviewed each subsequent change against the latest merged `main`. It did not
+repeat the previously qualified infrastructure review.
+
+| Case | Primary material compared | Concrete result and remaining evidence |
+|---|---|---|
+| C19R | Revised definition, Tasks A–C | Task B ended at day 100 while Task C requests the continuous reference through day 150; the horizon was aligned. The source-cell approximation and finite-domain boundary choices still require numerical comparison at the prescribed sections; the horizon change alone is not validation. |
+| C20 | Definition, workstation/product tables 1–2, operational scenario table 3 and failure table 5 | The checked workstation generations, process plans, order distributions and failure parameters agree with the implementation. Full-scale output has no archived independent quantitative comparison; the conveyor remains the documented reference-control abstraction. No code change was justified by this limited check. |
+| C21 | Definition and published Modelica solution | Existing tests cover published pendulum stop time 7.5962714 s and three kick cases, plus event/dynamic contact checks. This is limited validation of these variants and tolerances, not a claim of complete solver or DAE validation. No new mismatch was established in the checked material. |
+| C22 | Definition, sections 1, 2–4 and task list | Corrected ascending deterministic entity classes independently of descending operator calls, and exposed the deterministic lqt(t) step trace required for plotting. The tests verify the class prefix, first call, trace endpoints and integral; published queue traces and stochastic statistics have not been independently matched. |
 
 ## Runtime separation
 
