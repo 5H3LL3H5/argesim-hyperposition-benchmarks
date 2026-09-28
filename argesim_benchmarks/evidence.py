@@ -224,6 +224,7 @@ class ExperimentRecord:
         validation: ValidationEvidence | None = None,
         work: WorkEvidence | None = None,
         timing: TimingEvidence | None = None,
+        environment: RuntimeEnvironment | None = None,
     ) -> "ExperimentRecord":
         return cls(
             benchmark=benchmark,
@@ -234,6 +235,7 @@ class ExperimentRecord:
             seed=seed,
             benchmark_revision=benchmark_revision,
             implementation_git_sha=_git_sha(),
+            environment=environment if environment is not None else RuntimeEnvironment.capture(),
             validation=validation or ValidationEvidence(),
             work=work or WorkEvidence(),
             timing=timing or TimingEvidence.from_samples(()),
