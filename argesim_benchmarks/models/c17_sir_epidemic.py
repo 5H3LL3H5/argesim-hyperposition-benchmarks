@@ -761,7 +761,8 @@ def c17_task1_parameter_study(
             ("beta-low", C17Parameters(beta=0.05), (9500, 500, 0)),
             ("beta-high", C17Parameters(beta=0.2), (9500, 500, 0)),
             ("alpha-C-low", C17Parameters(c=2.0, alpha=0.2), (9500, 500, 0)),
-            ("alpha-C-high", C17Parameters(c=8.0, alpha=0.05), (9500, 500, 0)),
+            # At most six particles occupy each hexagonal cell, hence C < 5.
+            ("alpha-C-high", C17Parameters(c=5.0, alpha=0.08), (9500, 500, 0)),
         )
     output = []
     for index, (label, parameters, initial) in enumerate(selected_cases):
