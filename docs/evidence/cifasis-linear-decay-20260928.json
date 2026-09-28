@@ -1,0 +1,70 @@
+{
+  "argesim_base_commit": "8bc9f2d2a99e591eea9afe257c5a247a8cdffeb9",
+  "build": {
+    "cmake": "3.28.3",
+    "configure": "passed",
+    "g++": "13.3.0",
+    "gfortran": "13.3.0",
+    "install": "passed",
+    "native_build": "passed",
+    "platform": "Ubuntu 24.04 compatible x86_64 environment",
+    "source_checkout_clean_after_build": true
+  },
+  "capture_date": "2026-09-28",
+  "cifasis_commit": "4d53893958048273cb2dfd6fbd6e736f9dd0bbca",
+  "model": {
+    "absolute_tolerance": 1e-07,
+    "initial_value": 1.0,
+    "rate": 1.0,
+    "reference": "x(t)=initial_value*exp(-rate*(t-start_time))",
+    "relative_tolerance": 0.0001,
+    "start_time": 0.0,
+    "stop_time": 1.0,
+    "type": "scalar-linear-decay"
+  },
+  "runs": [
+    {
+      "artifact_manifest_sha256": "a5260470acf28324769b05d1ac0a4fc99b9f582cbb0a6ca716eb334ae9387ea0",
+      "compile_wall_seconds": 0.15921983200132672,
+      "driver_result_bytes": 380010,
+      "first_sample_time": 0.0,
+      "last_sample_time": 0.9999999999999062,
+      "max_absolute_error": 1.8394738512894637e-05,
+      "max_relative_error": 5.000208343885257e-05,
+      "max_scaled_error": 0.4986653215065917,
+      "method": "QSS1",
+      "native_method": "QSS",
+      "output_samples": 10001,
+      "request_hash": "88bd3d305b430432cb50bf042e20538d12962da2c2fbfebbc18ef0039ce53778",
+      "rmse": 1.421598384946136e-05,
+      "sampled_points_within_requested_tolerance": true,
+      "simulation_wall_seconds": 0.01691791600023862,
+      "source_sha256": "8f707d91f300e3805f2d00f8a3f7232296e583444938390ed481bee49c75e09b",
+      "terminal_gap": 9.381384558082573e-14,
+      "terminal_sample_present": true
+    },
+    {
+      "artifact_manifest_sha256": "62ad5f05451616b0fb59ab8f69da0d101bf36f3752c7cce4aa06809b794fc363",
+      "compile_wall_seconds": 0.15338418999999703,
+      "driver_result_bytes": 7234,
+      "first_sample_time": 0.0,
+      "last_sample_time": 0.9970234151851755,
+      "max_absolute_error": 1.2304700050091988e-05,
+      "max_relative_error": 3.334823083300002e-05,
+      "max_scaled_error": 0.3325809465632364,
+      "method": "QSS2",
+      "native_method": "QSS2",
+      "output_samples": 72,
+      "request_hash": "150e8e75abfa6a23e5339c147c0f4ce7602429af7455528e71df33f4a320b241",
+      "rmse": 9.422045628971408e-06,
+      "sampled_points_within_requested_tolerance": true,
+      "simulation_wall_seconds": 0.011614592000114499,
+      "source_sha256": "f666c5a2b9e9cfeb40fd0820da85759d6cc0a1d8d44601e0525fb3df310fec8a",
+      "terminal_gap": 0.0029765848148245455,
+      "terminal_sample_present": false
+    }
+  ],
+  "schema_version": 1,
+  "scope": "external execution observation plus analytic sample-point comparison",
+  "timing_interpretation": "single diagnostic observations; not performance claims"
+}

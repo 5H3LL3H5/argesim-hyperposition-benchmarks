@@ -22,6 +22,26 @@ import sys
 if "ARGESIM_TEST_SECRET" in os.environ:
     print("parent secret leaked", file=sys.stderr)
     raise SystemExit(9)
+required_environment = {
+    "MMOC_PATH",
+    "MMOC_SRC",
+    "MMOC_DOC",
+    "MMOC_LIBS",
+    "MMOC_BIN",
+    "MMOC_MODELS",
+    "MMOC_BUILD",
+    "MMOC_OUTPUT",
+    "MMOC_LOG",
+    "MMOC_PACKAGES",
+    "MMOC_LIBRARIES",
+    "MMOC_TESTS",
+    "MMOC_ENGINE",
+    "MMOC_INCLUDE",
+}
+missing = sorted(required_environment - os.environ.keys())
+if missing:
+    print(f"missing CIFASIS environment: {missing}", file=sys.stderr)
+    raise SystemExit(10)
 model = sys.argv[1]
 source = pathlib.Path(sys.argv[2]) / f"{model}.mo"
 if not source.is_file():
@@ -58,10 +78,22 @@ class CifasisNativeAdapterTests(unittest.TestCase):
         self.source.mkdir()
         (self.install / "bin").mkdir(parents=True)
         (self.source / "README").write_text("fake qss source\n", encoding="utf-8")
+        source_khmetis = (
+            self.source
+            / "src"
+            / "engine"
+            / "3rd-party"
+            / "partitioners"
+            / "hmetis"
+            / "khmetis"
+        )
+        source_khmetis.parent.mkdir(parents=True)
+        source_khmetis.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        source_khmetis.chmod(0o755)
         subprocess.run(
             ["git", "init", "-q"], cwd=self.source, check=True
         )
-        subprocess.run(["git", "add", "README"], cwd=self.source, check=True)
+        subprocess.run(["git", "add", "."], cwd=self.source, check=True)
         subprocess.run(
             [
                 "git",
@@ -180,6 +212,14 @@ class CifasisNativeAdapterTests(unittest.TestCase):
         self.assertEqual(result, 2)
         self.assertIn("not a directory", stderr.getvalue())
 
+    def test_probe_accepts_upstream_khmetis_location(self) -> None:
+        (self.install / "bin" / "khmetis").unlink()
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
+            result = main([*self._arguments(), "--argesim-oracle-probe"])
+        self.assertEqual(result, 0)
+        self.assertEqual(json.loads(stdout.getvalue())["engine_commit"], self.commit)
+
     def test_native_run_normalizes_trajectory_and_records_model(self) -> None:
         result, output, stderr = self._run_main()
         self.assertEqual((result, stderr), (0, ""))
@@ -189,6 +229,11 @@ class CifasisNativeAdapterTests(unittest.TestCase):
         self.assertEqual(payload["native_method"], "QSS2")
         self.assertEqual(payload["trajectory"]["x"]["time"], [0.0, 0.5, 1.0])
         self.assertEqual(payload["metrics"]["output_samples"], 3)
+        self.assertTrue(
+            payload["validation"]["sampled_points_within_requested_tolerance"]
+        )
+        self.assertTrue(payload["validation"]["terminal_sample_present"])
+        self.assertLess(payload["validation"]["max_scaled_error"], 1.0)
         self.assertIn("MMO_Solver=QSS2", payload["model"]["source"])
         self.assertIn("der(x) = -rate * x", payload["model"]["source"])
         self.assertEqual(payload["scope"], "external execution observation only")
