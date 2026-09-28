@@ -1,3 +1,4 @@
+import inspect
 import json
 import unittest
 from contextlib import redirect_stdout
@@ -78,6 +79,53 @@ class UnifiedRunnerTests(unittest.TestCase):
         self.assertEqual((report["passed"], report["failed"], report["total"]), (2, 1, 3))
         self.assertEqual(report["tasks"][0]["error"], "ValueError: bad")
         self.assertEqual(report["scope"], "execution only")
+
+    def test_suite_evidence_preserves_failure_and_unavailable_measurements(self) -> None:
+        with patch("argesim_benchmarks.runner._git_sha", return_value="a" * 40), \
+             patch.object(CONTRACTS["C01"], "run", side_effect=[ValueError("bad"), 5, 6]):
+            report = run_suite(benchmarks=("C01",))
+        failed = report["tasks"][0]["evidence"]
+        self.assertEqual(failed["schema_version"], 1)
+        self.assertEqual(failed["scope"], "execution only")
+        self.assertEqual(failed["status"], "failed")
+        self.assertEqual(failed["error"], "ValueError: bad")
+        self.assertEqual(failed["experiment"]["implementation_git_sha"], "a" * 40)
+        self.assertEqual(failed["experiment"]["benchmark"], "C01")
+        self.assertEqual(failed["experiment"]["task"], "A")
+        self.assertEqual(
+            failed["experiment"]["timing"]["samples"],
+            (failed["duration_seconds"],),
+        )
+        self.assertIsNone(failed["experiment"]["timing"]["iqr"])
+        self.assertIsNone(failed["experiment"]["validation"]["passed"])
+        self.assertIsNone(failed["experiment"]["work"]["rhs_evaluations"])
+        self.assertIsNone(failed["peak_python_allocation_bytes"])
+        self.assertIsNone(failed["peak_rss"])
+        self.assertIn("validation", failed["unavailable"])
+        self.assertEqual(report["tasks"][1]["evidence"]["status"], "passed")
+        self.assertIsNone(report["tasks"][1]["evidence"]["error"])
+
+    def test_suite_evidence_contains_effective_default_arguments(self) -> None:
+        with patch.object(CONTRACTS["C01"], "run", return_value=5):
+            report = run_suite(benchmarks=("C01",))
+        row = report["tasks"][0]
+        default = inspect.signature(CONTRACTS["C01"].task("A").resolve()).parameters[
+            "t_bound"
+        ].default
+        self.assertEqual(
+            row["evidence"]["experiment"]["input_parameters"]["t_bound"],
+            default,
+        )
+        self.assertEqual(row["arguments"], {})
+
+    def test_unresolvable_entrypoint_is_reported_without_stopping_suite(self) -> None:
+        with patch.object(CONTRACTS["C01"].task("A"), "resolve", side_effect=ImportError("missing")), \
+             patch.object(CONTRACTS["C01"], "run", return_value=5):
+            report = run_suite(benchmarks=("C01",))
+        self.assertEqual((report["passed"], report["failed"]), (2, 1))
+        row = report["tasks"][0]
+        self.assertEqual(row["error"], "ImportError: missing")
+        self.assertIn("signature resolution failed", row["evidence"]["unavailable"]["effective_defaults"])
 
     def test_cli_suite_exit_code_and_json(self) -> None:
         output = StringIO()

@@ -221,6 +221,7 @@ class ExperimentRecord:
         input_parameters: Mapping[str, Any] | None = None,
         seed: int | None = None,
         benchmark_revision: str | None = None,
+        implementation_git_sha: str | None = None,
         validation: ValidationEvidence | None = None,
         work: WorkEvidence | None = None,
         timing: TimingEvidence | None = None,
@@ -234,7 +235,10 @@ class ExperimentRecord:
             input_parameters=dict(input_parameters or {}),
             seed=seed,
             benchmark_revision=benchmark_revision,
-            implementation_git_sha=_git_sha(),
+            implementation_git_sha=(
+                implementation_git_sha
+                if implementation_git_sha is not None else _git_sha()
+            ),
             environment=environment if environment is not None else RuntimeEnvironment.capture(),
             validation=validation or ValidationEvidence(),
             work=work or WorkEvidence(),
