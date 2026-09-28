@@ -27,11 +27,13 @@ def benchmark_status_table() -> str:
 
 
 def replace_generated_section(text: str, generated: str) -> str:
-    """Replace one generated Markdown section, failing on malformed markers."""
+    """Replace the unique generated Markdown section, rejecting malformed markers."""
 
+    if text.count(COVERAGE_START) != 1 or text.count(COVERAGE_END) != 1:
+        raise ValueError("generated benchmark status markers must occur exactly once")
     start = text.find(COVERAGE_START)
     end = text.find(COVERAGE_END)
-    if start < 0 or end < 0 or end < start:
+    if end < start:
         raise ValueError("generated benchmark status markers are missing or malformed")
     end += len(COVERAGE_END)
     return (

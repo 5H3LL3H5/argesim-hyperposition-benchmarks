@@ -22,6 +22,10 @@ class ConvergenceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             decay_euler_endpoint(1)
 
+    def test_empty_iterable_is_rejected(self) -> None:
+        with self.assertRaisesRegex(ValueError, "at least one step count"):
+            convergence_table(iter(()))
+
 
 if __name__ == "__main__":
     unittest.main()

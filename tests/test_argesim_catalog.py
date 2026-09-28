@@ -2,7 +2,12 @@ import unittest
 from pathlib import Path
 
 from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus, benchmark
-from argesim_benchmarks.status_docs import verify_coverage_document
+from argesim_benchmarks.status_docs import (
+    COVERAGE_END,
+    COVERAGE_START,
+    replace_generated_section,
+    verify_coverage_document,
+)
 
 
 class ArgesimCatalogTests(unittest.TestCase):
@@ -70,6 +75,24 @@ class ArgesimCatalogTests(unittest.TestCase):
     def test_coverage_document_is_generated_from_catalog(self) -> None:
         root = Path(__file__).resolve().parents[1]
         verify_coverage_document(root / "ARGESIM_COVERAGE.md")
+
+    def test_generated_section_rejects_bad_markers(self) -> None:
+        valid = f"prefix\n{COVERAGE_START}\nold\n{COVERAGE_END}\nsuffix\n"
+        self.assertEqual(
+            replace_generated_section(valid, "new"),
+            f"prefix\n{COVERAGE_START}\nnew\n{COVERAGE_END}\nsuffix\n",
+        )
+        malformed = (
+            valid.replace(COVERAGE_START, ""),
+            valid.replace(COVERAGE_END, ""),
+            f"{COVERAGE_END}\n{COVERAGE_START}",
+            valid + f"{COVERAGE_START}\nextra\n{COVERAGE_END}\n",
+            valid.replace(COVERAGE_END, f"{COVERAGE_START}\n{COVERAGE_END}"),
+        )
+        for text in malformed:
+            with self.subTest(text=text):
+                with self.assertRaises(ValueError):
+                    replace_generated_section(text, "new")
 
     def test_coverage_families_are_present(self) -> None:
         self.assertTrue(all(entry.coverage_family.strip() for entry in BENCHMARKS))
