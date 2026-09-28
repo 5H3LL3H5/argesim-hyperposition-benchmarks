@@ -145,6 +145,25 @@ recorded per repetition only for a directly returned `IntegrationResult`;
 unknown counters stay null. No catalog evidence gate is
 changed by repeated execution or internal parity alone.
 
+## Optional external solver oracle
+
+The suite defines a process-isolated protocol for an independently installed
+[`CIFASIS/qss-solver`](https://github.com/CIFASIS/qss-solver/tree/qss-solver-dev)
+adapter. The initial boundary records capabilities, pinned engine and suite
+commits, request/model hashes, bounded process diagnostics and checksummed
+artifacts. It does not copy or link CIFASIS code, and this repository does not
+yet ship a native adapter or translated model:
+
+```bash
+argesim oracle probe cifasis
+argesim oracle run cifasis --request request.json --output-dir results/cifasis
+```
+
+An absent adapter produces a structured `unavailable` result. A successful
+external execution is a cross-engine observation, not independent validation,
+a speedup result or an ARGESIM evidence-gate promotion. See
+[the adapter contract](docs/CIFASIS_ORACLE.md).
+
 ## Run the NSA-DEVS experiments
 
 ```bash
