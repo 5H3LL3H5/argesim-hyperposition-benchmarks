@@ -249,7 +249,38 @@ def c07_task_c() -> float:
             initial_state=(math.pi/6.0, phi_dot_0),
             t_bound=10.0,
         )
-        return min(s[0] for s in res.states)
+        minimum = min(state[0] for state in res.states)
+        # The turning point normally falls between solver samples. Interpolate
+        # the zero of angular velocity on that smooth, fixed-mode segment.
+        for (t0, s0), (t1, s1) in zip(
+            zip(res.times, res.states), zip(res.times[1:], res.states[1:])
+        ):
+            if s0[1] >= 0.0 or s1[1] <= 0.0:
+                continue
+            dt = t1 - t0
+            if dt <= 0.0:
+                continue
+            # Cubic Hermite position uses both endpoint angles and velocities.
+            # Its derivative has opposite signs at the endpoints here.
+            def slope(u: float) -> float:
+                return ((6*u*u - 6*u) * (s0[0] - s1[0])
+                        + (3*u*u - 4*u + 1) * dt * s0[1]
+                        + (3*u*u - 2*u) * dt * s1[1])
+
+            left, right = 0.0, 1.0
+            for _ in range(40):
+                middle = (left + right) / 2
+                if slope(middle) < 0:
+                    left = middle
+                else:
+                    right = middle
+            u = (left + right) / 2
+            angle = ((2*u**3 - 3*u*u + 1) * s0[0]
+                     + (u**3 - 2*u*u + u) * dt * s0[1]
+                     + (-2*u**3 + 3*u*u) * s1[0]
+                     + (u**3 - u*u) * dt * s1[1])
+            minimum = min(minimum, angle)
+        return minimum
 
     v_left = -10.0
     v_right = 0.0
