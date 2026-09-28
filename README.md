@@ -95,6 +95,19 @@ definition profile uses the documented task defaults (including long CP2 LBM
 runs). Passing a suite run proves execution only; published reference checks
 and catalog evidence gates are assessed separately.
 
+Each task also contains a versioned `evidence` object. Its nested
+`experiment` records the Git commit (when available), effective arguments
+including defaults, scalar seed (when supplied), UTC capture time, elapsed
+time, Python/OS/CPU environment and nullable validation and work counters.
+The surrounding record gives the UTC start, status, failure text and reasons
+for unavailable fields. `scope` remains `execution only`: a successful task
+does not establish an independent oracle match or a performance result.
+The one elapsed time sample has no defined IQR. Per-task Python allocation
+and RSS peaks are not measured by this execution command; they remain null.
+An uncommitted source tree reports a null SHA rather than attributing the run
+to stale `HEAD`. Set `ARGESIM_GIT_SHA` only when the source export has been
+verified against that exact commit.
+
 ## Run the NSA-DEVS experiments
 
 ```bash

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, is_dataclass
+from datetime import datetime, timezone
 from enum import Enum
 import importlib
 import inspect
@@ -10,6 +11,7 @@ import time
 from typing import Any, Mapping
 
 from .catalog import BENCHMARKS, benchmark as catalog_benchmark
+from .evidence import ExperimentRecord, RuntimeEnvironment, TimingEvidence, _git_sha
 
 
 class BenchmarkTaskError(RuntimeError):
@@ -264,23 +266,93 @@ def run_suite(
     identifiers = tuple(CONTRACTS) if benchmarks is None else tuple(benchmarks)
     for identifier in identifiers:
         contract(identifier)
+    repository_sha = _git_sha()
+    environment = RuntimeEnvironment.capture()
     records: list[dict[str, Any]] = []
     for identifier in identifiers:
         for name in CONTRACTS[identifier].tasks:
             kwargs = inputs.get((identifier, name), {})
+            task = CONTRACTS[identifier].task(name)
+            effective_inputs = to_jsonable(kwargs)
+            defaults_unavailable = None
+            resolved_signature = False
+            started_at_utc = datetime.now(timezone.utc).isoformat()
             started = time.perf_counter()
             record: dict[str, Any] = {
                 "benchmark": identifier, "task": name,
                 "arguments": to_jsonable(kwargs), "status": "passed",
             }
             try:
+                signature = inspect.signature(task.resolve())
+                bound = signature.bind(**kwargs)
+                bound.apply_defaults()
+                effective_inputs = to_jsonable(bound.arguments)
+                resolved_signature = True
                 result = contract(identifier).run(name, kwargs)
                 record["result_type"] = type(result).__name__
             except Exception as exc:
                 record["status"] = "failed"
                 record["error"] = f"{type(exc).__name__}: {exc}"
+                if not resolved_signature:
+                    defaults_unavailable = (
+                        "Entrypoint/signature resolution failed; "
+                        "only supplied arguments were captured."
+                    )
             finally:
                 record["seconds"] = time.perf_counter() - started
+            experiment = ExperimentRecord.capture(
+                benchmark=identifier, task=name,
+                input_parameters=effective_inputs,
+                seed=(effective_inputs.get("seed")
+                      if isinstance(effective_inputs.get("seed"), int) else None),
+                timing=TimingEvidence(
+                    warmup=0, samples=(record["seconds"],), unit="seconds",
+                    median=record["seconds"], iqr=None,
+                ),
+                environment=environment,
+                implementation_git_sha=repository_sha,
+            ).to_dict()
+            # A suite run establishes execution only. Missing measurements and
+            # independent references must remain explicit, never synthetic zeroes.
+            record["evidence"] = {
+                "schema_version": 1,
+                "profile": profile,
+                "scope": "execution only",
+                "started_at_utc": started_at_utc,
+                "duration_seconds": record["seconds"],
+                "status": record["status"],
+                "error": record.get("error"),
+                "entrypoint": task.entrypoint,
+                "experiment": experiment,
+                "unavailable": {
+                    "repository_sha": (
+                        "No clean Git commit could be identified for this source tree."
+                        if repository_sha is None else None
+                    ),
+                    "benchmark_revision": (
+                        "No immutable definition revision is registered."
+                    ),
+                    "validation": "No independent oracle is executed by run-suite.",
+                    "work": (
+                        "The task interface does not expose standardized solver counters."
+                    ),
+                    "peak_python_allocation_bytes": (
+                        "Allocation tracing is not enabled for execution runs."
+                    ),
+                    "peak_rss": "Per-task peak RSS is not measured for execution runs.",
+                    "solver": (
+                        "No uniform solver identifier is exposed by the task contract."
+                    ),
+                    "seed": (
+                        "A scalar seed is not in the effective inputs."
+                        if experiment["seed"] is None else None
+                    ),
+                    "effective_defaults": defaults_unavailable,
+                },
+                "peak_python_allocation_bytes": None,
+                "peak_rss": None,
+                "peak_rss_unit": None,
+            }
             records.append(record)
             if fail_fast and record["status"] == "failed":
                 break

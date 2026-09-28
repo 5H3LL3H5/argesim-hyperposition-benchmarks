@@ -1,5 +1,15 @@
 # ARGESIM implementation audit
 
+## Suite evidence envelope (2026-09-28)
+
+The suite runner now attaches a schema-versioned execution record to every
+attempt, including failures. It captures effective default inputs, environment,
+commit identity when available, UTC start and duration. Fields without a
+uniform measurement or independent reference are null with explicit reasons.
+This is execution provenance, not external validation or performance evidence.
+No catalog gate was changed. Repeatable timing, per-task memory and solver work
+measurements remain separate pending work.
+
 Baseline audit date: 2026-08-17. Focused C19R–C22 delta review: 2026-09-28.
 Definitions were checked against the official catalog and primary papers.
 Gate meanings are defined in `METHODOLOGY.md`.

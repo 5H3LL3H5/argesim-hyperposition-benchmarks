@@ -2,7 +2,7 @@ import json
 import unittest
 
 import argesim_benchmarks.evidence as evidence
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from argesim_benchmarks.evidence import (
     ExperimentRecord,
@@ -16,11 +16,16 @@ from argesim_benchmarks.evidence import (
 class EvidenceTests(unittest.TestCase):
     @patch("argesim_benchmarks.evidence.subprocess.run")
     def test_git_sha_is_resolved_from_package_repository(self, run) -> None:
-        run.return_value.stdout = "abc123\n"
+        run.side_effect = [Mock(stdout="abc123\n"), Mock(stdout="")]
         self.assertEqual(evidence._git_sha(), "abc123")
-        command = run.call_args.args[0]
+        command = run.call_args_list[0].args[0]
         self.assertEqual(command[:2], ("git", "-C"))
         self.assertEqual(command[-2:], ("rev-parse", "HEAD"))
+
+    @patch("argesim_benchmarks.evidence.subprocess.run")
+    def test_dirty_checkout_has_no_implementation_sha(self, run) -> None:
+        run.side_effect = [Mock(stdout="abc123\n"), Mock(stdout=" M runner.py\n")]
+        self.assertIsNone(evidence._git_sha())
 
     def test_timing_summary_keeps_raw_samples(self) -> None:
         timing = TimingEvidence.from_samples((3.0, 1.0, 2.0), warmup=2)
