@@ -234,6 +234,7 @@ class ExperimentRecord:
             seed=seed,
             benchmark_revision=benchmark_revision,
             implementation_git_sha=_git_sha(),
+            environment=RuntimeEnvironment.capture(),
             validation=validation or ValidationEvidence(),
             work=work or WorkEvidence(),
             timing=timing or TimingEvidence.from_samples(()),
