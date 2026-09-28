@@ -37,6 +37,8 @@ def build_parser() -> argparse.ArgumentParser:
     suite = commands.add_parser("run-suite")
     suite.add_argument("--profile", choices=("smoke", "definition"), default="smoke")
     suite.add_argument("--benchmark", action="append", dest="benchmarks")
+    suite.add_argument("--task", action="append", dest="tasks",
+                       help="registered BENCHMARK:TASK, repeatable")
     suite.add_argument("--fail-fast", action="store_true")
 
     performance = commands.add_parser("run-performance")
@@ -50,6 +52,17 @@ def build_parser() -> argparse.ArgumentParser:
     performance.add_argument("--timeout-s", type=float, default=3600.0)
     performance.add_argument("--output-dir", type=Path, required=True)
     performance.add_argument("--fail-fast", action="store_true")
+
+    definitions = commands.add_parser("run-definitions")
+    definitions.add_argument("--group", choices=(
+        "C01-C06", "C07-C12", "C13-C18", "C19R-C22", "CP1", "CP2",
+    ), required=True)
+    definitions.add_argument("--output-dir", type=Path, required=True)
+    definitions.add_argument("--resume", action="store_true")
+    definitions.add_argument("--task", action="append", dest="tasks",
+                             help="optional BENCHMARK:TASK selection; marks group partial")
+    definitions.add_argument("--timeout-s", type=float, default=3600.0)
+    definitions.add_argument("--fail-fast", action="store_true")
 
     return parser
 
@@ -74,6 +87,7 @@ def main(argv: list[str] | None = None) -> int:
             report = run_suite(
                 profile=arguments.profile,
                 benchmarks=tuple(arguments.benchmarks) if arguments.benchmarks else None,
+                tasks=tuple(arguments.tasks) if arguments.tasks else None,
                 fail_fast=arguments.fail_fast,
             )
         except BenchmarkTaskError as exc:
@@ -98,6 +112,22 @@ def main(argv: list[str] | None = None) -> int:
             raise SystemExit(str(exc)) from exc
         print(json.dumps(report, indent=2, sort_keys=True, allow_nan=False))
         return 1 if report["failed"] else 0
+
+    if arguments.command == "run-definitions":
+        from .definitions import run_definition_group
+        try:
+            report = run_definition_group(
+                group=arguments.group,
+                output_dir=arguments.output_dir,
+                resume=arguments.resume,
+                tasks=tuple(arguments.tasks) if arguments.tasks else None,
+                timeout_s=arguments.timeout_s,
+                fail_fast=arguments.fail_fast,
+            )
+        except (BenchmarkTaskError, ValueError, OSError) as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(report, indent=2, sort_keys=True, allow_nan=False))
+        return 1 if report.get("failed", 0) or report.get("blocked", 0) else 0
 
     try:
         benchmark_contract = contract(arguments.benchmark)

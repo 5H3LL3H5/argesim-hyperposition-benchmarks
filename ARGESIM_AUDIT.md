@@ -1,5 +1,17 @@
 # ARGESIM implementation audit
 
+## Checkpointed definition groups (2026-09-28)
+
+`run-definitions` partitions all 71 registered tasks into six groups and
+executes each task with exact definition-profile arguments in an isolated
+process. A source-pinned, SHA-256 group manifest checkpoints every task and
+supports verified resumption after failure or interruption. Filtered runs are
+explicitly partial; timeout artifacts report a blocker and unknown memory as
+null. The manifest distinguishes completion of registered tasks from complete
+source-definition coverage; CP2:3 still lacks the full corrected rope study
+in its registered comparison entry. No full group is claimed from these
+runner contract tests, and no catalog evidence gate changed.
+
 ## Isolated diagnostic performance mode (2026-09-28)
 
 `run-performance` runs selected tasks in fresh processes with an untimed

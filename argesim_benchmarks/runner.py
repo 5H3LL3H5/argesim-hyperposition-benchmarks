@@ -253,6 +253,7 @@ def _suite_arguments(profile: str) -> dict[tuple[str, str], dict[str, Any]]:
 
 def run_suite(
     *, profile: str = "smoke", benchmarks: tuple[str, ...] | None = None,
+    tasks: tuple[str, ...] | None = None,
     fail_fast: bool = False,
 ) -> dict[str, Any]:
     """Execute each registered task once, reporting failures individually.
@@ -266,11 +267,22 @@ def run_suite(
     identifiers = tuple(CONTRACTS) if benchmarks is None else tuple(benchmarks)
     for identifier in identifiers:
         contract(identifier)
+    selected = set(tasks) if tasks is not None else None
+    registered = {
+        f"{identifier}:{name}"
+        for identifier in identifiers for name in CONTRACTS[identifier].tasks
+    }
+    if selected is not None and not selected <= registered:
+        raise BenchmarkTaskError(
+            f"unknown selected tasks: {sorted(selected - registered)}"
+        )
     repository_sha = _git_sha()
     environment = RuntimeEnvironment.capture()
     records: list[dict[str, Any]] = []
     for identifier in identifiers:
         for name in CONTRACTS[identifier].tasks:
+            if selected is not None and f"{identifier}:{name}" not in selected:
+                continue
             kwargs = inputs.get((identifier, name), {})
             task = CONTRACTS[identifier].task(name)
             effective_inputs = to_jsonable(kwargs)

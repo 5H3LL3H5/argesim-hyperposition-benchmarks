@@ -145,6 +145,40 @@ recorded per repetition only for a directly returned `IntegrationResult`;
 unknown counters stay null. No catalog evidence gate is
 changed by repeated execution or internal parity alone.
 
+## Checkpointed definition execution
+
+Run the full definition inputs by group, each into its own directory:
+
+```bash
+python -m argesim_benchmarks run-definitions --group C01-C06 \
+  --output-dir benchmark-results/definitions
+python -m argesim_benchmarks run-definitions --group C01-C06 \
+  --output-dir benchmark-results/definitions --resume
+```
+
+The six groups are `C01-C06`, `C07-C12`, `C13-C18` (including C17R),
+`C19R-C22`, `CP1`, and `CP2`. Together they contain all 71 registered tasks.
+Each task executes in a separate child with `--profile definition`; no smoke
+overrides are used. The group manifest is written before the first task and
+atomically updated after each completed task. Every JSON task artifact has a
+SHA-256 digest. `--resume` requires the same source SHA and task selection;
+verified passing tasks are skipped, while missing/corrupt/failed/blocked tasks
+are executed again. `--timeout-s` defaults to 3600 per task and can be raised
+when resuming. The manifest reports the latest successful task and whether
+every **registered** task in the full group passed. This execution flag does
+not certify that a registered task covers every study required by the source.
+In particular, CP2:3 currently lacks the complete corrected rope study in its
+registered comparison entry; the CP2 manifest names this gap explicitly.
+
+`--task BENCHMARK:TASK` can restrict a run for diagnosis; such a manifest says
+`selection_covers_full_group: false` and can never report the group complete.
+Timeouts and invalid child reports produce explicit blocker artifacts with
+effective inputs, elapsed time and error. Memory for a terminated child is
+null with a reason because it was not sampled before termination. A clean Git
+checkout or a verified `ARGESIM_GIT_SHA` is required. Passing definition
+execution still establishes **execution only**, not external validation or a
+complete official CP2 study.
+
 ## Run the NSA-DEVS experiments
 
 ```bash
