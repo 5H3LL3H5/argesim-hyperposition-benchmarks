@@ -121,14 +121,15 @@ def _rms_error(
     error: Sequence[float],
     old: Sequence[float],
     new: Sequence[float],
-    atol: float,
+    atol: Sequence[float],
     rtol: float,
 ) -> float:
     scaled = [
-        component / (atol + rtol * max(abs(before), abs(after)))
-        for component, before, after in zip(error, old, new)
+        component / (absolute + rtol * max(abs(before), abs(after)))
+        for component, before, after, absolute in zip(error, old, new, atol)
     ]
-    norm = math.sqrt(sum(value * value for value in scaled) / len(scaled))
+    root_dimension = math.sqrt(len(scaled))
+    norm = math.hypot(*(value / root_dimension for value in scaled))
     if not math.isfinite(norm):
         raise IntegrationError("rk45 produced a non-finite error estimate")
     return norm
@@ -139,15 +140,29 @@ def rk45(
     *,
     initial_step: float | None = None,
     rtol: float = 1e-6,
-    atol: float = 1e-9,
+    atol: float | Sequence[float] = 1e-9,
     min_step: float = 1e-14,
     max_step: float = math.inf,
     max_steps: int = 1_000_000,
 ) -> IntegrationResult:
-    """Adaptive Dormand-Prince 5(4) integration with local error control."""
+    """Adaptive Dormand-Prince 5(4) integration with local error control.
+
+    ``atol`` is positive and finite, scalar or one value per state component.
+    The initial step is clipped to the configured step bounds. Only the final
+    interval may be shorter than ``min_step``; it still must pass error control.
+    The RHS must be deterministic for the same (time, state): FSAL reuses the
+    accepted endpoint derivative, and retries reuse the unchanged start value.
+    """
 
     relative_tolerance = _positive_finite(rtol, name="rtol")
-    absolute_tolerance = _positive_finite(atol, name="atol")
+    if isinstance(atol, Sequence) and not isinstance(atol, (str, bytes)):
+        absolute_tolerance = tuple(
+            _positive_finite(value, name="atol") for value in atol
+        )
+        if len(absolute_tolerance) != problem.dimension:
+            raise ValueError("atol dimension must match y0")
+    else:
+        absolute_tolerance = (_positive_finite(atol, name="atol"),) * problem.dimension
     minimum_step = _positive_finite(min_step, name="min_step")
     if isinstance(max_step, bool):
         raise TypeError("max_step must be a real number")
@@ -164,7 +179,7 @@ def rk45(
         if initial_step is None
         else _positive_finite(initial_step, name="initial_step")
     )
-    h = min(h, maximum_step, span)
+    h = min(max(h, minimum_step), maximum_step, span)
     t = problem.t0
     y = tuple(problem.y0)
     times = [t]
@@ -172,15 +187,20 @@ def rk45(
     accepted = 0
     rejected = 0
     evaluations = 0
+    # Dormand-Prince is FSAL: the accepted endpoint derivative is the next k1.
+    # Rejected trials retain k1 at the unchanged (t, y).
+    k1 = None
 
     while t < problem.t_bound:
         if accepted + rejected >= step_limit:
             raise IntegrationError("rk45 exceeded max_steps")
         h = min(h, maximum_step, problem.t_bound - t)
-        if h < minimum_step or t + h == t:
+        if (h < minimum_step and h < problem.t_bound - t) or t + h == t:
             raise IntegrationError("rk45 required a step below min_step")
 
-        k1 = problem.evaluate(t, y)
+        if k1 is None:
+            k1 = problem.evaluate(t, y)
+            evaluations += 1
         k2 = problem.evaluate(t + h / 5.0, _combine(y, h, ((1.0 / 5.0, k1),)))
         k3 = problem.evaluate(
             t + 3.0 * h / 10.0,
@@ -241,7 +261,7 @@ def rk45(
                 (1.0 / 40.0, k7),
             ),
         )
-        evaluations += 7
+        evaluations += 6
         local_error = tuple(fifth - fourth for fifth, fourth in zip(y5, y4))
         error_norm = _rms_error(
             local_error, y, y5, absolute_tolerance, relative_tolerance
@@ -250,6 +270,7 @@ def rk45(
         if error_norm <= 1.0:
             t = min(problem.t_bound, t + h)
             y = y5
+            k1 = k7
             times.append(t)
             states.append(y)
             accepted += 1
