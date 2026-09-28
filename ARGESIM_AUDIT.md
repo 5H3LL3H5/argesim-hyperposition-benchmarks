@@ -43,7 +43,7 @@ in shared runtime code.
 | C19R | implemented | Three MOL tasks and analytical checks execute. |
 | C20 | implemented | All 3x4 scenarios and 5000-order defaults execute with alternative process plans, workstation generations, constraints, repairs and median/IQR output. Source/inter-operation/sink transport uses a dimensioned two-ring network, 1 m/s belt speed, finite 1 m-part capacity and PSc4 failures/rerouting. |
 | C21 | validated | Ball event/dynamic/shortcut studies, pendulum basic/kick studies and algebraic/interpolated/index-reduced Shockley RLC forms execute. Published stop time, kick angles, contact limits and dynamic-contact samples pass declared tolerances. |
-| C22 | implemented | Four queue policies and their concurrency semantics execute. |
+| C22 | implemented | Four queue policies execute. The deterministic class assignment follows the definition's ascending 1..5 cycle; the operator's independent call order descends from 5 after t=10. Concurrency and published trace/plot evidence remain to be reviewed before validation. |
 | CP1 | validated | All three serial/parallel workloads execute; task-B endpoint matches the published table. |
 | CP2 | validated | Sample/time Monte Carlo, reference full-way D2Q9 LBGK with reusable collision workers, and the corrected 499-unknown implicit/Fourier rope study execute. Serial/parallel LBM populations agree exactly; full rope traces/profiles stay below 5e-4/3e-4 error. |
 
@@ -56,6 +56,7 @@ in shared runtime code.
 - [C18 definition](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-definition.pdf) and [classic MATLAB solution](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-solution-MATLAB-02.pdf)
 - [C20 definition](https://www.argesim.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_21_34/articles/sne.21.34.10097.bn20.OA.pdf)
 - [C21 definition](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_26_2/articles/sne.26.2.10339.bn21.OA.pdf), [Modelica solution](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_28_2/articles/sne.28.2.10411.bn21.OA.pdf) and [Simulink solution](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_31_1/articles/sne.31.1.10556.bn21.OA.pdf)
+- [C22 definition, section 4](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_29_3/articles/sne.29.3.10481.bn22.OA.pdf): deterministic entity classes ascend from 1; operator calls descend from 5.
 - [CP1 definition](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/CP/CP1-definition.pdf)
 - [CP2 definition](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/CP/CP2-definition.pdf), [corrected PDE/Monte-Carlo solution](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_32_4/articles/sne.32.4.10625.bncp2.OA.pdf), [LBM solution](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_33_2/articles/sne.33.2.10646.bncp2.OA.pdf) and [reference code](https://github.com/cea-wismar/ArgesimCP2)
 
