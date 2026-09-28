@@ -6,6 +6,7 @@ from dataclasses import asdict, is_dataclass
 from enum import Enum
 import importlib
 import inspect
+import time
 from typing import Any, Mapping
 
 from .catalog import BENCHMARKS, benchmark as catalog_benchmark
@@ -191,3 +192,103 @@ def verify_registry_complete() -> None:
     for identifier, benchmark_contract in CONTRACTS.items():
         if not benchmark_contract.tasks:
             raise AssertionError(f"{identifier} has no registered tasks")
+
+
+def _suite_arguments(profile: str) -> dict[tuple[str, str], dict[str, Any]]:
+    """Explicit inputs for mandatory arguments and bounded smoke workloads."""
+    from .models.c17_sir_epidemic import C17Intervention
+
+    required = {
+        ("C02", "main"): {"num_pallets": 10},
+        ("C04", "run"): {"strategy": "put-back"},
+        ("C08", "replication"): {"eastmax": 3, "westmax": 3},
+        ("C17R", "ode"): {
+            "intervention": C17Intervention(threshold_fraction=0.1, soft_factor=0.5)
+        },
+        ("C20", "replication"): {
+            "order_scenario": "OSc1", "plant_scenario": "PSc1"
+        },
+    }
+    if profile == "definition":
+        return required
+    if profile != "smoke":
+        raise ValueError("profile must be 'smoke' or 'definition'")
+    bounded = {
+        ("C04", "compare"): {"replications": 1},
+        ("C08", "C"): {"duration": 600, "independent_replications": 2,
+                         "paired_replications": 2, "starting_seeds": (42,)},
+        ("C12", "C"): {"n_samples": 20},
+        ("C14", "A2"): {"runs": 1},
+        ("C14", "B2"): {"runs": 1},
+        ("C14", "C1"): {"runs": 1},
+        ("C14", "C2"): {"runs": 1},
+        ("C15", "C"): {"iterations": 2},
+        ("C16", "A"): {"runs": 1, "years": 6},
+        ("C16", "B"): {"runs": 1, "years": 1, "tax_rates": (0.2,)},
+        ("C16", "C"): {"runs": 1, "years": 1, "k_values": (4.0,)},
+        ("C17R", "task1"): {"steps": 2, "replications": 1},
+        ("C17R", "compare"): {"steps": 2, "replications": 1},
+        ("C17R", "ca"): {"steps": 2},
+        ("C17R", "ode"): {"t_bound": 2.0},
+        ("C18", "all"): {"epochs": 2},
+        ("C19R", "A"): {"nx": 3, "ny": 3},
+        ("C19R", "B"): {"nx": 3, "ny": 3},
+        ("C19R", "C"): {"nx": 3, "ny": 3},
+        ("C20", "replication"): {"order_count": 10},
+        ("C20", "experiment"): {"order_count": 10, "replications": 10},
+        ("C21", "dynamic-contact"): {"t_bound": 0.2},
+        ("CP1", "A"): {"samples": 2, "workers": 1, "t_bound": 0.1},
+        ("CP1", "B"): {"t_bound": 0.1, "step": 0.05, "workers": 1},
+        ("CP1", "C"): {"interior_points": 9, "t_bound": 0.1,
+                        "step": 0.05, "output_step": 0.05},
+        ("CP2", "1"): {"samples": 2, "workers": 1, "t_bound": 0.1},
+        ("CP2", "2"): {"nx": 17, "iterations": 20},
+    }
+    for key, overrides in bounded.items():
+        required.setdefault(key, {}).update(overrides)
+    return required
+
+
+def run_suite(
+    *, profile: str = "smoke", benchmarks: tuple[str, ...] | None = None,
+    fail_fast: bool = False,
+) -> dict[str, Any]:
+    """Execute each registered task once, reporting failures individually.
+
+    Success establishes execution only. No reference validation or evidence
+    status is inferred from these results. The definition profile may be very
+    expensive (notably CP2's 350,000 LBM iterations).
+    """
+    verify_registry_complete()
+    inputs = _suite_arguments(profile)
+    identifiers = tuple(CONTRACTS) if benchmarks is None else tuple(benchmarks)
+    for identifier in identifiers:
+        contract(identifier)
+    records: list[dict[str, Any]] = []
+    for identifier in identifiers:
+        for name in CONTRACTS[identifier].tasks:
+            kwargs = inputs.get((identifier, name), {})
+            started = time.perf_counter()
+            record: dict[str, Any] = {
+                "benchmark": identifier, "task": name,
+                "arguments": to_jsonable(kwargs), "status": "passed",
+            }
+            try:
+                result = contract(identifier).run(name, kwargs)
+                record["result_type"] = type(result).__name__
+            except Exception as exc:
+                record["status"] = "failed"
+                record["error"] = f"{type(exc).__name__}: {exc}"
+            finally:
+                record["seconds"] = time.perf_counter() - started
+            records.append(record)
+            if fail_fast and record["status"] == "failed":
+                break
+        if fail_fast and records and records[-1]["status"] == "failed":
+            break
+    return {
+        "profile": profile, "scope": "execution only", "tasks": records,
+        "passed": sum(row["status"] == "passed" for row in records),
+        "failed": sum(row["status"] == "failed" for row in records),
+        "total": len(records),
+    }
