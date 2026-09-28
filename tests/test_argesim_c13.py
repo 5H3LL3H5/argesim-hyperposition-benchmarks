@@ -6,6 +6,8 @@ import math
 from argesim_benchmarks.models.c13_crane import (
     C13Controller,
     C13Parameters,
+    C13_INITIAL_STATE,
+    c13_linear_rhs,
     _c13_disturbance_force,
     c13_task_a,
     c13_task_b_study,
@@ -15,6 +17,37 @@ from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
 
 
 class C13Tests(unittest.TestCase):
+    def test_2006_load_friction_reproduces_old_task_a_scale(self):
+        """Independent RK4 stepping guards the identified revision difference."""
+        def terminal_load_position(load_friction):
+            parameters = C13Parameters(dl=load_friction)
+            state = C13_INITIAL_STATE
+            dt = 0.1
+            for duration, disturbance, drive in (
+                (4.0, 0.0, 160.0),
+                (3.0, -750.0, 160.0),
+                (8.0, 0.0, 160.0),
+                (1985.0, 0.0, 0.0),
+            ):
+                rhs = c13_linear_rhs(parameters, fc_desired=drive,
+                                     fd=disturbance)
+                for _ in range(round(duration / dt)):
+                    k1 = rhs(0.0, state)
+                    k2 = rhs(0.0, tuple(x + dt * y / 2 for x, y in zip(state, k1)))
+                    k3 = rhs(0.0, tuple(x + dt * y / 2 for x, y in zip(state, k2)))
+                    k4 = rhs(0.0, tuple(x + dt * y for x, y in zip(state, k3)))
+                    state = tuple(
+                        x + dt * (a + 2 * b + 2 * c + d) / 6
+                        for x, a, b, c, d in zip(state, k1, k2, k3, k4)
+                    )
+            return state[0] + parameters.r * state[2]
+
+        old = terminal_load_position(0.01)
+        revised = terminal_load_position(0.001)
+        self.assertAlmostEqual(old, 294.084453, delta=0.15)
+        self.assertAlmostEqual(revised, 299.361523, delta=0.15)
+        self.assertGreater(revised - old, 5.0)
+
     def test_c13_catalog_status(self):
         c13 = next(b for b in BENCHMARKS if b.identifier == "C13")
         self.assertEqual(c13.status, BenchmarkStatus.IMPLEMENTED)
@@ -29,9 +62,9 @@ class C13Tests(unittest.TestCase):
         self.assertTrue(math.isfinite(result[-750.0]["nonlinear"]))
 
         # The revised definition asks for the position after about 2000 s.
-        # The published 2006 solution reports ~294 m for ±750/850 N, but
-        # that is inconsistent with the definition's force impulse and 0.5
-        # kg/s car damping: net impulse ±150 Ns implies ~±300 m displacement.
+        # The 2006 solution used d_l=0.01 and reports ~294 m; the 2007
+        # definition uses d_l=0.001 and gives ~299 m (see the C13 audit).
+        # Net impulse ±150 Ns implies a rough ±300 m scale at d_c=0.5.
         # Check that both models preserve that symmetry and cancel at -800 N.
         for model in ("linear", "nonlinear"):
             self.assertAlmostEqual(result[-750.0][model], 300.0, delta=1.0)
