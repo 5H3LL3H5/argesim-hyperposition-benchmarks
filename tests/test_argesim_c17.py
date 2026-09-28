@@ -159,6 +159,12 @@ class C17Tests(unittest.TestCase):
         self.assertEqual(cases[0].initial_state, (9900, 100, 0))
         self.assertEqual(len(cases[0].comparison.ca_mean), 3)
 
+    def test_task1_default_contact_sweep_fits_fhp_capacity(self) -> None:
+        cases = c17_task1_parameter_study(steps=1, replications=1)
+        high = next(case for case in cases if case.label == "alpha-C-high")
+        self.assertEqual(high.parameters.c * high.parameters.alpha, 0.4)
+        self.assertEqual(len(high.comparison.ca_mean), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
