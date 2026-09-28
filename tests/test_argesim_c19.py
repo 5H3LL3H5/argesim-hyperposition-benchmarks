@@ -1,5 +1,6 @@
 import unittest
 import math
+from unittest.mock import patch
 
 from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
 from argesim_benchmarks.models.c19_groundwater import (
@@ -89,6 +90,17 @@ class C19GroundwaterTests(unittest.TestCase):
                 t_bound=60.0,
                 options={"quantum": 1.0e-3},
             )
+
+    def test_continuous_task_covers_controlled_comparison_horizon(self) -> None:
+        # C19R Task C requests both Task B and Task C at (50,0), 0..150 days.
+        with patch(
+            "argesim_benchmarks.models.c19_groundwater.solve_c19",
+            return_value=object(),
+        ) as solve:
+            from argesim_benchmarks.models.c19_groundwater import c19_task_b
+
+            c19_task_b(nx=3, ny=3)
+        self.assertEqual(solve.call_args.kwargs["t_bound"], 150 * 24 * 3600)
 
 
 if __name__ == "__main__":
