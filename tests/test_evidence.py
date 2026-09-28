@@ -56,9 +56,8 @@ class EvidenceTests(unittest.TestCase):
             WorkEvidence(events=-1)
 
     @patch("argesim_benchmarks.evidence._git_sha", return_value="deadbeef")
-    @patch(
-        "argesim_benchmarks.evidence.RuntimeEnvironment.capture",
-        return_value=RuntimeEnvironment(
+    def test_record_is_machine_readable(self, _git) -> None:
+        environment = RuntimeEnvironment(
             python="3.13.0",
             implementation="CPython",
             os="Linux",
@@ -68,9 +67,7 @@ class EvidenceTests(unittest.TestCase):
             logical_cpus=8,
             cpu_affinity=(0, 1),
             cpu_governors=("performance",),
-        ),
-    )
-    def test_record_is_machine_readable(self, _environment, _git) -> None:
+        )
         record = ExperimentRecord.capture(
             benchmark="CP2",
             benchmark_revision="CP2",
@@ -79,6 +76,7 @@ class EvidenceTests(unittest.TestCase):
             solver_parameters={"rtol": 1.0e-6},
             input_parameters={"unknowns": 499},
             seed=7,
+            environment=environment,
             validation=ValidationEvidence(
                 reference="fourier",
                 metric="linf",
