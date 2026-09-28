@@ -68,8 +68,9 @@ class TestC14SupplyChain(unittest.TestCase):
 
         # D1/product 1 follows Table 3 (F1), even though F4 would have
         # the shorter lead time. The delivery itself has arrived by day 8.
-        self.assertEqual(sim.factories[1].stock[1], 90)
-        self.assertEqual(sim.factories[4].stock[1], 100)
+        # Table 3: D1 and D2 draw p1 from F1; D3 and D4 from F4.
+        self.assertEqual(sim.factories[1].stock[1], 80)
+        self.assertEqual(sim.factories[4].stock[1], 80)
 
     def test_single_run_tasks_return_full_stock_vectors(self):
         for task in (c14_task_a1, c14_task_b1):
