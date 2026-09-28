@@ -14,11 +14,17 @@ recorded.
 ## Adapter protocol version 1
 
 `qss-solver` does not expose one stable generic command for arbitrary ARGESIM
-models.  Therefore the suite calls a separately supplied adapter executable.
-That adapter owns model translation and the native CIFASIS build/run details.
-It must not be silently replaced with an internal Python solver.
-This repository defines the boundary but does not ship a native adapter or a
-translated benchmark model in this initial delta.
+models.  Therefore the suite calls a separate adapter executable.  The
+repository now ships `argesim-cifasis-oracle`, a deliberately narrow native
+adapter for the analytic scalar linear-decay pilot.  It owns deterministic
+micro-Modelica generation and the native CIFASIS build/run details without
+copying, importing or linking CIFASIS code.  It must not be silently replaced
+with an internal Python solver.
+
+The pilot advertises only `QSS1` and `QSS2`, mapped to CIFASIS `QSS` and
+`QSS2`.  That list is an integration capability, not a numerical-validation
+claim.  Additional models and methods require separately reviewed
+qualification deltas.
 
 Capability probe:
 
@@ -33,7 +39,7 @@ Standard output must contain only one JSON object:
   "protocol_version": 1,
   "engine": "CIFASIS/qss-solver",
   "engine_commit": "4d53893958048273cb2dfd6fbd6e736f9dd0bbca",
-  "methods": ["QSS1", "QSS2", "LIQSS2"],
+  "methods": ["QSS1", "QSS2"],
   "model_formats": ["mu-modelica"]
 }
 ```
@@ -52,9 +58,11 @@ ADAPTER --argesim-oracle-run REQUEST.json --output DRIVER-RESULT.json
 
 `REQUEST.json` must be a finite canonicalizable JSON object containing at
 least `model` and `method`.  The adapter must create a JSON object at the exact
-output path and return zero.  The initial boundary deliberately leaves the
-model payload extensible; model-specific schemas and numerical comparison
-tolerances belong to later, separately reviewed qualification PRs.
+output path and return zero.  The native pilot rejects unknown fields and raw
+model source.  Its accepted request is exemplified by
+`examples/cifasis-linear-decay-qss2.json`; model-specific schemas and
+numerical comparison tolerances for ARGESIM benchmarks belong to later,
+separately reviewed qualification PRs.
 
 The runner executes an argument vector with `shell=False`, closes standard
 input, captures bounded standard output and error, applies a timeout, and
@@ -67,11 +75,45 @@ Configure an adapter using `--executable`, or set
 `ARGESIM_CIFASIS_ORACLE` to an argv string.  If neither is configured, the
 suite looks for `argesim-cifasis-oracle` on `PATH`.
 
+The native adapter requires two separate locations:
+
+- `ARGESIM_CIFASIS_SOURCE`: a clean Git checkout used to establish the exact
+  engine commit;
+- `ARGESIM_CIFASIS_ROOT`: an installation containing executable
+  `bin/mmoc`, `bin/compile.sh`, `bin/simulate.sh` and `bin/khmetis`.
+
+For the qualified baseline, check out the source commit exactly and build it
+with the upstream Ubuntu 24.04 dependencies:
+
+```bash
+git clone https://github.com/CIFASIS/qss-solver.git cifasis-qss-solver
+git -C cifasis-qss-solver checkout \
+  4d53893958048273cb2dfd6fbd6e736f9dd0bbca
+cmake -S cifasis-qss-solver/src -B cifasis-qss-solver/src/build \
+  -DCMAKE_BUILD_TYPE=Release
+cmake --build cifasis-qss-solver/src/build --parallel
+cmake --install cifasis-qss-solver/src/build
+
+export ARGESIM_CIFASIS_SOURCE="$PWD/cifasis-qss-solver"
+export ARGESIM_CIFASIS_ROOT="$PWD/cifasis-qss-solver"
+```
+
+The upstream top-level CMake project sets its own install location and copies
+the installed tools into the checkout's `bin/` and `lib/` directories; it does
+not honor a caller-selected `CMAKE_INSTALL_PREFIX` at that level.  Those build
+outputs are ignored by the upstream repository.  A downstream packaged build
+may set `ARGESIM_CIFASIS_ROOT` to a separate installation while retaining the
+clean source checkout solely for commit provenance.
+
+The adapter refuses dirty source trees.  A different clean commit is reported
+by the probe and the outer oracle classifies it as `build-required` against the
+pinned baseline.
+
 ```bash
 argesim oracle probe cifasis
 argesim oracle capabilities cifasis
 argesim oracle run cifasis \
-  --request examples/linear-decay-qss2.json \
+  --request examples/cifasis-linear-decay-qss2.json \
   --output-dir benchmark-results/cifasis-linear-decay-qss2
 ```
 
@@ -85,6 +127,17 @@ timeout and result-contract failures are `execution-failed`.  Probe commands
 print these statuses as machine-readable JSON.  `oracle run` returns exit code
 2 for unavailable/build-required/unsupported, 1 for execution failure and 0
 only for a completed adapter result.
+
+The adapter invokes upstream `compile.sh` and `simulate.sh` with fixed argv
+entries and controlled run-local `MMOC_*` paths.  It does not accept arbitrary
+compiler flags or caller-supplied micro-Modelica.  Compiler and solver child
+processes receive only a small allowlist of ordinary process-location
+variables plus the controlled paths and locale; the caller's complete
+environment is not forwarded.  The generated model source,
+its SHA-256 digest, normalized trajectory, bounded stage diagnostics and
+measured compile/simulation wall times are returned in `driver-result.json`.
+No QSS event-count or peak-memory value is emitted until a native source for
+those measurements is qualified.
 
 ## Artifacts and provenance
 

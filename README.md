@@ -151,12 +151,19 @@ The suite defines a process-isolated protocol for an independently installed
 [`CIFASIS/qss-solver`](https://github.com/CIFASIS/qss-solver/tree/qss-solver-dev)
 adapter. The initial boundary records capabilities, pinned engine and suite
 commits, request/model hashes, bounded process diagnostics and checksummed
-artifacts. It does not copy or link CIFASIS code, and this repository does not
-yet ship a native adapter or translated model:
+artifacts. It does not copy or link CIFASIS code. The repository ships a
+narrow native adapter and deterministic micro-Modelica translation for an
+analytic scalar linear-decay pilot. Only QSS1 and QSS2 are advertised by this
+first adapter delta; no ARGESIM benchmark or additional QSS-family method is
+thereby qualified:
 
 ```bash
 argesim oracle probe cifasis
-argesim oracle run cifasis --request request.json --output-dir results/cifasis
+export ARGESIM_CIFASIS_SOURCE=/path/to/pinned/qss-solver
+export ARGESIM_CIFASIS_ROOT=/path/to/qss-solver-install
+argesim oracle run cifasis \
+  --request examples/cifasis-linear-decay-qss2.json \
+  --output-dir results/cifasis-linear-decay-qss2
 ```
 
 An absent adapter produces a structured `unavailable` result. A successful
