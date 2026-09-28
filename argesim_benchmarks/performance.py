@@ -74,6 +74,8 @@ def measure_task(
     inputs = to_jsonable(bound.arguments)
     start = datetime.now(timezone.utc).isoformat()
     environment = RuntimeEnvironment.capture()
+    git_sha = _git_sha()
+    seed = inputs.get("seed") if isinstance(inputs.get("seed"), int) else None
     raw: list[float] = []
     work_samples: list[dict[str, int | None]] = []
     outcome: dict[str, Any] = {
@@ -82,11 +84,11 @@ def measure_task(
         "scope": "internal result parity and diagnostic timing",
         "official_performance": False,
         "entrypoint": entry.entrypoint,
-        "implementation_git_sha": _git_sha(),
+        "implementation_git_sha": git_sha,
         "definition_source": definition.definition.primary_source,
         "definition_revision": None,
         "input_parameters": inputs,
-        "seed": inputs.get("seed") if isinstance(inputs.get("seed"), int) else None,
+        "seed": seed,
         "solver": None,
         "solver_parameters": None,
         "started_at_utc": start,
@@ -104,9 +106,23 @@ def measure_task(
         "peak_rss_bytes": None, "peak_rss_unit": None,
         "peak_rss_scope": "fresh benchmark worker process; descendants excluded",
         "unavailable": {
+            "implementation_git_sha": (
+                "No clean Git commit was available for this source tree."
+                if git_sha is None else None
+            ),
             "definition_revision": "No immutable definition revision is registered.",
             "validation": "No independent reference is checked by this command.",
             "solver": "No uniform solver identifier is exposed by the task contract.",
+            "solver_parameters": "No uniform solver parameter schema is exposed.",
+            "seed": "No scalar seed is in the effective inputs." if seed is None else None,
+            "cpu_affinity": (
+                "CPU affinity is unavailable on this platform."
+                if environment.cpu_affinity is None else None
+            ),
+            "cpu_governors": (
+                "CPU governor data is unavailable on this host."
+                if environment.cpu_governors is None else None
+            ),
             "work": "Only a direct IntegrationResult exposes standard counters.",
             "peak_python_allocation_bytes": "Untimed allocation probe did not complete.",
             "peak_rss_bytes": "Timed repetitions did not complete.",
@@ -234,7 +250,9 @@ def run_performance(
                 "input_parameters": to_jsonable(
                     _suite_arguments(profile).get((benchmark, task), {})
                 ),
+                "definition_source": contract(benchmark).definition.primary_source,
                 "definition_revision": None,
+                "seed": None, "solver": None, "solver_parameters": None,
                 "validation": {"reference": None, "metric": None,
                                "error": None, "tolerance": None, "passed": None},
                 "work": {"accepted_steps": None, "rejected_steps": None,
@@ -251,6 +269,8 @@ def run_performance(
                     "validation": "No independent reference is checked by this command.",
                     "work": "Worker failed before reporting counters.",
                     "memory": "Worker failed before reporting process memory.",
+                    "seed": "Worker failed before resolving effective inputs.",
+                    "solver": "Worker failed before resolving solver identity.",
                 },
                 "duration_seconds": time.perf_counter() - started,
                 "timeout_s": timeout_s,
