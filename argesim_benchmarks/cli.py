@@ -6,7 +6,7 @@ import argparse
 import json
 
 from .catalog import BENCHMARKS
-from .runner import BenchmarkTaskError, contract, to_jsonable
+from .runner import BenchmarkTaskError, contract, run_suite, to_jsonable
 
 
 def _json_object(text: str) -> dict[str, object]:
@@ -33,6 +33,11 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("task")
     run.add_argument("--kwargs-json", type=_json_object, default={})
 
+    suite = commands.add_parser("run-suite")
+    suite.add_argument("--profile", choices=("smoke", "definition"), default="smoke")
+    suite.add_argument("--benchmark", action="append", dest="benchmarks")
+    suite.add_argument("--fail-fast", action="store_true")
+
     return parser
 
 
@@ -50,6 +55,18 @@ def main(argv: list[str] | None = None) -> int:
         ]
         print(json.dumps(payload, indent=2, allow_nan=False))
         return 0
+
+    if arguments.command == "run-suite":
+        try:
+            report = run_suite(
+                profile=arguments.profile,
+                benchmarks=tuple(arguments.benchmarks) if arguments.benchmarks else None,
+                fail_fast=arguments.fail_fast,
+            )
+        except BenchmarkTaskError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(report, indent=2, sort_keys=True, allow_nan=False))
+        return 1 if report["failed"] else 0
 
     try:
         benchmark_contract = contract(arguments.benchmark)
