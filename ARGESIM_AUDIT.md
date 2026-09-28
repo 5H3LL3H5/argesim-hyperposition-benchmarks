@@ -81,9 +81,6 @@ in shared runtime code.
 
 - Internal conservation or cross-form agreement is verification, not an
   independent published validation.
-- The suite smoke profile establishes that entry points execute with shortened
-  workloads. The definition profile keeps task defaults and required inputs;
-  neither profile promotes a catalog evidence level.
 - A hardware-dependent speedup is reported, never required to exceed one.
 - The 2007 CP2 text printed `nu=0.6`; the peer-reviewed 2022 correction and
   reference code specify `nu=0.06`, 0-10 s, and profiles at 5 s and 8 s. The
