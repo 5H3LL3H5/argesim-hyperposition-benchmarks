@@ -1,5 +1,16 @@
 # ARGESIM implementation audit
 
+## Isolated diagnostic performance mode (2026-09-28)
+
+`run-performance` runs selected tasks in fresh processes with an untimed
+reference, configurable warm-up and at least nine odd repetitions. It requires
+exact result parity before publishing median/IQR, records all raw times,
+collects an untimed Python allocation probe and process peak RSS with platform
+units, and writes task JSON plus an atomic SHA-256 manifest. It does not
+check independent published references; these timings are diagnostic and do
+not advance a benchmark to `benchmark-ready`. Volatile or stochastic outputs
+that cannot satisfy exact parity become explicit failed evidence records.
+
 ## Suite evidence envelope (2026-09-28)
 
 The suite runner now attaches a schema-versioned execution record to every
