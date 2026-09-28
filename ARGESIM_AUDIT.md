@@ -43,6 +43,14 @@ check registry completeness, entrypoint resolution and single-task CLI use.
 This does not claim that every default task can be executed as a bounded
 one-command full-suite experiment. No scientific evidence gate changed.
 
+The broader local baseline run on the earlier main also exposed a separate
+evidence-test failure: the dataclass field's saved `default_factory` bypassed
+the patched `RuntimeEnvironment.capture` method. `ExperimentRecord.capture`
+now calls the method explicitly. This preserves live environment capture and
+makes the machine-readable record test independent of the host CPU affinity.
+The C07, C13 and C14 baseline failures in that checkout were independently
+addressed in PR #48 and passed focused tests on the later main.
+
 ## Runtime separation
 
 | Concern | Reusable implementation | Benchmark use |
