@@ -146,6 +146,9 @@ class BaseDevsSystem(AtomicModel):
         self.lqt_integral = 0.0
         self.last_time = 0.0
         self.wait_times: list[float] = []
+        # Duplicate macro times retain the specified order of concurrent
+        # transitions, so the deterministic lqt(t) can be plotted as steps.
+        self.lqt_trace: list[tuple[float, int]] = [(0.0, 0)]
 
         # State encoding for DEVS phase:
         # "wait_arrive", "wait_leave", "process_internal", "done"
@@ -257,6 +260,10 @@ class BaseDevsSystem(AtomicModel):
             self.handle_operator()
 
         self.lqt_max = max(self.lqt_max, sum(len(q) for q in self.queues))
+        if not self.stochastic:
+            queue_length = sum(len(q) for q in self.queues)
+            if queue_length != self.lqt_trace[-1][1]:
+                self.lqt_trace.append((float(self.current_time.macro), queue_length))
         self.update_sigma()
 
     def update_stats(self) -> None:
@@ -672,6 +679,7 @@ def run_model(
     if not stochastic:
         res["ids_out"] = system.terminated_ids[-20:]
         res["times_out"] = system.termination_times[-20:]
+        res["lqt_trace"] = system.lqt_trace
 
     if isinstance(system, JockeyingSystem):
         res["jockey_events"] = system.jockey_events
