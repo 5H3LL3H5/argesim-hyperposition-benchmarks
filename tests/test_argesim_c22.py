@@ -24,6 +24,19 @@ class C22Tests(unittest.TestCase):
         self.assertEqual(results["deterministic"]["entities_created"], 100)
         self.assertEqual(results["deterministic"]["entities_terminated"], 100)
         self.assertEqual(results["deterministic"]["active_entities"], 0)
+        trace = results["deterministic"]["lqt_trace"]
+        self.assertEqual(trace[0], (0.0, 0))
+        self.assertEqual(trace[-1][1], 0)
+        self.assertTrue(all(a[0] <= b[0] for a, b in zip(trace, trace[1:])))
+        self.assertGreater(max(length for _, length in trace), 0)
+        integral = sum(
+            length * (next_time - time)
+            for (time, length), (next_time, _) in zip(trace, trace[1:])
+        )
+        self.assertAlmostEqual(
+            integral / results["deterministic"]["times_out"][-1],
+            results["deterministic"]["lqt_avg"],
+        )
         # Structural check against expected bounds
         self.assertAlmostEqual(results["deterministic"]["tq_avg"], 6.7, places=1)
         self.assertAlmostEqual(results["deterministic"]["tq_max"], 13.5, places=1)
