@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from .catalog import BENCHMARKS
+from .oracles.cli import add_oracle_commands, handle_oracle_command
 from .runner import BenchmarkTaskError, contract, run_suite, to_jsonable
 
 
@@ -51,11 +52,18 @@ def build_parser() -> argparse.ArgumentParser:
     performance.add_argument("--output-dir", type=Path, required=True)
     performance.add_argument("--fail-fast", action="store_true")
 
+    add_oracle_commands(commands)
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     arguments = build_parser().parse_args(argv)
+
+    if arguments.command == "oracle":
+        try:
+            return handle_oracle_command(arguments)
+        except (ValueError, OSError) as exc:
+            raise SystemExit(str(exc)) from exc
 
     if arguments.command == "list":
         payload = [
