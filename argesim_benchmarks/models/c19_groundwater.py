@@ -377,7 +377,9 @@ def c19_task_b(nx: int = 71, ny: int = 41, dx: float = 1.0, dy: float = 1.0, x_o
         y_offset=y_offset,
         facility_mode="continuous",
         initial_state=state,
-        t_bound=100 * 24 * 3600,
+        # Task C compares the continuous result with scheduled operation
+        # through day 150; keep Task B on the same observation horizon.
+        t_bound=150 * 24 * 3600,
         max_step=12 * 3600,
     )
 
