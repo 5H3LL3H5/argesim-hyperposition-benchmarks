@@ -1,0 +1,58 @@
+{
+  "atol": 2e-14,
+  "final_time_s": 2000.0,
+  "max_step_s": 1.0,
+  "method": "SciPy DOP853; same model RHS, second integration engine",
+  "results": [
+    {
+      "disturbance_N": -750.0,
+      "linear_load_position_m": 294.08445314976484,
+      "load_damping_kg_s": 0.01,
+      "net_impulse_Ns": 150.0,
+      "nonlinear_load_position_m": 294.08445310935343,
+      "revision": "2006"
+    },
+    {
+      "disturbance_N": -800.0,
+      "linear_load_position_m": -0.00484961361040937,
+      "load_damping_kg_s": 0.01,
+      "net_impulse_Ns": 0.0,
+      "nonlinear_load_position_m": -0.004849654058244515,
+      "revision": "2006"
+    },
+    {
+      "disturbance_N": -850.0,
+      "linear_load_position_m": -294.0941523769921,
+      "load_damping_kg_s": 0.01,
+      "net_impulse_Ns": -150.0,
+      "nonlinear_load_position_m": -294.0941524181867,
+      "revision": "2006"
+    },
+    {
+      "disturbance_N": -750.0,
+      "linear_load_position_m": 299.3615227747888,
+      "load_damping_kg_s": 0.001,
+      "net_impulse_Ns": 150.0,
+      "nonlinear_load_position_m": 299.36152272713235,
+      "revision": "2007"
+    },
+    {
+      "disturbance_N": -800.0,
+      "linear_load_position_m": -0.0057068684980473424,
+      "load_damping_kg_s": 0.001,
+      "net_impulse_Ns": 0.0,
+      "nonlinear_load_position_m": -0.005706916190033563,
+      "revision": "2007"
+    },
+    {
+      "disturbance_N": -850.0,
+      "linear_load_position_m": -299.3729365117806,
+      "load_damping_kg_s": 0.001,
+      "net_impulse_Ns": -150.0,
+      "nonlinear_load_position_m": -299.37293656037014,
+      "revision": "2007"
+    }
+  ],
+  "rtol": 2e-13,
+  "scipy": "1.17.0"
+}
