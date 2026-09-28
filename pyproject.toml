@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "argesim-nsa-devs-reference-benchmarks"
 version = "0.6.0"
@@ -6,7 +10,11 @@ requires-python = ">=3.10"
 
 [project.scripts]
 argesim = "argesim_benchmarks.cli:main"
+argesim-cifasis-oracle = "argesim_benchmarks.oracles.cifasis_adapter:main"
 
 [tool.ruff]
 line-length = 88
 target-version = "py310"
+
+[tool.setuptools.packages.find]
+include = ["argesim_benchmarks*", "nsa_devs*"]
