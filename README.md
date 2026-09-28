@@ -108,6 +108,43 @@ An uncommitted source tree reports a null SHA rather than attributing the run
 to stale `HEAD`. Set `ARGESIM_GIT_SHA` only when the source export has been
 verified against that exact commit.
 
+## Repeated diagnostic timing
+
+Run a selected task in a fresh subprocess and write its evidence into a new
+empty directory:
+
+```bash
+argesim run-performance --profile smoke --benchmark C01 --task C01:C \
+  --warmup 1 --repetitions 9 --output-dir benchmark-results/c01-diagnostic
+```
+
+`--profile definition` is the default and may invoke very large official
+workloads. Repetitions must be odd and at least nine; warm-up is configurable.
+`--benchmark` and `--task BENCHMARK:TASK` can be repeated; `--fail-fast` stops
+after the first failure, while the default continues. `--timeout-s` defaults
+to 3600 per task. Each task produces an atomically written JSON record, and
+`manifest.json` records artifact paths, statuses and SHA-256 digests. The
+output directory must be empty; local `benchmark-results/` is ignored by Git.
+
+The worker compares a complete JSON result fingerprint against an untimed
+reference before publishing a median or inclusive IQR. All raw durations are
+kept; if parity fails, the summary stays null and the run fails. Exact parity
+can reject tasks whose outputs contain volatile timing data or unconstrained
+randomness; that is a documented blocker, not a result match. The independent
+validation fields remain null, so these numbers are **diagnostic timings**,
+including when definition inputs are selected. Smoke inputs are reduced and
+must never be presented as official benchmark performance.
+
+Python peak allocation is collected in a separate untimed `tracemalloc`
+probe. Peak RSS comes from the fresh worker's process high-water mark *before*
+that probe, including interpreter and imports. Linux `ru_maxrss` is reported
+in KiB and converted to bytes; macOS reports bytes; unknown units produce
+null with a reason. The RSS high-water mark covers the fresh benchmark worker
+process, not child processes created by parallel tasks. Work counters are
+recorded per repetition only for a directly returned `IntegrationResult`;
+unknown counters stay null. No catalog evidence gate is
+changed by repeated execution or internal parity alone.
+
 ## Run the NSA-DEVS experiments
 
 ```bash

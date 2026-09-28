@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 
 from .catalog import BENCHMARKS
 from .runner import BenchmarkTaskError, contract, run_suite, to_jsonable
@@ -38,6 +39,18 @@ def build_parser() -> argparse.ArgumentParser:
     suite.add_argument("--benchmark", action="append", dest="benchmarks")
     suite.add_argument("--fail-fast", action="store_true")
 
+    performance = commands.add_parser("run-performance")
+    performance.add_argument("--profile", choices=("smoke", "definition"),
+                             default="definition")
+    performance.add_argument("--benchmark", action="append", dest="benchmarks")
+    performance.add_argument("--task", action="append", dest="tasks",
+                             help="registered BENCHMARK:TASK, repeatable")
+    performance.add_argument("--warmup", type=int, default=1)
+    performance.add_argument("--repetitions", type=int, default=9)
+    performance.add_argument("--timeout-s", type=float, default=3600.0)
+    performance.add_argument("--output-dir", type=Path, required=True)
+    performance.add_argument("--fail-fast", action="store_true")
+
     return parser
 
 
@@ -64,6 +77,24 @@ def main(argv: list[str] | None = None) -> int:
                 fail_fast=arguments.fail_fast,
             )
         except BenchmarkTaskError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(json.dumps(report, indent=2, sort_keys=True, allow_nan=False))
+        return 1 if report["failed"] else 0
+
+    if arguments.command == "run-performance":
+        from .performance import run_performance
+        try:
+            report = run_performance(
+                output_dir=arguments.output_dir,
+                profile=arguments.profile,
+                benchmarks=tuple(arguments.benchmarks) if arguments.benchmarks else None,
+                tasks=tuple(arguments.tasks) if arguments.tasks else None,
+                warmup=arguments.warmup,
+                repetitions=arguments.repetitions,
+                timeout_s=arguments.timeout_s,
+                fail_fast=arguments.fail_fast,
+            )
+        except (BenchmarkTaskError, ValueError, OSError) as exc:
             raise SystemExit(str(exc)) from exc
         print(json.dumps(report, indent=2, sort_keys=True, allow_nan=False))
         return 1 if report["failed"] else 0
