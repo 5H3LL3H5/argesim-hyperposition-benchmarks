@@ -325,6 +325,10 @@ def run_suite(
                 "entrypoint": task.entrypoint,
                 "experiment": experiment,
                 "unavailable": {
+                    "repository_sha": (
+                        "No clean Git commit could be identified for this source tree."
+                        if repository_sha is None else None
+                    ),
                     "benchmark_revision": (
                         "No immutable definition revision is registered."
                     ),

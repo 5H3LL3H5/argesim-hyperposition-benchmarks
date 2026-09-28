@@ -31,7 +31,16 @@ def _git_sha() -> str | None:
             text=True,
             timeout=2,
         )
+        status = subprocess.run(
+            ("git", "-C", str(repository_root), "status", "--porcelain"),
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
     except (OSError, subprocess.SubprocessError):
+        return None
+    if status.stdout.strip():
         return None
     value = completed.stdout.strip()
     return value or None

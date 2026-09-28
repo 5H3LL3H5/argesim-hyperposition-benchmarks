@@ -104,7 +104,9 @@ for unavailable fields. `scope` remains `execution only`: a successful task
 does not establish an independent oracle match or a performance result.
 The one elapsed time sample has no defined IQR. Per-task Python allocation
 and RSS peaks are not measured by this execution command; they remain null.
-Set `ARGESIM_GIT_SHA` when running from a source export without Git metadata.
+An uncommitted source tree reports a null SHA rather than attributing the run
+to stale `HEAD`. Set `ARGESIM_GIT_SHA` only when the source export has been
+verified against that exact commit.
 
 ## Run the NSA-DEVS experiments
 
