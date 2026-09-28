@@ -80,6 +80,21 @@ python -m unittest discover -s tests -v
 python -m compileall -q .
 ```
 
+## Run the registered benchmark suite
+
+```bash
+argesim run-suite --profile smoke
+argesim run-suite --profile definition
+argesim run-suite --profile smoke --benchmark C19R --benchmark C22
+```
+
+The JSON report lists each task's input arguments, outcome, elapsed time and
+error, if any. A failure gives a nonzero exit code; later tasks still run unless
+`--fail-fast` is set. The smoke profile shortens costly workloads, and the
+definition profile uses the documented task defaults (including long CP2 LBM
+runs). Passing a suite run proves execution only; published reference checks
+and catalog evidence gates are assessed separately.
+
 ## Run the NSA-DEVS experiments
 
 ```bash
