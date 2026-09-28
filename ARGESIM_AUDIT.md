@@ -17,32 +17,6 @@ repeat the previously qualified infrastructure review.
 | C21 | Definition and published Modelica solution | Existing tests cover published pendulum stop time 7.5962714 s and three kick cases, plus event/dynamic contact checks. This is limited validation of these variants and tolerances, not a claim of complete solver or DAE validation. No new mismatch was established in the checked material. |
 | C22 | Definition, sections 1, 2–4 and task list | Corrected ascending deterministic entity classes independently of descending operator calls, and exposed the deterministic lqt(t) step trace required for plotting. The tests verify the class prefix, first call, trace endpoints and integral; published queue traces and stochastic statistics have not been independently matched. |
 
-## Focused suggestion review (2026-09-28)
-
-The eight repository suggestions were checked against qualified `main` without
-reopening the benchmark definitions. Two missing contract tests were confirmed:
-`convergence_table` rejects an empty iterable, and generated status markers
-must be present in the right order. Review of the latter also found a concrete
-integrity gap: duplicate marker pairs could leave an extra, stale table in the
-coverage document while the first generated table verified successfully.
-The section replacement now requires exactly one start and end marker; direct
-tests cover absent, reversed and duplicate markers.
-
-The `math.log(0)` alert in the LIQSS root helper is unreachable: zero
-polynomials are rejected, leading zero coefficients are removed, and a
-constant-only polynomial exits before the logarithm. The two factorial
-suggestions concern small fixed solver orders; C19R's distance calculations
-occur once while selecting facility cells; and C16's distance replacement has
-no representative end-to-end speedup or seeded-result parity evidence.
-These performance changes were therefore not applied. The root-level
-`parse_comments.py` placeholder has no registered benchmark task or specified
-AST-comment contract; no parser was invented for it.
-
-The unified runner registers all 24 active families, and its focused tests
-check registry completeness, entrypoint resolution and single-task CLI use.
-This does not claim that every default task can be executed as a bounded
-one-command full-suite experiment. No scientific evidence gate changed.
-
 ## Runtime separation
 
 | Concern | Reusable implementation | Benchmark use |
@@ -107,6 +81,9 @@ in shared runtime code.
 
 - Internal conservation or cross-form agreement is verification, not an
   independent published validation.
+- The suite smoke profile establishes that entry points execute with shortened
+  workloads. The definition profile keeps task defaults and required inputs;
+  neither profile promotes a catalog evidence level.
 - A hardware-dependent speedup is reported, never required to exceed one.
 - The 2007 CP2 text printed `nu=0.6`; the peer-reviewed 2022 correction and
   reference code specify `nu=0.06`, 0-10 s, and profiles at 5 s and 8 s. The
