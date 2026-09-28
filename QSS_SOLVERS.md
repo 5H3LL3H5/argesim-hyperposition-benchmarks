@@ -200,3 +200,23 @@ matrix, architecture separation, implementation status and work comparison.
   general-purpose DAE integrator.
 - CQSS's conservation guarantees are not claimed outside the Hamiltonian class
   of its defining paper.
+
+## Classical adaptive baseline
+
+`rk45` accepts a positive finite scalar `atol` or a list/tuple containing one
+positive finite absolute tolerance per state component. `rtol` remains scalar.
+The same options work through `solve_ivp`:
+
+```python
+result = solve_ivp(problem, "rk45", options={
+    "rtol": 1e-8, "atol": (1e-6, 1e-12),
+})  # for a two-state problem
+```
+
+A clipped final step may be shorter than `min_step` and still undergoes local
+error control. The initial proposal is clipped to the configured step bounds.
+Dormand-Prince endpoint derivatives are reused (FSAL), including start-value
+reuse on rejected trials. The RHS must be deterministic for each `(time, state)`;
+known discontinuities belong in separate integration segments. Each solver
+invocation starts with a fresh cache. See the
+[bounded solver review](docs/SOLVER_REVIEW_2026-09-28.md) for regressions and limits.

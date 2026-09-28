@@ -54,6 +54,71 @@ class ExplicitSolverTests(unittest.TestCase):
         self.assertGreater(result.stats.rejected_steps, 0)
         self.assertAlmostEqual(result.final_state[0], math.exp(-10.0), delta=2e-12)
 
+    def test_rk45_vector_atol_through_dispatcher(self) -> None:
+        from argesim_benchmarks.runtime import solve_ivp
+
+        problem = InitialValueProblem(
+            lambda t, y: (-y[0], -2.0 * y[1]), 0, (1e6, 1e-6), 2
+        )
+        result = solve_ivp(problem, "rk45", options={
+            "rtol": 1e-9, "atol": (1e-5, 1e-15), "initial_step": 2.0,
+        })
+        self.assertAlmostEqual(result.final_state[0] / 1e6, math.exp(-2), delta=1e-9)
+        self.assertAlmostEqual(result.final_state[1] / 1e-6, math.exp(-4), delta=1e-9)
+        scalar = rk45(decay_problem(), atol=1e-10)
+        vector = rk45(decay_problem(), atol=(1e-10,))
+        self.assertEqual(scalar, vector)
+
+    def test_rk45_invalid_vector_tolerances_fail_before_rhs(self) -> None:
+        def forbidden_rhs(t, y):
+            self.fail("invalid tolerance must fail before evaluating the RHS")
+        problem = InitialValueProblem(forbidden_rhs, 0, (1,), 1)
+        for atol in ((), (1e-9, 1e-9), (0,), (-1,), (math.nan,), (math.inf,)):
+            with self.subTest(atol=atol), self.assertRaises(ValueError):
+                rk45(problem, atol=atol)
+        with self.assertRaises(TypeError):
+            rk45(problem, atol=(True,))
+
+    def test_rk45_fsal_counts_calls_including_rejected_trials(self) -> None:
+        calls = []
+        def rhs(t, y):
+            calls.append((t, tuple(y)))
+            return (-y[0] + math.sin(t),)
+        result = rk45(InitialValueProblem(rhs, 0, (1,), 10),
+                      initial_step=10, rtol=1e-9, atol=1e-12)
+        attempts = result.stats.accepted_steps + result.stats.rejected_steps
+        self.assertGreater(result.stats.rejected_steps, 0)
+        self.assertEqual(len(calls), 1 + 6 * attempts)
+        self.assertEqual(result.stats.rhs_evaluations, len(calls))
+        exact = 1.5 * math.exp(-10) + 0.5 * (math.sin(10) - math.cos(10))
+        self.assertAlmostEqual(result.final_state[0], exact, delta=2e-9)
+        # Cache is local to one integration, even when the same callable is reused.
+        before = len(calls)
+        again = rk45(InitialValueProblem(rhs, 0, (1,), 10),
+                     initial_step=10, rtol=1e-9, atol=1e-12)
+        self.assertEqual(again, result)
+        self.assertEqual(len(calls) - before, result.stats.rhs_evaluations)
+
+    def test_rk45_integrates_short_final_interval_with_error_control(self) -> None:
+        result = rk45(decay_problem(), initial_step=0.3,
+                      min_step=0.2, max_step=0.3, rtol=1e-3)
+        self.assertEqual(result.final_time, 1.0)
+        self.assertEqual(result.stats.accepted_steps, 4)
+        self.assertAlmostEqual(result.final_state[0], math.exp(-1), delta=1e-6)
+        tiny = rk45(InitialValueProblem(lambda t, y: (1,), 0, (0,), 1e-15))
+        self.assertEqual(tiny.final_state, (1e-15,))
+        # An inaccurate endpoint trial must not be accepted merely to finish.
+        with self.assertRaises(IntegrationError):
+            rk45(InitialValueProblem(lambda t, y: (-1e6 * y[0],), 0, (1,), 1e-6),
+                 min_step=1e-5, rtol=1e-12, atol=1e-15)
+
+    def test_rk45_error_norm_avoids_intermediate_square_overflow(self) -> None:
+        from argesim_benchmarks.solvers.explicit import _rms_error
+
+        norm = _rms_error((1e200, 1e200), (0, 0), (0, 0), (1, 1), 1e-6)
+        self.assertTrue(math.isfinite(norm))
+        self.assertAlmostEqual(norm / 1e200, 1.0)
+
     def test_rhs_dimension_mismatch_is_rejected(self) -> None:
         problem = InitialValueProblem(lambda _time, _state: (1.0, 2.0), 0, (0,), 1)
         with self.assertRaises(ValueError):
