@@ -1,6 +1,26 @@
 # ARGESIM implementation audit
 
-## Correctness review, 2026-11-18
+## Corrective follow-up, 2026-11-18
+
+The follow-up implements C04 cleaning/request/conspiracy refinements, C05
+sampled trajectories and measured decimal-precision experiments, and C06
+individual-doctor service/exchange semantics. These three families now reach
+`implemented`; C02, C18 and C20 remain incomplete. The four limited `validated`
+labels are unchanged. No family is benchmark-ready.
+
+Additional C02 geometry and timing corrections expose a historical reference
+mismatch for ten pallets. Its original 6% threshold is retained as an explicit
+expected failure, not counted as successful scientific validation. Repository
+Ruff findings are now resolved; two intentional task-failure collection boundaries
+are locally annotated. See [the follow-up report](docs/ARGESIM_FOLLOWUP_20261118.md)
+for modelling conventions, numerical evidence and remaining limits, and
+[the follow-up evidence](docs/BENCHMARK_FOLLOWUP_20261118.json) for actual checks.
+
+## Initial correctness review, 2026-11-18
+
+The following initial findings describe commit
+`c57c14aea5fb8d8e5f099db5e898accb7d01bb4a`. Later corrections above supersede
+its open items; the per-definition table below records the current state.
 
 **Verdict: the repository does not yet implement every ARGESIM benchmark
 correctly and completely.** The audit retrieved the active primary definitions
@@ -183,11 +203,11 @@ in shared runtime code.
 | ID | Gate | Audit result |
 |---|---|---|
 | C01 | implemented | Definition equations and parameter study reviewed. Independent Radau spot checks pass at loss=100/1000/10000; every solver/backend is not independently qualified. |
-| C02 | specified | Partial transport abstraction. Fabricated high-load deadlocks removed; timing, blocking and merge rules remain open. Historical throughput proximity does not validate the plant. |
+| C02 | specified | Shift/travel/load timing corrected and fabricated deadlocks removed. The 10-pallet published proximity check now explicitly fails; full occupancy, blocking and merge rules remain open. |
 | C03 | implemented | Ideal-switch segment and floating-point boundary defects fixed. Independent matrix-exponential check passes through 100 us. Finite-ramp parameter sweeps retain existing tests. |
-| C04 | specified | Basic philosopher policies and accounting execute. Dirty/clean states, cleaning and neighbour-request refinements are absent. |
-| C05 | specified | Revised Task-D branch restored. Published event/final-value references pass, including explicit return-state checks. Sampled plotting output and the requested numerical-accuracy study remain absent. |
-| C06 | specified | 20% Task-B service penalty fixed. Aggregate doctor alternation remains an approximation; persistent individual service/exchange semantics are missing. |
+| C04 | implemented | Atomic/hungry/dirty-cleaning/neighbour-request refinements and reproducible normal, deadlock and two conspiracy policies execute. Timings are declared model choices; no universal fairness proof is claimed. |
+| C05 | implemented | Sampled trajectories include fast transients. Tasks C/D measure decimal precision against an 80-digit run; independent 90-digit logarithmic checks cover both parameter sets. This is a semi-analytical backend, not general RK/QSS qualification. |
+| C06 | implemented | Persistent doctors replace aggregate alternation. Actual service times, 20% transfer penalty, non-preemptive paired exchange/return, hysteresis and return-visit priority are tested. Handover convention is documented; external statistical validation remains open. |
 | C07 | implemented | Pin mode equations and velocity resets reviewed. Both Task-A cases pass independent DOP853 spot checks; Task-C published initial-velocity check remains. |
 | C08 | validated | Cumulative cycle admission bug fixed in both directions. Five deterministic appendix datasets and replication/interval checks pass; stochastic output is not a universal distributional validation. |
 | C09 | implemented | IFC surface difference-axis units fixed. Rule-weight regression and full sampled scenario checks pass. Reference level-change versus literal error-difference ambiguity remains explicitly selectable. |

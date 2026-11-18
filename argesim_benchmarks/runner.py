@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, is_dataclass
-from datetime import datetime, timezone
-from enum import Enum
 import importlib
 import inspect
 import time
-from typing import Any, Mapping
+from collections.abc import Mapping
+from dataclasses import asdict, is_dataclass
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any
 
-from .catalog import BENCHMARKS, benchmark as catalog_benchmark
+from .catalog import BENCHMARKS
+from .catalog import benchmark as catalog_benchmark
 from .evidence import ExperimentRecord, RuntimeEnvironment, TimingEvidence, _git_sha
 
 
@@ -74,8 +76,8 @@ _TASKS: dict[str, dict[str, str]] = {
     "C01": {"A": _m("solve_c01"), "B": _m("c01_task_b"), "C": _m("c01_task_c")},
     "C02": {"main": _m("solve_c02")},
     "C03": {"A": _m("c03_task_a"), "B": _m("c03_task_b"), "C": _m("c03_task_c")},
-    "C04": {"run": _m("run_c04"), "compare": _m("c04_compare_strategies")},
-    "C05": {"simulate": _m("simulate_c05"), "validate": _m("c05_validate")},
+    "C04": {"run": _m("run_c04"), "compare": _m("c04_compare_strategies"), "refinements": _m("c04_refinement_study")},
+    "C05": {"simulate": _m("simulate_c05"), "validate": _m("c05_validate"), "C": _m("c05_task_c"), "D": _m("c05_task_d")},
     "C06": {
         "A": _m("solve_c06_task_a"),
         "B": _m("solve_c06_task_b"),
@@ -290,7 +292,7 @@ def run_suite(
                 resolved_signature = True
                 result = contract(identifier).run(name, kwargs)
                 record["result_type"] = type(result).__name__
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - record arbitrary task failures and continue
                 record["status"] = "failed"
                 record["error"] = f"{type(exc).__name__}: {exc}"
                 if not resolved_signature:
