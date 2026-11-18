@@ -9,6 +9,28 @@ from argesim_benchmarks import (
 )
 
 class C03Tests(unittest.TestCase):
+    def test_ideal_switch_completes_all_twenty_half_cycles(self) -> None:
+        result = solve_c03(parameters=C03Parameters(trf=0.0), t_bound=100.0e-6)
+        self.assertEqual(result.final_time, 100.0e-6)
+        # Full-horizon regression catches duplicate floating-point cycle
+        # boundaries (previously 60 us and 60 us + one ULP).
+        self.assertTrue(all(a < b for a, b in zip(result.times, result.times[1:])))
+        # Independent affine matrix exponential at each of the 20 constant
+        # circuit segments (SciPy 1.17.0 audit oracle, not this solver's RHS).
+        expected = (
+            0.26109390773802077, 0.010829917670134966,
+            0.044486180887741075, -14.370629610159387,
+        )
+        for value, reference in zip(result.final_state, expected):
+            self.assertAlmostEqual(value, reference, delta=5.0e-6)
+
+    def test_maximum_ramp_duration_completes_the_official_horizon(self) -> None:
+        # At trf=period/2 the falling ramp ends exactly at the next cycle.
+        # Different floating-point expressions must not add a second edge.
+        result = solve_c03(parameters=C03Parameters(trf=5.0e-6))
+        self.assertEqual(result.final_time, 100.0e-6)
+        self.assertTrue(all(a < b for a, b in zip(result.times, result.times[1:])))
+
     def test_task_a_eigenvalues_match_theoretical_roots(self) -> None:
         result = c03_task_a()
         on_roots = result["ON"]

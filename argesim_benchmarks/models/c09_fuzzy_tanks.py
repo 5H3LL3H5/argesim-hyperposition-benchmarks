@@ -234,7 +234,10 @@ def c09_controller_surface(
     else:
         y_axis = tuple(-0.05 + 0.1 * index / (points - 1) for index in range(points))
         values = tuple(
-            tuple(c09_ifc_increment(error / 100.0, delta, selected) for error in x_axis)
+            tuple(
+                c09_ifc_increment(error / 100.0, delta / 100.0, selected)
+                for error in x_axis
+            )
             for delta in y_axis
         )
     return C09Surface(x_axis, y_axis, values, selected)

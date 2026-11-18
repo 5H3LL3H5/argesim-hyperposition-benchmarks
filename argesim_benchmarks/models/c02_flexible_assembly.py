@@ -537,21 +537,22 @@ class SourceSinkModel(AtomicModel):
             self.sigma = math.inf
 
 
-def solve_c02(num_pallets: int) -> dict[str, float | bool]:
-    """Solve ARGESIM C02 for the specified number of pallets using formal DEVS."""
+def solve_c02(num_pallets: int) -> dict[str, float | None]:
+    """Run the partial C02 transport abstraction, not a validated plant model.
+
+    Belt blocking and merge contention are not implemented. ``deadlock`` is
+    therefore unknown (None). High-load cases requiring those mechanisms are
+    rejected rather than returning a published deadlock as a simulated result.
+    See ARGESIM_AUDIT.md for the remaining timing and transport mismatches.
+    """
     if isinstance(num_pallets, bool) or not isinstance(num_pallets, int) or num_pallets <= 0:
         raise ValueError("num_pallets must be a positive integer")
 
-    # The closed conveyor is physically overfilled at this point.  The
-    # benchmark's reference parameter study reports deadlock for 50--60
-    # pallets, so do not manufacture a throughput value from a collision-free
-    # abstraction beyond the admissible loading range.
     if num_pallets >= 50:
-        return {
-            "throughput": 0.0,
-            "average_throughput_time": 0.0,
-            "deadlock": True,
-        }
+        raise NotImplementedError(
+            "C02 high-load cases require belt blocking and merge contention; "
+            "deadlock detection is not implemented"
+        )
 
     constants = C02Constants()
     coord = Coordinator(constants.end_minutes)
@@ -677,5 +678,5 @@ def solve_c02(num_pallets: int) -> dict[str, float | bool]:
     return {
         "throughput": float(coord.throughput),
         "average_throughput_time": avg_throughput_time,
-        "deadlock": False,
+        "deadlock": None,
     }

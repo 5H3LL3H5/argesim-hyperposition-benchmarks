@@ -16,7 +16,7 @@ from argesim_benchmarks.models.c18_nonlinear_identification import (
 
 class C18Tests(unittest.TestCase):
     def test_digitized_provenance_and_published_scale_correlations(self) -> None:
-        self.assertEqual(benchmark("C18").status, BenchmarkStatus.IMPLEMENTED)
+        self.assertEqual(benchmark("C18").status, BenchmarkStatus.SPECIFIED)
         training, validation = c18_digitized_data()
         self.assertEqual(len(training.force), 2001)
         self.assertIn("digitized", training.provenance)

@@ -10,7 +10,7 @@ from argesim_benchmarks.models.c04_dining_philosophers import (
 
 class C04Tests(unittest.TestCase):
     def test_catalog_and_seeded_state_time_accounting(self) -> None:
-        self.assertEqual(benchmark("C04").status, BenchmarkStatus.IMPLEMENTED)
+        self.assertEqual(benchmark("C04").status, BenchmarkStatus.SPECIFIED)
         first = run_c04(C04Strategy.PUT_BACK, seed=11)
         second = run_c04(C04Strategy.PUT_BACK, seed=11)
         self.assertEqual(first, second)

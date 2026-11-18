@@ -13,6 +13,17 @@ from argesim_benchmarks.models.c15_clearance import (
 
 
 class C15Tests(unittest.TestCase):
+    def test_fixed_step_solver_integrates_the_complete_bolus(self) -> None:
+        for duration in (0.5, 0.53):
+            with self.subTest(duration=duration):
+                bolus = C15Bolus(2500.0, duration)
+                expected = c15_analytical(1.0, bolus=bolus)
+                result = solve_c15(
+                    "rk4", bolus=bolus, t_bound=1.0, options={"step": 0.1}
+                )
+                for value, reference in zip(result.final_state, expected):
+                    self.assertAlmostEqual(value, reference, delta=1.0e-5)
+
     def test_rhs_matches_equations(self) -> None:
         params = C15Parameters(k01=0.1, k21=0.2, k12=0.3, v1=1.0)
         bolus = C15Bolus(d=10.0, tau=2.0)

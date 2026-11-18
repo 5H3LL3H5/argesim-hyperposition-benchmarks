@@ -7,6 +7,7 @@ from argesim_benchmarks.models.c11_scara_robot import (
     C11_TARGET_STATE,
     C11Parameters,
     c11_inertia_terms,
+    c11_rhs,
     c11_task_a,
     c11_task_b,
     c11_task_c,
@@ -14,6 +15,29 @@ from argesim_benchmarks.models.c11_scara_robot import (
 )
 
 class C11Tests(unittest.TestCase):
+    def test_motor_torques_are_limited_to_the_specified_maxima(self) -> None:
+        p = C11Parameters()
+        # At q=dq=0, M*qdd equals the clamped joint drive torque (plus
+        # vertical gravity). Check both current polarities independently.
+        theta1, theta2, theta3 = c11_inertia_terms(p)
+        for sign in (-1.0, 1.0):
+            with self.subTest(sign=sign):
+                rhs = c11_rhs(p)(0.0, (0.0,) * 6 + (sign * 100.0,) * 3)
+                qdd1, qdd2, qdd3 = rhs[3:6]
+                self.assertAlmostEqual(
+                    (theta1 + 2 * theta2 + theta3) * qdd1
+                    + (theta2 + theta3) * qdd2,
+                    sign * p.u1 * p.T1_max,
+                )
+                self.assertAlmostEqual(
+                    (theta2 + theta3) * qdd1 + theta3 * qdd2,
+                    sign * p.u2 * p.T2_max,
+                )
+                self.assertAlmostEqual(
+                    (p.m3L + p.Theta3_mot * p.u3**2) * qdd3 + p.m3L * p.g,
+                    sign * p.u3 * p.T3_max,
+                )
+
     def test_invalid_parameters_are_rejected(self) -> None:
         with self.assertRaises(ValueError):
             solve_c11("unsupported")

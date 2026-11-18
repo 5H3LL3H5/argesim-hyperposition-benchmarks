@@ -21,8 +21,8 @@ class C12Parameters:
     d: float = 1.0
     a: float = 1.0
     v0: float = 1.0
-    # Task A termination time (from spec: t=15)
-    max_time: float = 15.0
+    # Task A1 plotting horizon; None resolves collisions to their terminal state.
+    max_time: float | None = 15.0
     # Task C stochastic parameters
     mean_e: float = 0.5
     std_e: float = 0.05
@@ -36,8 +36,10 @@ class C12Parameters:
             raise ValueError("Distance a must be positive and finite")
         if not math.isfinite(self.v0) or self.v0 <= 0.0:
             raise ValueError("Initial velocity v0 must be positive and finite")
-        if not math.isfinite(self.max_time) or self.max_time <= 0.0:
-            raise ValueError("Max time must be positive and finite")
+        if self.max_time is not None and (
+            not math.isfinite(self.max_time) or self.max_time <= 0.0
+        ):
+            raise ValueError("Max time must be positive and finite, or None")
         if not math.isfinite(self.mean_e) or self.mean_e < 0.0 or self.mean_e > 1.0:
             raise ValueError("Mean e must be between 0.0 and 1.0")
         if not math.isfinite(self.std_e) or self.std_e <= 0.0:
@@ -57,12 +59,11 @@ def _simulate(
     e = params.e
     v0 = params.v0
     a_dist = params.a
-    max_time = params.max_time
+    max_time = math.inf if params.max_time is None else params.max_time
 
     v = [v0, 0.0, 0.0, 0.0]
-    # Official initial geometry: sphere 1 starts a units from sphere 2;
-    # spheres 2--4 are touching, so their free surface gaps are zero.
-    y = [a_dist, 0.0, 0.0]
+    # Definition (4): all three free surface gaps initially equal a.
+    y = [a_dist, a_dist, a_dist]
     t = 0.0
     cols = 0
     history = [(t, list(y), list(v))]
@@ -86,17 +87,18 @@ def _simulate(
 
         if t + dt > max_time + 1e-12:
             dt = max_time - t
-            if dt > 1e-12:
+            if dt > 0.0:
                 t += dt
                 for j in range(3):
-                    y[j] += (v[j+1] - v[j]) * dt
+                    y[j] = max(0.0, y[j] + (v[j+1] - v[j]) * dt)
                 history.append((t, list(y), list(v)))
             break
 
-        if dt > 1e-12:
+        if dt > 0.0:
             t += dt
             for j in range(3):
-                y[j] += (v[j+1] - v[j]) * dt
+                # Exact event advance cannot create overlap; clip roundoff.
+                y[j] = max(0.0, y[j] + (v[j+1] - v[j]) * dt)
 
         vy = v[i+1] - v[i]
         v[i] = v[i] + 0.5 * (1 + e) * vy
@@ -117,9 +119,9 @@ def c12_task_a() -> dict[str, object]:
     cols, v_final, t_final, history = _simulate(C12Parameters(e=0.2, v0=1.0, max_time=15.0))
 
     # a2
-    _, v_elastic, _, _ = _simulate(C12Parameters(e=1.0, v0=1.0))
+    _, v_elastic, _, _ = _simulate(C12Parameters(e=1.0, v0=1.0, max_time=None))
     _, v_quasi_plastic, _, _ = _simulate(
-        C12Parameters(e=C12_QUASI_PLASTIC_E, v0=1.0)
+        C12Parameters(e=C12_QUASI_PLASTIC_E, v0=1.0, max_time=None)
     )
 
     return {
@@ -138,7 +140,7 @@ def c12_task_b() -> dict[str, object]:
     count = int(round((1.0 - C12_QUASI_PLASTIC_E) / step))
     for i in range(count + 1):
         e_val = round(1.0 - i * step, 2)
-        cols, v, _t, _ = _simulate(C12Parameters(e=e_val, v0=1.0))
+        cols, v, _t, _ = _simulate(C12Parameters(e=e_val, v0=1.0, max_time=None))
         results[e_val] = {"collisions": cols, "velocities": v}
     return {"sweep": results}
 
@@ -148,7 +150,7 @@ def c12_task_c(*, n_samples: int = 10000, seed: int = 42) -> dict[str, object]:
         raise ValueError("stochastic study requires an integer sample count of at least two")
     # c1: find e for v4 = v0/2 = 0.5
     def f(e_val: float) -> float:
-        return _simulate(C12Parameters(e=e_val, v0=1.0))[1][3] - 0.5
+        return _simulate(C12Parameters(e=e_val, v0=1.0, max_time=None))[1][3] - 0.5
 
     e_solution = brentq(f, 0.0, 1.0)
 
@@ -161,7 +163,9 @@ def c12_task_c(*, n_samples: int = 10000, seed: int = 42) -> dict[str, object]:
     for _ in range(n_samples):
         e_val = rng.normalvariate(mean_e, std_e)
         e_val = max(0.0, min(1.0, e_val))
-        v4_samples.append(_simulate(C12Parameters(e=e_val, v0=1.0))[1][3])
+        v4_samples.append(
+            _simulate(C12Parameters(e=e_val, v0=1.0, max_time=None))[1][3]
+        )
 
     mean_v4 = statistics.mean(v4_samples)
     std_v4 = statistics.stdev(v4_samples)

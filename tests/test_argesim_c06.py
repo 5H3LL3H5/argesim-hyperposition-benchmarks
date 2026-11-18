@@ -51,7 +51,7 @@ class TestArgesimC06(unittest.TestCase):
                 _ward_treatment_time(
                     cw1_patient, facilities, task_b_active=True
                 ),
-                (2.8, 4.1, 6.3),
+                tuple(1.2 * value for value in (2.8, 4.1, 6.3)),
             )
             self.assertEqual(
                 _ward_treatment_time(
