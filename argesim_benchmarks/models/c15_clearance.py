@@ -423,8 +423,8 @@ def c15_task_c(
     for _ in range(iterations):
         art_conc = [c + rng.gauss(0.0, s) for c in measurements_conc]
 
-        def res_fn(p):
-            return residual(p, art_conc)
+        def res_fn(p, values=art_conc):
+            return residual(p, values)
 
         p_opt = _levenberg_marquardt(res_fn, p0, max_iter=50)
         results["k01"].append(p_opt[0])

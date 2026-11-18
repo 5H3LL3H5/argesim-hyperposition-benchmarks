@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import math
-from dataclasses import dataclass
 
 def _map_to_svg(
     x: float, y: float, x_min: float, x_max: float, y_min: float, y_max: float,

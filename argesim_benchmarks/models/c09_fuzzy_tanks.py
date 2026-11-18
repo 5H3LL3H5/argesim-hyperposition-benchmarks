@@ -329,8 +329,8 @@ def simulate_c09(
         raise ValueError("valid positive simulation and output steps are required")
     if not math.isfinite(actuator_scale) or actuator_scale <= 0.0:
         raise ValueError("actuator_scale must be positive and finite")
-    steps = int(round(t_bound / sample_time))
-    stride = int(round(output_step / sample_time))
+    steps = round(t_bound / sample_time)
+    stride = round(output_step / sample_time)
     if not math.isclose(steps * sample_time, t_bound, abs_tol=1.0e-10):
         raise ValueError("t_bound must be an integer multiple of sample_time")
     if not math.isclose(stride * sample_time, output_step, abs_tol=1.0e-10):

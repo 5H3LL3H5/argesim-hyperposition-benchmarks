@@ -13,7 +13,6 @@ from unittest import mock
 from argesim_benchmarks.oracles import CifasisOracle, OracleStatus
 from argesim_benchmarks.oracles.cifasis_adapter import main
 
-
 COMPILE_DRIVER = r'''#!/usr/bin/env python3
 import os
 import pathlib

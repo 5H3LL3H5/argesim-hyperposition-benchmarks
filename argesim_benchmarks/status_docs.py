@@ -6,7 +6,6 @@ from pathlib import Path
 
 from .catalog import BENCHMARKS
 
-
 COVERAGE_START = "<!-- BEGIN GENERATED BENCHMARK STATUS -->"
 COVERAGE_END = "<!-- END GENERATED BENCHMARK STATUS -->"
 

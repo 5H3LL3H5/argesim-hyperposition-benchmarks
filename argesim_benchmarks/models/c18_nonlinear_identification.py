@@ -9,6 +9,7 @@ set, keeping data provenance separate from model implementation.
 
 from __future__ import annotations
 
+import itertools
 import math
 import random
 from collections.abc import Sequence
@@ -189,7 +190,7 @@ def _interpolate_anchors(values: Sequence[float], output_hz: int = 100) -> tuple
     if output_hz % 5:
         raise ValueError("output_hz must be an integer multiple of 5")
     result = []
-    for left, right in zip(values, values[1:]):
+    for left, right in itertools.pairwise(values):
         result.extend(left + (right - left) * index / factor for index in range(factor))
     result.append(float(values[-1]))
     return tuple(result)

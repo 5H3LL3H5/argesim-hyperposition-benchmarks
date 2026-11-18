@@ -116,7 +116,7 @@ def _simulate(
 def c12_task_a() -> dict[str, object]:
     """Task A: Distance-time functions and final velocities."""
     # a1
-    cols, v_final, t_final, history = _simulate(C12Parameters(e=0.2, v0=1.0, max_time=15.0))
+    _cols, _v_final, _t_final, history = _simulate(C12Parameters(e=0.2, v0=1.0, max_time=15.0))
 
     # a2
     _, v_elastic, _, _ = _simulate(C12Parameters(e=1.0, v0=1.0, max_time=None))
@@ -137,7 +137,7 @@ def c12_task_b() -> dict[str, object]:
     """Task B: Number of collisions and final velocities over e."""
     results = {}
     step = 0.01
-    count = int(round((1.0 - C12_QUASI_PLASTIC_E) / step))
+    count = round((1.0 - C12_QUASI_PLASTIC_E) / step)
     for i in range(count + 1):
         e_val = round(1.0 - i * step, 2)
         cols, v, _t, _ = _simulate(C12Parameters(e=e_val, v0=1.0, max_time=None))

@@ -1,13 +1,13 @@
 import unittest
 
 from argesim_benchmarks.models.c10_dining_philosophers import (
-    c10_task_a,
-    c10_task_b,
-    run_c10_simulation,
+    PhilosopherState,
     TaskAResult,
     TaskBResult,
-    PhilosopherState,
+    c10_task_a,
+    c10_task_b,
     resolve_chopstick_requests,
+    run_c10_simulation,
 )
 
 
@@ -72,9 +72,8 @@ class C10Tests(unittest.TestCase):
 
     def test_task_b_rejects_empty_run_set(self) -> None:
         for value in (0, 1, 49, -1, 1.5, True):
-            with self.subTest(value=value):
-                with self.assertRaises(ValueError):
-                    c10_task_b(value)
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                c10_task_b(value)
 
 if __name__ == "__main__":
     unittest.main()

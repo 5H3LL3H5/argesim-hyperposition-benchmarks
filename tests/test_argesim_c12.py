@@ -1,4 +1,6 @@
+import itertools
 import unittest
+
 from argesim_benchmarks.models.c12_collision import (
     C12_QUASI_PLASTIC_E,
     C12Parameters,
@@ -7,6 +9,7 @@ from argesim_benchmarks.models.c12_collision import (
     c12_task_c,
 )
 from argesim_benchmarks.models.c12_collision.c12_collision_processes import _simulate
+
 
 class ArgesimC12Tests(unittest.TestCase):
     def test_c12_task_a(self) -> None:
@@ -100,13 +103,12 @@ class ArgesimC12Tests(unittest.TestCase):
         cdf = result["c2_empirical_cdf"]
         self.assertEqual(len(cdf), 10000)
         self.assertEqual(cdf[-1][1], 1.0)
-        self.assertTrue(all(a[0] <= b[0] and a[1] < b[1] for a, b in zip(cdf, cdf[1:])))
+        self.assertTrue(all(a[0] <= b[0] and a[1] < b[1] for a, b in itertools.pairwise(cdf)))
 
     def test_c12_task_c_rejects_too_few_samples(self) -> None:
         for value in (1, 1.5, True):
-            with self.subTest(value=value):
-                with self.assertRaises(ValueError):
-                    c12_task_c(n_samples=value)
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                c12_task_c(n_samples=value)
 
 if __name__ == "__main__":
     unittest.main()

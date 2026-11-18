@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
 from ..runtime import solve_ivp
 
+
 @dataclass(frozen=True)
 class C11Parameters:
     # Mechanical system parameters

@@ -1175,8 +1175,7 @@ def _generalised_liqss_family(
         crossings: list[float] = []
         for index in range(problem.dimension):
             scheduled = next_self[index] - time
-            if scheduled < 0.0:
-                scheduled = 0.0
+            scheduled = max(scheduled, 0.0)
             guard = _boundary_time(
                 x[index],
                 q[index],

@@ -32,7 +32,7 @@ def solve_case(load_damping: float, disturbance: float, *, nonlinear: bool) -> f
     ):
         rhs = rhs_factory(parameters, fd=force_d, fc_desired=force_c)
         trajectory = solve_ivp(
-            lambda t, y: rhs(t, y), (start, end), state, method="DOP853",
+            rhs, (start, end), state, method="DOP853",
             rtol=2e-13, atol=2e-14, max_step=1.0,
         )
         if not trajectory.success:

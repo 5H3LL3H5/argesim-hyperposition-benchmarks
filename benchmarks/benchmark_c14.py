@@ -7,6 +7,7 @@ from argesim_benchmarks.models.c14_supply_chain import (
     c14_task_c2,
 )
 
+
 def main():
     print("Running ARGESIM C14 Supply Chain Validation...")
 

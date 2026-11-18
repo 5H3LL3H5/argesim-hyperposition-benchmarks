@@ -1,7 +1,7 @@
-import unittest
 import random
+import unittest
 
-import argesim_benchmarks.catalog as catalog
+from argesim_benchmarks import catalog
 from argesim_benchmarks.models.c20_complex_production import (
     C20ConveyorCluster,
     C20ConveyorElement,
@@ -17,8 +17,8 @@ from argesim_benchmarks.models.c20_complex_production import (
     generate_osc1_order_book,
     generate_osc2_order_book,
     generate_osc3_order_book,
-    run_c20_replication,
     get_process_plans,
+    run_c20_replication,
 )
 
 

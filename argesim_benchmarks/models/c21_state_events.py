@@ -5,6 +5,7 @@ The equations, parameters, and tasks follow the official C21 definition (SNE 26(
 
 from __future__ import annotations
 
+import itertools
 import math
 import time
 from bisect import bisect_left
@@ -48,7 +49,7 @@ class C21RLCDiodeParameters:
 
     r1: float = 1.0e3
     r2: float = 2.0e1
-    l: float = 25.3e-6  # noqa: E741
+    l: float = 25.3e-6
     c: float = 100.0e-9
     i_s: float = 1.0e-8
     u_t: float = 26.0e-3
@@ -66,7 +67,7 @@ class C21RotatingPendulumParameters:
 
     m: float = 1.5
     k: float = 0.9
-    l: float = 1.0  # noqa: E741
+    l: float = 1.0
     g: float = 9.81
 
     def __post_init__(self) -> None:
@@ -173,7 +174,7 @@ def c21_bouncing_ball_event_contact(parameters: C21BouncingBallParameters) -> Rh
     """Return the RHS for the event contact bouncing ball model (free falling phase)."""
 
     def rhs(_time: float, state: Sequence[float]) -> Vector:
-        x, v = state
+        _x, v = state
         return (
             v,
             -parameters.g - parameters.beta * v * abs(v),
@@ -186,7 +187,7 @@ def c21_bouncing_ball_dynamic_contact_flying(parameters: C21BouncingBallParamete
     """Return the RHS for the dynamic contact model (free falling phase)."""
 
     def rhs(_time: float, state: Sequence[float]) -> Vector:
-        x, v, w = state
+        _x, v, w = state
         return (
             v,
             -parameters.g - parameters.beta * v * abs(v),
@@ -200,7 +201,7 @@ def c21_bouncing_ball_dynamic_contact_contact(parameters: C21BouncingBallParamet
     """Return the RHS for the dynamic contact model (contact phase)."""
 
     def rhs(_time: float, state: Sequence[float]) -> Vector:
-        x, v, w = state
+        x, v, _w = state
         f_c = -parameters.k * x - parameters.d * v
         return (
             v,
@@ -346,7 +347,7 @@ def c21_rotating_pendulum_falling(parameters: C21RotatingPendulumParameters) -> 
     """Return the RHS for the rotating pendulum in free falling phase."""
 
     def rhs(_time: float, state: Sequence[float]) -> Vector:
-        x, dx, y, dy = state
+        _x, dx, _y, dy = state
         return (
             dx,
             -(parameters.k / parameters.m) * dx,
@@ -1293,9 +1294,7 @@ def c21_shockley_algebraic(
     if interpolation_points is not None:
         breakpoints = c21_shockley_breakpoints(interpolation_points, parameters)
         candidate: tuple[float, float] | None = None
-        for (left_u, left_i), (right_u, right_i) in zip(
-            breakpoints, breakpoints[1:]
-        ):
+        for (left_u, left_i), (right_u, right_i) in itertools.pairwise(breakpoints):
             slope = (right_i - left_i) / (right_u - left_u)
             intercept = left_i - slope * left_u
             denominator = 1.0 - parameters.r2 * slope

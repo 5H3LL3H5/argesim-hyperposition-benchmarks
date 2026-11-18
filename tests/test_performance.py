@@ -1,14 +1,14 @@
 """Contract tests for isolated diagnostic timing and evidence artifacts."""
 
+import json
+import subprocess
+import sys
+import unittest
 from contextlib import redirect_stdout
 from hashlib import sha256
 from io import StringIO
-import json
 from pathlib import Path
-import subprocess
-import sys
 from tempfile import TemporaryDirectory
-import unittest
 from unittest.mock import Mock, patch
 
 from argesim_benchmarks.cli import main
@@ -75,10 +75,9 @@ class PerformanceTests(unittest.TestCase):
         self.assertGreater(record["work"]["rhs_evaluations"], 0)
 
     def test_task_filter_must_name_selected_registered_task(self):
-        with TemporaryDirectory() as directory:
-            with self.assertRaisesRegex(ValueError, "registered selected"):
-                run_performance(output_dir=Path(directory), profile="smoke",
-                                benchmarks=("C01",), tasks=("C02:main",))
+        with TemporaryDirectory() as directory, self.assertRaisesRegex(ValueError, "registered selected"):
+            run_performance(output_dir=Path(directory), profile="smoke",
+                            benchmarks=("C01",), tasks=("C02:main",))
 
     def test_fail_fast_and_continue_write_complete_manifests(self):
         failure = {"status": "failed", "error": "parity mismatch"}

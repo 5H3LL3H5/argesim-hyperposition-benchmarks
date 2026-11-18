@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
 import json
 import math
 import os
-from pathlib import Path
 import platform
 import statistics
 import subprocess
-from typing import Any, Mapping, Sequence
-
+from collections.abc import Mapping, Sequence
+from dataclasses import asdict, dataclass, field
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
 
 SCHEMA_VERSION = 1
 TIMING_UNITS = frozenset({"seconds", "milliseconds", "microseconds", "nanoseconds"})
@@ -100,7 +100,7 @@ class RuntimeEnvironment:
     cpu_governors: tuple[str, ...] | None
 
     @classmethod
-    def capture(cls) -> "RuntimeEnvironment":
+    def capture(cls) -> RuntimeEnvironment:
         return cls(
             python=platform.python_version(),
             implementation=platform.python_implementation(),
@@ -164,7 +164,7 @@ class TimingEvidence:
         *,
         warmup: int = 0,
         unit: str = "seconds",
-    ) -> "TimingEvidence":
+    ) -> TimingEvidence:
         if warmup < 0:
             raise ValueError("warmup must be non-negative")
         if unit not in TIMING_UNITS:
@@ -235,7 +235,7 @@ class ExperimentRecord:
         work: WorkEvidence | None = None,
         timing: TimingEvidence | None = None,
         environment: RuntimeEnvironment | None = None,
-    ) -> "ExperimentRecord":
+    ) -> ExperimentRecord:
         return cls(
             benchmark=benchmark,
             task=task,

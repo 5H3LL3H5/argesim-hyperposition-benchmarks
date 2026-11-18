@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 from collections.abc import Mapping, Sequence
 
 from .ivp import InitialValueProblem, IntegrationResult, SolverStats
@@ -240,7 +241,7 @@ def merge_integration_results(
     accepted = results[0].stats.accepted_steps
     rejected = results[0].stats.rejected_steps
     evaluations = results[0].stats.rhs_evaluations
-    for previous, current in zip(results, results[1:]):
+    for previous, current in itertools.pairwise(results):
         if previous.final_time != current.times[0]:
             raise ValueError("integration segments must be contiguous")
         if previous.final_state != current.states[0]:

@@ -16,5 +16,9 @@ argesim-cifasis-oracle = "argesim_benchmarks.oracles.cifasis_adapter:main"
 line-length = 88
 target-version = "py310"
 
+[tool.ruff.lint]
+# The core supports Python 3.10 without third-party runtime dependencies.
+typing-extensions = false
+
 [tool.setuptools.packages.find]
 include = ["argesim_benchmarks*", "nsa_devs*"]

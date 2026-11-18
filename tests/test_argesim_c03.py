@@ -1,4 +1,5 @@
 import unittest
+
 from argesim_benchmarks import (
     C03Parameters,
     c03_rhs,
@@ -7,6 +8,7 @@ from argesim_benchmarks import (
     c03_task_c,
     solve_c03,
 )
+
 
 class C03Tests(unittest.TestCase):
     def test_ideal_switch_completes_all_twenty_half_cycles(self) -> None:
@@ -57,7 +59,7 @@ class C03Tests(unittest.TestCase):
         self.assertEqual(len(real_off), 0)
 
         # Check OFF state complex roots
-        off_real_parts = sorted(list(set([round(r.real, 0) for r in off_roots])))
+        off_real_parts = sorted({round(r.real, 0) for r in off_roots})
         self.assertAlmostEqual(off_real_parts[1], -54708.0, delta=2.0)
         self.assertAlmostEqual(off_real_parts[0], -58228.0, delta=2.0)
 

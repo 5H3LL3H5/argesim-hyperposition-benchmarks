@@ -19,11 +19,11 @@ from argesim_benchmarks import (
     qss4,
 )
 from argesim_benchmarks.runtime import normalise_solver_name, solve_ivp
+from argesim_benchmarks.solvers._polynomial import first_positive_root
 from argesim_benchmarks.solvers.advanced_qss import (
     _difference_coefficients,
     _first_positive_unbounded_root,
 )
-from argesim_benchmarks.solvers._polynomial import first_positive_root
 
 
 class AdvancedQssTests(unittest.TestCase):

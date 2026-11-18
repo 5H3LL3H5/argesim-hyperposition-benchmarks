@@ -1,19 +1,19 @@
 import unittest
 
 from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
-
 from argesim_benchmarks.models.cp1_parallel import (
+    CP1_TASK_B_EQUILIBRIUM,
+    CP1_TASK_B_TERMINAL_VALUES,
     cp1_task_a_ivp,
+    cp1_task_a_study,
+    cp1_task_b_compare_execution,
     cp1_task_b_ivp,
     cp1_task_b_rhs,
     cp1_task_c_ivp,
-    CP1_TASK_B_EQUILIBRIUM,
-    CP1_TASK_B_TERMINAL_VALUES,
-    cp1_task_a_study,
-    cp1_task_b_compare_execution,
     cp1_task_c_solve,
 )
 from argesim_benchmarks.solvers import rk45
+
 
 class CP1Tests(unittest.TestCase):
     def test_cp1_catalog_status_reflects_external_table_validation(self) -> None:
