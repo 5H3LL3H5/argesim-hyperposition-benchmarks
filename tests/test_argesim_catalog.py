@@ -23,9 +23,9 @@ class ArgesimCatalogTests(unittest.TestCase):
 
     def test_benchmark_status_reflects_remaining_definition_gaps(self) -> None:
         expected_groups = {
-            BenchmarkStatus.SPECIFIED: {"C02", "C04", "C05", "C06", "C18", "C20"},
+            BenchmarkStatus.SPECIFIED: {"C02", "C18", "C20"},
             BenchmarkStatus.IMPLEMENTED: {
-                "C01", "C03", "C07", "C09", "C10", "C11", "C12", "C13",
+                "C01", "C03", "C04", "C05", "C06", "C07", "C09", "C10", "C11", "C12", "C13",
                 "C14", "C15", "C16", "C17R", "C19R", "C22",
             },
             BenchmarkStatus.VALIDATED: {"C08", "C21", "CP1", "CP2"},
@@ -66,9 +66,8 @@ class ArgesimCatalogTests(unittest.TestCase):
             valid.replace(COVERAGE_END, f"{COVERAGE_START}\n{COVERAGE_END}"),
         )
         for text in malformed:
-            with self.subTest(text=text):
-                with self.assertRaises(ValueError):
-                    replace_generated_section(text, "new")
+            with self.subTest(text=text), self.assertRaises(ValueError):
+                replace_generated_section(text, "new")
 
     def test_coverage_families_are_present(self) -> None:
         self.assertTrue(all(entry.coverage_family.strip() for entry in BENCHMARKS))

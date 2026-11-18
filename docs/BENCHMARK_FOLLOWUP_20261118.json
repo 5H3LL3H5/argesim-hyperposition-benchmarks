@@ -1,0 +1,827 @@
+{
+  "audit_date": "2026-11-18",
+  "recorded_at_utc": "2026-11-18T23:20:31.511708+00:00",
+  "repository": "5H3LL3H5/argesim-hyperposition-benchmarks",
+  "base_commit": "c57c14aea5fb8d8e5f099db5e898accb7d01bb4a",
+  "ci_cleanup_commit": "eb932a75b33680433c13b2b3ae00a8e89ef84f70",
+  "scope": "Corrective follow-up to the 24-family audit; implementation, regression and numerical spot checks, not full-workload scientific certification",
+  "prior_evidence": "docs/BENCHMARK_AUDIT_20261118.json",
+  "environment": {
+    "python": "3.12.14",
+    "system": "Linux",
+    "machine": "x86_64",
+    "reference_dependencies": {
+      "numpy": "2.3.5",
+      "scipy": "1.17.0",
+      "mpmath": "1.3.0"
+    },
+    "ruff": "0.17.5"
+  },
+  "catalog_counts": {
+    "implemented": 17,
+    "specified": 3,
+    "validated": 4
+  },
+  "catalog": {
+    "C01": "implemented",
+    "C02": "specified",
+    "C03": "implemented",
+    "C04": "implemented",
+    "C05": "implemented",
+    "C06": "implemented",
+    "C07": "implemented",
+    "C08": "validated",
+    "C09": "implemented",
+    "C10": "implemented",
+    "C11": "implemented",
+    "C12": "implemented",
+    "C13": "implemented",
+    "C14": "implemented",
+    "C15": "implemented",
+    "C16": "implemented",
+    "C17R": "implemented",
+    "C18": "specified",
+    "C19R": "implemented",
+    "C20": "specified",
+    "C21": "validated",
+    "C22": "implemented",
+    "CP1": "validated",
+    "CP2": "validated"
+  },
+  "checks": {
+    "unit_suite": {
+      "command": "python -m unittest discover -s tests -v",
+      "scope": "Full suite before the last C04 deadlock refinement and C02 execution assertion; see final focused rerun.",
+      "exit_code": 0,
+      "total": 341,
+      "passed": 340,
+      "expected_failures": 1,
+      "failures": 0,
+      "errors": 0,
+      "duration_seconds": 326.04,
+      "log_sha256": "58106c74ea2b86f727722f979a807169a3fbb3883443e777fbcf1e02f2b6f10f"
+    },
+    "final_focused_units": {
+      "command": "python -m unittest discover -s tests -p 'test_argesim_c0[2456].py' -v",
+      "scope": "Exact final C02/C04/C05/C06 files; overlaps full-suite tests.",
+      "exit_code": 0,
+      "total": 32,
+      "passed": 31,
+      "expected_failures": 1,
+      "failures": 0,
+      "errors": 0,
+      "duration_seconds": 6.915,
+      "log_sha256": "214f003ab184832da852848638916339ad2e62a8d77119beea7cbd48954ec9d9"
+    },
+    "smoke_suite": {
+      "command": "python -m argesim_benchmarks run-suite --profile smoke",
+      "scope": "All 24 families; execution only. Precedes C05 context isolation and final C04 deadlock refinement.",
+      "exit_code": 0,
+      "total": 74,
+      "passed": 74,
+      "failed": 0,
+      "log_sha256": "70caae07cb3756f44b270782b3764aece58f677b86b37c5ff0c4024762e274c1",
+      "tasks": [
+        {
+          "benchmark": "C01",
+          "task": "A",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C01",
+          "task": "B",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C01",
+          "task": "C",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C02",
+          "task": "main",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C03",
+          "task": "A",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C03",
+          "task": "B",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C03",
+          "task": "C",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C04",
+          "task": "run",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C04",
+          "task": "compare",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C04",
+          "task": "refinements",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C05",
+          "task": "simulate",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C05",
+          "task": "validate",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C05",
+          "task": "C",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C05",
+          "task": "D",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C06",
+          "task": "A",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C06",
+          "task": "B",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C06",
+          "task": "C",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C07",
+          "task": "A",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C07",
+          "task": "B",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C07",
+          "task": "C",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C08",
+          "task": "replication",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C08",
+          "task": "C",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C09",
+          "task": "run",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C09",
+          "task": "validate",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C10",
+          "task": "A",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C10",
+          "task": "B",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C11",
+          "task": "A",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C11",
+          "task": "B",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C11",
+          "task": "C",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C11",
+          "task": "main",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C12",
+          "task": "A",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C12",
+          "task": "B",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C12",
+          "task": "C",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C13",
+          "task": "A",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C13",
+          "task": "B",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C13",
+          "task": "C",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C14",
+          "task": "A1",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C14",
+          "task": "A2",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C14",
+          "task": "B1",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C14",
+          "task": "B2",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C14",
+          "task": "C1",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C14",
+          "task": "C2",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C15",
+          "task": "A",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C15",
+          "task": "B",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C15",
+          "task": "C",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C16",
+          "task": "A",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C16",
+          "task": "B",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C16",
+          "task": "C",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C17R",
+          "task": "task1",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C17R",
+          "task": "compare",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C17R",
+          "task": "ca",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C17R",
+          "task": "ode",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C18",
+          "task": "all",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C19R",
+          "task": "A",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C19R",
+          "task": "B",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C19R",
+          "task": "C",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C20",
+          "task": "replication",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C20",
+          "task": "experiment",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C21",
+          "task": "event-contact",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C21",
+          "task": "dynamic-contact",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C21",
+          "task": "pendulum-basic",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C21",
+          "task": "pendulum-kick",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C21",
+          "task": "rlc-diode",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C22",
+          "task": "basic",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C22",
+          "task": "jockeying",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C22",
+          "task": "reneging",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C22",
+          "task": "classing",
+          "status": "passed"
+        },
+        {
+          "benchmark": "CP1",
+          "task": "A",
+          "status": "passed"
+        },
+        {
+          "benchmark": "CP1",
+          "task": "B",
+          "status": "passed"
+        },
+        {
+          "benchmark": "CP1",
+          "task": "B-validate",
+          "status": "passed"
+        },
+        {
+          "benchmark": "CP1",
+          "task": "C",
+          "status": "passed"
+        },
+        {
+          "benchmark": "CP2",
+          "task": "1",
+          "status": "passed"
+        },
+        {
+          "benchmark": "CP2",
+          "task": "2",
+          "status": "passed"
+        },
+        {
+          "benchmark": "CP2",
+          "task": "3",
+          "status": "passed"
+        }
+      ]
+    },
+    "final_focused_smoke": {
+      "command": "python -m argesim_benchmarks run-suite --profile smoke --benchmark C04 --benchmark C05",
+      "scope": "Final C04/C05 source; execution only; overlaps full smoke profile.",
+      "exit_code": 0,
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "log_sha256": "d0b6bd941963153666cf51e9b9ac2b06e12071c45d552596369eaf0d71e4dce2",
+      "tasks": [
+        {
+          "benchmark": "C04",
+          "task": "run",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C04",
+          "task": "compare",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C04",
+          "task": "refinements",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C05",
+          "task": "simulate",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C05",
+          "task": "validate",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C05",
+          "task": "C",
+          "status": "passed"
+        },
+        {
+          "benchmark": "C05",
+          "task": "D",
+          "status": "passed"
+        }
+      ]
+    },
+    "independent_numerical_probes": {
+      "command": "python scripts/benchmark_spec_probe.py",
+      "exit_code": 0,
+      "passed": 11,
+      "failed": 0,
+      "log_sha256": "86ef2f5da1756ec7eb30e4dbcb2193d8a20068e5cf3be216dde60be1574cfbb2",
+      "checks": [
+        {
+          "case": "C01 loss=100",
+          "maximum_absolute_error": 1.5059747671131163e-08,
+          "tolerance": 2e-06,
+          "passed": true,
+          "details": "Radau reference, all 1072 candidate trajectory samples"
+        },
+        {
+          "case": "C01 loss=1000",
+          "maximum_absolute_error": 1.4610526122282863e-08,
+          "tolerance": 2e-06,
+          "passed": true,
+          "details": "Radau reference, all 3164 candidate trajectory samples"
+        },
+        {
+          "case": "C01 loss=10000",
+          "maximum_absolute_error": 1.4696668770852739e-08,
+          "tolerance": 2e-06,
+          "passed": true,
+          "details": "Radau reference, all 30363 candidate trajectory samples"
+        },
+        {
+          "case": "C03 ideal-switch limit",
+          "maximum_absolute_error": 1.5487363702604284e-07,
+          "tolerance": 5e-05,
+          "passed": true,
+          "details": "Independent matrix exponentials at all 20 half-cycle boundaries through 100 us"
+        },
+        {
+          "case": "C07 initial angle=0.523599",
+          "maximum_absolute_error": 1.4194285674618e-07,
+          "tolerance": 5e-07,
+          "passed": true,
+          "details": "DOP853, 8 pin events; excludes 1 us around velocity jumps"
+        },
+        {
+          "case": "C07 initial angle=-0.523599",
+          "maximum_absolute_error": 1.9733099970720147e-07,
+          "tolerance": 5e-07,
+          "passed": true,
+          "details": "DOP853, 7 pin events; excludes 1 us around velocity jumps"
+        },
+        {
+          "case": "C15 bolus tau=0.5",
+          "maximum_absolute_error": 1.1368683772161603e-12,
+          "tolerance": 2e-05,
+          "passed": true,
+          "details": "Independent augmented matrix exponential, both compartments at 240 min"
+        },
+        {
+          "case": "C15 bolus tau=3",
+          "maximum_absolute_error": 1.9326762412674725e-12,
+          "tolerance": 2e-05,
+          "passed": true,
+          "details": "Independent augmented matrix exponential, both compartments at 240 min"
+        },
+        {
+          "case": "C15 bolus tau=240",
+          "maximum_absolute_error": 5.229594535194337e-12,
+          "tolerance": 2e-05,
+          "passed": true,
+          "details": "Independent augmented matrix exponential, both compartments at 240 min"
+        },
+        {
+          "case": "C05 default",
+          "maximum_absolute_error": 7.245291340659267e-73,
+          "tolerance": 1e-60,
+          "passed": true,
+          "details": "90-digit logarithmic reference, all 5 event times and both final states"
+        },
+        {
+          "case": "C05 Task D",
+          "maximum_absolute_error": 7.718661040697406e-78,
+          "tolerance": 1e-60,
+          "passed": true,
+          "details": "90-digit logarithmic reference, all 62 event times and both final states"
+        }
+      ]
+    },
+    "ruff": {
+      "command": "ruff check . --output-format json",
+      "version": "0.17.5",
+      "exit_code": 0,
+      "findings": 0,
+      "log_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "compile": {
+      "command": "python -m compileall -q .",
+      "exit_code": 0
+    },
+    "generated_status": {
+      "command": "python scripts/update_status_docs.py --check",
+      "exit_code": 0
+    },
+    "diff_whitespace": {
+      "command": "git diff --check && git diff --cached --check",
+      "exit_code": 0
+    },
+    "dependency_free_core": {
+      "command": "python -S -c \"import argesim_benchmarks; from argesim_benchmarks import c05_task_c; assert all(row['passed'] for row in c05_task_c()['runs'])\"",
+      "exit_code": 0
+    }
+  },
+  "known_expected_failure": {
+    "test": "test_argesim_c02.C02Tests.test_parameter_study_tracks_published_reference",
+    "reason": "Correct physical lengths expose the remaining ten-pallet throughput/transit mismatch. Full physical transport blocking and merge contention are not implemented.",
+    "original_relative_tolerance": 0.06,
+    "threshold_relaxed": false,
+    "counts_as_scientific_pass": false,
+    "comparisons": [
+      {
+        "pallets": 10,
+        "actual": {
+          "throughput": 1209.0,
+          "average_throughput_time": 238.6925834022605,
+          "deadlock": null
+        },
+        "reference_throughput": 959.0,
+        "reference_transit_seconds": 285.0,
+        "relative_throughput_error": 0.26068821689259636,
+        "relative_transit_error": -0.16248216350084033,
+        "within_historical_6_percent": false
+      },
+      {
+        "pallets": 14,
+        "actual": {
+          "throughput": 1440.0,
+          "average_throughput_time": 280.0,
+          "deadlock": null
+        },
+        "reference_throughput": 1439.0,
+        "reference_transit_seconds": 265.0,
+        "relative_throughput_error": 0.0006949270326614965,
+        "relative_transit_error": 0.05660377358490565,
+        "within_historical_6_percent": true
+      },
+      {
+        "pallets": 20,
+        "actual": {
+          "throughput": 1439.0,
+          "average_throughput_time": 401.1025249015521,
+          "deadlock": null
+        },
+        "reference_throughput": 1439.0,
+        "reference_transit_seconds": 385.0,
+        "relative_throughput_error": 0.0,
+        "relative_transit_error": 0.04182474000403147,
+        "within_historical_6_percent": true
+      },
+      {
+        "pallets": 40,
+        "actual": {
+          "throughput": 1437.0,
+          "average_throughput_time": 803.1562978427261,
+          "deadlock": null
+        },
+        "reference_throughput": 1437.0,
+        "reference_transit_seconds": 787.0,
+        "relative_throughput_error": 0.0,
+        "relative_transit_error": 0.020528968033959538,
+        "within_historical_6_percent": true
+      }
+    ]
+  },
+  "modelling_conventions": {
+    "C04": "Cleaning duration and request delay are explicit configurable choices; finite conspiracy experiments do not prove starvation freedom.",
+    "C05": "Closed-form mode flows, numerical event bisection and decimal precision; reports event-time/final-state errors, not a general ODE integrator or an all-trajectory error bound.",
+    "C06": "Fixed exchange pair waits for current treatments to finish; idle partner is reserved, swap atomic, pending swap cancelled at the return threshold."
+  },
+  "remaining_incomplete": {
+    "C02": "Full belt occupancy, shifter contention, finite buffers, downstream blocking and Sy merge priority; high-load deadlock unsupported.",
+    "C18": "Original 100 Hz measurement files not recovered; digitized 5 Hz figure data are explicitly substitutes.",
+    "C20": "Complete physical conveyor topology, buffer/junction occupancy and blocking propagation not demonstrated."
+  },
+  "hosted_ci": {
+    "preceding_commit": "c57c14aea5fb8d8e5f099db5e898accb7d01bb4a",
+    "preceding_run_id": 44414213059,
+    "preceding_python_unit_versions_passed": [
+      "3.10",
+      "3.11",
+      "3.12",
+      "3.13"
+    ],
+    "preceding_failure": "Python 3.13 Ruff step, 210 findings",
+    "followup_status_at_recording": "not yet published; consult PR #61 for new hosted checks"
+  },
+  "source_sha256": {
+    ".github/workflows/reference-suite.yml": "d77c6910ce029247a16e466460aa21f15a39e1806e9be0889a5bb9465be49b9e",
+    "argesim_benchmarks/__init__.py": "f7fbf1a103247d0edf943183919612dcd4ae1f5afee14e568f74733e372bf046",
+    "argesim_benchmarks/__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+    "argesim_benchmarks/catalog.py": "a953e7ea9ad83957f56385974cb599e9561d6fe4a33d91f95d957c7f73cbd06b",
+    "argesim_benchmarks/cli.py": "aa32d00bebf6a5ebf1fa96c085694c738640928cf654944bf3e847b448c0dea9",
+    "argesim_benchmarks/evidence.py": "8fc0cd55ae796efc4fd92e3bcaf45ff680947f4217574dfc2ca17b23defa696a",
+    "argesim_benchmarks/external.py": "efd01c0e1bde69f8814dc5a7526111e2e8953466b3effe84a40f881e5c1d85bb",
+    "argesim_benchmarks/hybrid.py": "762cb66bd1964082be12a43f1bf49e8be4835f3b7cb4133a61fbfacfe332344a",
+    "argesim_benchmarks/ivp.py": "350b1aeb44c4dae1721445abfcedbddda61d7b84c2a8ce1e501ec65c65ae515d",
+    "argesim_benchmarks/models/__init__.py": "85ab2238e71da30e60d4f34832fecdd6b6bda746f55aface4e14c93754d82ad6",
+    "argesim_benchmarks/models/c01_lithium_cluster.py": "b8261d6efac207596d76b4ac4534713ea0ac12b216d88e259745daafb1e5a8e3",
+    "argesim_benchmarks/models/c02_flexible_assembly.py": "a94ed8dffff6be2c1002733464451165acf82351a199798c956bc8567e5aaf95",
+    "argesim_benchmarks/models/c03_amplifier.py": "18c7bd84bc73c17c32d4e6961123b013c317472bb80bae88aa3b6ab29e812ecd",
+    "argesim_benchmarks/models/c04_dining_philosophers.py": "7bbfca4d47ed0e61be63292db415a6b65e318cece5132adffb24a90d822f938e",
+    "argesim_benchmarks/models/c05_two_state.py": "9829b4edb9d4d589b55f1188640d2834690e49fcc73b7f2bd88c0d94f5977509",
+    "argesim_benchmarks/models/c06_emergency_department.py": "10f107c7ddac3f2184b1ef5f31b79b838359138a272f58440f06ef851531cf56",
+    "argesim_benchmarks/models/c07_constrained_pendulum.py": "04388551cec55fb1033fb6c1ed8a58b82af70faa63cf0107e32f706aaa0dc861",
+    "argesim_benchmarks/models/c08_canal_and_lock.py": "732ec8fe7f705e667d6c7894e0967665c499cc0128ebcfb63059a3f22e5d3ebd",
+    "argesim_benchmarks/models/c09_fuzzy_tanks.py": "b2355b0334f400736f9d2acae41098bd88ac5dd2d0e53008ce36a53a2498f5e8",
+    "argesim_benchmarks/models/c10_dining_philosophers.py": "72432a77233c4427e8ecb723f65dbaa6a1156609b8461dd5bbc6bf1bfddffd83",
+    "argesim_benchmarks/models/c11_scara_robot.py": "5358e86a4942b0aab029ef14cf56ebefe0aba116cafc8b684ace59c01609f2ad",
+    "argesim_benchmarks/models/c12_collision/__init__.py": "93cc1e8cd45e61586821d35e1bdd842e44cc60358a6a287b2c8ef08c15d5cc4a",
+    "argesim_benchmarks/models/c12_collision/c12_collision_plots.py": "f098ca2a5da21ee028312a2d7b3c790ce4feeb734e76ab734a558e0ba01fd476",
+    "argesim_benchmarks/models/c12_collision/c12_collision_processes.py": "d8fcc36b69d0e6d5198c443d670295ac60babacf0d6423027f519e9af9f3a32c",
+    "argesim_benchmarks/models/c13_crane.py": "7839a78882192605f449b9220676b044daaef44457c9245df08922ed98182350",
+    "argesim_benchmarks/models/c14_supply_chain.py": "165c96f85c0b841058010702a4e1d64bff70c7cbdabf61b2ee840c228532fdf4",
+    "argesim_benchmarks/models/c15_clearance.py": "a598988b95376cfe85882f8fdbd93c9eb04bba20c5fa7294eb98973e5ce0ce27",
+    "argesim_benchmarks/models/c16_restaurant_business.py": "fefdd1dba0b9e3d20bc1960fae163502452a58642b2d778eadd28fe2492fc0d6",
+    "argesim_benchmarks/models/c17_sir_epidemic.py": "9e85fcebdfd49b8cff7b4ac039a2f8dbecc23f80822cc2793031e824a476e125",
+    "argesim_benchmarks/models/c18_nonlinear_identification.py": "9d8f126c1a3240ae55f7915fe19c00d561cca0d3e0a86d0e0eae9f1f38f082a8",
+    "argesim_benchmarks/models/c19_groundwater.py": "1bf8eeca9d1aa2e89ae8cb3b97de34557de062b09fc97c2970f843f275984f1b",
+    "argesim_benchmarks/models/c20_complex_production.py": "81b8be60831dfc4e14171c141e10f3340d4e5814d15d3fd9bddca40806658dfd",
+    "argesim_benchmarks/models/c21_state_events.py": "0f582c3a6f1e4419dbe61dfcff90dec9bf422c2383f5b5120c206c1702e391bc",
+    "argesim_benchmarks/models/c22_queuing_policies.py": "4e7899c18083fb74dccf991066fc61a3ce43a19ed8814f1352c8f20d35a028d4",
+    "argesim_benchmarks/models/cp1_parallel.py": "ceb34885d8d1c3086894220fc30c8f1e5b42c02b08679c817403c2311c91bd9e",
+    "argesim_benchmarks/models/cp2_parallel_and_distributed.py": "cf9f6533c56489a490d28f0d7e40610bd516765294e59a6aa84d05f8a6f73efd",
+    "argesim_benchmarks/oracles/__init__.py": "faace1f0d09e9fb34fa0f6424387723c1b350f707e83e42b52c870a5f9cc4eb6",
+    "argesim_benchmarks/oracles/base.py": "339e36f5dd312f54f9bce885a8b03156ab11537f62edb0e4cdf31609676169d4",
+    "argesim_benchmarks/oracles/cifasis.py": "2545d6b5464ba8cc3bc770a6b62058d21e8fa0339d595146b0fe2238ce811a32",
+    "argesim_benchmarks/oracles/cifasis_adapter.py": "1be346e03b64a72fde28a72946c7d93b8fbbc1e2e875f98e4e6d995be183d48a",
+    "argesim_benchmarks/oracles/cli.py": "ca4e96ab4c93c66e01c8877661c111b0618005da102690965b9c27f1b4e3d0a6",
+    "argesim_benchmarks/parallel.py": "17917249bf9a51d5e8e1f3240622f5815cfa0e945ab730aef005fcdbe746e94c",
+    "argesim_benchmarks/pde.py": "d108aaa59d4645e9fc802e895a8943974535c9ecdee1319146090251689a7c60",
+    "argesim_benchmarks/performance.py": "a35c38c8dc3d704d57ad47ab694b5fab1ca94aae499173d0e54769ec2092d18c",
+    "argesim_benchmarks/runner.py": "e731a5a5fbaf38800a68a097041e28f7f68a79355f03a03ffc213d15cc7e7a0f",
+    "argesim_benchmarks/runtime.py": "080334a093fbfb83c1d1a11427644a90e732821555619e61efdd78fd3c60d070",
+    "argesim_benchmarks/solvers/__init__.py": "786ba7f83eba70a76c0fbacfa704767fe35af19a398c097052dc278c0de9b3de",
+    "argesim_benchmarks/solvers/_polynomial.py": "80168a443fe9d7ef3c93a2f774e47d6eb0d496831b1d5f1f73a76f2ef95a538f",
+    "argesim_benchmarks/solvers/advanced_qss.py": "d76e14ce99b5feae9e94b7cb38899a51237689a8800745a6419c0ebbb29478dc",
+    "argesim_benchmarks/solvers/explicit.py": "a02e95ada5077c881fd67edbcbf6a6ab8f0fbb2b384c57338f2e14ce64b4d153",
+    "argesim_benchmarks/solvers/mixed_qss.py": "c3ae2448d44cdc4e2226b36083a2c8e66223aab09eea3cdbcbe65d2a0b625a26",
+    "argesim_benchmarks/solvers/qss.py": "d7cff1c3df530270fa6cc6d2ca6f8c0433fe93051ba7ddd68910fb78f96836d0",
+    "argesim_benchmarks/solvers/roots.py": "1ea2f11bacd39089515619995069b7e03dae2e6524ff7f8f009ebbb0f5aa885f",
+    "argesim_benchmarks/status_docs.py": "d0198ca0b05b0cd98db14b1e62876bb5b7cfd3198b437e3dc39d1c142590daf0",
+    "benchmarks/benchmark_argesim_c01.py": "1b4b28e9dbaa50fdc9a1da23dd6a3110502052d0ee99c06bf400100f86dac470",
+    "benchmarks/benchmark_argesim_c06.py": "ac9171c07a3307e0748f5bf9f0eb595762399c740341760707e25a7d34ae03a4",
+    "benchmarks/benchmark_argesim_c07.py": "5ce2cd318cac081ef375ad08b7be41fdee216fc9f948c3ed5ab45158d7cc3858",
+    "benchmarks/benchmark_argesim_c08.py": "4abd927f8d914f8fae3fb46cfa69381f07439d757587d732c1e4e0df95804fbd",
+    "benchmarks/benchmark_argesim_c11.py": "246dc05bde89c6c427bf9837cb7ba27cb747fc3a5469663b7fd725a777c64c4e",
+    "benchmarks/benchmark_argesim_c12.py": "cb4ac42d1a087621a27fa5a1945b128888a586eeba653b0144d3ff07ea5d28b6",
+    "benchmarks/benchmark_argesim_c13.py": "4fbc8e546cdf46b307bc7473bf2c6348787fbe63fbe2adc7dc29f21d7e933cab",
+    "benchmarks/benchmark_argesim_c15.py": "1e03d34572b3dcb19c700d94dcc63f4e6ba96dbb4d2b7d4c17230f6204a4ed44",
+    "benchmarks/benchmark_argesim_c16.py": "f60a28353c16287576f0d601fb903be9e123b7ca4118f4b77d945c98f9fcf515",
+    "benchmarks/benchmark_argesim_c17r.py": "df6e6f24d223d623352fdbdf0a36c9e5150b46c2581a1a11f45dcadfb4a0c3d5",
+    "benchmarks/benchmark_argesim_c19.py": "63440ff4fbb36f2682ffcb0529503a905ea52cba23f9b17126d0d9e0be16b95c",
+    "benchmarks/benchmark_argesim_c20.py": "3ea5a37c48ecda2ce2cc0c22eb816ebbc46f90f1969d2f6cb9702ac413108da0",
+    "benchmarks/benchmark_argesim_c21.py": "e1089f213677a78fa948dea6ce962f0d028bac76d472e38ba5d6f8b997739315",
+    "benchmarks/benchmark_argesim_c22.py": "14507e9cf5f0f12f7015e82a4e9da92bf1ef9f41ca7f9ae2c355dc5cb10aaa93",
+    "benchmarks/benchmark_argesim_cp2.py": "42893f96da1ecbb719dacbf6fa2cb132e25a556a60c7a1107640b8746d7aacf2",
+    "benchmarks/benchmark_c14.py": "06515f029f19cfd30b7d81dfbcfc5f5e8362b3d978dc063b9e14b6969d971903",
+    "benchmarks/benchmark_cqss_liqss_bdf.py": "35528fad80d767e9c5d6b8e04e9d5f29d8af347fa4ecf5505af4bf387fb03818",
+    "benchmarks/benchmark_euler_convergence.py": "90edfda4286b20906ebdb6ef6884e7166c26c118cc360d7d69145c778d09f4f3",
+    "benchmarks/benchmark_event_chain.py": "3b2d13e8ea2e5e69a77e4df6aee59af6f9efd50e7b719f72f69a18d87a5f6d9a",
+    "benchmarks/benchmark_qss_variants.py": "a487ec8a729e2b8e3bbd3b4f93395ce42bed2bdd4209e293897538724081fe39",
+    "benchmarks/plot_argesim_c11.py": "3ac2286035a31d337d2f64e7ca79b11cb8c1f3495fc97b484759be1de283ce21",
+    "benchmarks/validate_c03.py": "a3f93140d1b6ca53239a630d447f646a48ee5333e099d6257dac88a497f6abca",
+    "nsa_devs/__init__.py": "efdf01abd7d141f7fcc623d85ceee744b79419553d06ab2b30e40a2e1f2fea3e",
+    "nsa_devs/convergence.py": "3d7ad18aaedef4c2fd325f60145088898d196ba711a0873e49fdfc91ba4ec0fc",
+    "nsa_devs/hypertime.py": "b7c529eabef817bc3e15acbee4bd44566d33499aab47288e49f4d3ce55e1e1d6",
+    "nsa_devs/scheduler.py": "24061ef5f84eec77f08fe1f3d5754674e580643ef3956c16c36ff7a1be3418b0",
+    "parse_comments.py": "00d7d9d6fa72e07e272f68701a12a06990bbcc9afd6facca2ae789d207a3804f",
+    "pyproject.toml": "4afb20e3bd3e16ee72b276c552224c0ee84f6474ab39f02d4f7efacd01430cc6",
+    "scripts/benchmark_spec_probe.py": "6ab5f41685d52513bd36c00b6b903a4641e75812f351886f2f7f774e91e96c5b",
+    "scripts/c13_reference_probe.py": "24b87d6aed443709b2e5eb82b5b59add29d5745ca1ea16c267e1145b695a0f72",
+    "scripts/update_status_docs.py": "38965d0cf161644591df1b08f0a97fa1db78d6cf5d8e89578a530617a56221e1",
+    "tests/test_advanced_qss.py": "b269fbebc609c5ef3a393673437ca164b5be8f91f3a0367dc85a0c5c78c2e2f2",
+    "tests/test_argesim_c01.py": "3012f1df75628fd983cd9096e23e06d1e152e59a350d575d1d630da45f5f9a65",
+    "tests/test_argesim_c02.py": "3513b05ef2505ef50c470ff62f98b11b9db82dbcd0e6275055e3fbc28897fba6",
+    "tests/test_argesim_c03.py": "0230c974bbb5589fd5da40187ca5d872e1b73912e242619dc734ccbf1bad730b",
+    "tests/test_argesim_c04.py": "12ec5f4d545efdf6e8e66e1babce0a07de6d09ace887b22f028ac1ba0381cbd5",
+    "tests/test_argesim_c05.py": "31cfdc34a6bb13829a768cc5d8cf8d51b2e9d0430447e2501609b095c159ed55",
+    "tests/test_argesim_c06.py": "fe1fcd616958eee3d4faf906c6a736458a57f51524dcba2890df6df57b64434f",
+    "tests/test_argesim_c07.py": "c03f98939010b911728fee81c5e156a65f6750b374fa4d1ced4bae82b118561c",
+    "tests/test_argesim_c08.py": "7e392fcfd58c123a40c168cdbb6a20323e09de62d7035b6204f9af92ebeadd2a",
+    "tests/test_argesim_c09.py": "83d050165290a1eac45491927e16565e9b35e1de56bf74e2465fc8158e68cef9",
+    "tests/test_argesim_c10.py": "5a50356cb4e740040fb956900fd48df33366f3b3091b43bef86599dcdf993fbe",
+    "tests/test_argesim_c11.py": "e7f0d9c3575203164aaa492e1b158db7f119b999079716cce63bd77b22866dcd",
+    "tests/test_argesim_c12.py": "7624b46814e21ae7d714f43f5b5dc16bcd3a98e40ccb68a872b371ac75ea5823",
+    "tests/test_argesim_c13.py": "3995571dfa8182efd25e5182a3473557394f8e46cb29b6be4f3f437aaef87630",
+    "tests/test_argesim_c15.py": "e7acb4948170de00bc0b70ec74d53c12791679bff5e9b8d4a9ad4704fed86e3c",
+    "tests/test_argesim_c17.py": "1d08d67c4c254da6bd302a111861c27b446409b0c5d0a002f32cb5ade3aff4d7",
+    "tests/test_argesim_c18.py": "d38ee696a58d348a142649aca423f48f41368c129047acee97201725bec96305",
+    "tests/test_argesim_c19.py": "cc30eb2932f5528ad21bdd317a875bc7b5a482c7cea83d3cd08306beafc7a5c7",
+    "tests/test_argesim_c20.py": "38e8e33294e64f48bc5d1abe818c6a3e7505185768d1646fce0d57d5742a3023",
+    "tests/test_argesim_c21.py": "6824509ad1bc5d7f9c886715c9a7fb4007344b942439b7768e3719df4f4c8466",
+    "tests/test_argesim_c22.py": "aa4edd0a171a7df7ad55538028278e39d2ff6c2236453009b6aa951b0cbf252f",
+    "tests/test_argesim_catalog.py": "30ab20b7d43457f4e538bb67101089c9935653e31267b6190306b33bdd2f6083",
+    "tests/test_argesim_cp1.py": "73a641377f00ecc8d376085cf717bd50fcc4913ece59bb9028631ceaaeb1f9b1",
+    "tests/test_argesim_cp2.py": "258af41ff0948b1df0ece5cecf8425949854fb63d5204e300e0786199391309d",
+    "tests/test_c14_supply_chain.py": "d33fdecb2a2296d180a333f64d7fc26383f4a223c8c679301f99245e98eefb2d",
+    "tests/test_c16.py": "22dbfe0036c168d0600d613f7a896ebc6e8141900c998c42673c49fc0e77ae2e",
+    "tests/test_cifasis_native_adapter.py": "891cf69f07d218980099f1be7e16b1011da22f560be1855a3df3f50437c9098a",
+    "tests/test_cifasis_oracle.py": "ba07b7c4fb3dcc8e55380b91888a1bd5d627a4168b7cecdfa997314c68d8231a",
+    "tests/test_convergence.py": "46fc0a8d6c4995bc2b9431e774ed3234433b6c2a47e5f90da2383296284f3ebd",
+    "tests/test_des_scheduler.py": "6608a9d435d1f87e757df3e1722e0b811cb1707d4e4e971df99929f177a5341f",
+    "tests/test_evidence.py": "4c5949dcfb4cfabcb73144dc2345aba2b33318e2547d0746f902380d0568f6de",
+    "tests/test_explicit_solvers.py": "dcd540a0465be8334010d458de22fea0e184d401652787ae259696cd368e33d0",
+    "tests/test_external_backend.py": "73a5d102c76b69c31fb1adcbaa3745aa9fb3b25057db17d07a9dd271d0e0f189",
+    "tests/test_hybrid_runtime.py": "3691ccd2c2dc445b05d0525ba4b3e958a809e84d1e94d426e5eed4b4906a8aff",
+    "tests/test_hypertime.py": "732d0f9dd74154b88efd19a2ce908c3e2ddc8b60b449c04c36818c944398ab56",
+    "tests/test_mixed_qss.py": "2c896800a1189471b49acf6bbb62e9d3187c34b86e017164a83af918b8a27c1e",
+    "tests/test_parallel_runtime.py": "c9cfffd25192ced1aefb4893707ca0fccb942ae0c246473de9feb3f933bbefd5",
+    "tests/test_pde_method_of_lines.py": "1a383be9f89b65e26afa8d730770f4ea192e591040e699db3547516fe4c3f9a3",
+    "tests/test_performance.py": "0e4ac6ca1bd3063445e48f927204aeee94908151b8e2a83d3f991ef8ccb60f4e",
+    "tests/test_qss_solver.py": "85728e0372cb5e64974bbb5f908c92bb67164d1261c1a9052db4de639a31fd11",
+    "tests/test_relay_chain.py": "f691097cddb0722306b51fb182146bbf90f7754c62528cb2d68ae2d4127c75e9",
+    "tests/test_root_solver.py": "83fa3d82c0a141396483fca2de69f384fe5f0442ac8762ec086e0916c0dae626",
+    "tests/test_runner.py": "b56b43e0d255f3a03d9a18f4c8049cfb1e5b2679bef0a6296ede9cdd26fda3ba",
+    "tests/test_runtime.py": "8bf9b989001ebe1e9783b8fffa96b9fa1fa1ecb69deb6509358bc305bbd2db9f"
+  }
+}

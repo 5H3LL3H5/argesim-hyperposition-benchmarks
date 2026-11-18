@@ -6,7 +6,7 @@ Inventory reviewed: 2026-11-18. Primary catalog:
 The status is an evidence gate, not a code-size label. `implemented` means all
 required task types have an executable path and tests; `validated` additionally
 requires an external analytical or published numeric reference. Partial code stays
-`specified`; see the 2026-11-18 audit for the six downgraded families.
+`specified`; see the follow-up audit for the three remaining incomplete families.
 
 <!-- BEGIN GENERATED BENCHMARK STATUS -->
 | ID | Official benchmark | Model family | Status |
@@ -14,9 +14,9 @@ requires an external analytical or published numeric reference. Partial code sta
 | C01 | Lithium-Cluster Dynamics | stiff ODE | implemented |
 | C02 | Flexible Assembly System | DES | specified |
 | C03 | Class-E Amplifier | ODE, hybrid | implemented |
-| C04 | Dining Philosophers | DES/concurrency | specified |
-| C05 | Two State Model | stiff ODE, state events | specified |
-| C06 | Emergency Department - Follow-up Treatment | stochastic DES | specified |
+| C04 | Dining Philosophers | DES/concurrency | implemented |
+| C05 | Two State Model | stiff ODE, state events | implemented |
+| C06 | Emergency Department - Follow-up Treatment | stochastic DES | implemented |
 | C07 | Constrained Pendulum | hybrid mechanics | implemented |
 | C08 | Canal-and-Lock System | stochastic DES | validated |
 | C09 | Fuzzy Control of a Two Tank System | nonlinear ODE, sampled fuzzy control | implemented |
@@ -41,8 +41,8 @@ requires an external analytical or published numeric reference. Partial code sta
 
 | ID | Executable scope | Verification evidence |
 |---|---|---|
-| C04 | Unsafe, waiter, ordered-fork (not a cleaning model) and put-back strategies; seeded replications, per-philosopher fairness and full state-time accounting | conservation of every individual horizon, deterministic replay, resource-cycle deadlock/progress tests |
-| C05 | exact piecewise solution, state switching, default experiment and 62-event Task D | published event times to about 2e-12 s; published final values |
+| C04 | Atomic, unsafe, waiter, cleaning, neighbour-request and put-back policies; dirty-fork delays, request age priority, explicit hoarding/targeted-hold experiments | conservation of every individual horizon, deterministic replay, resource-cycle deadlock/progress tests |
+| C05 | sampled piecewise solution including fast transients, default/62-event Task D, decimal precision studies at the specified accuracies | published event checks; 80-digit reference, independently checked by 90-digit logarithmic event calculations; requested and attained precision reported separately |
 | C09 | I-FC1, I-FC2 and P-FC surfaces; nonlinear tanks; 1 s sampled 60,000 s scenario; reference `change-level` and literal printed difference modes | I-FC final errors below 0.02 mm, <0.06 mm setpoint overshoot and published qualitative disturbance/P-FC behaviour |
 | C17R | identified ODE, hexagonal FHP-I CA, homogeneous random movement, Task-1 sweeps and persistent soft/repeatable hard/spatial interventions | population conservation, lattice/contact equation, seeded replay and shared RK/QSS2 hybrid-event paths |
 | C18 | second-order ARX, seven-unit parallel residual ANN and ten-unit free-running dynamic ANN; complete trajectories and error trends | synthetic coefficient recovery; digitized-figure ARX correlations 0.962/0.942 versus published 0.95/0.94; provenance gap retained |

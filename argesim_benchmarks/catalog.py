@@ -77,7 +77,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.DES,),
         _source("c04"),
         "DES/concurrency",
-        BenchmarkStatus.SPECIFIED,
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C05",
@@ -85,7 +85,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.STIFF_ODE, ModelClass.HYBRID),
         _source("c05"),
         "stiff ODE, state events",
-        BenchmarkStatus.SPECIFIED,
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C06",
@@ -93,7 +93,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.DES, ModelClass.STOCHASTIC),
         _source("c06"),
         "stochastic DES",
-        BenchmarkStatus.SPECIFIED,
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C07",

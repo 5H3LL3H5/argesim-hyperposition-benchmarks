@@ -1,6 +1,6 @@
 """Independent numerical spot checks for the 2026-11-18 definition audit.
 
-Requires NumPy and SciPy (audit used 2.3.5 / 1.17.0). Run this script from
+Requires NumPy, SciPy and mpmath (audit used 2.3.5 / 1.17.0 / 1.3.0). Run this script from
 any directory; each JSON line records its declared tolerance and outcome.
 No candidate RHS is used by the independent reference calculations.
 """
@@ -10,6 +10,7 @@ import math
 import sys
 from pathlib import Path
 
+import mpmath as mp
 import numpy as np
 import scipy
 from scipy.integrate import solve_ivp
@@ -18,10 +19,16 @@ from scipy.linalg import expm
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from argesim_benchmarks.models.c01_lithium_cluster import C01Parameters, solve_c01
 from argesim_benchmarks.models.c03_amplifier import C03Parameters, solve_c03
+from argesim_benchmarks.models.c05_two_state import c05_task_c
 from argesim_benchmarks.models.c07_constrained_pendulum import C07Parameters, solve_c07
 from argesim_benchmarks.models.c15_clearance import C15Bolus, solve_c15
 
-results = {"numpy": np.__version__, "scipy": scipy.__version__, "checks": []}
+results = {
+    "numpy": np.__version__,
+    "scipy": scipy.__version__,
+    "mpmath": mp.__version__,
+    "checks": [],
+}
 
 
 def record(case, maximum, tolerance, details):
@@ -162,5 +169,55 @@ for tau in (0.5, 3.0, 240.0):
         2e-5,
         "Independent augmented matrix exponential, both compartments at 240 min",
     )
+
+# C05: logarithmic crossings instead of the candidate's decimal bisection.
+# At every defined crossing the omitted fast exponential is < 10**(-15000).
+for task_d in (False, True):
+    with mp.workdps(90):
+        c1, c3 = mp.mpf("2700000"), mp.mpf("3.5651205")
+        state = (mp.mpf("4.2"), mp.mpf("0.3"))
+        current, mode_index = mp.mpf(0), 0
+        expected_events = []
+        modes = [
+            ("0.4", "5.5", "5.8"),
+            ("-1.25", "4.33", "4.1") if task_d else ("-0.3", "2.73", "2.5"),
+        ]
+        while current < 5:
+            c2, c4, threshold = map(mp.mpf, modes[mode_index])
+            difference = state[1] - c4
+            slow = difference * c1 / (c1 - c3)
+            equilibrium = c4 + c2
+            fast = state[0] - equilibrium - slow
+            delay = -mp.log((threshold - equilibrium) / slow) / c3
+            duration = min(delay, 5 - current)
+            state = (
+                equilibrium
+                + slow * mp.exp(-c3 * duration)
+                + fast * mp.exp(-c1 * duration),
+                c4 + difference * mp.exp(-c3 * duration),
+            )
+            current += duration
+            if current == 5:
+                break
+            expected_events.append(current)
+            mode_index = 1 - mode_index
+        candidate = c05_task_c((1e-14,), task_d=task_d)
+        assert len(candidate["reference_event_times"]) == len(expected_events)
+        errors = [
+            abs(mp.mpf(value) - expected)
+            for value, expected in zip(
+                candidate["reference_event_times"], expected_events
+            )
+        ]
+        errors.extend(
+            abs(mp.mpf(value) - expected)
+            for value, expected in zip(candidate["reference_final_state"], state)
+        )
+        record(
+            "C05 Task D" if task_d else "C05 default",
+            max(errors),
+            1e-60,
+            f"90-digit logarithmic reference, all {len(expected_events)} event times and both final states",
+        )
 
 assert all(row["passed"] for row in results["checks"]), "Independent reference mismatch"

@@ -9,14 +9,14 @@ two deliberately separate purposes:
 
 ## Current status
 
-The official inventory was re-audited on 2026-08-17: C01-C22 plus CP1 and
+The official inventory was re-audited on 2026-11-18: C01-C22 plus CP1 and
 CP2, with C17R and C19R as the active revised definitions. The machine-readable
 inventory in `argesim_benchmarks.catalog` records the evidence reached by each
 complete task family instead of treating file presence as implementation.
 
 C08, C21, CP1 and CP2 retain limited `validated` evidence for the cases
-listed in the audit. Fourteen other families reach `implemented`. C02, C04,
-C05, C06, C18 and C20 remain `specified` with partial executable code because
+listed in the audit. Seventeen other families reach `implemented`. C02,
+C18 and C20 remain `specified` with partial executable code because
 required model behaviour, experiments or original data are missing. Passing
 unit tests or a smoke run does not establish full benchmark correctness.
 Each benchmark must pass five evidence gates:
