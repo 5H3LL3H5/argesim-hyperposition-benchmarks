@@ -48,6 +48,21 @@ class C04Tests(unittest.TestCase):
             all(summary.mean_meal_count_range >= 0.0 for summary in summaries)
         )
 
+    def test_resource_release_cannot_bypass_pending_acquisition_delay(self) -> None:
+        # Philosopher 0 finishes at 0.3, waking philosopher 2, whose second
+        # acquisition is due at 0.35. Its meal must finish at 0.45, not 0.4.
+        with patch(
+            "argesim_benchmarks.models.c04_dining_philosophers._C04Simulation.duration",
+            return_value=0.1,
+        ):
+            result = run_c04(
+                "unprotected",
+                horizon=0.425,
+                acquisition_delay=0.2,
+                initial_thinking_times=(0.0, 100.0, 0.15, 100.0, 100.0),
+            )
+        self.assertEqual(result.philosopher_meals, (1, 0, 0, 0, 0))
+
     def test_dirty_forks_cannot_be_reused_before_cleaning_completes(self) -> None:
         with patch(
             "argesim_benchmarks.models.c04_dining_philosophers._C04Simulation.duration",
