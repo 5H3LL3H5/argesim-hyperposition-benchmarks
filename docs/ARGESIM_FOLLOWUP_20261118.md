@@ -103,7 +103,9 @@ Unit tests check the complete isolated-station timeline. For A2 it is
 
 Correcting the dimensions exposes a failure of the historical 6% throughput
 comparison for ten pallets. The test retains its original numeric thresholds
-and is marked `expectedFailure` with the missing model behaviour documented.
+and only that case is marked `expectedFailure`, with the missing model behaviour
+documented. The 14-, 20- and 40-pallet comparisons remain regular passing tests,
+so the known mismatch cannot mask a new regression in those cases.
 An unexpected success will require revisiting that marker; it is not counted
 as a passing scientific check. The evidence JSON records all four comparison
 cases, including failures. No benchmark validation gate is advanced.
@@ -144,7 +146,7 @@ individual numerical checks and C02 comparison results are retained in
 | Check | Observed result |
 |---|---|
 | Complete unit suite | 341 tests: 340 passed, one expected C02 reference failure |
-| Final C02/C04/C05/C06 regression rerun | 32 tests: 31 passed, the same expected failure |
+| Final C02/C04/C05/C06 regression rerun | 34 tests: 33 passed, the same expected failure |
 | Complete smoke profile | 74/74 tasks passed across all 24 families |
 | Final C04/C05 smoke rerun | 7/7 tasks passed |
 | C04 acquisition-delay regression rerun | 8/8 tests and 3/3 smoke tasks passed |
@@ -154,13 +156,14 @@ individual numerical checks and C02 comparison results are retained in
 | Core import and C05 precision with `python -S` | Passed without site packages |
 
 The full unit run preceded the last C04 deadlock-detection refinement and an
-additional C02 execution assertion; the 32-test rerun covers those final files.
+additional C02 execution assertion. The final 34-test rerun covers those files,
+the C04 acquisition-delay fix and the isolated C02 expected-failure case.
 The full smoke run preceded the C05 decimal-context isolation and final C04
 refinement; their seven tasks were rerun afterwards. These are overlapping
 checks, not additional independent test totals. A subsequent acquisition-delay
-fix added one C04 regression (342 tests now discovered); all eight C04 tests
-and its three smoke tasks were rerun on that final source. Hosted CI checks
-the complete updated suite.
+fix added one C04 regression; isolating the known C02 mismatch added a separate
+test (343 tests now discovered). All eight C04 tests and its three smoke tasks
+were rerun on that final source. Hosted CI checks the complete updated suite.
 
 The ten-pallet C02 case yields throughput 1209 versus reference 959 (+26.07%)
 and mean transit 238.69 s versus 285 s (-16.25%). The 14-, 20- and 40-pallet
