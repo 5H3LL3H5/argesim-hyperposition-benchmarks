@@ -13,14 +13,23 @@ from argesim_benchmarks.models.c02_flexible_assembly import (
 
 class C02Tests(unittest.TestCase):
     @unittest.expectedFailure
-    def test_parameter_study_tracks_published_reference(self):
+    def test_ten_pallet_case_has_known_published_reference_mismatch(self):
         # Historical proximity check against SNE 21(3-4), 2011, Table 2.
         # Correct geometry exposes a >6% mismatch for 10 pallets. Keep the
         # reference threshold unchanged and the failure explicit until the
         # missing blocking/merging model is implemented; do not recalibrate
         # physical lengths or operation times to fit this table.
+        result = solve_c02(10)
+        self.assertIsNone(result["deadlock"])
+        self.assertAlmostEqual(result["throughput"] / 959.0, 1.0, delta=0.06)
+        self.assertAlmostEqual(
+            result["average_throughput_time"] / 285.0, 1.0, delta=0.06
+        )
+
+    def test_parameter_study_tracks_published_reference(self):
+        # Keep the other reference cases active: the known ten-pallet mismatch
+        # must not hide regressions in the currently matching cases.
         reference = {
-            10: (959.0, 285.0),
             14: (1439.0, 265.0),
             20: (1439.0, 385.0),
             40: (1437.0, 787.0),

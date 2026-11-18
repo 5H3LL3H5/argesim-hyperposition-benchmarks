@@ -1,6 +1,6 @@
 {
   "audit_date": "2026-11-18",
-  "recorded_at_utc": "2026-11-18T23:24:44.734087+00:00",
+  "recorded_at_utc": "2026-11-18T23:27:22.773522+00:00",
   "repository": "5H3LL3H5/argesim-hyperposition-benchmarks",
   "base_commit": "c57c14aea5fb8d8e5f099db5e898accb7d01bb4a",
   "ci_cleanup_commit": "eb932a75b33680433c13b2b3ae00a8e89ef84f70",
@@ -63,15 +63,15 @@
     },
     "final_focused_units": {
       "command": "python -m unittest discover -s tests -p 'test_argesim_c0[2456].py' -v",
-      "scope": "Exact final C02/C04/C05/C06 files; overlaps full-suite tests. Precedes the final C04 acquisition-delay correction; see c04_acquisition_regression.",
+      "scope": "Exact final C02/C04/C05/C06 files, including the C04 acquisition-delay correction and isolated ten-pallet expected failure. Overlaps prior full and focused runs.",
       "exit_code": 0,
-      "total": 32,
-      "passed": 31,
+      "total": 34,
+      "passed": 33,
       "expected_failures": 1,
       "failures": 0,
       "errors": 0,
-      "duration_seconds": 6.915,
-      "log_sha256": "214f003ab184832da852848638916339ad2e62a8d77119beea7cbd48954ec9d9"
+      "duration_seconds": 27.364,
+      "log_sha256": "7294de2489f9fd07bced72cfc3d84c90a85d22ef3ddc9959013c97acfe91abe3"
     },
     "smoke_suite": {
       "command": "python -m argesim_benchmarks run-suite --profile smoke",
@@ -621,10 +621,22 @@
       "smoke_failed": 0,
       "smoke_exit_code": 0,
       "smoke_log_sha256": "4e950ca37b864f4ee2d19f11eaf60ba14ed1dfd2b2a249599cb6074fddbcd56f"
+    },
+    "prior_focused_units": {
+      "command": "python -m unittest discover -s tests -p 'test_argesim_c0[2456].py' -v",
+      "scope": "Exact final C02/C04/C05/C06 files; overlaps full-suite tests. Precedes the final C04 acquisition-delay correction; see c04_acquisition_regression.",
+      "exit_code": 0,
+      "total": 32,
+      "passed": 31,
+      "expected_failures": 1,
+      "failures": 0,
+      "errors": 0,
+      "duration_seconds": 6.915,
+      "log_sha256": "214f003ab184832da852848638916339ad2e62a8d77119beea7cbd48954ec9d9"
     }
   },
   "known_expected_failure": {
-    "test": "test_argesim_c02.C02Tests.test_parameter_study_tracks_published_reference",
+    "test": "test_argesim_c02.C02Tests.test_ten_pallet_case_has_known_published_reference_mismatch",
     "reason": "Correct physical lengths expose the remaining ten-pallet throughput/transit mismatch. Full physical transport blocking and merge contention are not implemented.",
     "original_relative_tolerance": 0.06,
     "threshold_relaxed": false,
@@ -682,6 +694,11 @@
         "relative_transit_error": 0.020528968033959538,
         "within_historical_6_percent": true
       }
+    ],
+    "unmasked_regular_cases": [
+      14,
+      20,
+      40
     ]
   },
   "modelling_conventions": {
@@ -794,7 +811,7 @@
     "scripts/update_status_docs.py": "38965d0cf161644591df1b08f0a97fa1db78d6cf5d8e89578a530617a56221e1",
     "tests/test_advanced_qss.py": "b269fbebc609c5ef3a393673437ca164b5be8f91f3a0367dc85a0c5c78c2e2f2",
     "tests/test_argesim_c01.py": "3012f1df75628fd983cd9096e23e06d1e152e59a350d575d1d630da45f5f9a65",
-    "tests/test_argesim_c02.py": "3513b05ef2505ef50c470ff62f98b11b9db82dbcd0e6275055e3fbc28897fba6",
+    "tests/test_argesim_c02.py": "71b61add1ff1d1d193649eac469f033a1b01af628dd807f546e1f31d1f4c1797",
     "tests/test_argesim_c03.py": "0230c974bbb5589fd5da40187ca5d872e1b73912e242619dc734ccbf1bad730b",
     "tests/test_argesim_c04.py": "ce5ae0f0a6fcc9e815d36d28c9ce4965b2b8b85f87f8fb069a3488f807668827",
     "tests/test_argesim_c05.py": "31cfdc34a6bb13829a768cc5d8cf8d51b2e9d0430447e2501609b095c159ed55",
@@ -838,5 +855,5 @@
     "tests/test_runtime.py": "8bf9b989001ebe1e9783b8fffa96b9fa1fa1ecb69deb6509358bc305bbd2db9f"
   },
   "subsequent_c04_base_commit": "88d9fffe2f654421f32d63f2c429d0dbd10a3fda",
-  "current_discovered_unit_tests": 342
+  "current_discovered_unit_tests": 343
 }
