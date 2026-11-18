@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 import math
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -123,7 +124,7 @@ class IntegrationResult:
             raise ValueError("times and states must be non-empty and equally sized")
         if not all(math.isfinite(value) for value in times):
             raise ValueError("result times must be finite")
-        if any(later < earlier for earlier, later in zip(times, times[1:])):
+        if any(later < earlier for earlier, later in itertools.pairwise(times)):
             raise ValueError("result times must be non-decreasing")
         dimension = len(states[0])
         if any(len(state) != dimension for state in states):

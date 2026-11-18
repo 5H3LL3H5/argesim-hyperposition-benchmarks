@@ -1,12 +1,14 @@
 import unittest
+
 from argesim_benchmarks.models.c08_canal_and_lock import (
-    CanalAndLock,
     Barge,
+    CanalAndLock,
     Direction,
     c08_task_c,
     run_c08_replication,
 )
 from nsa_devs.hypertime import HyperTime
+
 
 class TestC08(unittest.TestCase):
     def test_departure_does_not_reopen_a_full_cycle(self):
@@ -205,9 +207,8 @@ class TestC08(unittest.TestCase):
 
     def test_invalid_cycle_limits_are_rejected(self):
         for eastmax, westmax in ((0, 1), (1, 0), (True, 1), (1.5, 1)):
-            with self.subTest(eastmax=eastmax, westmax=westmax):
-                with self.assertRaises(ValueError):
-                    CanalAndLock(eastmax, westmax)
+            with self.subTest(eastmax=eastmax, westmax=westmax), self.assertRaises(ValueError):
+                CanalAndLock(eastmax, westmax)
 
     def test_invalid_experiment_controls_are_rejected(self):
         for arguments in (
@@ -216,9 +217,8 @@ class TestC08(unittest.TestCase):
             {"paired_replications": 1.5},
             {"starting_seeds": (True,)},
         ):
-            with self.subTest(arguments=arguments):
-                with self.assertRaises(ValueError):
-                    c08_task_c(**arguments)
+            with self.subTest(arguments=arguments), self.assertRaises(ValueError):
+                c08_task_c(**arguments)
 
     def test_scheduler_rejects_time_reversal(self):
         model = CanalAndLock(1, 1)

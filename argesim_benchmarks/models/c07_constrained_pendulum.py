@@ -19,7 +19,7 @@ class C07Parameters:
     """Parameters in the notation of the official C07 definition."""
 
     m: float = 1.02
-    l: float = 1.0  # noqa: E741
+    l: float = 1.0
     l_p: float = 0.7
     g: float = 9.81
     d: float = 0.2
@@ -262,10 +262,10 @@ def c07_task_c() -> float:
                 continue
             # Cubic Hermite position uses both endpoint angles and velocities.
             # Its derivative has opposite signs at the endpoints here.
-            def slope(u: float) -> float:
-                return ((6*u*u - 6*u) * (s0[0] - s1[0])
-                        + (3*u*u - 4*u + 1) * dt * s0[1]
-                        + (3*u*u - 2*u) * dt * s1[1])
+            def slope(u: float, left_state=s0, right_state=s1, span=dt) -> float:
+                return ((6*u*u - 6*u) * (left_state[0] - right_state[0])
+                        + (3*u*u - 4*u + 1) * span * left_state[1]
+                        + (3*u*u - 2*u) * span * right_state[1])
 
             left, right = 0.0, 1.0
             for _ in range(40):

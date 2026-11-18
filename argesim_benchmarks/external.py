@@ -19,10 +19,14 @@ import sys
 import tempfile
 import threading
 import time
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
 from numbers import Real
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from types import TracebackType
+from typing import Any, TypeVar
+
+_DirectoryT = TypeVar("_DirectoryT", bound="AtomicArtifactDirectory")
 
 
 @dataclass(frozen=True)
@@ -209,7 +213,7 @@ class AtomicArtifactDirectory:
         self.path: Path | None = None
         self._published = False
 
-    def __enter__(self) -> "AtomicArtifactDirectory":
+    def __enter__(self: _DirectoryT) -> _DirectoryT:
         parent = self.target.parent.resolve()
         parent.mkdir(parents=True, exist_ok=True)
         if self.target.exists():
@@ -244,6 +248,9 @@ class AtomicArtifactDirectory:
         self._published = True
         return artifacts
 
-    def __exit__(self, exc_type: Any, exc: Any, traceback: Any) -> None:
+    def __exit__(
+        self, exc_type: type[BaseException] | None,
+        exc: BaseException | None, traceback: TracebackType | None,
+    ) -> None:
         if self.path is not None and not self._published:
             shutil.rmtree(self.path, ignore_errors=True)

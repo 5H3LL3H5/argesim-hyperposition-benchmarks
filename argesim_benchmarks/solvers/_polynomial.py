@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import math
 import sys
-from functools import lru_cache
-from typing import Sequence
+from collections.abc import Sequence
+from functools import cache
 
 from ..ivp import IntegrationError
 
@@ -212,7 +212,7 @@ def solve_linear_system(
     return solution
 
 
-@lru_cache(maxsize=None)
+@cache
 def interpolation_inverse(radius: int) -> tuple[tuple[float, ...], ...]:
     """Return the inverse Vandermonde map for integer nodes ``[-r, r]``."""
 

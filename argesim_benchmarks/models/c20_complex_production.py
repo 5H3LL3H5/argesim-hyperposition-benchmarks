@@ -722,8 +722,7 @@ class _C20Machine:
             return start + duration, False
         while self.next_failure <= start:
             repair_finish = self.next_failure + self.mttr
-            if start < repair_finish:
-                start = repair_finish
+            start = max(start, repair_finish)
             self.next_failure = repair_finish + rng.gammavariate(
                 self.failure_shape, self.failure_scale_hours * 3600.0
             )
@@ -1195,8 +1194,8 @@ def _c20_statistic(values: Sequence[float]) -> C20Statistic:
 
     def percentile(fraction: float) -> float:
         position = fraction * (len(ordered) - 1)
-        lower = int(math.floor(position))
-        upper = int(math.ceil(position))
+        lower = math.floor(position)
+        upper = math.ceil(position)
         if lower == upper:
             return ordered[lower]
         return ordered[lower] + (position - lower) * (ordered[upper] - ordered[lower])

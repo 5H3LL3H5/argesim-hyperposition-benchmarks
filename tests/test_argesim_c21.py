@@ -1,14 +1,13 @@
 import unittest
 
 from argesim_benchmarks.catalog import BenchmarkStatus, benchmark
-
 from argesim_benchmarks.models.c21_state_events import (
     C21BouncingBallParameters,
+    C21DiodeModel,
     C21RLCDiodeParameters,
     C21RotatingPendulumParameters,
-    C21DiodeModel,
-    c21_bouncing_ball_h_b,
     c21_bouncing_ball_action_b,
+    c21_bouncing_ball_h_b,
     c21_compare_diode_models,
     c21_compare_diode_realtime,
     c21_dynamic_contact_study,
@@ -16,19 +15,19 @@ from argesim_benchmarks.models.c21_state_events import (
     c21_last_bounce_time,
     c21_rlc_diode_h_c,
     c21_rlc_diode_h_l_shortcut,
-    c21_rotating_pendulum_h_f,
-    c21_rotating_pendulum_h_s,
     c21_rotating_pendulum_action_f,
     c21_rotating_pendulum_action_s,
     c21_rotating_pendulum_basic_study,
+    c21_rotating_pendulum_h_f,
+    c21_rotating_pendulum_h_s,
     c21_rotating_pendulum_kick_study,
-    solve_c21_bouncing_ball_event_contact,
-    solve_c21_rotating_pendulum,
     c21_shockley_algebraic,
     c21_shockley_algebraic_current,
     c21_validate_bounce_times,
     simulate_c21_bouncing_ball_dynamic_contact,
     simulate_c21_rlc_diode,
+    solve_c21_bouncing_ball_event_contact,
+    solve_c21_rotating_pendulum,
 )
 
 

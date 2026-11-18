@@ -546,7 +546,7 @@ def cp2_task1_monte_carlo(
         raise TypeError("seed must be an integer")
     if output_step <= 0.0 or t_bound <= 0.0:
         raise ValueError("output_step and t_bound must be positive")
-    intervals = int(round(t_bound / output_step))
+    intervals = round(t_bound / output_step)
     if not math.isclose(intervals * output_step, t_bound, abs_tol=1.0e-14):
         raise ValueError("t_bound must be an integer multiple of output_step")
     times = tuple(index * output_step for index in range(intervals + 1))
@@ -583,7 +583,7 @@ def cp2_task1_time_parallel(
 
     if samples <= 0:
         raise ValueError("samples must be positive")
-    intervals = int(round(t_bound / output_step))
+    intervals = round(t_bound / output_step)
     if not math.isclose(intervals * output_step, t_bound, abs_tol=1.0e-14):
         raise ValueError("t_bound must be an integer multiple of output_step")
     times = tuple(index * output_step for index in range(intervals + 1))
@@ -778,19 +778,19 @@ def cp2_swinging_rope_implicit(
 
     if time_step <= 0.0 or t_bound <= 0.0:
         raise ValueError("time_step and t_bound must be positive")
-    steps = int(round(t_bound / time_step))
+    steps = round(t_bound / time_step)
     if not math.isclose(steps * time_step, t_bound, abs_tol=1.0e-12):
         raise ValueError("t_bound must be an integer multiple of time_step")
     coordinates = tuple(float(value) for value in positions)
     if any(value < 0.0 or value > parameters.length for value in coordinates):
         raise ValueError("positions must lie on the rope")
-    requested_snapshots = tuple(sorted(set(float(value) for value in snapshot_times)))
+    requested_snapshots = tuple(sorted({float(value) for value in snapshot_times}))
     if any(
         not math.isfinite(value) or value < 0.0 or value > t_bound
         for value in requested_snapshots
     ):
         raise ValueError("snapshot times must lie in [0, t_bound]")
-    snapshot_steps = tuple(int(round(value / time_step)) for value in requested_snapshots)
+    snapshot_steps = tuple(round(value / time_step) for value in requested_snapshots)
     if any(
         not math.isclose(index * time_step, value, abs_tol=1.0e-12)
         for index, value in zip(snapshot_steps, requested_snapshots)
@@ -832,7 +832,7 @@ def cp2_swinging_rope_implicit(
 
     def sample(values: Sequence[float], coordinate: float) -> float:
         position = coordinate / spacing
-        left_grid = int(math.floor(position))
+        left_grid = math.floor(position)
         fraction = position - left_grid
 
         def node(grid_index: int) -> float:
@@ -921,13 +921,13 @@ def cp2_task3_swinging_rope(
     profile_output_times = tuple(float(value) for value in profile_times)
     if any(value < 0.0 or value > t_bound for value in profile_output_times):
         raise ValueError("profile times must lie in [0, t_bound]")
-    surface_intervals = int(round(t_bound / surface_step))
+    surface_intervals = round(t_bound / surface_step)
     if not math.isclose(
         surface_intervals * surface_step, t_bound, abs_tol=1.0e-12
     ):
         raise ValueError("t_bound must be an integer multiple of surface_step")
     surface_times = tuple(index * surface_step for index in range(surface_intervals + 1))
-    captured_times = tuple(sorted(set((*profile_output_times, *surface_times))))
+    captured_times = tuple(sorted({*profile_output_times, *surface_times}))
     implicit = cp2_swinging_rope_implicit(
         parameters=parameters,
         t_bound=t_bound,
@@ -1024,7 +1024,7 @@ def cp2_task3_compare(
         time_step=0.01,
         positions=coordinates,
     )
-    indices = tuple(int(round(value / 0.01)) for value in output_times)
+    indices = tuple(round(value / 0.01) for value in output_times)
     if any(
         not math.isclose(index * 0.01, value, abs_tol=1.0e-12)
         for index, value in zip(indices, output_times)

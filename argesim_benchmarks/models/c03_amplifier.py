@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
@@ -230,7 +231,7 @@ def solve_c03(
     segments: list[IntegrationResult] = []
     state = tuple(float(value) for value in initial_state)
 
-    for start, end in zip(ordered, ordered[1:]):
+    for start, end in itertools.pairwise(ordered):
         if parameters.trf == 0.0:
             # An instantaneous switch belongs to the next segment. All RK
             # stages in this segment, including its endpoint, use its fixed

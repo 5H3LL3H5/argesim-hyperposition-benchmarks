@@ -29,11 +29,9 @@ class AtomicModel:
 
     def internal_transition(self) -> None:
         """Handle internal state changes."""
-        pass
 
     def external_transition(self, e: HyperTime, payload: Any) -> None:
         """Handle external inputs."""
-        pass
 
     def output_function(self) -> Any:
         """Generate output."""
@@ -241,7 +239,7 @@ class BaseDevsSystem(AtomicModel):
 
         # Advance current time to next event
         event = heapq.heappop(self._internal_events)
-        target_time, priority, seq, event_type, payload = event
+        target_time, _priority, _seq, event_type, payload = event
         self.current_time = target_time
 
         self.update_stats()
@@ -272,8 +270,7 @@ class BaseDevsSystem(AtomicModel):
         if dt > 0:
             lqt = sum(len(q) for q in self.queues)
             self.lqt_integral += lqt * dt
-            if lqt > self.lqt_max:
-                self.lqt_max = lqt
+            self.lqt_max = max(self.lqt_max, lqt)
             self.last_time = current_macro
 
     def get_service_time(self) -> float:
@@ -378,7 +375,6 @@ class BaseDevsSystem(AtomicModel):
         descending round-robin order starting with the highest class (nC = 5),
         which then proceeds to the front of their respective queues.
         """
-        pass
 
 
 class JockeyingSystem(BaseDevsSystem):
@@ -585,9 +581,9 @@ class ClassingSystem(BaseDevsSystem):
             q[:] = called + others
 
     def check_enter_server(self, q_idx: int) -> None:
-        if self.servers[q_idx] is None and self.queues[q_idx]:
-            if self.queues[q_idx][0].entity_class == self.current_class:
-                self.schedule_eps_event(2, "enter", q_idx)
+        if (self.servers[q_idx] is None and self.queues[q_idx]
+                and self.queues[q_idx][0].entity_class == self.current_class):
+            self.schedule_eps_event(2, "enter", q_idx)
 
     def handle_enter(self, q_idx: int) -> None:
         if (

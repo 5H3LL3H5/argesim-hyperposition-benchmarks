@@ -94,7 +94,7 @@ def brentq(
 
             min1 = 3.0 * xm * q - abs(tol1 * q)
             min2 = abs(e * q)
-            if 2.0 * p < (min1 if min1 < min2 else min2):
+            if 2.0 * p < (min(min2, min1)):
                 e = d
                 d = p / q
             else:

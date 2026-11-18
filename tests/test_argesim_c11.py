@@ -3,7 +3,6 @@
 import unittest
 
 from argesim_benchmarks.models.c11_scara_robot import (
-    C11_INITIAL_STATE,
     C11_TARGET_STATE,
     C11Parameters,
     c11_inertia_terms,
@@ -13,6 +12,7 @@ from argesim_benchmarks.models.c11_scara_robot import (
     c11_task_c,
     solve_c11,
 )
+
 
 class C11Tests(unittest.TestCase):
     def test_motor_torques_are_limited_to_the_specified_maxima(self) -> None:
@@ -55,7 +55,7 @@ class C11Tests(unittest.TestCase):
     def test_task_b_runs_to_completion(self) -> None:
         result = c11_task_b("rk45", t_bound=2.0)
         self.assertEqual(result.times[-1], 2.0)
-        q1, q2, q3, dq1, dq2, dq3, I1, I2, I3 = result.states[-1]
+        q1, q2, q3, _dq1, _dq2, _dq3, _I1, _I2, _I3 = result.states[-1]
 
         # Verify that it reaches the target reasonably well
         self.assertAlmostEqual(q1, C11_TARGET_STATE[0], places=1)

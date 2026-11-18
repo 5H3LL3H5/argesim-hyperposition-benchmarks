@@ -660,23 +660,20 @@ def _mixed_endpoint(
         )
         evaluations += used
         initial = [estimate[index] for index in bdf_indices]
-        try:
-            candidate, used = _implicit_bdf_partition(
-                problem,
-                time + step,
-                step,
-                with_qss,
-                bdf_indices,
-                initial,
-                alpha=alpha,
-                constant=constant,
-                jacobian=jacobian,
-                jacobian_step=jacobian_step,
-                max_newton_iterations=max_newton_iterations,
-                newton_tolerance=newton_tolerance,
-            )
-        except _StepFailure:
-            raise
+        candidate, used = _implicit_bdf_partition(
+            problem,
+            time + step,
+            step,
+            with_qss,
+            bdf_indices,
+            initial,
+            alpha=alpha,
+            constant=constant,
+            jacobian=jacobian,
+            jacobian_step=jacobian_step,
+            max_newton_iterations=max_newton_iterations,
+            newton_tolerance=newton_tolerance,
+        )
         evaluations += used
         last_qss_events = qss_events
         last_quantizer_state = trial_quantizer_state

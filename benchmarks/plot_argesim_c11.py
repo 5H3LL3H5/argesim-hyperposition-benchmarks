@@ -12,7 +12,8 @@ except ImportError:
     sys.exit(1)
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from argesim_benchmarks.models.c11_scara_robot import solve_c11, C11_TARGET_STATE
+from argesim_benchmarks.models.c11_scara_robot import C11_TARGET_STATE, solve_c11
+
 
 def plot_task(task: str, title: str, filename: str):
     print(f"Solving task {task}...")

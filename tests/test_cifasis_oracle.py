@@ -20,7 +20,6 @@ from argesim_benchmarks.oracles.cli import (
     handle_oracle_command,
 )
 
-
 FAKE_DRIVER = r'''\
 import argparse
 import json

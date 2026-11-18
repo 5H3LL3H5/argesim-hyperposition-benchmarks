@@ -1,7 +1,6 @@
 import unittest
 
 from argesim_benchmarks.hybrid import HybridMode, simulate_hybrid
-
 from argesim_benchmarks.models.c21_state_events import (
     simulate_c21_bouncing_ball_event_contact,
     simulate_c21_rotating_pendulum,

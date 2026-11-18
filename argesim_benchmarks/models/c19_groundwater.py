@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 
-from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
+from ..ivp import InitialValueProblem, IntegrationResult, Rhs
 from ..runtime import solve_ivp
 
 
@@ -157,7 +157,6 @@ def c19_rhs(
 
     deg_val = parameters.degradation
 
-    source_term = [0.0] * (nx * ny)
     # The source is a point source M at (0,0). In a discrete grid, it corresponds to the cell
     # containing (0,0). The transport equation is integrated over the cell volume:
     # the concentration rate is M / (dx * dy * thickness * ne).
@@ -182,8 +181,8 @@ def c19_rhs(
                     facility_indices.append(j * nx + i)
 
     # Find the closest cell to (0,0)
-    ix0 = max(0, min(nx - 1, int(round((0.0 - x_offset) / dx))))
-    iy0 = max(0, min(ny - 1, int(round((0.0 - y_offset) / dy))))
+    ix0 = max(0, min(nx - 1, round((0.0 - x_offset) / dx)))
+    iy0 = max(0, min(ny - 1, round((0.0 - y_offset) / dy)))
 
     source_idx = iy0 * nx + ix0
 
@@ -203,9 +202,7 @@ def c19_rhs(
             day_of_week = int(t / (24 * 3600)) % 7  # 0=Monday, 6=Sunday
             hour_of_day = (t % (24 * 3600)) / 3600.0
 
-            if day_of_week >= 5: # Saturday, Sunday
-                is_active = True
-            elif hour_of_day < 8.0 or hour_of_day >= 20.0:
+            if day_of_week >= 5 or hour_of_day < 8.0 or hour_of_day >= 20.0: # Saturday, Sunday
                 is_active = True
 
         for j in range(ny):

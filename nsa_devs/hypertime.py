@@ -7,10 +7,10 @@ hyperreal field.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from fractions import Fraction
 from functools import total_ordering
-import math
 
 Scalar = int | float | str | Fraction
 

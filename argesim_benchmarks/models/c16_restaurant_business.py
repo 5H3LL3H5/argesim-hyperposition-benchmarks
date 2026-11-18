@@ -7,11 +7,12 @@ from __future__ import annotations
 
 import math
 import random
+from collections.abc import Sequence
 from dataclasses import dataclass, replace
 from enum import Enum, auto
-from typing import Sequence
 
 from nsa_devs import DesScheduler, HyperTime
+
 
 @dataclass(frozen=True)
 class C16Parameters:
@@ -181,15 +182,15 @@ def initialize_restaurants(parameters: C16Parameters) -> list[Restaurant]:
         x0 = 50.0
         y0 = 40.0
     else:
-        cols = max(1, int(math.ceil(math.sqrt(n * parameters.area_width / parameters.area_height))))
-        rows = max(1, int(math.ceil(n / cols)))
+        cols = max(1, math.ceil(math.sqrt(n * parameters.area_width / parameters.area_height)))
+        rows = max(1, math.ceil(n / cols))
         dx = parameters.area_width / cols
         dy = parameters.area_height / rows
         x0 = 0.5 * dx
         y0 = 0.5 * dy
 
     count = 0
-    rows = int(math.ceil(n / cols))
+    rows = math.ceil(n / cols)
     for row in range(rows):
         for col in range(cols):
             if count >= n:
@@ -257,7 +258,7 @@ class C16Simulation:
 
     def run_until(
         self,
-        max_days: int | float,
+        max_days: float,
         tax_rate: float | None = None,
         *,
         max_events: int = 1_000_000,

@@ -18,7 +18,6 @@ from ..ivp import InitialValueProblem, Rhs, Vector
 from ..parallel import OrderedExecutor, ParallelRun, benchmark_ordered_map
 from ..solvers import rk4
 
-
 # --- Task A: Parameter Sweep ---
 
 def cp1_task_a_ivp(
@@ -272,7 +271,7 @@ def _cp1_oscillator_case(
     x = 0.1
     velocity = 0.0
     positions = [x]
-    steps = int(round(t_bound / step))
+    steps = round(t_bound / step)
 
     def rates(position: float, speed: float) -> tuple[float, float]:
         return speed, (-stiffness * position - damping * speed) / mass
@@ -309,10 +308,10 @@ def cp1_task_a_study(
         raise TypeError("seed must be an integer")
     if step <= 0.0 or output_step < step or t_bound <= 0.0:
         raise ValueError("steps and t_bound must be positive; output_step >= step")
-    output_stride = int(round(output_step / step))
+    output_stride = round(output_step / step)
     if not math.isclose(output_stride * step, output_step, abs_tol=1.0e-14):
         raise ValueError("output_step must be an integer multiple of step")
-    integration_steps = int(round(t_bound / step))
+    integration_steps = round(t_bound / step)
     if not math.isclose(integration_steps * step, t_bound, abs_tol=1.0e-14):
         raise ValueError("t_bound must be an integer multiple of step")
 
@@ -397,7 +396,7 @@ def _cp1_task_b_integrate(
     workers: int,
     backend: str,
 ) -> tuple[Vector, float]:
-    steps = int(round(t_bound / step))
+    steps = round(t_bound / step)
     if not math.isclose(steps * step, t_bound, abs_tol=1.0e-12):
         raise ValueError("t_bound must be an integer multiple of step")
     state = [1.0] * 10
@@ -497,8 +496,8 @@ def cp1_task_c_solve(
     problem = cp1_task_c_ivp(interior_points, t_bound=t_bound)
     if step <= 0.0 or output_step < step:
         raise ValueError("step must be positive and output_step must be >= step")
-    steps = int(round(t_bound / step))
-    stride = int(round(output_step / step))
+    steps = round(t_bound / step)
+    stride = round(output_step / step)
     if not math.isclose(steps * step, t_bound, abs_tol=1.0e-12):
         raise ValueError("t_bound must be an integer multiple of step")
     if not math.isclose(stride * step, output_step, abs_tol=1.0e-12):

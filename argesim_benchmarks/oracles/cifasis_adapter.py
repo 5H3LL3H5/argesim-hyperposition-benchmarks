@@ -16,13 +16,13 @@ import subprocess
 import sys
 import tempfile
 import time
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from ..external import canonical_json_bytes
 from .cifasis import ORACLE_PROTOCOL_VERSION
-
 
 _MAX_REQUEST_BYTES = 16_777_216
 _MAX_OUTPUT_BYTES = 16_777_216
@@ -80,8 +80,7 @@ def _run_checked(
             cwd=cwd,
             env=dict(environment),
             stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             shell=False,
             check=False,
         )
@@ -103,8 +102,7 @@ def _git_commit(source_root: Path) -> str:
         completed = subprocess.run(
             ["git", "-C", str(source_root), "rev-parse", "--verify", "HEAD"],
             stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             shell=False,
             check=False,
             timeout=5.0,
@@ -127,8 +125,7 @@ def _git_commit(source_root: Path) -> str:
                 "--untracked-files=normal",
             ],
             stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             shell=False,
             check=False,
             timeout=5.0,

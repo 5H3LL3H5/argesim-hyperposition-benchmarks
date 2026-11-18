@@ -64,7 +64,7 @@ class C15Tests(unittest.TestCase):
         self.assertIn("tau_3_0", results)
         self.assertIn("tau_240", results)
 
-        for name, res in results.items():
+        for res in results.values():
             self.assertEqual(res.final_time, 240.0)
             self.assertEqual(len(res.states[0]), 2)
             self.assertGreater(res.final_state[0], 0.0)

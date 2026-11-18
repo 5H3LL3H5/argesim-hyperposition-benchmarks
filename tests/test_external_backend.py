@@ -41,8 +41,8 @@ class ExternalBackendTests(unittest.TestCase):
                 (
                     sys.executable,
                     "-c",
-                    "import sys; print(sys.argv[1]); "
-                    "sys.stderr.write('x' * 40)",
+                    ("import sys; print(sys.argv[1]); "
+                     "sys.stderr.write('x' * 40)"),
                     "; touch must-not-exist",
                 ),
                 cwd=Path(name),
@@ -66,18 +66,16 @@ class ExternalBackendTests(unittest.TestCase):
             )
             manifest = json.loads((target / "manifest.json").read_text())
             self.assertEqual(manifest["artifacts"], digests)
-            with self.assertRaises(FileExistsError):
-                with AtomicArtifactDirectory(target):
-                    pass
+            with self.assertRaises(FileExistsError), AtomicArtifactDirectory(target):
+                pass
 
     def test_unpublished_directory_is_cleaned(self) -> None:
         with tempfile.TemporaryDirectory() as name:
             target = Path(name) / "evidence"
-            with self.assertRaisesRegex(RuntimeError, "stop"):
-                with AtomicArtifactDirectory(target) as bundle:
-                    assert bundle.path is not None
-                    staging = bundle.path
-                    raise RuntimeError("stop")
+            with self.assertRaisesRegex(RuntimeError, "stop"), AtomicArtifactDirectory(target) as bundle:
+                assert bundle.path is not None
+                staging = bundle.path
+                raise RuntimeError("stop")
             self.assertFalse(staging.exists())
             self.assertFalse(target.exists())
 
@@ -85,11 +83,10 @@ class ExternalBackendTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as name:
             root = Path(name)
             target = root / "evidence"
-            with self.assertRaisesRegex(ValueError, "symbolic link"):
-                with AtomicArtifactDirectory(target) as bundle:
-                    assert bundle.path is not None
-                    (bundle.path / "link").symlink_to(root / "outside")
-                    bundle.publish(scope="diagnostic", status="failed")
+            with self.assertRaisesRegex(ValueError, "symbolic link"), AtomicArtifactDirectory(target) as bundle:
+                assert bundle.path is not None
+                (bundle.path / "link").symlink_to(root / "outside")
+                bundle.publish(scope="diagnostic", status="failed")
             self.assertFalse(target.exists())
 
     def test_canonical_json_is_order_independent_and_rejects_nan(self) -> None:

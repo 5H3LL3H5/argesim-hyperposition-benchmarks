@@ -2,12 +2,9 @@
 """Execute ARGESIM C16 tasks, generate plots and print validation metrics."""
 
 import argparse
-import random
 import statistics
 
 from argesim_benchmarks.models.c16_restaurant_business import (
-    C16Parameters,
-    C16Simulation,
     c16_task_a,
     c16_task_b,
     c16_task_c,

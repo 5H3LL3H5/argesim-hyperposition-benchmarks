@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import Enum
 import math
 import random
 import statistics
-from typing import Callable
+from collections.abc import Callable
+from dataclasses import dataclass
+from enum import Enum
+
 from nsa_devs.hypertime import HyperTime
 from nsa_devs.scheduler import DesScheduler
 

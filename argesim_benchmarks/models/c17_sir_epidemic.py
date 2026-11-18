@@ -12,6 +12,8 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
 
+from nsa_devs.hypertime import HyperTime
+
 from ..hybrid import (
     HybridEventRecord,
     HybridMode,
@@ -22,7 +24,6 @@ from ..hybrid import (
 )
 from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
 from ..runtime import solve_ivp
-from nsa_devs.hypertime import HyperTime
 
 C17_INITIAL_STATE: Vector = (9500.0, 500.0, 0.0)
 
@@ -483,7 +484,7 @@ def simulate_c17_ca(
     except ValueError as exc:
         raise ValueError(f"unknown C17 movement: {movement!r}") from exc
     counts = tuple(int(value) for value in initial_state)
-    population = int(round(parameters.n))
+    population = round(parameters.n)
     if len(counts) != 3 or any(value < 0 for value in counts) or sum(counts) != population:
         raise ValueError("integer CA initial_state must contain S, I, R and sum to n")
     if not math.isclose(parameters.n, population, abs_tol=1.0e-12):
@@ -697,7 +698,7 @@ def c17_compare_ca_ode(
     counts = tuple(int(value) for value in initial_state)
     if len(counts) != 3 or any(value < 0 for value in counts):
         raise ValueError("initial_state must contain non-negative integer S, I, R")
-    if sum(counts) != int(round(parameters.n)):
+    if sum(counts) != round(parameters.n):
         raise ValueError("initial_state must sum to the parameter population")
     runs = tuple(
         simulate_c17_ca(

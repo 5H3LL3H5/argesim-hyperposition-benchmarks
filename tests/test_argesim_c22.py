@@ -1,3 +1,4 @@
+import itertools
 import unittest
 
 from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
@@ -27,11 +28,11 @@ class C22Tests(unittest.TestCase):
         trace = results["deterministic"]["lqt_trace"]
         self.assertEqual(trace[0], (0.0, 0))
         self.assertEqual(trace[-1][1], 0)
-        self.assertTrue(all(a[0] <= b[0] for a, b in zip(trace, trace[1:])))
+        self.assertTrue(all(a[0] <= b[0] for a, b in itertools.pairwise(trace)))
         self.assertGreater(max(length for _, length in trace), 0)
         integral = sum(
             length * (next_time - time)
-            for (time, length), (next_time, _) in zip(trace, trace[1:])
+            for (time, length), (next_time, _) in itertools.pairwise(trace)
         )
         self.assertAlmostEqual(
             integral / results["deterministic"]["times_out"][-1],

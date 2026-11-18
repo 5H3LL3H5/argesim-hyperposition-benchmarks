@@ -18,6 +18,7 @@ from typing import Generic, TypeVar
 
 InputT = TypeVar("InputT")
 OutputT = TypeVar("OutputT")
+_ExecutorT = TypeVar("_ExecutorT", bound="OrderedExecutor")
 
 
 class OrderedExecutor:
@@ -31,7 +32,7 @@ class OrderedExecutor:
         self.backend = backend
         self._executor: ThreadPoolExecutor | ProcessPoolExecutor | None = None
 
-    def __enter__(self) -> OrderedExecutor:
+    def __enter__(self: _ExecutorT) -> _ExecutorT:
         if self.backend == "thread" and self.workers > 1:
             self._executor = ThreadPoolExecutor(max_workers=self.workers)
         elif self.backend == "process" and self.workers > 1:
