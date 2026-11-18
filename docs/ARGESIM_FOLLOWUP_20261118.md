@@ -29,6 +29,12 @@ both neighbours. Finite experiments do not prove universal starvation freedom.
 Matched replication seeds are no longer described as guaranteed common random
 numbers: different policy histories can consume random draws differently.
 
+A final event-order counterexample exposed another error in the unsafe policy:
+an unrelated fork release could wake a philosopher before its scheduled second
+acquisition. Waking a blocked philosopher now respects that pending delay.
+The regression fixes the schedule: a release at 0.3 must not move acquisition
+from 0.35 to 0.3, or meal completion from 0.45 to 0.4.
+
 ## C05: trajectories and measured precision
 
 `simulate_c05` now returns sample times, states and active modes. It includes
@@ -141,6 +147,7 @@ individual numerical checks and C02 comparison results are retained in
 | Final C02/C04/C05/C06 regression rerun | 32 tests: 31 passed, the same expected failure |
 | Complete smoke profile | 74/74 tasks passed across all 24 families |
 | Final C04/C05 smoke rerun | 7/7 tasks passed |
+| C04 acquisition-delay regression rerun | 8/8 tests and 3/3 smoke tasks passed |
 | Independent numerical probes | 11/11 passed, including both C05 precision references |
 | Ruff 0.17.5 | Zero findings |
 | Compile, generated-status and diff checks | Passed |
@@ -150,7 +157,10 @@ The full unit run preceded the last C04 deadlock-detection refinement and an
 additional C02 execution assertion; the 32-test rerun covers those final files.
 The full smoke run preceded the C05 decimal-context isolation and final C04
 refinement; their seven tasks were rerun afterwards. These are overlapping
-checks, not additional independent test totals.
+checks, not additional independent test totals. A subsequent acquisition-delay
+fix added one C04 regression (342 tests now discovered); all eight C04 tests
+and its three smoke tasks were rerun on that final source. Hosted CI checks
+the complete updated suite.
 
 The ten-pallet C02 case yields throughput 1209 versus reference 959 (+26.07%)
 and mean transit 238.69 s versus 285 s (-16.25%). The 14-, 20- and 40-pallet

@@ -244,10 +244,14 @@ class _C04Simulation:
         if not self.held[philosopher] and self.acquire(philosopher, left):
             self.pending_second.add(philosopher)
             self.schedule(self.now + self.acquisition_delay, "second", philosopher)
-        elif left in self.held[philosopher] and self.acquire(philosopher, right):
+        elif (
+            philosopher not in self.pending_second
+            and left in self.held[philosopher]
+            and self.acquire(philosopher, right)
+        ):
             # Resource release wakes blocked philosophers.  Retaining the
             # first fork must not turn a temporary conflict into an artificial
-            # permanent block; only the circular-wait case is a deadlock.
+            # permanent block, but cannot bypass a pending acquisition delay.
             self.start_eating(philosopher)
             return True
         return False

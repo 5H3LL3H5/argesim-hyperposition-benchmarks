@@ -1,6 +1,6 @@
 {
   "audit_date": "2026-11-18",
-  "recorded_at_utc": "2026-11-18T23:20:31.511708+00:00",
+  "recorded_at_utc": "2026-11-18T23:24:44.734087+00:00",
   "repository": "5H3LL3H5/argesim-hyperposition-benchmarks",
   "base_commit": "c57c14aea5fb8d8e5f099db5e898accb7d01bb4a",
   "ci_cleanup_commit": "eb932a75b33680433c13b2b3ae00a8e89ef84f70",
@@ -51,7 +51,7 @@
   "checks": {
     "unit_suite": {
       "command": "python -m unittest discover -s tests -v",
-      "scope": "Full suite before the last C04 deadlock refinement and C02 execution assertion; see final focused rerun.",
+      "scope": "Full suite before the last C04 deadlock refinement and C02 execution assertion; see final focused rerun. Precedes the final C04 acquisition-delay correction; see c04_acquisition_regression.",
       "exit_code": 0,
       "total": 341,
       "passed": 340,
@@ -63,7 +63,7 @@
     },
     "final_focused_units": {
       "command": "python -m unittest discover -s tests -p 'test_argesim_c0[2456].py' -v",
-      "scope": "Exact final C02/C04/C05/C06 files; overlaps full-suite tests.",
+      "scope": "Exact final C02/C04/C05/C06 files; overlaps full-suite tests. Precedes the final C04 acquisition-delay correction; see c04_acquisition_regression.",
       "exit_code": 0,
       "total": 32,
       "passed": 31,
@@ -75,7 +75,7 @@
     },
     "smoke_suite": {
       "command": "python -m argesim_benchmarks run-suite --profile smoke",
-      "scope": "All 24 families; execution only. Precedes C05 context isolation and final C04 deadlock refinement.",
+      "scope": "All 24 families; execution only. Precedes C05 context isolation and final C04 deadlock refinement. Precedes the final C04 acquisition-delay correction; see c04_acquisition_regression.",
       "exit_code": 0,
       "total": 74,
       "passed": 74,
@@ -456,7 +456,7 @@
     },
     "final_focused_smoke": {
       "command": "python -m argesim_benchmarks run-suite --profile smoke --benchmark C04 --benchmark C05",
-      "scope": "Final C04/C05 source; execution only; overlaps full smoke profile.",
+      "scope": "Final C04/C05 source; execution only; overlaps full smoke profile. Precedes the final C04 acquisition-delay correction; see c04_acquisition_regression.",
       "exit_code": 0,
       "total": 7,
       "passed": 7,
@@ -608,6 +608,19 @@
     "dependency_free_core": {
       "command": "python -S -c \"import argesim_benchmarks; from argesim_benchmarks import c05_task_c; assert all(row['passed'] for row in c05_task_c()['runs'])\"",
       "exit_code": 0
+    },
+    "c04_acquisition_regression": {
+      "reason": "An unrelated resource release bypassed the pending second-acquisition delay; fixed schedule checks completion remains at 0.45 instead of 0.4.",
+      "unit_command": "python -m unittest discover -s tests -p 'test_argesim_c04.py' -v",
+      "unit_total": 8,
+      "unit_passed": 8,
+      "unit_exit_code": 0,
+      "unit_log_sha256": "b355e813401a99a9a133c5ceae698a3cef9e6a9b5fdb54ed929fe503f9c3e54d",
+      "smoke_command": "python -m argesim_benchmarks run-suite --profile smoke --benchmark C04",
+      "smoke_passed": 3,
+      "smoke_failed": 0,
+      "smoke_exit_code": 0,
+      "smoke_log_sha256": "4e950ca37b864f4ee2d19f11eaf60ba14ed1dfd2b2a249599cb6074fddbcd56f"
     }
   },
   "known_expected_failure": {
@@ -707,7 +720,7 @@
     "argesim_benchmarks/models/c01_lithium_cluster.py": "b8261d6efac207596d76b4ac4534713ea0ac12b216d88e259745daafb1e5a8e3",
     "argesim_benchmarks/models/c02_flexible_assembly.py": "a94ed8dffff6be2c1002733464451165acf82351a199798c956bc8567e5aaf95",
     "argesim_benchmarks/models/c03_amplifier.py": "18c7bd84bc73c17c32d4e6961123b013c317472bb80bae88aa3b6ab29e812ecd",
-    "argesim_benchmarks/models/c04_dining_philosophers.py": "7bbfca4d47ed0e61be63292db415a6b65e318cece5132adffb24a90d822f938e",
+    "argesim_benchmarks/models/c04_dining_philosophers.py": "e90b5eaaa932f216c1e955c62919902fb56c35b8845324d884133ce89bebdaaa",
     "argesim_benchmarks/models/c05_two_state.py": "9829b4edb9d4d589b55f1188640d2834690e49fcc73b7f2bd88c0d94f5977509",
     "argesim_benchmarks/models/c06_emergency_department.py": "10f107c7ddac3f2184b1ef5f31b79b838359138a272f58440f06ef851531cf56",
     "argesim_benchmarks/models/c07_constrained_pendulum.py": "04388551cec55fb1033fb6c1ed8a58b82af70faa63cf0107e32f706aaa0dc861",
@@ -783,7 +796,7 @@
     "tests/test_argesim_c01.py": "3012f1df75628fd983cd9096e23e06d1e152e59a350d575d1d630da45f5f9a65",
     "tests/test_argesim_c02.py": "3513b05ef2505ef50c470ff62f98b11b9db82dbcd0e6275055e3fbc28897fba6",
     "tests/test_argesim_c03.py": "0230c974bbb5589fd5da40187ca5d872e1b73912e242619dc734ccbf1bad730b",
-    "tests/test_argesim_c04.py": "12ec5f4d545efdf6e8e66e1babce0a07de6d09ace887b22f028ac1ba0381cbd5",
+    "tests/test_argesim_c04.py": "ce5ae0f0a6fcc9e815d36d28c9ce4965b2b8b85f87f8fb069a3488f807668827",
     "tests/test_argesim_c05.py": "31cfdc34a6bb13829a768cc5d8cf8d51b2e9d0430447e2501609b095c159ed55",
     "tests/test_argesim_c06.py": "fe1fcd616958eee3d4faf906c6a736458a57f51524dcba2890df6df57b64434f",
     "tests/test_argesim_c07.py": "c03f98939010b911728fee81c5e156a65f6750b374fa4d1ced4bae82b118561c",
@@ -823,5 +836,7 @@
     "tests/test_root_solver.py": "83fa3d82c0a141396483fca2de69f384fe5f0442ac8762ec086e0916c0dae626",
     "tests/test_runner.py": "b56b43e0d255f3a03d9a18f4c8049cfb1e5b2679bef0a6296ede9cdd26fda3ba",
     "tests/test_runtime.py": "8bf9b989001ebe1e9783b8fffa96b9fa1fa1ecb69deb6509358bc305bbd2db9f"
-  }
+  },
+  "subsequent_c04_base_commit": "88d9fffe2f654421f32d63f2c429d0dbd10a3fda",
+  "current_discovered_unit_tests": 342
 }
