@@ -1,5 +1,104 @@
 # ARGESIM implementation audit
 
+## Correctness review, 2026-11-18
+
+**Verdict: the repository does not yet implement every ARGESIM benchmark
+correctly and completely.** The audit retrieved the active primary definitions
+for all 24 families and compared model assumptions, parameters, event rules,
+task entry points and existing tests. It added targeted counterexamples and
+independent numerical spot checks. This is not an exhaustive proof, a complete
+statistical validation, or a run of all publication-sized workloads.
+
+The starting main commit was `8bc9f2d2a99e591eea9afe257c5a247a8cdffeb9`.
+The scheduler correction is commit `2852ab4d0eec8095db1ba8aaddae3edf972d0f3f`
+in draft PR #61. The following benchmark fixes build on that correction.
+Source URLs and SHA-256 hashes for the 24 definitions, together with numerical
+probe results and tolerances, are retained in
+[BENCHMARK_AUDIT_20261118.json](docs/BENCHMARK_AUDIT_20261118.json).
+
+### Confirmed defects and corrections
+
+| Case | Counterexample / primary requirement | Correction and remaining limit |
+|---|---|---|
+| C02 | `solve_c02(50)` and `(60)` returned a hardcoded deadlock before constructing the plant. This was not simulation evidence. | High-load cases now raise `NotImplementedError`; lower-load output reports deadlock as unknown (`None`). Full blocking, merge contention and transport timing remain unresolved. |
+| C03 | The supported ideal-switch case `trf=0` and the maximum ramp duration could fail with a minimum-step error. `base+period` and the next `cycle*period` produced an artificial one-ULP interval near 60 us; RK endpoint stages could also sample the next circuit at an ideal switch. | Canonical cycle boundaries, including ramp endpoints coinciding with a cycle edge, and a fixed circuit per ideal-switch segment. Full 100 us ideal-switch trajectory is checked against independent matrix exponentials. |
+| C05 | Revised July 1992 Task D requires `c2=-1.25` and return threshold `y1=4.1`. Code used `-2.85` and `2.5`. Switching times/endpoints alone missed the 1.6 state error. | Corrected both parameters and tested all 31 return states. Published 62-event times and final value still pass unchanged. The general solver/tolerance experiment of Task C remains missing. |
+| C06 | Definition Task B requires the inexperienced doctor transferred to CW1 to take 20% longer. | Applied the factor only to that doctor's distribution. Alternating aggregate service distributions still do not model persistent individual doctors. |
+| C08 | With two eastbound arrivals at t=0, a westbound arrival at t=1 and another eastbound at t=55, the old model admitted three into a cycle limited to two. | Count cumulative admissions separately from remaining occupants. Departure order is now 0,1,2,3 at 54,88,142,196 min. Both directions and incomplete-cycle admission are tested. |
+| C09 | Surface generation converted the error axis from cm to m but omitted that conversion for the difference axis. At e=15 cm, de=.0125 cm, IFC2 returned .00008 instead of .000125. | Both axes use the same units as Figure 4. Independently evaluated rule weights check IFC1 and IFC2. |
+| C11 | The definition gives `Imax=Tmax/((3/2)*kT)`. Multiplication by 3/2 instead of division allowed 2.25 times the specified motor torque. | Corrected all three current limits. Tests reconstruct joint torque from acceleration for both polarities. |
+| C12 | Definition (4) sets all three initial gaps to `a`; code used `(a,0,0)`. It also used Task A1's 15 s plotting horizon for terminal results in A2/B/C. At e=.5 two of six collisions occur after 15 s. | Correct gaps; terminal tasks run until no significant closing velocity remains. Tiny event advances preserve nonoverlap. Elastic events at 1,2,3 s, terminal e=.5 velocities, plastic collapse, momentum and energy are checked. |
+| C15 | RK stages straddled the bolus discontinuity. With dose 2500, tau=.5 and RK4 step=.1, x1(1) was 2321.910742 instead of 2403.057754. | Every backend now uses separate bolus-on/off segments, including the left-hand forcing at the first segment's endpoint. Tests include grid-aligned and off-grid bolus durations. |
+
+The initial PR CI also exposed a pre-existing exact floating-point assertion
+on Python 3.10/3.11: integrating `y'=1` to `1e-15` differed by one ULP from
+the literal. The test now allows two ULPs at that scale; it still rejects zero
+or an omitted final interval. This is a portability correction, not a relaxed
+scientific accuracy target.
+
+### Open blockers and corrected gates
+
+The strict `implemented` gate requires every required task and model behaviour.
+The following six families therefore move back to `specified`, despite useful
+partial code. The four retained `validated` labels denote the particular
+references listed below, not universal correctness.
+
+| Family | Work still required before claiming complete implementation |
+|---|---|
+| C02 | Physical belt blocking, shifter/merge priority and pallet occupancy; restore the definition's 2 s shifts at A1/A6 instead of 4/3 s; separate buffer travel from total B1/B2 length and processing travel. The existing 6% throughput proximity check is only historical evidence for the abstraction. |
+| C04 | The original open-ended comparison asks for successive refinements: actual dirty/clean chopstick state, cleaning, neighbour request tokens and conspiracy/starvation experiments. Ordered atomic fork acquisition is not the cleaning process. |
+| C05 | Sampled y1(t) output and the requested relative-accuracy study across numerical solver settings. The exact event oracle is useful but does not perform that solver experiment. The definition's printed c1=2.7e-6 conflicts with its stiff example; c1=2.7e6 is retained consistently with the published Maple solution and reference events. |
+| C06 | Individual doctor identity, service completion and exchange scheduling. Alternation gives equal counts of service starts, which is not equivalent to two servers with different service durations. |
+| C18 | Original measured 100 Hz identification/validation data, or an explicitly agreed substitute task. Interpolated 5 Hz figure digitizations cannot validate the original data experiment. |
+| C20 | A validated transport topology, junction/buffer occupancy and propagation of downstream blocking. Entry headway in a reduced two-ring abstraction is insufficient evidence for the complete physical conveyor model. |
+
+### Independent numerical spot checks
+
+[benchmark_spec_probe.py](scripts/benchmark_spec_probe.py) uses independently
+transcribed equations and NumPy/SciPy, without calling candidate RHS functions
+for its references. The audit runtime used NumPy 2.3.5 and SciPy 1.17.0.
+
+| Case | Independent reference | Maximum absolute difference |
+|---|---|---:|
+| C01, loss=100/1000/10000, 0..10 s | Radau at every candidate trajectory point | 1.51e-8 |
+| C03, ideal switch, 20 half-cycle boundaries through 100 us | Affine matrix exponentials | 1.55e-7 |
+| C07, both Task-A initial conditions through 10 s | DOP853 with separate pin events and velocity resets | 1.98e-7 |
+| C15, all three bolus durations at 240 min | Augmented matrix exponentials for both compartments | 5.23e-12 |
+
+C07 comparisons exclude samples within 1 us of a velocity jump to avoid
+comparing opposite sides of a reset. C03's independent check concerns the
+ideal-switch limit, not every finite rise/fall-time variant. These probes
+do not promote entire families to `validated`.
+
+### Verification of the corrected source
+
+Python 3.12.14 completed **325/325 unit tests**. The complete smoke profile
+completed **71/71 tasks across all 24 families**; the three C03 smoke tasks
+were repeated successfully after the final coincident ramp/cycle-boundary fix.
+All nine independent numerical probes passed. `compileall`, generated status
+verification and `git diff --check` passed.
+
+Ruff 0.17.5 still reports **210 pre-existing findings**, with zero new findings
+relative to the scheduler commit. The new probe script passes lint and
+formatting. Repository-wide CI lint therefore remains blocked by existing
+lint debt; successful numerical tests are not an overall green CI claim.
+The evidence JSON records commands, results, source hashes and log digests.
+
+Reproduce the checks from the repository root:
+
+```sh
+python -m unittest discover -s tests -v
+python -m argesim_benchmarks run-suite --profile smoke
+python scripts/benchmark_spec_probe.py  # optional NumPy/SciPy audit dependencies
+python scripts/update_status_docs.py --check
+python -m compileall -q argesim_benchmarks tests scripts
+```
+
+## Earlier reviews
+
+The dated sections below retain their original scope. Current family status
+is given by the per-definition table and the 2026-11-18 findings above.
+
 ## Isolated diagnostic performance mode (2026-09-28)
 
 `run-performance` runs selected tasks in fresh processes with an untimed
@@ -83,30 +182,30 @@ in shared runtime code.
 
 | ID | Gate | Audit result |
 |---|---|---|
-| C01 | implemented | Tasks A-C and five solver selections execute; independent published trajectories are not archived. |
-| C02 | validated | Published throughput/transit references pass. |
-| C03 | implemented | Switch boundaries are aligned; non-autonomous QSS misuse is rejected. |
-| C04 | implemented | Unsafe, waiter, cleaning/ordered-fork and put-back strategies execute with seeded replications, resource-cycle deadlock detection, per-philosopher meals/fairness and complete state-time accounting. C10 remains a separate definition. |
-| C05 | validated | Closed-form modes reproduce five default events, all 62 Task-D events and both published endpoints. |
-| C06 | implemented | Shared DES scheduling executes all three tasks; Task B preserves two-doctor ward capacity and models the specified hysteretic CW1/CW2 doctor-time exchange by alternating the two service distributions in each aggregate two-server ward. Persistent individual server identity is not claimed. |
-| C07 | implemented | Explicit hybrid modes share classical/QSS event handling; Task C localizes the turning angle between solver samples and agrees with the published initial velocity to 1e-6. |
-| C08 | validated | Independent table/replication checks pass. |
-| C09 | implemented | I-FC1, I-FC2 and P-FC surfaces plus the complete 60,000 s experiment execute. The published Simulink `change-level` convention gives final I-FC errors below 0.02 mm and disturbance rejection; the contradictory literal printed error difference remains selectable. |
-| C10 | implemented | Concurrency/deadlock tasks execute independently of C04, including the specified simultaneous-access priority and the Task-B minimum of 50 deadlock runs. |
-| C11 | implemented | Official inertia coupling and nine-state explicit formulation execute; Tasks A/B/C are separate entry points and Task C returns x_tip, q3-h_obs and x_obs diagnostic trajectories. No implicit-formulation performance comparison is claimed. |
-| C12 | implemented | Deterministic, boundary-value and stochastic collision tasks execute; the published quasi-plastic e=0.18 boundary and C1 restitution root are regression-checked. |
-| C13 | implemented | Revised nonlinear/linear crane and embedded-control tasks execute with d_l=0.001 kg/s, 0.1 s digital-controller sampling, the specified Task-B/Task-C disturbance sequences, and complete load/brake/emergency diagnostic trajectories. The 2006 definition used d_l=0.01 kg/s and its published ~±294 m Task-A table belongs to that revision. An independent DOP853 integration of both parameter sets reproduces the ~±294 versus ~±299 m shift; smaller residual differences to the old table remain. [Analysis](docs/C13_REFERENCE_ANALYSIS.md). No 2007 external validation is claimed. |
-| C14 | implemented | All discrete supply-chain tasks execute; the day-8 ten-piece initial fill is strategy-independent as specified, with strategy-specific ordering starting only afterwards. |
-| C15 | implemented | Identification/Monte Carlo tasks and explicit bolus segments execute. |
-| C16 | implemented | Agent/DES restaurant tasks preserve deterministic microstep ordering. |
-| C17R | implemented | Task-1 sweeps, ODE/CA comparison, FHP-I collisions, homogeneous random movement, persistent soft measures and repeatable hard/spatial threshold interventions execute through classical or QSS2 hybrid paths; revised lattice sizing uses ceiling and discrete hard-measure populations are rounded down. The default high-contact sweep now uses C=5 and alpha=0.08: the earlier C=8 implied more people than six FHP slots per cell. |
-| C18 | implemented | ARX, parallel residual ANN and free-running dynamic ANN execute and return models, trajectories, correlations and error trends on user data or provenance-labelled digitizations. Original measurement files remain an external-data gap, not a hidden substitution. |
-| C19R | implemented | Three MOL tasks and analytical checks execute. The Task-B continuous run now extends to day 150 so its output can be compared with Task C on the interval specified by the definition. Independent reference trajectories and the required plots remain open evidence. |
-| C20 | implemented | All 3x4 scenarios and 5000-order defaults execute with alternative process plans, workstation generations, constraints, repairs and median/IQR output. Source/inter-operation/sink transport uses a dimensioned two-ring network, 1 m/s belt speed, finite 1 m-part capacity and PSc4 failures/rerouting. |
-| C21 | validated | Ball event/dynamic/shortcut studies, pendulum basic/kick studies and algebraic/interpolated/index-reduced Shockley RLC forms execute. Published stop time, kick angles, contact limits and dynamic-contact samples pass declared tolerances. |
-| C22 | implemented | Four queue policies execute. Deterministic class assignment ascends from 1 while operator calls descend from 5 after t=10. Deterministic runs now expose the complete queue-length step trace needed for the prescribed lqt(t) plots; published trace/plot comparisons remain open before validation. |
-| CP1 | validated | All three serial/parallel workloads execute; task-B endpoint matches the published table. |
-| CP2 | validated | Sample/time Monte Carlo, reference full-way D2Q9 LBGK with reusable collision workers, and the corrected 499-unknown implicit/Fourier rope study execute. Serial/parallel LBM populations agree exactly; full rope traces/profiles stay below 5e-4/3e-4 error. |
+| C01 | implemented | Definition equations and parameter study reviewed. Independent Radau spot checks pass at loss=100/1000/10000; every solver/backend is not independently qualified. |
+| C02 | specified | Partial transport abstraction. Fabricated high-load deadlocks removed; timing, blocking and merge rules remain open. Historical throughput proximity does not validate the plant. |
+| C03 | implemented | Ideal-switch segment and floating-point boundary defects fixed. Independent matrix-exponential check passes through 100 us. Finite-ramp parameter sweeps retain existing tests. |
+| C04 | specified | Basic philosopher policies and accounting execute. Dirty/clean states, cleaning and neighbour-request refinements are absent. |
+| C05 | specified | Revised Task-D branch restored. Published event/final-value references pass, including explicit return-state checks. Sampled plotting output and the requested numerical-accuracy study remain absent. |
+| C06 | specified | 20% Task-B service penalty fixed. Aggregate doctor alternation remains an approximation; persistent individual service/exchange semantics are missing. |
+| C07 | implemented | Pin mode equations and velocity resets reviewed. Both Task-A cases pass independent DOP853 spot checks; Task-C published initial-velocity check remains. |
+| C08 | validated | Cumulative cycle admission bug fixed in both directions. Five deterministic appendix datasets and replication/interval checks pass; stochastic output is not a universal distributional validation. |
+| C09 | implemented | IFC surface difference-axis units fixed. Rule-weight regression and full sampled scenario checks pass. Reference level-change versus literal error-difference ambiguity remains explicitly selectable. |
+| C10 | implemented | Left-before-right acquisition, simultaneous-access priority, deadlock termination and 50-run task reviewed. Tests check these rules; full published trace comparison remains open. |
+| C11 | implemented | All motor current limits corrected from 2.25x excess. Inertia and explicit equations reviewed; task and torque-limit tests pass. Collision safety between samples and every solver remain unqualified. |
+| C12 | implemented | Equal initial gaps and terminal collision horizon corrected. Elastic times, late impacts, momentum, dissipated energy and plastic collapse tested. Boundary-value/stochastic tasks rerun. |
+| C13 | implemented | Revised d_l=.001, sampled controller and disturbance cases reviewed. Existing revision analysis distinguishes 2006 d_l=.01 reference values; no complete independent revised closed-loop validation. |
+| C14 | implemented | Factory/product tables, lead times, initial fill, wholesaler rules and daily order strategies reviewed. Tests verify those rules; full 100-run statistical reference comparison remains open. |
+| C15 | implemented | Bolus switching now segmented for all backends. Independent matrix-exponential endpoint checks pass; identification/Monte Carlo and published parameter checks retain existing coverage. |
+| C16 | implemented | Population/location rules, weekly accounting, distance density and task entry points reviewed. Deterministic boundary tests pass; full 50-replication multiyear statistical qualification not run in this audit. |
+| C17R | implemented | Revised ODE identification, FHP-I exclusion/collisions, random movement and intervention paths reviewed. Conservation/replay tests pass; ensemble agreement and spatial parameter regions require further numerical validation. |
+| C18 | specified | ARX and both ANN forms execute on labelled digitizations or supplied data. Original 100 Hz data missing; synthetic recovery and figure correlations cannot certify the original experiment. |
+| C19R | implemented | Transport/source/facility equations and 150-day task horizons reviewed. Full mesh-convergence and prescribed section/profile error evidence remain open; coarse-grid smoke tests are not PDE validation. |
+| C20 | specified | Scenario/process/failure code reviewed. Reduced transport network lacks demonstrated junction/buffer/back-pressure equivalence to the physical layout. Complete benchmark correctness is not established. |
+| C21 | validated | Existing published ball/pendulum event and dynamic-contact checks pass; diode forms have residual/cross-form tests. This is limited reference validation, not arbitrary DAE or every parameter combination. |
+| C22 | implemented | Queue choice, event priority, reneging, jockeying and class-call rules reviewed. Existing deterministic trace/length tests pass; independent complete published traces remain open. |
+| CP1 | validated | Task-B published ten-population endpoint and equilibrium checks retained. Serial/parallel equality is verification, not independent validation of all workloads or speedup. |
+| CP2 | validated | Corrected rope/Fourier and reference LBM algorithm checks retained. Full 257x257, 350000-iteration cavity workload and publication-scale parallel performance were not rerun in this audit. |
 
 ## Primary completion sources
 

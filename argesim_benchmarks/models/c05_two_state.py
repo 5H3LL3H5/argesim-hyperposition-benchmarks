@@ -64,7 +64,7 @@ class C05Mode:
 C05_MODE_1 = C05Mode("state-1", 0.4, 5.5, C05_UPPER_THRESHOLD, 1)
 C05_MODE_2 = C05Mode("state-2", -0.3, 2.73, C05_LOWER_THRESHOLD, -1)
 C05_TASK_D_MODE_2 = C05Mode(
-    "state-2-task-d", -2.85, 4.33, C05_LOWER_THRESHOLD, -1
+    "state-2-task-d", -1.25, 4.33, 4.1, -1
 )
 
 

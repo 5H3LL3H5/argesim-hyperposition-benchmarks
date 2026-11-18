@@ -111,12 +111,6 @@ def solve_c15(
 ) -> IntegrationResult:
     """Solve C15 with an explicitly selected backend."""
 
-    problem = c15_problem(
-        parameters=parameters,
-        bolus=bolus,
-        initial_state=initial_state,
-        t_bound=t_bound,
-    )
     normalised = normalise_solver_name(method)
     defaults = {
         "euler": {"step": 1.0e-2},
@@ -125,43 +119,23 @@ def solve_c15(
         "qss1": {"quantum": (1.0, 1.0)},
         "qss2": {"quantum": (1.0, 1.0)},
     }
-    quantized_methods = {
-        "qss1",
-        "qss2",
-        "qss3",
-        "qss4",
-        "liqss1",
-        "liqss2",
-        "liqss3",
-        "eliqss1",
-        "eliqss2",
-        "eliqss3",
-        "cheqss1",
-        "cheqss2",
-        "cheqss3",
-        "mliqss1",
-        "mliqss2",
-        "mliqss3",
-        "liqss-bdf",
-    }
-    if normalised not in quantized_methods:
-        return solve_ivp(problem, normalised, options=options, defaults=defaults)
-
-    # QSS requires autonomous ODEs, so expose the bolus switch as two segments.
+    # Every backend must stop at the known input discontinuity. In particular,
+    # an RK stage at tau must still use the left-hand forcing for the segment
+    # ending there, otherwise part of the prescribed dose is lost.
     def rhs_phase1(_time: float, state: Sequence[float]) -> Vector:
-            x1, x2 = state
-            f_t = bolus.d / bolus.tau
-            return (
-                f_t - (parameters.k01 + parameters.k21) * x1 + parameters.k12 * x2,
-                parameters.k21 * x1 - parameters.k12 * x2,
-            )
+        x1, x2 = state
+        f_t = bolus.d / bolus.tau
+        return (
+            f_t - (parameters.k01 + parameters.k21) * x1 + parameters.k12 * x2,
+            parameters.k21 * x1 - parameters.k12 * x2,
+        )
 
     def rhs_phase2(_time: float, state: Sequence[float]) -> Vector:
-            x1, x2 = state
-            return (
-                -(parameters.k01 + parameters.k21) * x1 + parameters.k12 * x2,
-                parameters.k21 * x1 - parameters.k12 * x2,
-            )
+        x1, x2 = state
+        return (
+            -(parameters.k01 + parameters.k21) * x1 + parameters.k12 * x2,
+            parameters.k21 * x1 - parameters.k12 * x2,
+        )
 
     first_end = min(bolus.tau, t_bound)
     first_problem = InitialValueProblem(

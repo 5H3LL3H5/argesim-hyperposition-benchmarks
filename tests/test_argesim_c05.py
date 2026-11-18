@@ -11,8 +11,17 @@ from argesim_benchmarks.models.c05_two_state import (
 
 
 class C05Tests(unittest.TestCase):
+    def test_revised_task_d_switches_at_the_specified_state(self) -> None:
+        # Revised definition, July 1992, Task d: c2=-1.25 and y1>4.1.
+        # Event times alone cannot distinguish a shifted, incorrect branch.
+        result = simulate_c05(task_d=True)
+        returns = [event for event in result.events if event.new_mode == "state-1"]
+        self.assertEqual(len(returns), 31)
+        for event in returns:
+            self.assertAlmostEqual(event.state[0], 4.1, places=12)
+
     def test_published_event_sequences(self) -> None:
-        self.assertEqual(benchmark("C05").status, BenchmarkStatus.VALIDATED)
+        self.assertEqual(benchmark("C05").status, BenchmarkStatus.SPECIFIED)
         result = simulate_c05()
         self.assertEqual(len(result.events), 5)
         for event, reference in zip(result.events, C05_REFERENCE_EVENT_TIMES):

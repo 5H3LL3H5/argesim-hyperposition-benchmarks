@@ -188,7 +188,10 @@ def _ward_treatment_time(
     Task B exchanges one of the two doctors between CW1 and CW2 while the
     CW2 queue is above the hysteresis threshold.  The ward capacities remain
     unchanged; one alternating service in each ward therefore uses the other
-    ward's doctor-time distribution.
+    ward's doctor-time distribution.  The inexperienced doctor transferred
+    to CW1 needs 20% longer for its more complex cases (definition, Task B).
+    Alternation is an aggregate approximation; doctors are not individual
+    resources and this does not yet reproduce their service-based allocation.
     """
 
     if patient.ward not in (1, 2):
@@ -203,7 +206,10 @@ def _ward_treatment_time(
             not facilities.cw1_transferred_doctor_turn
         )
         transferred = facilities.cw1_transferred_doctor_turn
-        distribution = _CW2_TREATMENT if transferred else _CW1_TREATMENT
+        distribution = (
+            tuple(1.2 * value for value in _CW2_TREATMENT)
+            if transferred else _CW1_TREATMENT
+        )
     else:
         facilities.cw2_transferred_doctor_turn = (
             not facilities.cw2_transferred_doctor_turn

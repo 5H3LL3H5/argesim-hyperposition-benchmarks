@@ -1,0 +1,333 @@
+{
+  "audit_date": "2026-11-18",
+  "repository": "5H3LL3H5/argesim-hyperposition-benchmarks",
+  "base_commit": "8bc9f2d2a99e591eea9afe257c5a247a8cdffeb9",
+  "scheduler_commit": "2852ab4d0eec8095db1ba8aaddae3edf972d0f3f",
+  "scope": "24-family definition and regression audit; numerical spot checks, not full-workload certification",
+  "primary_sources": [
+    {
+      "benchmark": "C01",
+      "title": "Comparison 1: Lithium-Cluster Dynamics under Electron Bombardment - Definition",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C01/C1-definition.pdf",
+      "sha256": "c5553029c3c6aa063032c05e987ccdc4d4444cb55f2cfbb6436575ea41b2cad5"
+    },
+    {
+      "benchmark": "C02",
+      "title": "Comparison 2: Flexible Assembly System - Definition",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C02/C2-definition.pdf",
+      "sha256": "21011995a5ab84963958b667f4a5e2c46c34ade8afeba816b68250d202b8ec35"
+    },
+    {
+      "benchmark": "C03",
+      "title": "Comparison 3: Generalized class-E Amplifier - Definition",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C03/C3-definition.pdf",
+      "sha256": "f542b416b7f2f9bb526edd69687ca5229d87711ba39426085637e0bcf4456a62"
+    },
+    {
+      "benchmark": "C04",
+      "title": "Comparison C4: Dining Philosophers - Definition",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C04/C4-definition.pdf",
+      "sha256": "501a16b2020bf6c4bbdbb0ad2dafcd91d394863871ebaf30778840faa956a51a"
+    },
+    {
+      "benchmark": "C05",
+      "title": "Comparison 5: Two State Model - Definition",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C05/C5-definition.pdf",
+      "sha256": "ec99a4eb3da6c82cc883088430055e637c54752ef1138adab831e34a3aaa31ab"
+    },
+    {
+      "benchmark": "C06",
+      "title": "Comparison 6: Emergency Department - Follow-up Treatment, Definition",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C06/C6-definition.pdf",
+      "sha256": "abd8f17d267635b00107058c48f8b632849dc14ac5c11080e6e1f32a44d92e0c"
+    },
+    {
+      "benchmark": "C07",
+      "title": "Comparison 7: Constrained Pendulum, Definition",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C07/C7-definition.pdf",
+      "sha256": "e7842deda0e1d6359d032b4e6f14fc911602a0e35578c420655affa37c59e61d"
+    },
+    {
+      "benchmark": "C08",
+      "title": "Comparison 8: Canal-and-Lock System - Definition",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C08/C8-definition.pdf",
+      "sha256": "887dbae6eb75e6cdb4463220bfe9f4fa2b15ef4c0b502e02b97512283ba5b7dc"
+    },
+    {
+      "benchmark": "C09",
+      "title": "Extended Fuzzy Control of a Two-Tank System - ARGESIM Benchmark C9R - Definition",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C09/C9R-revised-definition.pdf",
+      "sha256": "359143ee0ebf2301b33e8f55efd6bd1716252cc29d831eb21e21d736d60a9924"
+    },
+    {
+      "benchmark": "C10",
+      "title": "Comparison 10: Dining Philosophers II - Definition",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C10/C10-definition.pdf",
+      "sha256": "2c1aa93f4dbd6262e654a4b49410bc0f782f943dce04539d1ae40a123a642182"
+    },
+    {
+      "benchmark": "C11",
+      "title": "Comparison 11: SCARA Robot - Definition",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C11/C11-definition.pdf",
+      "sha256": "8074b892317eec68337bf9bd9603ebfbb8bdbbf25124f69341e6b1e0168821e1"
+    },
+    {
+      "benchmark": "C12",
+      "title": "Comparison 12: Collision Processes in Rows of Spheres, Definition",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C12/C12-definition.pdf",
+      "sha256": "44a868fb2a4091aee183853fa072134d6c0378a3969b2597680232edac4e50d8"
+    },
+    {
+      "benchmark": "C13",
+      "title": "Crane with Complex Embedded Control \u2013 ARGESIM Benchmark C13R with Implicit Modelling, Digital Control and Sensor Action",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C13/C13-definition-2.pdf",
+      "sha256": "7809746abdadc7923781667c7fefeccaffa16c96ab66ef8f0360b1a89afe48a5"
+    },
+    {
+      "benchmark": "C14",
+      "title": "C14 Supply Chain Management - Definition",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C14/C14-definition.pdf",
+      "sha256": "f6a48eb44c3ba743c27f3bb41d490369a048541294ffce749f7d858d93f55707"
+    },
+    {
+      "benchmark": "C15",
+      "title": "C15 Clearance Identification - Definition",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C15/C15-definition.pdf",
+      "sha256": "9e4d72575fa94efc6d5539144627d2afd7994d1bf7634bda0ecd9b687fec82e6"
+    },
+    {
+      "benchmark": "C16",
+      "title": "Restaurant Business Dynamics \u2013 Definition of a new ARGESIM Comparison - C16",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C16/C16-definition.pdf",
+      "sha256": "3b23dd68aba8245ceea3bbd1f4c928fe0e4c5a5467cdfee9a7ebc94832f8ec38"
+    },
+    {
+      "benchmark": "C17R",
+      "title": "Modelling and Simulation of a SIR-type Epidemic with Cellular Automata and Ordinary Differential Equations \u2013 Definition ARGESIM Benchmark C17R",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_25_1/articles/sne.25.1.10283.bn17r.OA.pdf",
+      "sha256": "99fb09e8783afeb47b433a568a1dcc9c46f1ab9777c5ba5d353a53026a4f356b"
+    },
+    {
+      "benchmark": "C18",
+      "title": "Identification of Nonlinear Dynamics \u2013 Neural Networks versus Transfer Functions - Definition C18",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-definition.pdf",
+      "sha256": "af31e3a2c385d498529c89482f20764b8629f42e353b25a7017f0bd3d7507886"
+    },
+    {
+      "benchmark": "C19R",
+      "title": "Pollution in Groundwater Flow - ARGESIM Benchmark C19R with Spatially Distributed Modelling",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C19/C19-revised-definition.pdf",
+      "sha256": "a2f7aa1595c3c2cbe4ffe027b9c29211ad842f74cf5ffbda8fc91ea761fb3d53"
+    },
+    {
+      "benchmark": "C20",
+      "title": "ARGESIM Benchmark C20 \u2018Complex Production System\u2019 \u2013 Definition and Call",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_21_34/articles/sne.21.34.10097.bn20.OA.pdf",
+      "sha256": "fa7d3818348bb3f54d8845ae4d51ec6ecd58571e28a6d91d6a0c132f265d1bc2"
+    },
+    {
+      "benchmark": "C21",
+      "title": "State Events and Structural-dynamic Systems: Definition of ARGESIM Benchmark C21",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_26_2/articles/sne.26.2.10339.bn21.OA.pdf",
+      "sha256": "ab05b12cc6ba463552a425ee2a8b669741dfdfa68c48b1fe95b59488c2b85f28"
+    },
+    {
+      "benchmark": "C22",
+      "title": "Non-standard Queuing Policies: Definition of ARGESIM Benchmark C22",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_29_3/articles/sne.29.3.10481.bn22.OA.pdf",
+      "sha256": "e848c2916da835aa5218d54d8e1f4fc07fc21d2240b1619995054a08ee0f819c"
+    },
+    {
+      "benchmark": "CP2",
+      "title": "CP2 - ARGESIM Benchmark on Parallel and Distributed Simulation",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/CP/CP2-definition.pdf",
+      "sha256": "fa692210cea36e69aedc5e86f9ae9d530c9a67264134d8f4377b1573ec5044ce"
+    },
+    {
+      "benchmark": "CP1",
+      "title": "CP1: Parallel Simulation Techniques - Definition",
+      "url": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/CP/CP1-definition.pdf",
+      "sha256": "ac69130eecde5b70a35145e823f0f624c4750d7336870fa8960224f7781b0541"
+    }
+  ],
+  "independent_probes": {
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "checks": [
+      {
+        "case": "C01 loss=100",
+        "maximum_absolute_error": 1.5059747671131163e-08,
+        "tolerance": 2e-06,
+        "passed": true,
+        "details": "Radau reference, all 1072 candidate trajectory samples"
+      },
+      {
+        "case": "C01 loss=1000",
+        "maximum_absolute_error": 1.4610526122282863e-08,
+        "tolerance": 2e-06,
+        "passed": true,
+        "details": "Radau reference, all 3164 candidate trajectory samples"
+      },
+      {
+        "case": "C01 loss=10000",
+        "maximum_absolute_error": 1.4696668770852739e-08,
+        "tolerance": 2e-06,
+        "passed": true,
+        "details": "Radau reference, all 30363 candidate trajectory samples"
+      },
+      {
+        "case": "C03 ideal-switch limit",
+        "maximum_absolute_error": 1.5487363702604284e-07,
+        "tolerance": 5e-05,
+        "passed": true,
+        "details": "Independent matrix exponentials at all 20 half-cycle boundaries through 100 us"
+      },
+      {
+        "case": "C07 initial angle=0.523599",
+        "maximum_absolute_error": 1.4194285674618e-07,
+        "tolerance": 5e-07,
+        "passed": true,
+        "details": "DOP853, 8 pin events; excludes 1 us around velocity jumps"
+      },
+      {
+        "case": "C07 initial angle=-0.523599",
+        "maximum_absolute_error": 1.9733099970720147e-07,
+        "tolerance": 5e-07,
+        "passed": true,
+        "details": "DOP853, 7 pin events; excludes 1 us around velocity jumps"
+      },
+      {
+        "case": "C15 bolus tau=0.5",
+        "maximum_absolute_error": 1.1368683772161603e-12,
+        "tolerance": 2e-05,
+        "passed": true,
+        "details": "Independent augmented matrix exponential, both compartments at 240 min"
+      },
+      {
+        "case": "C15 bolus tau=3",
+        "maximum_absolute_error": 1.9326762412674725e-12,
+        "tolerance": 2e-05,
+        "passed": true,
+        "details": "Independent augmented matrix exponential, both compartments at 240 min"
+      },
+      {
+        "case": "C15 bolus tau=240",
+        "maximum_absolute_error": 5.229594535194337e-12,
+        "tolerance": 2e-05,
+        "passed": true,
+        "details": "Independent augmented matrix exponential, both compartments at 240 min"
+      }
+    ]
+  },
+  "tested_changed_file_sha256": {
+    "ARGESIM_COVERAGE.md": "fcf0b016ad7e0f6d1a9ef39bb8fac9c04d96628648440a476a596cd08b6a0ec9",
+    "README.md": "4de5327f46c92ef0bad75034252eab626b7f6b0ec886c6c2987d10ae86d3dd29",
+    "argesim_benchmarks/catalog.py": "a1fb3e568e6c9266a37922b5eae3a15e7fff5b22ad4a31b5b8ace7cd07d555b2",
+    "argesim_benchmarks/models/c02_flexible_assembly.py": "2441eb62d2f37e94b550519dc05e85a2a319529eaf4cfebdf25f210ab60540e0",
+    "argesim_benchmarks/models/c03_amplifier.py": "7a1eb4c1cb8884ed4d333a31b3320bcba1227917a91683b7a24e27e4b39b659c",
+    "argesim_benchmarks/models/c05_two_state.py": "0e9e6b03c22a76aa0a0972f8265c16114e945e7b41fc8577335aa70a7da94da7",
+    "argesim_benchmarks/models/c06_emergency_department.py": "25a7567047c699e7ea2c18fcdce60c123b2dacfd94b61c9a03f448a278e43d4c",
+    "argesim_benchmarks/models/c08_canal_and_lock.py": "916f5cdaf499dbd28c0d00c2745758e3cf4c63082ea32d459f54558179edb746",
+    "argesim_benchmarks/models/c09_fuzzy_tanks.py": "71d757dd83677a159c87c603554d4aeafe253487030674779eb8c6317ced1b30",
+    "argesim_benchmarks/models/c11_scara_robot.py": "a2e736e1600beb293619fffd2f631523cacaee5c90395163ff43846d5ebe5806",
+    "argesim_benchmarks/models/c12_collision/c12_collision_processes.py": "860b65d0586a73827ce168378e50c0f87706f1b1146d02ce60b8e162a5165ee6",
+    "argesim_benchmarks/models/c15_clearance.py": "41e28b3d1bf82b6add6bbe41d7b9a4e4ff11c056cf95dcef2504abc1eae62717",
+    "scripts/benchmark_spec_probe.py": "dc50b63691b99a1b9f0cfb4a79d5928c6e71996a0098ed7b8813a9ea4cff8ea7",
+    "tests/test_argesim_c02.py": "1644acb5343d9809aa5ad61a9c3737916cfc4da0350ef4fd8fc9155742626323",
+    "tests/test_argesim_c03.py": "c121179809614d463054fd28d5eb20a89df56c1c055a0a5296f5f075db86eec3",
+    "tests/test_argesim_c04.py": "dac62f38654e291d3ebcbfa81daaeb4c8e5b8e1169c16d0f8d778dece37615a2",
+    "tests/test_argesim_c05.py": "51336ec054458d11a935d87068882370acc5b72d6e4b74a0bad34253c0a13727",
+    "tests/test_argesim_c06.py": "5d493f4bb7fdc02526716b6ab93fabf069a8a521291f7aa1760facda71739ebc",
+    "tests/test_argesim_c08.py": "6120b20ed894433dbdba4e64f2797088b3c9f3aa91107ec6b8cbbf2c6c3caebf",
+    "tests/test_argesim_c09.py": "83d050165290a1eac45491927e16565e9b35e1de56bf74e2465fc8158e68cef9",
+    "tests/test_argesim_c11.py": "5cff6c625520a529e87554ad40830fb9dee9d4d69ebf2f6c6e447905179ae611",
+    "tests/test_argesim_c12.py": "c5f43a447639e54633e32b4638a0dabdd72154a5e682e693d3da1839de1bdd74",
+    "tests/test_argesim_c15.py": "9e6d012931ec22f2c08e075648c92be5ac0544053752c81af02355556346d860",
+    "tests/test_argesim_c18.py": "d38ee696a58d348a142649aca423f48f41368c129047acee97201725bec96305",
+    "tests/test_argesim_c20.py": "9f1fea3129a9e68f61d20d5f2ccab3a96f0e88a693ad596ae3bcffc4c16cc63b",
+    "tests/test_argesim_catalog.py": "674ba6c59072d0cc2bf63ec0e65a61b08cbab5e1ea92a1f1999e0abb8463d752",
+    "tests/test_explicit_solvers.py": "dcd540a0465be8334010d458de22fea0e184d401652787ae259696cd368e33d0"
+  },
+  "verification": {
+    "python": "3.12.14",
+    "unit_tests": {
+      "command": "python -m unittest discover -s tests -v",
+      "passed": 325,
+      "failed": 0,
+      "seconds": 358.444
+    },
+    "smoke": {
+      "command": "python -m argesim_benchmarks run-suite --profile smoke",
+      "passed": 71,
+      "failed": 0,
+      "total": 71,
+      "scope": "execution only",
+      "families": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12",
+        "C13",
+        "C14",
+        "C15",
+        "C16",
+        "C17R",
+        "C18",
+        "C19R",
+        "C20",
+        "C21",
+        "C22",
+        "CP1",
+        "CP2"
+      ]
+    },
+    "final_c03_smoke": {
+      "command": "python -m argesim_benchmarks run-suite --profile smoke --benchmark C03",
+      "passed": 3,
+      "failed": 0,
+      "reason": "Repeat after final coincident ramp/cycle-boundary correction"
+    },
+    "independent_probes": {
+      "command": "python scripts/benchmark_spec_probe.py",
+      "passed": 9,
+      "failed": 0
+    },
+    "compileall": {
+      "command": "python -m compileall -q argesim_benchmarks tests scripts",
+      "passed": true
+    },
+    "status_docs": {
+      "command": "python scripts/update_status_docs.py --check",
+      "passed": true
+    },
+    "diff_check": {
+      "command": "git diff --check",
+      "passed": true
+    },
+    "ruff": {
+      "version": "0.17.5",
+      "command": "ruff check .",
+      "passed": false,
+      "findings": 210,
+      "baseline_findings": 210,
+      "introduced_findings": 0,
+      "baseline_commit": "2852ab4d0eec8095db1ba8aaddae3edf972d0f3f",
+      "new_probe_script_lint_and_format_passed": true
+    },
+    "log_sha256": {
+      "unittest-final.log": "fa638ce7356cf22b5410cb3e3efbe859ab05fa63f5791901b65ee92983d20d91",
+      "smoke.json": "01b56a0073cd25698bc7a4d85ea267ccd482c190f84ce17b992381f34474a7a5",
+      "smoke-c03-final.json": "8764bb2c8a399f7fce0cc1c2840763caf35b86d9d3154b689041eda0c59d83df",
+      "independent-repo-script.log": "4b057909e775524eebc2692c309826fac64dd798453d605feef77295ffa0b665",
+      "ruff-final.json": "fd27275ae7588a49dcdffc2ae101da01e8b277f17fe06f2292d6b1297a6be33a"
+    }
+  }
+}

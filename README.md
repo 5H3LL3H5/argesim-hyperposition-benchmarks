@@ -14,10 +14,12 @@ CP2, with C17R and C19R as the active revised definitions. The machine-readable
 inventory in `argesim_benchmarks.catalog` records the evidence reached by each
 complete task family instead of treating file presence as implementation.
 
-C02, C05, C08, C21, CP1 and CP2 currently reach the `validated` gate. Every
-other catalog family reaches `implemented`: all required task types have an
-executable path, while independent external full-output references are still
-missing for several families. Each benchmark must pass five evidence gates:
+C08, C21, CP1 and CP2 retain limited `validated` evidence for the cases
+listed in the audit. Fourteen other families reach `implemented`. C02, C04,
+C05, C06, C18 and C20 remain `specified` with partial executable code because
+required model behaviour, experiments or original data are missing. Passing
+unit tests or a smoke run does not establish full benchmark correctness.
+Each benchmark must pass five evidence gates:
 
 `cataloged -> specified -> implemented -> validated -> benchmark-ready`
 

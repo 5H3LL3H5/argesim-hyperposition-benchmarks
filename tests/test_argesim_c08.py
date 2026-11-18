@@ -9,6 +9,50 @@ from argesim_benchmarks.models.c08_canal_and_lock import (
 from nsa_devs.hypertime import HyperTime
 
 class TestC08(unittest.TestCase):
+    def test_departure_does_not_reopen_a_full_cycle(self):
+        """Eastmax/Westmax limit cumulative admissions, not current occupancy."""
+        for direction in Direction:
+            with self.subTest(direction=direction):
+                opposite = next(value for value in Direction if value != direction)
+                model = CanalAndLock(2, 2)
+                for identifier, heading, arrival in (
+                    (0, direction, 0.0),
+                    (1, direction, 0.0),
+                    (2, opposite, 1.0),
+                    (3, direction, 55.0),
+                ):
+                    model.schedule_arrival(
+                        Barge(identifier, heading, HyperTime.at(arrival))
+                    )
+                model.run(250.0)
+                self.assertEqual(
+                    [barge.id for barge, _ in model.completed_barges],
+                    [0, 1, 2, 3],
+                )
+                departures = {
+                    barge.id: float(barge.arrival_time.standard_part()) + transit
+                    for barge, transit in model.completed_barges
+                }
+                self.assertEqual(departures, {0: 54.0, 1: 88.0, 2: 142.0, 3: 196.0})
+
+    def test_arrival_can_fill_an_incomplete_cycle(self):
+        model = CanalAndLock(2, 1)
+        for identifier, heading, arrival in (
+            (0, Direction.EASTBOUND, 0.0),
+            (1, Direction.WESTBOUND, 1.0),
+            (2, Direction.EASTBOUND, 10.0),
+        ):
+            model.schedule_arrival(Barge(identifier, heading, HyperTime.at(arrival)))
+        model.run(200.0)
+        self.assertEqual(
+            [barge.id for barge, _ in model.completed_barges], [0, 2, 1]
+        )
+        self.assertEqual(
+            [float(barge.arrival_time.standard_part()) + transit
+             for barge, transit in model.completed_barges],
+            [54.0, 88.0, 142.0],
+        )
+
     def test_dataset_1(self):
         """Validate C08 Dataset 1: Alternating minimal cycles (Eastmax 1, Westmax 1).
 

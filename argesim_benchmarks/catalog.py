@@ -61,7 +61,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.DES,),
         _source("c02"),
         "DES",
-        BenchmarkStatus.VALIDATED,
+        BenchmarkStatus.SPECIFIED,
     ),
     BenchmarkDefinition(
         "C03",
@@ -77,7 +77,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.DES,),
         _source("c04"),
         "DES/concurrency",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.SPECIFIED,
     ),
     BenchmarkDefinition(
         "C05",
@@ -85,7 +85,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.STIFF_ODE, ModelClass.HYBRID),
         _source("c05"),
         "stiff ODE, state events",
-        BenchmarkStatus.VALIDATED,
+        BenchmarkStatus.SPECIFIED,
     ),
     BenchmarkDefinition(
         "C06",
@@ -93,7 +93,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.DES, ModelClass.STOCHASTIC),
         _source("c06"),
         "stochastic DES",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.SPECIFIED,
     ),
     BenchmarkDefinition(
         "C07",
@@ -199,7 +199,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         ),
         _source("c18"),
         "ARX, static/dynamic ANN",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.SPECIFIED,
     ),
     BenchmarkDefinition(
         "C19R",
@@ -215,7 +215,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.DES,),
         _source("c20"),
         "stochastic production DES",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.SPECIFIED,
     ),
     BenchmarkDefinition(
         "C21",
