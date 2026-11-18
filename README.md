@@ -184,6 +184,25 @@ python benchmarks/benchmark_cqss_liqss_bdf.py --repeat 9 --warmup 1
 The event-chain benchmark validates result parity before recording timing. It
 reports median and interquartile range and makes no speedup claim.
 
+## Discrete-event ordering
+
+`DesScheduler.schedule` and `schedule_at` accept a keyword-only integer
+`priority` (default `0`). Pending events are ordered by macro time, microstep,
+priority, then insertion sequence. Lower priority numbers run first at the
+same exact `HyperTime`; equal priorities preserve FIFO order. Existing calls
+therefore retain their ordering. Priority never overrides macro time or a
+causal microstep, and zero-delay `schedule` calls still advance the microstep.
+
+Models must choose their own simultaneous-event policy. For example, queue an
+abort at priority `-1` and a result at priority `0` at the same time to process
+the abort first while still accounting for the result. This applies to pending
+events only: an event inserted by a callback cannot run before that callback,
+and late external arrivals cannot undo completed handlers. The scheduler does
+not provide network-arrival independence or automatic confluent transitions.
+
+Both run methods count executed callbacks toward `max_events`; cancelled
+entries are discarded without consuming that budget or advancing time.
+
 ## Interpretation
 
 `HyperTime` is an executable superdense-time encoding of values `a + b epsilon`

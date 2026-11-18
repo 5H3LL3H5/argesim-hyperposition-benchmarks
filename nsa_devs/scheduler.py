@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import heapq
 import math
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from fractions import Fraction
-from collections.abc import Callable
 
 from .hypertime import HyperTime
 
@@ -42,9 +42,10 @@ class RelayResult:
 
 @dataclass(order=True)
 class DesEvent:
-    """A generic discrete event for DES scheduling."""
+    """An event ordered by superdense time, priority, then insertion sequence."""
 
     time: HyperTime
+    priority: int = field(default=0, kw_only=True)
     sequence: int
     name: str = field(compare=False)
     handler: Callable[..., None] = field(compare=False)
@@ -53,7 +54,13 @@ class DesEvent:
 
 
 class DesScheduler:
-    """A deterministic HyperTime discrete-event scheduler."""
+    """A deterministic HyperTime discrete-event scheduler.
+
+    At the same macro time and microstep, lower priority numbers run first;
+    equal priorities retain insertion order. Priority orders pending events
+    only and cannot precede a handler that has already run. Models must assign
+    priorities explicitly when simultaneous events need domain-specific order.
+    """
 
     def __init__(self, initial_time: HyperTime | None = None):
         if initial_time is not None and not isinstance(initial_time, HyperTime):
@@ -69,6 +76,7 @@ class DesScheduler:
         handler: Callable[..., None],
         *args: object,
         microsteps: int = 1,
+        priority: int = 0,
     ) -> DesEvent:
         if isinstance(delay_minutes, bool):
             raise TypeError("delay must be a real number")
@@ -88,7 +96,7 @@ class DesScheduler:
             if delay == 0.0
             else self.time.after_finite(delay)
         )
-        return self.schedule_at(target_time, name, handler, *args)
+        return self.schedule_at(target_time, name, handler, *args, priority=priority)
 
     def schedule_at(
         self,
@@ -96,6 +104,7 @@ class DesScheduler:
         name: str,
         handler: Callable[..., None],
         *args: object,
+        priority: int = 0,
     ) -> DesEvent:
         """Schedule at an absolute superdense time and return a cancel token."""
 
@@ -107,7 +116,11 @@ class DesScheduler:
             raise ValueError("name must be a non-empty string")
         if not callable(handler):
             raise TypeError("handler must be callable")
-        event = DesEvent(time, self.event_sequence, name, handler, args)
+        if not isinstance(priority, int) or isinstance(priority, bool):
+            raise TypeError("priority must be an integer")
+        event = DesEvent(
+            time, self.event_sequence, name, handler, args, priority=priority
+        )
         heapq.heappush(
             self.events,
             event,
@@ -173,7 +186,10 @@ class DesScheduler:
         if max_events <= 0:
             raise ValueError("max_events must be positive")
         processed = 0
-        while self.events:
+        while True:
+            self._discard_cancelled()
+            if not self.events:
+                break
             if processed >= max_events:
                 raise RuntimeError("scheduler exceeded max_events")
             if self._process_next():
