@@ -101,12 +101,12 @@ class C20ConveyorCluster(str, Enum):
 
 @dataclass
 class C20ConveyorElement:
-    """One capacity-constrained, constant-speed conveyor element.
+    """Legacy free-flow/headway calculator, not a blocked conveyor model.
 
-    The benchmark specifies a speed of 1 m/s and one-metre parts.  Enforcing
-    the corresponding one-second entry headway gives an element of length
-    ``L`` its specified capacity of ``floor(L)`` parts without discretising
-    the belt into cells.
+    ``capacity`` reports the specified floor(length / part_length). This
+    calculator has no retained occupants, so its admission times alone cannot
+    enforce that bound under downstream blockage. Use ``C20Flow`` for the
+    physical production model.
     """
 
     name: str
@@ -163,15 +163,11 @@ class C20TransportTrace:
 
 
 class C20ConveyorNetwork:
-    """Reusable C20 transport model for the dimensioned two-cycle layout.
+    """Legacy reduced transport calculator, retained for API compatibility.
 
-    Areas are numbered as in Figure 4: source/sink 0, lower-left 1,
-    lower-right 2, and upper-right 3.  The outer and inner cycles provide the
-    two directed alternatives between areas.  Processing-area ingress and
-    egress use the 26 m depth from Figure 5; a same-area transfer traverses
-    its 55 m local loop.  In PSc4, exactly one element fails at a time and is
-    selected with the official A/B/C probabilities followed by a uniform
-    choice within the selected cluster.
+    This area-level approximation has no physical junctions or back-pressure.
+    Its future reservations cannot be used as a causal plant simulation.
+    The default C20 replication uses ``C20Layout``/``C20Flow`` instead.
     """
 
     _AREA_ORDER = (0, 3, 2, 1)
@@ -634,6 +630,7 @@ class C20ReplicationResult:
     conveyor_failures: int = 0
     conveyor_capacity_delay: float = 0.0
     conveyor_failure_delay: float = 0.0
+    total_tardiness: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -658,6 +655,8 @@ class C20ScenarioSummary:
     weighted_tardiness: C20Statistic
     max_nok_parts: C20Statistic
     max_ok_parts: C20Statistic
+    tardiness: C20Statistic
+    replication_median_throughput_time: C20Statistic
 
 
 @dataclass
@@ -855,16 +854,16 @@ def run_c20_replication(
     seed: int = 20,
     order_count: int = 5000,
     transport_time: float | None = None,
+    wip_limit: int = 30,
 ) -> C20ReplicationResult:
-    """Run one complete C20 scenario replication.
+    """Run a C20 order book through the Figure 4/5 directed conveyor layout.
 
-    By default, transport uses :class:`C20ConveyorNetwork`, including the
-    official dimensions, speed, part capacity, inner/outer routing, and PSc4
-    element failures.  Passing ``transport_time`` explicitly retains a fixed
-    point-to-point delay for backwards-compatible reduced experiments; source
-    and sink trips are still included.
+    The controller admits at most ``wip_limit`` active parts and reserves real
+    machine/buffer destinations. Every transfer shares one causal event
+    calendar, so downstream blockage propagates upstream. ``transport_time``
+    explicitly selects the legacy reduced fixed-delay experiment, which has
+    no physical transport capacity and is not a full C20 replication.
     """
-
     selected_orders = C20OrderScenario(order_scenario)
     selected_plant = C20PlantScenario(plant_scenario)
     if not isinstance(seed, int) or isinstance(seed, bool):
@@ -875,6 +874,24 @@ def run_c20_replication(
         not math.isfinite(transport_time) or transport_time < 0.0
     ):
         raise ValueError("transport_time must be non-negative and finite")
+    if isinstance(wip_limit, bool) or not isinstance(wip_limit, int) or wip_limit <= 0:
+        raise ValueError("wip_limit must be a positive integer")
+    if transport_time is None:
+        from .c20_production import C20Production
+
+        return C20Production(selected_orders, selected_plant, seed=seed,
+                             order_count=order_count, wip_limit=wip_limit).run()
+    if wip_limit != 30:
+        raise ValueError("wip_limit does not apply to the reduced fixed-delay experiment")
+    return _run_c20_reduced_replication(selected_orders, selected_plant, seed=seed,
+                                       order_count=order_count, transport_time=transport_time)
+
+
+def _run_c20_reduced_replication(
+    selected_orders: C20OrderScenario, selected_plant: C20PlantScenario,
+    *, seed: int, order_count: int, transport_time: float,
+) -> C20ReplicationResult:
+    """Legacy experiment with infinite transport capacity and fixed delays."""
     rng = random.Random(seed + 1_000_003)
     orders = _c20_order_book(selected_orders, seed, order_count)
     contexts = [
@@ -1186,11 +1203,14 @@ def run_c20_replication(
         sum(failure.start <= last_completion for failure in conveyor.failures),
         conveyor.capacity_delay if transport_time is None else 0.0,
         conveyor.failure_delay if transport_time is None else 0.0,
+        sum(result.tardiness for result in completed),
     )
 
 
 def _c20_statistic(values: Sequence[float]) -> C20Statistic:
     ordered = sorted(float(value) for value in values)
+    if not ordered or not all(math.isfinite(value) for value in ordered):
+        raise ValueError("C20 statistics require nonempty finite observations")
 
     def percentile(fraction: float) -> float:
         position = fraction * (len(ordered) - 1)
@@ -1209,7 +1229,13 @@ def run_c20_experiment(
     order_count: int = 5000,
     seed: int = 20,
 ) -> tuple[C20ScenarioSummary, ...]:
-    """Run all 3 x 4 scenarios and report Task A--D median/IQR values."""
+    """Run all 3 x 4 scenarios and report Task A--D median/IQR values.
+
+    Task B describes individual orders, so ``throughput_time`` pools their
+    release-to-sink observations across replications. The distribution of
+    per-run medians is retained separately and must not replace that spread.
+    Task C includes both unweighted and weighted sums of tardiness per run.
+    """
 
     if not isinstance(replications, int) or isinstance(replications, bool) or replications < 10:
         raise ValueError("the official experiment requires at least 10 replications")
@@ -1231,11 +1257,13 @@ def run_c20_experiment(
                     plant_scenario,
                     replications,
                     _c20_statistic(tuple(run.makespan for run in runs)),
-                    _c20_statistic(tuple(run.median_throughput_time for run in runs)),
+                    _c20_statistic(tuple(order.throughput_time for run in runs for order in run.orders)),
                     _c20_statistic(tuple(float(run.tardy_orders) for run in runs)),
                     _c20_statistic(tuple(run.weighted_tardiness for run in runs)),
                     _c20_statistic(tuple(float(run.max_nok_parts) for run in runs)),
                     _c20_statistic(tuple(float(run.max_ok_parts) for run in runs)),
+                    _c20_statistic(tuple(run.total_tardiness for run in runs)),
+                    _c20_statistic(tuple(run.median_throughput_time for run in runs)),
                 )
             )
     return tuple(summaries)

@@ -183,6 +183,7 @@ from .c18_nonlinear_identification import (
     C18_PUBLISHED_ERROR_TRENDS,
     C18_PUBLISHED_TRANSFER,
     C18MLP,
+    C18DataEvidence,
     C18DataSet,
     C18LinearModel,
     C18Metrics,
@@ -192,6 +193,7 @@ from .c18_nonlinear_identification import (
     c18_error_trend,
     fit_c18_linear,
     fit_c18_mlp,
+    load_c18_csv,
     predict_c18_linear,
     run_c18_tasks,
 )
@@ -234,6 +236,8 @@ from .c20_complex_production import (
     run_c20_experiment,
     run_c20_replication,
 )
+from .c20_flow import C20Flow, C20FlowTrip
+from .c20_layout import C20Layout, C20Node, C20Track
 from .c21_state_events import (
     C21BounceValidation,
     C21BouncingBallParameters,
@@ -391,6 +395,7 @@ __all__ = [
     "C17ParameterCase",
     "C17Parameters",
     "C17SoftParameter",
+    "C18DataEvidence",
     "C18DataSet",
     "C18LinearModel",
     "C18Metrics",
@@ -400,12 +405,17 @@ __all__ = [
     "C20ConveyorElement",
     "C20ConveyorFailure",
     "C20ConveyorNetwork",
+    "C20Flow",
+    "C20FlowTrip",
+    "C20Layout",
+    "C20Node",
     "C20OrderResult",
     "C20OrderScenario",
     "C20PlantScenario",
     "C20ReplicationResult",
     "C20ScenarioSummary",
     "C20Statistic",
+    "C20Track",
     "C20TransportTrace",
     "C21BounceValidation",
     "C21BouncingBallParameters",
@@ -582,6 +592,7 @@ __all__ = [
     "get_process_plan",
     "get_process_plans",
     "get_processing_time",
+    "load_c18_csv",
     "predict_c18_linear",
     "render_task_a_svg",
     "render_task_b1_svg",

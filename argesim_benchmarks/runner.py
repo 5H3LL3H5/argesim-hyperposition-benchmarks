@@ -234,7 +234,7 @@ def _suite_arguments(profile: str) -> dict[tuple[str, str], dict[str, Any]]:
         ("C17R", "compare"): {"steps": 2, "replications": 1},
         ("C17R", "ca"): {"steps": 2},
         ("C17R", "ode"): {"t_bound": 2.0},
-        ("C18", "all"): {"epochs": 2},
+        ("C18", "all"): {"epochs": 2, "use_digitized": True},
         ("C19R", "A"): {"nx": 3, "ny": 3},
         ("C19R", "B"): {"nx": 3, "ny": 3},
         ("C19R", "C"): {"nx": 3, "ny": 3},

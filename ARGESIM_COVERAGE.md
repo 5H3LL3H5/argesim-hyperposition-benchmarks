@@ -6,7 +6,7 @@ Inventory reviewed: 2026-11-18. Primary catalog:
 The status is an evidence gate, not a code-size label. `implemented` means all
 required task types have an executable path and tests; `validated` additionally
 requires an external analytical or published numeric reference. Partial code stays
-`specified`; see the follow-up audit for the three remaining incomplete families.
+`specified`; see the follow-up audit for the two remaining incomplete families, C02 and C18.
 
 <!-- BEGIN GENERATED BENCHMARK STATUS -->
 | ID | Official benchmark | Model family | Status |
@@ -30,7 +30,7 @@ requires an external analytical or published numeric reference. Partial code sta
 | C17R | SIR-type Epidemic with Cellular Automata and ODEs | ODE, FHP-I CA, interventions | implemented |
 | C18 | Identification of Nonlinear Dynamics - Neural Networks versus Transfer Functions | ARX, static/dynamic ANN | specified |
 | C19R | Pollution in Groundwater Flow | PDE/distributed system | implemented |
-| C20 | Complex Production System | stochastic production DES | specified |
+| C20 | Complex Production System | stochastic production DES | implemented |
 | C21 | State Events and Structural-dynamic Systems | ODE/DAE, hybrid | validated |
 | C22 | Non-standard Queuing Policies | DES/queueing | implemented |
 | CP1 | Parallel Simulation Techniques | ODE, MOL/PDE, parallel study | validated |
@@ -46,7 +46,7 @@ requires an external analytical or published numeric reference. Partial code sta
 | C09 | I-FC1, I-FC2 and P-FC surfaces; nonlinear tanks; 1 s sampled 60,000 s scenario; reference `change-level` and literal printed difference modes | I-FC final errors below 0.02 mm, <0.06 mm setpoint overshoot and published qualitative disturbance/P-FC behaviour |
 | C17R | identified ODE, hexagonal FHP-I CA, homogeneous random movement, Task-1 sweeps and persistent soft/repeatable hard/spatial interventions | population conservation, lattice/contact equation, seeded replay and shared RK/QSS2 hybrid-event paths |
 | C18 | second-order ARX, seven-unit parallel residual ANN and ten-unit free-running dynamic ANN; complete trajectories and error trends | synthetic coefficient recovery; digitized-figure ARX correlations 0.962/0.942 versus published 0.95/0.94; provenance gap retained |
-| C20 | three order scenarios, four plant scenarios, all plans/machines, due dates, setups, tool changes, repair-safe starts and dimensioned conveyor/headway abstraction with failures | all 12 scenario paths have reduced smoke coverage; deterministic seeded generation; physical transport equivalence remains open |
+| C20 | 284-node/368-track causal layout, 90 buffer slots, 19 located machines, downstream blocking, source/sink/rework, setups, disruptions and Task A–D statistics | all 12 scenarios at 100 orders and OSc3/PSc4 at 5,000 orders; independent geometry and blocking fixtures; no independent full-output validation |
 | C21 | event/dynamic ball studies, pendulum basic/kick studies, and algebraic/interpolated/index-reduced Shockley RLC variants | published pendulum stop/kick values, event contact limits and dynamic-contact samples plus algebraic residual below 1e-8 |
 | CP1 | 1000-run RK4 study, five-pair ODE decomposition and 800-line rope MOL decomposition | serial/parallel bitwise parity; published task-B terminal table |
 | CP2 | two Monte Carlo distribution strategies, official full-way D2Q9 LBGK with output field, reusable row workers, corrected 499-unknown rope traces/profiles/surface and Fourier reference | exact serial/parallel LBM parity and reference boundary; corrected full rope errors below 5e-4/3e-4 |
@@ -75,10 +75,10 @@ requires an external analytical or published numeric reference. Partial code sta
 
 ## Evidence boundaries
 
-- The original C18 100 Hz downloads are unavailable. The bundled data are
-  explicitly labelled 5 Hz vector-figure digitizations interpolated to the
-  specified grid; callers can supply recovered original files without changing
-  the algorithms.
+- The original C18 100 Hz measurements were not recovered by this audit.
+  Figure reconstruction requires explicit selection; regular runs require both
+  input datasets. CSV import checks sampling and retains hashes/provenance.
+  Interpolated 5 Hz anchors cannot validate the original data experiment.
 - C09 and C17R have internal/cross-form or qualitative published checks
   but no archived independent numeric full-output reference, so they remain
   `implemented`.
