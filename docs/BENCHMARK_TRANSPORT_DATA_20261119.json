@@ -1,0 +1,1271 @@
+{
+  "date": "2026-11-19",
+  "recorded_at_utc": "2026-11-19T18:40:58.268101+00:00",
+  "repository": "5H3LL3H5/argesim-hyperposition-benchmarks",
+  "parent_commit": "dc57f2d593e4fa1580051210e996fcd681ef4793",
+  "scope": "Implementation verification and explicitly limited experiments; not full ARGESIM certification",
+  "environment": {
+    "python": "3.12.14",
+    "implementation": "CPython",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "ruff": "0.17.5"
+  },
+  "catalog_counts": {
+    "implemented": 18,
+    "specified": 2,
+    "validated": 4
+  },
+  "checks": {
+    "unit_tests": {
+      "command": "python -m unittest discover -s tests -v",
+      "exit_code": 0,
+      "total": 361,
+      "passed": 360,
+      "expected_failures": 1,
+      "unexpected_failures": 0,
+      "seconds": 393.283,
+      "log_sha256": "18e89d6a4e555cb3076e0948741750a88630e4a2875a13d6f10a15961a75797d",
+      "summary": [
+        "Ran 361 tests in 393.283s",
+        "",
+        "OK (expected failures=1)"
+      ]
+    },
+    "smoke": {
+      "command": "python -m argesim_benchmarks run-suite --profile smoke",
+      "exit_code": 0,
+      "total": 74,
+      "passed": 74,
+      "failed": 0,
+      "families": 24,
+      "scope": "execution only",
+      "log_sha256": "b509cb4a2eefe07253b37347ae52ce171cedc881ddacd1739ead2bb0cd46b8f4",
+      "tasks": [
+        {
+          "arguments": {},
+          "benchmark": "C01",
+          "result_type": "IntegrationResult",
+          "seconds": 0.10387647499919694,
+          "status": "passed",
+          "task": "A"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C01",
+          "result_type": "dict",
+          "seconds": 1.5798840820007172,
+          "status": "passed",
+          "task": "B"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C01",
+          "result_type": "dict",
+          "seconds": 0.0024467030007144785,
+          "status": "passed",
+          "task": "C"
+        },
+        {
+          "arguments": {
+            "num_pallets": 10
+          },
+          "benchmark": "C02",
+          "result_type": "dict",
+          "seconds": 1.7945508289994905,
+          "status": "passed",
+          "task": "main"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C03",
+          "result_type": "dict",
+          "seconds": 0.05513486499967257,
+          "status": "passed",
+          "task": "A"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C03",
+          "result_type": "IntegrationResult",
+          "seconds": 0.8100425390002783,
+          "status": "passed",
+          "task": "B"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C03",
+          "result_type": "dict",
+          "seconds": 1.1685366669998984,
+          "status": "passed",
+          "task": "C"
+        },
+        {
+          "arguments": {
+            "strategy": "put-back"
+          },
+          "benchmark": "C04",
+          "result_type": "C04Replication",
+          "seconds": 0.003752716000235523,
+          "status": "passed",
+          "task": "run"
+        },
+        {
+          "arguments": {
+            "replications": 1
+          },
+          "benchmark": "C04",
+          "result_type": "tuple",
+          "seconds": 0.01741784799924062,
+          "status": "passed",
+          "task": "compare"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C04",
+          "result_type": "dict",
+          "seconds": 0.017862831999991613,
+          "status": "passed",
+          "task": "refinements"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C05",
+          "result_type": "C05Result",
+          "seconds": 0.0023464449996026815,
+          "status": "passed",
+          "task": "simulate"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C05",
+          "result_type": "C05Validation",
+          "seconds": 0.015427147000082186,
+          "status": "passed",
+          "task": "validate"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C05",
+          "result_type": "dict",
+          "seconds": 0.23216217600020173,
+          "status": "passed",
+          "task": "C"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C05",
+          "result_type": "dict",
+          "seconds": 2.107260052000129,
+          "status": "passed",
+          "task": "D"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C06",
+          "result_type": "dict",
+          "seconds": 0.027894003000255907,
+          "status": "passed",
+          "task": "A"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C06",
+          "result_type": "dict",
+          "seconds": 0.026781495999784966,
+          "status": "passed",
+          "task": "B"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C06",
+          "result_type": "dict",
+          "seconds": 0.0350534350000089,
+          "status": "passed",
+          "task": "C"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C07",
+          "result_type": "dict",
+          "seconds": 0.30061227300029714,
+          "status": "passed",
+          "task": "A"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C07",
+          "result_type": "dict",
+          "seconds": 0.3172647440005676,
+          "status": "passed",
+          "task": "B"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C07",
+          "result_type": "float",
+          "seconds": 7.155380273999981,
+          "status": "passed",
+          "task": "C"
+        },
+        {
+          "arguments": {
+            "eastmax": 3,
+            "westmax": 3
+          },
+          "benchmark": "C08",
+          "result_type": "float",
+          "seconds": 0.049000360999343684,
+          "status": "passed",
+          "task": "replication"
+        },
+        {
+          "arguments": {
+            "duration": 600,
+            "independent_replications": 2,
+            "paired_replications": 2,
+            "starting_seeds": [
+              42
+            ]
+          },
+          "benchmark": "C08",
+          "result_type": "dict",
+          "seconds": 0.02157446700039145,
+          "status": "passed",
+          "task": "C"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C09",
+          "result_type": "C09BenchmarkResult",
+          "seconds": 0.7717256260002614,
+          "status": "passed",
+          "task": "run"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C09",
+          "result_type": "C09Validation",
+          "seconds": 0.7154584419995444,
+          "status": "passed",
+          "task": "validate"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C10",
+          "result_type": "TaskAResult",
+          "seconds": 2.486893207999856,
+          "status": "passed",
+          "task": "A"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C10",
+          "result_type": "TaskBResult",
+          "seconds": 274.87986666800043,
+          "status": "passed",
+          "task": "B"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C11",
+          "result_type": "C11TaskAReport",
+          "seconds": 0.00023902200064185308,
+          "status": "passed",
+          "task": "A"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C11",
+          "result_type": "IntegrationResult",
+          "seconds": 0.16927614599990193,
+          "status": "passed",
+          "task": "B"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C11",
+          "result_type": "C11CollisionStudy",
+          "seconds": 33.62733644299988,
+          "status": "passed",
+          "task": "C"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C11",
+          "result_type": "IntegrationResult",
+          "seconds": 0.1360284230004254,
+          "status": "passed",
+          "task": "main"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C12",
+          "result_type": "dict",
+          "seconds": 0.0007766439994156826,
+          "status": "passed",
+          "task": "A"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C12",
+          "result_type": "dict",
+          "seconds": 0.0021359050006140023,
+          "status": "passed",
+          "task": "B"
+        },
+        {
+          "arguments": {
+            "n_samples": 20
+          },
+          "benchmark": "C12",
+          "result_type": "dict",
+          "seconds": 0.0019429809999564895,
+          "status": "passed",
+          "task": "C"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C13",
+          "result_type": "dict",
+          "seconds": 3.810617832999924,
+          "status": "passed",
+          "task": "A"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C13",
+          "result_type": "C13ControlledStudy",
+          "seconds": 0.35424968100051046,
+          "status": "passed",
+          "task": "B"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C13",
+          "result_type": "C13ControlledStudy",
+          "seconds": 1.9023299929995119,
+          "status": "passed",
+          "task": "C"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C14",
+          "result_type": "list",
+          "seconds": 0.03237408300083189,
+          "status": "passed",
+          "task": "A1"
+        },
+        {
+          "arguments": {
+            "runs": 1
+          },
+          "benchmark": "C14",
+          "result_type": "dict",
+          "seconds": 0.031975896999938414,
+          "status": "passed",
+          "task": "A2"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C14",
+          "result_type": "list",
+          "seconds": 0.028259163000257104,
+          "status": "passed",
+          "task": "B1"
+        },
+        {
+          "arguments": {
+            "runs": 1
+          },
+          "benchmark": "C14",
+          "result_type": "dict",
+          "seconds": 0.028204282999467978,
+          "status": "passed",
+          "task": "B2"
+        },
+        {
+          "arguments": {
+            "runs": 1
+          },
+          "benchmark": "C14",
+          "result_type": "dict",
+          "seconds": 0.027007210000192572,
+          "status": "passed",
+          "task": "C1"
+        },
+        {
+          "arguments": {
+            "runs": 1
+          },
+          "benchmark": "C14",
+          "result_type": "dict",
+          "seconds": 0.09201444700011052,
+          "status": "passed",
+          "task": "C2"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C15",
+          "result_type": "dict",
+          "seconds": 0.18147289999978966,
+          "status": "passed",
+          "task": "A"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C15",
+          "result_type": "dict",
+          "seconds": 0.003906521999851975,
+          "status": "passed",
+          "task": "B"
+        },
+        {
+          "arguments": {
+            "iterations": 2
+          },
+          "benchmark": "C15",
+          "result_type": "dict",
+          "seconds": 0.007203197000308137,
+          "status": "passed",
+          "task": "C"
+        },
+        {
+          "arguments": {
+            "runs": 1,
+            "years": 6
+          },
+          "benchmark": "C16",
+          "result_type": "dict",
+          "seconds": 63.69843437399959,
+          "status": "passed",
+          "task": "A"
+        },
+        {
+          "arguments": {
+            "runs": 1,
+            "tax_rates": [
+              0.2
+            ],
+            "years": 1
+          },
+          "benchmark": "C16",
+          "result_type": "dict",
+          "seconds": 4.630512520000593,
+          "status": "passed",
+          "task": "B"
+        },
+        {
+          "arguments": {
+            "k_values": [
+              4.0
+            ],
+            "runs": 1,
+            "years": 1
+          },
+          "benchmark": "C16",
+          "result_type": "dict",
+          "seconds": 4.708880416999818,
+          "status": "passed",
+          "task": "C"
+        },
+        {
+          "arguments": {
+            "replications": 1,
+            "steps": 2
+          },
+          "benchmark": "C17R",
+          "result_type": "tuple",
+          "seconds": 0.20764470199992502,
+          "status": "passed",
+          "task": "task1"
+        },
+        {
+          "arguments": {
+            "replications": 1,
+            "steps": 2
+          },
+          "benchmark": "C17R",
+          "result_type": "C17Comparison",
+          "seconds": 0.01715500200043607,
+          "status": "passed",
+          "task": "compare"
+        },
+        {
+          "arguments": {
+            "steps": 2
+          },
+          "benchmark": "C17R",
+          "result_type": "C17CAResult",
+          "seconds": 0.017334004000076675,
+          "status": "passed",
+          "task": "ca"
+        },
+        {
+          "arguments": {
+            "intervention": {
+              "duration": 0,
+              "hard_fraction": 0.0,
+              "hard_measure": null,
+              "profile": "linear",
+              "repeated": false,
+              "selection": "random",
+              "soft_factor": 0.5,
+              "soft_parameter": "alpha",
+              "threshold_fraction": 0.1
+            },
+            "t_bound": 2.0
+          },
+          "benchmark": "C17R",
+          "result_type": "HybridResult",
+          "seconds": 0.0007621020004080492,
+          "status": "passed",
+          "task": "ode"
+        },
+        {
+          "arguments": {
+            "epochs": 2,
+            "use_digitized": true
+          },
+          "benchmark": "C18",
+          "result_type": "C18Tasks",
+          "seconds": 0.17269544800001313,
+          "status": "passed",
+          "task": "all"
+        },
+        {
+          "arguments": {
+            "nx": 3,
+            "ny": 3
+          },
+          "benchmark": "C19R",
+          "result_type": "IntegrationResult",
+          "seconds": 0.0267565399999512,
+          "status": "passed",
+          "task": "A"
+        },
+        {
+          "arguments": {
+            "nx": 3,
+            "ny": 3
+          },
+          "benchmark": "C19R",
+          "result_type": "IntegrationResult",
+          "seconds": 0.024743484999817156,
+          "status": "passed",
+          "task": "B"
+        },
+        {
+          "arguments": {
+            "nx": 3,
+            "ny": 3
+          },
+          "benchmark": "C19R",
+          "result_type": "IntegrationResult",
+          "seconds": 0.06142657199961832,
+          "status": "passed",
+          "task": "C"
+        },
+        {
+          "arguments": {
+            "order_count": 10,
+            "order_scenario": "OSc1",
+            "plant_scenario": "PSc1"
+          },
+          "benchmark": "C20",
+          "result_type": "C20ReplicationResult",
+          "seconds": 0.0896193159996983,
+          "status": "passed",
+          "task": "replication"
+        },
+        {
+          "arguments": {
+            "order_count": 10,
+            "replications": 10
+          },
+          "benchmark": "C20",
+          "result_type": "tuple",
+          "seconds": 14.285614565999822,
+          "status": "passed",
+          "task": "experiment"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C21",
+          "result_type": "C21EventContactStudy",
+          "seconds": 0.011404126999877917,
+          "status": "passed",
+          "task": "event-contact"
+        },
+        {
+          "arguments": {
+            "t_bound": 0.2
+          },
+          "benchmark": "C21",
+          "result_type": "C21DynamicContactStudy",
+          "seconds": 0.08284092399935616,
+          "status": "passed",
+          "task": "dynamic-contact"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C21",
+          "result_type": "C21PendulumBasicStudy",
+          "seconds": 1.1899046949993135,
+          "status": "passed",
+          "task": "pendulum-basic"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C21",
+          "result_type": "C21KickStudy",
+          "seconds": 1.2297065439997823,
+          "status": "passed",
+          "task": "pendulum-kick"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C21",
+          "result_type": "C21RLCResult",
+          "seconds": 2.2686189809992356,
+          "status": "passed",
+          "task": "rlc-diode"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C22",
+          "result_type": "dict",
+          "seconds": 0.4839970100001665,
+          "status": "passed",
+          "task": "basic"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C22",
+          "result_type": "dict",
+          "seconds": 0.05352059899996675,
+          "status": "passed",
+          "task": "jockeying"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C22",
+          "result_type": "dict",
+          "seconds": 0.04991774199970678,
+          "status": "passed",
+          "task": "reneging"
+        },
+        {
+          "arguments": {},
+          "benchmark": "C22",
+          "result_type": "dict",
+          "seconds": 0.03813833300046099,
+          "status": "passed",
+          "task": "classing"
+        },
+        {
+          "arguments": {
+            "samples": 2,
+            "t_bound": 0.1,
+            "workers": 1
+          },
+          "benchmark": "CP1",
+          "result_type": "CP1TaskAStudy",
+          "seconds": 0.00045937699997011805,
+          "status": "passed",
+          "task": "A"
+        },
+        {
+          "arguments": {
+            "step": 0.05,
+            "t_bound": 0.1,
+            "workers": 1
+          },
+          "benchmark": "CP1",
+          "result_type": "CP1ExecutionComparison",
+          "seconds": 0.00017714099976728903,
+          "status": "passed",
+          "task": "B"
+        },
+        {
+          "arguments": {},
+          "benchmark": "CP1",
+          "result_type": "CP1TaskBValidation",
+          "seconds": 0.32541661899995233,
+          "status": "passed",
+          "task": "B-validate"
+        },
+        {
+          "arguments": {
+            "interior_points": 9,
+            "output_step": 0.05,
+            "step": 0.05,
+            "t_bound": 0.1
+          },
+          "benchmark": "CP1",
+          "result_type": "CP1TaskCResult",
+          "seconds": 0.00024535100055800285,
+          "status": "passed",
+          "task": "C"
+        },
+        {
+          "arguments": {
+            "samples": 2,
+            "t_bound": 0.1,
+            "workers": 1
+          },
+          "benchmark": "CP2",
+          "result_type": "CP2MonteCarloStudy",
+          "seconds": 0.00020583300010912353,
+          "status": "passed",
+          "task": "1"
+        },
+        {
+          "arguments": {
+            "iterations": 20,
+            "nx": 17
+          },
+          "benchmark": "CP2",
+          "result_type": "CP2LBMResult",
+          "seconds": 0.0200078099996972,
+          "status": "passed",
+          "task": "2"
+        },
+        {
+          "arguments": {},
+          "benchmark": "CP2",
+          "result_type": "CP2RopeComparison",
+          "seconds": 0.20030422400031966,
+          "status": "passed",
+          "task": "3"
+        }
+      ]
+    },
+    "c18_missing_inputs": {
+      "command": "python -m argesim_benchmarks run-suite --profile definition --benchmark C18",
+      "exit_code": 1,
+      "expected": true,
+      "reason": "ValueError: C18 requires both training and validation data; use_digitized=True selects only the reconstruction demo",
+      "log_sha256": "5ae021dc5b5d3c8aa0c2beac70ee8b91cfbcafa3ed9047d6d4be47a5c46d0d10"
+    },
+    "lint": {
+      "command": "ruff check .",
+      "exit_code": 0,
+      "findings": 0
+    },
+    "compile": {
+      "command": "python -m compileall -q argesim_benchmarks tests",
+      "exit_code": 0
+    },
+    "generated_status": {
+      "command": "verify_coverage_document(Path(\"ARGESIM_COVERAGE.md\"))",
+      "passed": true
+    },
+    "dependency_free": {
+      "command": "python -S: import public APIs, run one C20 OSc1/PSc1 order, verify generated status",
+      "passed": true
+    },
+    "whitespace": {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  },
+  "c20": {
+    "controller": {
+      "wip_limit": 30,
+      "priority": "released orders: rush in OSc2/3, due date, identifier",
+      "machine_selection": "nearest idle eligible machine",
+      "buffer_policy": "nearest accessible FIFO column; no incoming reservation overtaking",
+      "route_policy": "shortest directed; avoid failed tracks at dispatch, wait later failures"
+    },
+    "graph": {
+      "nodes": 284,
+      "tracks": 368,
+      "buffer_places": 90,
+      "workstation_positions": 30,
+      "installed_machines": 19,
+      "central_failure_clusters": {
+        "A": 16,
+        "B": 8,
+        "C": 12
+      }
+    },
+    "runs": [
+      {
+        "orders": 100,
+        "osc": "OSc1",
+        "psc": "PSc1",
+        "seed": 20,
+        "completed": 100,
+        "makespan": 9898.11503794347,
+        "median_throughput_time": 3101.5567999771724,
+        "tardy_orders": 96,
+        "total_tardiness": 237500.6448697915,
+        "weighted_tardiness": 313310.7175214084,
+        "max_nok": 1,
+        "max_ok": 0,
+        "failures": 0,
+        "wall_seconds": 3.496218300999317
+      },
+      {
+        "orders": 100,
+        "osc": "OSc1",
+        "psc": "PSc2",
+        "seed": 20,
+        "completed": 100,
+        "makespan": 11829.326050177118,
+        "median_throughput_time": 3133.513599087398,
+        "tardy_orders": 97,
+        "total_tardiness": 250101.70042067816,
+        "weighted_tardiness": 331401.9170686832,
+        "max_nok": 1,
+        "max_ok": 1,
+        "failures": 0,
+        "wall_seconds": 2.9987700969995785
+      },
+      {
+        "orders": 100,
+        "osc": "OSc1",
+        "psc": "PSc3",
+        "seed": 20,
+        "completed": 100,
+        "makespan": 11116.395182522698,
+        "median_throughput_time": 3166.7646615551093,
+        "tardy_orders": 95,
+        "total_tardiness": 270852.21981971344,
+        "weighted_tardiness": 364481.2205220593,
+        "max_nok": 3,
+        "max_ok": 9,
+        "failures": 0,
+        "wall_seconds": 3.1982605330003935
+      },
+      {
+        "orders": 100,
+        "osc": "OSc1",
+        "psc": "PSc4",
+        "seed": 20,
+        "completed": 100,
+        "makespan": 11116.395182522698,
+        "median_throughput_time": 3166.7646615551093,
+        "tardy_orders": 95,
+        "total_tardiness": 270852.21981971344,
+        "weighted_tardiness": 364481.2205220593,
+        "max_nok": 3,
+        "max_ok": 9,
+        "failures": 2,
+        "wall_seconds": 3.1337825099999463
+      },
+      {
+        "orders": 100,
+        "osc": "OSc2",
+        "psc": "PSc1",
+        "seed": 20,
+        "completed": 100,
+        "makespan": 9698.22424438049,
+        "median_throughput_time": 3014.029064553634,
+        "tardy_orders": 97,
+        "total_tardiness": 221746.31128297525,
+        "weighted_tardiness": 275670.932373543,
+        "max_nok": 0,
+        "max_ok": 0,
+        "failures": 0,
+        "wall_seconds": 3.070281423999404
+      },
+      {
+        "orders": 100,
+        "osc": "OSc2",
+        "psc": "PSc2",
+        "seed": 20,
+        "completed": 100,
+        "makespan": 9972.047109785442,
+        "median_throughput_time": 3159.256176823991,
+        "tardy_orders": 97,
+        "total_tardiness": 241322.12420540486,
+        "weighted_tardiness": 302593.8094678612,
+        "max_nok": 1,
+        "max_ok": 2,
+        "failures": 0,
+        "wall_seconds": 3.3663633850001133
+      },
+      {
+        "orders": 100,
+        "osc": "OSc2",
+        "psc": "PSc3",
+        "seed": 20,
+        "completed": 100,
+        "makespan": 12678.163093154868,
+        "median_throughput_time": 3102.844628608774,
+        "tardy_orders": 95,
+        "total_tardiness": 252173.8791895758,
+        "weighted_tardiness": 331813.93567932775,
+        "max_nok": 0,
+        "max_ok": 3,
+        "failures": 0,
+        "wall_seconds": 3.3610892960005003
+      },
+      {
+        "orders": 100,
+        "osc": "OSc2",
+        "psc": "PSc4",
+        "seed": 20,
+        "completed": 100,
+        "makespan": 12678.163093154868,
+        "median_throughput_time": 3102.844628608774,
+        "tardy_orders": 95,
+        "total_tardiness": 252173.8791895758,
+        "weighted_tardiness": 331813.93567932775,
+        "max_nok": 0,
+        "max_ok": 3,
+        "failures": 3,
+        "wall_seconds": 3.140491582999857
+      },
+      {
+        "orders": 100,
+        "osc": "OSc3",
+        "psc": "PSc1",
+        "seed": 20,
+        "completed": 100,
+        "makespan": 9698.22424438049,
+        "median_throughput_time": 3014.029064553634,
+        "tardy_orders": 97,
+        "total_tardiness": 223159.39781702685,
+        "weighted_tardiness": 277972.97475175286,
+        "max_nok": 0,
+        "max_ok": 0,
+        "failures": 0,
+        "wall_seconds": 2.8762150329994256
+      },
+      {
+        "orders": 100,
+        "osc": "OSc3",
+        "psc": "PSc2",
+        "seed": 20,
+        "completed": 100,
+        "makespan": 9972.047109785442,
+        "median_throughput_time": 3159.256176823991,
+        "tardy_orders": 97,
+        "total_tardiness": 242735.21073945647,
+        "weighted_tardiness": 304895.8518460711,
+        "max_nok": 1,
+        "max_ok": 2,
+        "failures": 0,
+        "wall_seconds": 2.969833777000531
+      },
+      {
+        "orders": 100,
+        "osc": "OSc3",
+        "psc": "PSc3",
+        "seed": 20,
+        "completed": 100,
+        "makespan": 12678.163093154868,
+        "median_throughput_time": 3102.844628608774,
+        "tardy_orders": 96,
+        "total_tardiness": 253333.55137467853,
+        "weighted_tardiness": 333555.93234636076,
+        "max_nok": 0,
+        "max_ok": 3,
+        "failures": 0,
+        "wall_seconds": 3.642642511000304
+      },
+      {
+        "orders": 100,
+        "osc": "OSc3",
+        "psc": "PSc4",
+        "seed": 20,
+        "completed": 100,
+        "makespan": 12678.163093154868,
+        "median_throughput_time": 3102.844628608774,
+        "tardy_orders": 96,
+        "total_tardiness": 253333.55137467853,
+        "weighted_tardiness": 333555.93234636076,
+        "max_nok": 0,
+        "max_ok": 3,
+        "failures": 3,
+        "wall_seconds": 2.649215751999691
+      },
+      {
+        "orders": 5000,
+        "osc": "OSc3",
+        "psc": "PSc4",
+        "seed": 20,
+        "completed": 5000,
+        "makespan": 400485.11881755595,
+        "median_throughput_time": 178402.24329709754,
+        "tardy_orders": 4961,
+        "total_tardiness": 853076954.4845566,
+        "weighted_tardiness": 826800256.3243542,
+        "max_nok": 153,
+        "max_ok": 507,
+        "failures": 96,
+        "wall_seconds": 142.64459852900018
+      }
+    ],
+    "run_log_sha256": "1aa30f6246043634a7d9983f889a3021decc8b1c46a49c3859b9264c52a2fd72",
+    "independent_output_validation": false,
+    "full_120_by_5000_experiment_performed": false,
+    "task_b_convention": "pool individual-order throughput values across runs; per-run medians additionally retained",
+    "task_c": "both weighted and unweighted tardiness"
+  },
+  "c18": {
+    "original_measurements_recovered": false,
+    "default_substitution_removed": true,
+    "csv_columns": [
+      "time_s",
+      "thickening",
+      "force"
+    ],
+    "default_sampling_hz": 100,
+    "provenance": "data kind, sample count/rate, canonical signal SHA-256, input-file SHA-256",
+    "checksum_authenticates_original_measurements": false
+  },
+  "c02": {
+    "status": "specified",
+    "registered_solver_changed": false,
+    "expected_reference_failure": "10 pallets, existing 6% tolerance unchanged",
+    "candidate": "argesim_benchmarks.experiments.c02_spatial.C02SpatialCandidate",
+    "candidate_scope": "experimental; point shifter representation does not enforce complete zero-storage footprints",
+    "candidate_runs": [
+      {
+        "pallets": 10,
+        "result": {
+          "throughput": 921.0,
+          "average_throughput_time": 305.14220050669564,
+          "deadlock": false,
+          "stopped_at_seconds": 36000.0,
+          "pallets": 10,
+          "events": 50728,
+          "maximum_input_buffer_occupancy": [
+            3,
+            2,
+            2,
+            2,
+            2,
+            1,
+            1,
+            0
+          ],
+          "maximum_output_buffer_occupancy": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0
+          ],
+          "minimum_main_spacing_m": 0.36,
+          "minimum_branch_spacing_m": 0.36
+        },
+        "wall_seconds": 3.133694402999936
+      },
+      {
+        "pallets": 14,
+        "result": {
+          "throughput": 1278.0,
+          "average_throughput_time": 307.9666666666667,
+          "deadlock": false,
+          "stopped_at_seconds": 36000.0,
+          "pallets": 14,
+          "events": 72818,
+          "maximum_input_buffer_occupancy": [
+            3,
+            2,
+            2,
+            2,
+            2,
+            2,
+            1,
+            1
+          ],
+          "maximum_output_buffer_occupancy": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "minimum_main_spacing_m": 0.36,
+          "minimum_branch_spacing_m": 0.36
+        },
+        "wall_seconds": 5.181581090999771
+      },
+      {
+        "pallets": 20,
+        "result": {
+          "throughput": 1382.0,
+          "average_throughput_time": 409.28931500241197,
+          "deadlock": false,
+          "stopped_at_seconds": 36000.0,
+          "pallets": 20,
+          "events": 90623,
+          "maximum_input_buffer_occupancy": [
+            3,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            3
+          ],
+          "maximum_output_buffer_occupancy": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "minimum_main_spacing_m": 0.36,
+          "minimum_branch_spacing_m": 0.36
+        },
+        "wall_seconds": 7.676634460000059
+      },
+      {
+        "pallets": 40,
+        "result": {
+          "throughput": 1381.0,
+          "average_throughput_time": 826.2011585807386,
+          "deadlock": false,
+          "stopped_at_seconds": 36000.0,
+          "pallets": 40,
+          "events": 200308,
+          "maximum_input_buffer_occupancy": [
+            3,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            3
+          ],
+          "maximum_output_buffer_occupancy": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "minimum_main_spacing_m": 0.36,
+          "minimum_branch_spacing_m": 0.36
+        },
+        "wall_seconds": 28.101820987000337
+      },
+      {
+        "pallets": 50,
+        "result": {
+          "throughput": 1381.0,
+          "average_throughput_time": 1036.4255611875453,
+          "deadlock": false,
+          "stopped_at_seconds": 36000.0,
+          "pallets": 50,
+          "events": 238062,
+          "maximum_input_buffer_occupancy": [
+            3,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            3
+          ],
+          "maximum_output_buffer_occupancy": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "minimum_main_spacing_m": 0.36,
+          "minimum_branch_spacing_m": 0.36
+        },
+        "wall_seconds": 40.20167907500036
+      },
+      {
+        "pallets": 60,
+        "result": {
+          "throughput": 1384.0,
+          "average_throughput_time": 1245.2924614643546,
+          "deadlock": false,
+          "stopped_at_seconds": 36000.0,
+          "pallets": 60,
+          "events": 252278,
+          "maximum_input_buffer_occupancy": [
+            3,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            3
+          ],
+          "maximum_output_buffer_occupancy": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "minimum_main_spacing_m": 0.36,
+          "minimum_branch_spacing_m": 0.36
+        },
+        "wall_seconds": 48.498251287999665
+      }
+    ],
+    "candidate_run_scope": "exploratory runs before module relocation/formatting; physics unchanged, output now explicitly carries experimental scope",
+    "candidate_log_sha256": "5be8fe497ac8fd77cb895481dc5ace80425ff9783bb17ebf503b4031df30565f",
+    "validated": false
+  },
+  "definition_pdf_sha256": {
+    "C02": "21011995a5ab84963958b667f4a5e2c46c34ade8afeba816b68250d202b8ec35",
+    "C18": "af31e3a2c385d498529c89482f20764b8629f42e353b25a7017f0bd3d7507886",
+    "C20": "fa7d3818348bb3f54d8845ae4d51ec6ecd58571e28a6d91d6a0c132f265d1bc2"
+  },
+  "source_sha256": {
+    "argesim_benchmarks/__init__.py": "ea550cc33e35d49490bd39d336988324abdc4aa2d75d93e57d04302732934262",
+    "argesim_benchmarks/catalog.py": "628c1062a312cf86f31092677b52458f94c6f9e8e847cd815d130f5e044c3341",
+    "argesim_benchmarks/experiments/__init__.py": "64d01f0b7bc76d7a15bcfefa01803b646bb3e56a90be089be22fd7e274edf5e1",
+    "argesim_benchmarks/experiments/c02_spatial.py": "3895cbd05e0a50c1da1c43849a26faa1de634aa89e254e7f3955a4b54d2229d3",
+    "argesim_benchmarks/models/__init__.py": "7e5e37c4b650415b3ef1bafdfa81c3dd6f914b37b18cd3d9f7ed9f2aa3875011",
+    "argesim_benchmarks/models/c18_nonlinear_identification.py": "9c0f46c8113d809370b5dd941fcf8831de0cc9afbfe1d254fb29b77fb5a5b40a",
+    "argesim_benchmarks/models/c20_complex_production.py": "f943272796731c0b8bcade4d34fa9be7dfe25d4d7068107c5a575f42da15fa20",
+    "argesim_benchmarks/models/c20_flow.py": "d8900bb851570314af292b92b3ea78130fa52fbf8db44e6c1df4acda543197a7",
+    "argesim_benchmarks/models/c20_layout.py": "394824515eb17ab1798a543db27249c650ed0c8d8b867ccfe56b6cbf93a5d9db",
+    "argesim_benchmarks/models/c20_production.py": "ec5d88f00c304b1e70b21e22906c6d78ecd0de2a992fc58fed9a73ce9b1558a9",
+    "argesim_benchmarks/runner.py": "ef6603b07b1eb0e2b3cd04deae910ea279f78d8cde4c1c694f0c9f2e53c5c533",
+    "tests/test_argesim_c18_data.py": "673ef322ed0866b617c5bc48254021d72a58747f2c5610a9e19816f18fd1b9d8",
+    "tests/test_argesim_c20.py": "9e762dc99f82f1fa1fa820d65053cdd1bb1211794c38209386585b0d12765fea",
+    "tests/test_argesim_c20_flow.py": "354415eb49f99bb2b8493344b249d8b5232fe20495deafcb37fd6e2b7d3885e1",
+    "tests/test_argesim_c20_statistics.py": "bd75ac8438d4cbb564da4fa07bdabc141385557b9587fa396a4f9b4b05bc87fa",
+    "tests/test_argesim_catalog.py": "1b289c924d17fa75e31ef7b927f002ad21432ad5662f0c57e3baae1cf3dc891e",
+    "tests/test_c02_spatial_candidate.py": "43532a3461eddbfa3d4ff4057e0c9eaca2b37d1684faeba6d67acbc42694c52b"
+  },
+  "hosted_ci": {
+    "prior_head": "dc57f2d593e4fa1580051210e996fcd681ef4793",
+    "prior_run": 44420987271,
+    "prior_python_3_10_to_3_13": "all successful",
+    "new_commit": "not yet published at record creation; see PR checks"
+  },
+  "remaining": {
+    "C02": "complete zero-storage shifter geometry and qualify physical blocking/deadlocks against declared initial positions/control",
+    "C18": "recover original 100 Hz measured training and validation data",
+    "C20": "independent aggregate-output validation and full 120-replication 5000-order study"
+  }
+}

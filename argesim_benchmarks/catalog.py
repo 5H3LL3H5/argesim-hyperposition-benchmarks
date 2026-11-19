@@ -215,7 +215,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.DES,),
         _source("c20"),
         "stochastic production DES",
-        BenchmarkStatus.SPECIFIED,
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C21",

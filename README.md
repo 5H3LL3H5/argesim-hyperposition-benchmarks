@@ -15,8 +15,9 @@ inventory in `argesim_benchmarks.catalog` records the evidence reached by each
 complete task family instead of treating file presence as implementation.
 
 C08, C21, CP1 and CP2 retain limited `validated` evidence for the cases
-listed in the audit. Seventeen other families reach `implemented`. C02,
-C18 and C20 remain `specified` with partial executable code because
+listed in the audit. Eighteen other families reach `implemented`, including
+the causal C20 transport model added on 2026-11-19. C02 and C18 remain
+`specified` with partial executable code because
 required model behaviour, experiments or original data are missing. Passing
 unit tests or a smoke run does not establish full benchmark correctness.
 Each benchmark must pass five evidence gates:
@@ -25,6 +26,8 @@ Each benchmark must pass five evidence gates:
 
 See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status and
 [ARGESIM_AUDIT.md](ARGESIM_AUDIT.md) for the definition-by-definition review.
+The [2026-11-19 transport/data report](docs/ARGESIM_TRANSPORT_DATA_20261119.md)
+records the C20 geometry, controller, test scope and C18 input-data contract.
 
 ## Implemented numerical foundation
 
@@ -95,7 +98,10 @@ error, if any. A failure gives a nonzero exit code; later tasks still run unless
 `--fail-fast` is set. The smoke profile shortens costly workloads, and the
 definition profile uses the documented task defaults (including long CP2 LBM
 runs). Passing a suite run proves execution only; published reference checks
-and catalog evidence gates are assessed separately.
+and catalog evidence gates are assessed separately. C18 smoke explicitly uses
+the labelled figure-reconstruction demo. A regular C18 run requires both data
+sets (objects or CSV paths); missing measurements fail instead of silently
+loading substitutes.
 
 Each task also contains a versioned `evidence` object. Its nested
 `experiment` records the Git commit (when available), effective arguments

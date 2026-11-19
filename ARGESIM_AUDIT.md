@@ -1,5 +1,22 @@
 # ARGESIM implementation audit
 
+## Transport/data follow-up, 2026-11-19
+
+C20 now implements the individual directed tracks, junctions, buffer slots and
+machine locations, with causal blocking, physical source/sink/rework transfers
+and corrected Task-B/C statistics. C18 requires an explicit training/validation
+pair or an explicitly selected reconstruction demo and records input hashes.
+The catalog now has 18 `implemented`, four narrowly `validated` and two
+`specified` families: C02 and C18. No family is benchmark-ready.
+
+C02's finite-spacing research candidate is isolated under `experiments`:
+zero-storage shifter footprints and the reference mismatch remain open.
+Its results do not replace the registered model or its expected failing test.
+See [the transport/data report](docs/ARGESIM_TRANSPORT_DATA_20261119.md) and
+[its reproducible evidence](docs/BENCHMARK_TRANSPORT_DATA_20261119.json).
+The dated sections below retain historical findings; newer corrections
+supersede their former open items.
+
 ## Corrective follow-up, 2026-11-18
 
 The follow-up implements C04 cleaning/request/conspiracy refinements, C05
@@ -221,7 +238,7 @@ in shared runtime code.
 | C17R | implemented | Revised ODE identification, FHP-I exclusion/collisions, random movement and intervention paths reviewed. Conservation/replay tests pass; ensemble agreement and spatial parameter regions require further numerical validation. |
 | C18 | specified | ARX and both ANN forms execute on labelled digitizations or supplied data. Original 100 Hz data missing; synthetic recovery and figure correlations cannot certify the original experiment. |
 | C19R | implemented | Transport/source/facility equations and 150-day task horizons reviewed. Full mesh-convergence and prescribed section/profile error evidence remain open; coarse-grid smoke tests are not PDE validation. |
-| C20 | specified | Scenario/process/failure code reviewed. Reduced transport network lacks demonstrated junction/buffer/back-pressure equivalence to the physical layout. Complete benchmark correctness is not established. |
+| C20 | implemented | Directed Figure-4/5 geometry, finite occupancy and downstream blocking now coupled to production. All 12 scenarios and a 5,000-order run execute; aggregate independent validation and the full 120-replication study remain unperformed. |
 | C21 | validated | Existing published ball/pendulum event and dynamic-contact checks pass; diode forms have residual/cross-form tests. This is limited reference validation, not arbitrary DAE or every parameter combination. |
 | C22 | implemented | Queue choice, event priority, reneging, jockeying and class-call rules reviewed. Existing deterministic trace/length tests pass; independent complete published traces remain open. |
 | CP1 | validated | Task-B published ten-population endpoint and equilibrium checks retained. Serial/parallel equality is verification, not independent validation of all workloads or speedup. |
@@ -254,9 +271,9 @@ in shared runtime code.
 - The 2007 CP2 text printed `nu=0.6`; the peer-reviewed 2022 correction and
   reference code specify `nu=0.06`, 0-10 s, and profiles at 5 s and 8 s. The
   printed variant remains available explicitly for provenance experiments.
-- C20's conveyor is a dimensioned reference-control abstraction of the
-  published two-ring layout, not a claim to encode every drawing junction and
-  buffer as an individual object.
+- C20 now encodes the drawing's tracks, junctions and buffer slots. Its
+  conservative documented controller is not an optimized or independently
+  validated reference solution; a full 120-replication study is still absent.
 - C18 reports teacher-forced and free-running dynamic-ANN metrics separately;
   the former is not presented as closed-loop simulation evidence.
 - No general-purpose implicit DAE solver is claimed. Quantized partitions are

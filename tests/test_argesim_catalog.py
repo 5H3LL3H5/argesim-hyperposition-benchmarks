@@ -23,10 +23,10 @@ class ArgesimCatalogTests(unittest.TestCase):
 
     def test_benchmark_status_reflects_remaining_definition_gaps(self) -> None:
         expected_groups = {
-            BenchmarkStatus.SPECIFIED: {"C02", "C18", "C20"},
+            BenchmarkStatus.SPECIFIED: {"C02", "C18"},
             BenchmarkStatus.IMPLEMENTED: {
                 "C01", "C03", "C04", "C05", "C06", "C07", "C09", "C10", "C11", "C12", "C13",
-                "C14", "C15", "C16", "C17R", "C19R", "C22",
+                "C14", "C15", "C16", "C17R", "C19R", "C20", "C22",
             },
             BenchmarkStatus.VALIDATED: {"C08", "C21", "CP1", "CP2"},
         }
