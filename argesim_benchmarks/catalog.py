@@ -173,7 +173,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.DES, ModelClass.AGENT_BASED, ModelClass.STOCHASTIC),
         _source("c16"),
         "agent-based stochastic dynamics",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
         "C17R",

@@ -10,7 +10,7 @@ two deliberately separate purposes:
 ## Current status
 
 The catalog contains 24 families, including revised definitions C17R and C19R.
-Twelve have numerical reference checks for identified cases. Eleven have
+Thirteen have numerical reference checks for identified cases. Ten more have
 executable implementations. C18 has executable identification algorithms and
 digitized examples. It remains at `specified` pending the two original recordings.
 The catalog records the following evidence gates.

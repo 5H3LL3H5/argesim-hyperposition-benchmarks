@@ -1,6 +1,6 @@
 # ARGESIM numerical reference checks
 
-The catalog has 24 families. Twelve reach `validated` for the cases identified below. Eleven reach `implemented`. C18 remains at `specified`. A smoke run checks executability. The scientific comparisons use separate published numbers, analytical solutions or independently integrated equations.
+The catalog has 24 families. Thirteen reach `validated` for the cases identified below. Ten reach `implemented`. C18 remains at `specified`. A smoke run checks executability. The scientific comparisons use separate published numbers, analytical solutions or independently integrated equations.
 
 ## Cases with numerical references
 
@@ -14,6 +14,7 @@ The catalog has 24 families. Twelve reach `validated` for the cases identified b
 | C08 | Five deterministic appendix datasets cover the canal/lock policies. Stochastic replication and interval tests are also present. [Case evidence](../C08_VALIDATION.md) |
 | C12 | The inverse solution gives restitution 0.58740105. For 10,000 samples, the fourth sphere's mean terminal speed is 0.42322 and its standard deviation is 0.04294. Both fall in the intervals published for the Dymola experiment. [Dymola, Task C](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C12/C12-solution-Dymola.pdf) |
 | C15 | All three Task A numerical bolus masses agree within 0.01 with the Maxima/LISP publication at 1.5, 4 and 240 min. The Task B fit yields a squared residual of 260.80663. The published MATLAB value is 260.8067. Task C runs 1,000 perturbed fits. Different studies report different parameter dispersions. [Maxima/LISP](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C15/C15-solution-Maxima.pdf) · [MATLAB](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C15/C15-solution-MATLAB.pdf) |
+| C16 | The mean restaurant count at the end of year five meets the declared comparison criterion for two independent 50-replication studies. The simulated counts have lower variance. The economic studies use different observation windows. [C16 results](#c16-restaurant-count-and-economic-studies) |
 | C21 | Published ball-contact and pendulum stop/kick cases, plus the RLC algebraic residual. [Coverage](../ARGESIM_COVERAGE.md) |
 | C22 | The ten published jockeying records, all four abandonments and the ten deterministic class waiting-time statistics match MatlabGPSS to printed precision. Only customers already waiting at a call can join that service group. Later arrivals wait for another call. STROBOSCOPE reports different class statistics under its queue-filter implementation. [MatlabGPSS, Tables 3, 5, 7](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_29_4/articles/sne.29.4.10496.bn22.OA.pdf) · [STROBOSCOPE, Table 8](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_35_4/articles/sne.35.4.10751.bn22.OA.pdf) |
 | CP1 | Published ten-population endpoint for Task B. Serial/parallel comparisons cover additional workloads. [Coverage](../ARGESIM_COVERAGE.md) |
@@ -44,7 +45,6 @@ Each policy runs 100 independent days of 250 patients, with seeds 0–99. The co
 | C11 | Robot dynamics, control tasks and numerical residual checks. | Published controller trajectories under matching gains, sampling and initial conditions are outstanding. |
 | C13 | Independent plant checks distinguish the 2006 and revised 2007 damping parameters. | Published Task B/C traces for the revised parameters remain outstanding. |
 | C14 | Midnight demand belongs to the new day. The reported sale-triggered Task A ordering rule is selectable alongside literal daily ordering. All three policies have 100-run comparisons. | Reference implementations disagree on Task A ordering and costs. The default and published variants are identified separately. [Results and sources](../C14_VALIDATION.md) |
-| C16 | Task A records the restaurant count at the end of year five in each replication. Tasks B and C can complete their five- and ten-year horizons with the official population. | Published studies use different horizons and definitions of revenue for Tasks B and C. See the C16 comparison below. |
 | C17R | Aggregate conservation and seeded numerical replay. | Independent matched numeric trajectories remain outstanding. |
 | C18 | Published linear model on the digitized training/validation curves gives 0.95347/0.94231. The recurrent model gives 0.99377/0.92642 on separate muscles. | Neither original recording was located in the publisher archives. The recovered figures support a separate reconstruction experiment. [Data provenance and searches](C18_FIGURE_RECONSTRUCTION.md) |
 | C19R | Table 1 parameters, finite-volume source and sink areas, weekday switching and numerical homogeneous profiles. | The 1 m grid retains measurable spatial error at breakthrough and near the treatment disks. See the numerical comparisons below. |
@@ -71,9 +71,32 @@ of up to three estimated standard errors of the difference of means plus
 0.005 for rounding. Each side has 50 replications. The reference checker
 reports both comparisons and the candidate counts.
 
+| At week 260, 50 replications | Mean | Variance | Minimum | Maximum |
+|---|---:|---:|---:|---:|
+| Registered model, seed 42 | 5.72 | 1.104 | 4 | 8 |
+| AnyLogic | 6.34 | 1.98 | 4 | 10 |
+| Java OO | 6.06 | 2.02 | 4 | 9 |
+
+The mean is 2.50 estimated standard errors below AnyLogic and 1.36 below
+Java. The catalog classification covers the week-260 mean. The sample is
+less dispersed than either published sample. The mean over weeks 261–520 is
+6.04946. [Counts, inputs and economic results](C16_REFERENCE_RESULTS.json)
+
 ```bash
 python -m argesim_benchmarks run C16 A --kwargs-json '{"workers": 6}' | python scripts/c16_reference_check.py
 ```
+
+Task B runs five replications at each of the 21 tax rates from 0% to 100%.
+Across five simulated years, the largest mean tax income is 224,840.24 at
+40%. The Java study found 37.8% over two years on a finer tax grid. AnyLogic
+reported 39.85% for its observation window from day 180 to year two. These
+windows permit comparison of the maximizing rate only. [Java](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C16/C16-solution-Java-OO.pdf) · [AnyLogic](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C16/C16-solution-AnyLogic.pdf)
+
+Task C covers all 13 density exponents from 0 to 6. Each value uses five
+ten-year runs. The largest pooled mean lifetime revenue of new restaurants
+is 10,569.96 at `k=0.5`. AnyLogic also selected 0.5 using a five-year revenue
+measure. Java selected 1.0 using weekly revenue. Differences in the revenue
+definition and horizon limit the monetary comparison. [AnyLogic](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C16/C16-solution-AnyLogic.pdf) · [Java](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C16/C16-solution-Java-OO.pdf)
 
 ## C19R spatial and time accuracy
 

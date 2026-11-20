@@ -26,7 +26,7 @@ requires an external analytical or published numeric reference. Partial code sta
 | C13 | Crane and Embedded Control | DAE, sampled control | implemented |
 | C14 | Supply Chain | discrete-time dynamics | implemented |
 | C15 | Clearance Identification | ODE identification | validated |
-| C16 | Restaurant Business Dynamics | agent-based stochastic dynamics | implemented |
+| C16 | Restaurant Business Dynamics | agent-based stochastic dynamics | validated |
 | C17R | SIR-type Epidemic with Cellular Automata and ODEs | ODE, FHP-I CA, interventions | implemented |
 | C18 | Identification of Nonlinear Dynamics - Neural Networks versus Transfer Functions | ARX, static/dynamic ANN | specified |
 | C19R | Pollution in Groundwater Flow | PDE/distributed system | implemented |

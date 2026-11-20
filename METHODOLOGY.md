@@ -189,6 +189,10 @@ timings as official benchmark results.
   Simulink solution and retains the contradictory literal printed error
   difference as an explicit alternative. The qualitative reference behaviour
   is tested without inventing numeric curve samples.
+- C16 compares the count of restaurants at week 260 across 50 replications
+  with the published AnyLogic and Java OO statistics. Report the time average
+  after week 260 separately. Use the sample and published variances to compute
+  the standard error of each difference of means. [C16 comparison](docs/PUBLISHED_REFERENCE_CHECKS.md)
 - C17R checks the CA population invariant and the published lattice/contact
   identification formula. Random seeds are local to each replication.
 - C18 keeps data provenance in `C18DataSet`. Figure digitizations are not
