@@ -50,24 +50,41 @@ Least-squares refitting to the digitization produces different coefficients
 (1.760091, −0.769501, 0.308333, −0.301893). Agreement of the published model's
 correlations does not recover the input samples used for its identification.
 
-The table gives the results of the default 400-epoch run on the packaged
-figure demo. Each scored prediction starts at index 2. The first two measured
-outputs supply the initial state and are excluded from the metrics.
+The following CPython 3.12 results use the packaged figure data and default
+settings. Each scored prediction starts at index 2. The first two measured
+outputs initialize the state and are excluded from the metrics.
 
 | Model | Training correlation | Independent muscle correlation |
 |---|---:|---:|
 | Refit second-order ARX | 0.94180 | 0.93299 |
 | ARX plus static residual network | 0.95811 | 0.94371 |
-| Dynamic network, free-running feedback | 0.89965 | 0.88609 |
-| Dynamic network, one-step prediction with measured history | 0.98581 | 0.98482 |
+| Dynamic network, free-running feedback | 0.99377 | 0.92642 |
+| Same dynamic network, one-step prediction with measured history | 0.99875 | 0.99890 |
 
-Task C trains from seeds 18, 19 and 20. Each candidate learns from the first
-muscle's one-step examples and is ranked by its free-running training RMSE.
-The three RMSEs are 0.14567, 0.16580 and 0.14047, so seed 20 is selected.
-The second muscle is used to evaluate that selection. The CLI returns every
-trial and the selected seed. A single seed can be requested explicitly through
-`dynamic_seeds`. Identical training and validation signal pairs are rejected
-even if CSV filenames or numeric formatting differ.
+### Recurrent training in Task C
+
+The classic MATLAB solution connects the output layer back to the hidden
+layer, gives both the output and input connections delays of one and two
+samples, and trains the connected sequence for up to 50 epochs. The Python
+fit now minimizes the free-running output error over the entire training
+trajectory. Each predicted force feeds the following two steps. A damped
+Gauss–Newton update adjusts all 61 weights and biases of the ten-unit
+network. The sensitivity recurrence differentiates both feedback paths.
+A central-difference check exercises every parameter type, and a separate
+nonlinear synthetic system tests prediction with a new input sequence.
+
+With 50 epochs, the free-run training RMSEs for seeds 18, 19 and 20 are
+0.03492, 0.03729 and 0.03605. Seed 18 wins on training data alone. The
+static parallel network retains its 400-epoch budget. Passing `epochs`
+sets the maximum for both fits. The CLI records the dynamic fitting method,
+epoch budget, per-seed scores and selection.
+
+The former one-step fitting method is available with `dynamic_fit="one-step"`.
+Using its default 400 epochs gives free-running correlations of 0.89965
+and 0.88609. Recurrent training recovers the published rounded training value
+of 0.99. The independent-muscle result of 0.92642 falls below the published 0.98.
+A one-step score uses the preceding measured forces and has a different
+interpretation from an uninterrupted simulation on the second muscle.
 
 The original C18 definition calls for repeated dynamic-network training. The
 reference solution distinguishes linear, parallel and dynamic model results.

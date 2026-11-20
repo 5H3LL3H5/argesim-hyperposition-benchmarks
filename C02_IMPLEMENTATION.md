@@ -146,6 +146,38 @@ actual arrival on A6's input belt. A fixture releases it at tick 30, before
 the next unrelated belt departure at tick 34. This event correction preserves
 all previously archived numerical results for the default 1–60 runs.
 
+## Initial pallet positions and the 14-pallet result
+
+Krauth's 1991 clarification permits random initial positions on B1. The
+default uses evenly spaced slots. Passing an integer `initial_seed` samples
+from the same 40 legal centres without replacement and preserves FIFO order.
+Surplus pallets use the same A1 feed. All placements coincide at 40 or more
+pallets. The seed is included in each run, including runs in a pallet study.
+
+We applied each seed from 0 through 11 to every quantitative SimEvents row,
+with both timing choices (288 runs). A row meets the existing criterion when
+both count and mean are within 6% of Table 2. Every run admitted its full
+population and completed the observation window.
+
+| Positioning-unit timing | Initial seed | Rows within tolerance | Pallet counts outside |
+|---|---|---:|---|
+| Exclusive | Each of 0–11 | 9/12 | 13, 14, 25 |
+| Service only | 0, 3, 8 | 11/12 | 25 |
+| Service only | 1, 2, 4, 5, 6, 7, 9, 10, 11 | 10/12 | 14, 25 |
+
+At 14 pallets, seeds 0, 3 and 8 give 1,440 completions and exactly 265 s,
+compared with the published 1,439 and 265 s. During the eight-hour window
+all three A2 stations spend 100% of their time processing and start 480 jobs
+each. With seed 1 the third station starts 384 jobs and spends 80% of the
+window processing. The first two still start 480 each. Throughput drops to
+1,344 and mean time rises to 285 s. The release times induced by startup
+therefore affect bottleneck utilization beyond warm-up.
+
+At 25 pallets the same 12 service-only starts yield 485.43–486.39 s versus
+the published 396 s. For seed 0 the independent time-balance residual is
+zero at both 14 and 25 pallets. The paper does not identify its initial
+positions. The matching 14-pallet result demonstrates a possible schedule.
+
 ## Independent 25-pallet time accounting
 
 The window-balance script integrates the number of active workpieces over
@@ -198,6 +230,8 @@ python -m argesim_benchmarks run C02 main --kwargs-json '{"num_pallets":12,"cont
 python -m argesim_benchmarks run C02 study > /tmp/c02-pallet-study.json
 cmp /tmp/c02-pallet-study.json docs/C02_PALLET_STUDY_20261120.json
 python -m argesim_benchmarks run C02 study --kwargs-json '{"unit_timing":"service-only"}'
+python -m argesim_benchmarks run C02 study --kwargs-json '{"unit_timing":"service-only","initial_seed":0}'
+python scripts/c02_window_balance.py --pallets 14 --unit-timing service-only --initial-seed 0
 python scripts/c02_window_balance.py --pallets 25
 python scripts/c02_window_balance.py --pallets 25 --unit-timing service-only
 python -m unittest discover -s tests -p '*c02*.py' -v

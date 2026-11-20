@@ -7,6 +7,7 @@ speed. Time advances only to a transport, clearance or service event.
 from __future__ import annotations
 
 import math
+import random
 from collections import deque
 from dataclasses import dataclass, field
 
@@ -85,6 +86,7 @@ class C02Plant:
         *,
         controller: str = "first-eligible",
         unit_timing: str = "exclusive",
+        initial_seed: int | None = None,
         constants: C02Constants | None = None,
         trace: bool = False,
     ) -> None:
@@ -93,6 +95,9 @@ class C02Plant:
             raise ValueError("controller must be 'first-eligible' or 'cyclic-a2'")
         if unit_timing not in ("exclusive", "service-only"):
             raise ValueError("unit_timing must be 'exclusive' or 'service-only'")
+        if initial_seed is not None and type(initial_seed) is not int:
+            raise ValueError("initial_seed must be an integer or None")
+        self.initial_seed = initial_seed
         self.controller = controller
         self.unit_timing = unit_timing
         self.a2_passages = [0, 0]
@@ -170,8 +175,15 @@ class C02Plant:
                         centre = belt.pitch // 2 + j * belt.pitch
                         slots.append((belt, centre))
         placed = min(count, len(slots))
-        for i in range(placed):
-            belt, centre = slots[i * len(slots) // placed]
+        if self.initial_seed is None:
+            selected = [i * len(slots) // placed for i in range(placed)]
+        else:
+            # Sample legal B1 centres without replacement. Ordering is needed
+            # for FIFO insertion, including when all 40 slots are occupied.
+            rng = random.Random(self.initial_seed)
+            selected = sorted(rng.sample(range(len(slots)), placed))
+        for i, slot in enumerate(selected):
+            belt, centre = slots[slot]
             belt.queue.appendleft((_Pallet(i), belt.transit - centre))
             belt.next_entry = max(belt.next_entry, belt.pitch - centre)
         self.feed.queue.extend((_Pallet(i), 0) for i in range(placed, count))
@@ -476,6 +488,7 @@ class C02Plant:
             "num_pallets": self.num_pallets,
             "controller": self.controller,
             "unit_timing": self.unit_timing,
+            "initial_seed": self.initial_seed,
             "throughput": float(self.throughput),
             "average_throughput_time": mean(self.part_ticks),
             "average_to_unload_complete_seconds": mean(self.with_unload_ticks),
@@ -504,6 +517,7 @@ def c02_pallet_study(
     *,
     controller: str = "first-eligible",
     unit_timing: str = "exclusive",
+    initial_seed: int | None = None,
 ) -> dict:
     """Run independently initialized loads; rank productive, fully admitted runs."""
     _positive_count(min_pallets)
@@ -513,7 +527,9 @@ def c02_pallet_study(
     runs = []
     candidates = []
     for n in range(min_pallets, max_pallets + 1):
-        plant = C02Plant(n, controller=controller, unit_timing=unit_timing)
+        plant = C02Plant(
+            n, controller=controller, unit_timing=unit_timing, initial_seed=initial_seed
+        )
         result = plant.run()
         result.pop("deadlock_witness")  # solve_c02(n) exposes the full graph
         runs.append(result)

@@ -10,8 +10,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from argesim_benchmarks.models.c02_transport import C02Plant
 
 
-def window_balance(pallets=25, *, unit_timing="exclusive"):
-    plant = C02Plant(pallets, unit_timing=unit_timing, trace=True)
+def window_balance(pallets=25, *, unit_timing="exclusive", initial_seed=None):
+    plant = C02Plant(
+        pallets, unit_timing=unit_timing, initial_seed=initial_seed, trace=True
+    )
     result = plant.run()
     warm, end = plant.warmup, plant.end
     active = {}
@@ -58,6 +60,7 @@ def window_balance(pallets=25, *, unit_timing="exclusive"):
     return {
         "num_pallets": pallets,
         "unit_timing": unit_timing,
+        "initial_seed": initial_seed,
         "completed": completed,
         "full_cycle_mean_seconds": mean,
         "mean_active_workpieces": area / (end - warm),
@@ -72,7 +75,15 @@ if __name__ == "__main__":
     parser.add_argument(
         "--unit-timing", choices=("exclusive", "service-only"), default="exclusive"
     )
+    parser.add_argument("--initial-seed", type=int)
     args = parser.parse_args()
     print(
-        json.dumps(window_balance(args.pallets, unit_timing=args.unit_timing), indent=2)
+        json.dumps(
+            window_balance(
+                args.pallets,
+                unit_timing=args.unit_timing,
+                initial_seed=args.initial_seed,
+            ),
+            indent=2,
+        )
     )

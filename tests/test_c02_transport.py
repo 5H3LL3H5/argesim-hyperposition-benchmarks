@@ -82,6 +82,43 @@ class C02TransportTests(unittest.TestCase):
                 )
                 self.assertEqual(single["throughput"], 150)
 
+    def test_seeded_initial_placement_uses_distinct_legal_b1_slots(self):
+        def occupied(plant):
+            result = []
+            for station in plant.stations:
+                self.assertFalse(
+                    station.before.queue or station.after.queue or station.pallet
+                )
+                for belt in (station.bypass, station.connector):
+                    if belt is None:
+                        continue
+                    entries = [ready for _, ready in belt.queue]
+                    self.assertEqual(entries, sorted(set(entries)))
+                    for ready in entries:
+                        centre = belt.transit - ready
+                        self.assertTrue(
+                            belt.pitch // 2 <= centre <= belt.transit - belt.pitch // 2
+                        )
+                        self.assertEqual((centre - belt.pitch // 2) % belt.pitch, 0)
+                        result.append((belt.name, centre))
+            return result
+
+        first = occupied(C02Plant(14, initial_seed=0))
+        self.assertEqual(len(first), 14)
+        self.assertEqual(first, occupied(C02Plant(14, initial_seed=0)))
+        self.assertNotEqual(first, occupied(C02Plant(14, initial_seed=1)))
+        full = C02Plant(60, initial_seed=3)
+        self.assertEqual(occupied(full), occupied(C02Plant(60)))
+        self.assertEqual((full.initial_on_b1, len(full.feed.queue)), (40, 20))
+        study = c02_pallet_study(1, 1, initial_seed=0)
+        self.assertEqual(study["runs"][0]["initial_seed"], 0)
+        for invalid in (True, 3.5, "0"):
+            with (
+                self.subTest(seed=invalid),
+                self.assertRaisesRegex(ValueError, "initial_seed"),
+            ):
+                C02Plant(14, initial_seed=invalid)
+
     def test_two_adjacent_shifters_need_an_exit_before_the_first_move(self):
         for previous, operations in ((3, 1), (7, 15)):
             with self.subTest(previous=previous):

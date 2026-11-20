@@ -195,6 +195,26 @@ class C02PublishedComparisons(unittest.TestCase):
                         r["average_throughput_time"] / mean_time, 1, delta=0.06
                     )
 
+    def test_service_only_with_one_fixed_placement_seed_across_reference_rows(self):
+        for n, (count, mean_time) in self.references.items():
+            with self.subTest(pallets=n):
+                run = solve_c02(n, unit_timing="service-only", initial_seed=0)
+                self.assertEqual(run["initial_seed"], 0)
+                self.assertFalse(run["deadlock"])
+                self.assertEqual(run["pending_admission"], 0)
+                self.assertAlmostEqual(run["throughput"] / count, 1, delta=0.06)
+                if n != 25:
+                    self.assertAlmostEqual(
+                        run["average_throughput_time"] / mean_time, 1, delta=0.06
+                    )
+                if n == 14:
+                    self.assertEqual(run["throughput"], 1440)
+                    self.assertAlmostEqual(run["average_throughput_time"], 265)
+        # A different legal start with the same control and clocks is periodic too.
+        other = solve_c02(14, unit_timing="service-only", initial_seed=1)
+        self.assertEqual(other["throughput"], 1344)
+        self.assertAlmostEqual(other["average_throughput_time"], 285)
+
     @unittest.expectedFailure
     def test_simevents_13_pallets(self):
         self.assert_reference(13)
