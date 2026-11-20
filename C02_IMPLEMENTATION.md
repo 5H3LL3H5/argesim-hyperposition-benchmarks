@@ -117,6 +117,55 @@ printed expression even on the paper's data. The article reports 14. Resolving
 which objective or input data produced that claim requires further source
 material. Shorter studies explicitly report how many eligible loads they score.
 
+## Sensitivity to positioning-unit occupancy
+
+The default `unit_timing="exclusive"` includes the two half-unit journeys in
+the time the positioning unit is occupied. The unit releases after clearance.
+At A2 this gives a minimum headway of 61⅓ s between consecutive starts.
+Figure 2 of Pingel and Pawletta places the A2 processor between transport
+blocks. To quantify the effect of assigning just processing time to that
+server, `unit_timing="service-only"` places the two half-unit travel times on
+the adjoining belts. Slot counts, total forward travel, shifts, service times,
+routing and startup remain the same. The A2 headway becomes 60 s. Both choices
+give the same 191⅔ s single-pallet cycle. This experiment does not reconstruct
+the unpublished SimEvents block parameters.
+
+| Pallets | SimEvents count / mean (s) | Exclusive unit | Service only |
+|---:|---:|---:|---:|
+| 10 | 959 / 285 | 939 / 291.68 | 960 / 285.00 |
+| 13 | 1,298 / 273 | 1,220 / 291.57 | 1,242 / 286.44 |
+| 14 | 1,439 / 265 | 1,331 / 288.05 | 1,344 / 285.00 |
+| 20 | 1,439 / 385 | 1,409 / 393.83 | 1,440 / 384.77 |
+| 25 | 1,439 / 396 | 1,409 / 496.47 | 1,441 / 485.68 |
+| 40 | 1,437 / 787 | 1,411 / 801.20 | 1,441 / 787.62 |
+
+Service-only timing meets both measures in 10 of 12 rows. At 14 pallets both
+measures are outside the band. At 25 only the mean is outside. All 50–60
+pallet runs still reach gridlock. A3 now reevaluates a blocked transfer at the
+actual arrival on A6's input belt. A fixture releases it at tick 30, before
+the next unrelated belt departure at tick 34. This event correction preserves
+all previously archived numerical results for the default 1–60 runs.
+
+## Independent 25-pallet time accounting
+
+The window-balance script integrates the number of active workpieces over
+time, from the start of loading through completed unloading. For the exact
+finite window this area equals the sum of full cycle times of completed
+pieces plus the change in the summed ages of unfinished pieces. The script
+replays load and unload events and checks this identity in integer ticks.
+
+| Unit timing | Mean active pieces | Completed | Full cycle mean (s) | Change in unfinished ages (pallet·s) | Balance residual (pallet·ticks) |
+|---|---:|---:|---:|---:|---:|
+| Exclusive | 25 | 1,409 | 511.467 | −657.00 | 0 |
+| Service only | 25 | 1,441 | 500.684 | −1,485.33 | 0 |
+
+If the SimEvents row used the same part-time clock and all 25 workpieces
+were active throughout the window, its count of 1,439 and mean of 396 s
+would require an age increase of `25 × 28,800 − 1,439 × (396 + 15) =
+128,571` pallet·s. The paper does not give the boundary ages or the event
+trace needed to check those assumptions. The independently counted local
+completions and measured mean satisfy the identity exactly.
+
 ## Cyclic A2 comparison
 
 The cyclic policy uses the same transport, A6 rule, startup and observation
@@ -148,6 +197,9 @@ python -m argesim_benchmarks run C02 main --kwargs-json '{"num_pallets":60}'
 python -m argesim_benchmarks run C02 main --kwargs-json '{"num_pallets":12,"controller":"cyclic-a2"}'
 python -m argesim_benchmarks run C02 study > /tmp/c02-pallet-study.json
 cmp /tmp/c02-pallet-study.json docs/C02_PALLET_STUDY_20261120.json
+python -m argesim_benchmarks run C02 study --kwargs-json '{"unit_timing":"service-only"}'
+python scripts/c02_window_balance.py --pallets 25
+python scripts/c02_window_balance.py --pallets 25 --unit-timing service-only
 python -m unittest discover -s tests -p '*c02*.py' -v
 ```
 

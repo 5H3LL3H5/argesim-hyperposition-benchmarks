@@ -30,7 +30,10 @@ records the C20 geometry, controller, test scope and C18 input-data contract.
 The [2026-11-20 corrective report](docs/ARGESIM_CLOSURE_20261120.md) adds C02
 routing fixes, C18 numerical verification and the reproducible C20 study.
 The [C02 implementation report](C02_IMPLEMENTATION.md) gives the subsequent
-1–60 pallet study, deadlock evidence and remaining numerical deviations.
+1–60 pallet study, deadlock evidence, station-timing sensitivity and finite-window
+accounting. The [C18 figure experiment](docs/C18_FIGURE_RECONSTRUCTION.md)
+records the reconstructed signals, two published linear-model correlations
+and the repeated dynamic-network training results.
 
 ## Implemented numerical foundation
 

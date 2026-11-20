@@ -1,10 +1,7 @@
 """ARGESIM C18: nonlinear dynamic identification benchmark.
 
-The original downloadable 100 Hz files have not been recovered by this audit.
-``c18_digitized_data`` reconstructs explicitly labelled 5 Hz
-anchors from Figures 1 and 2 of the official definition and interpolates them
-onto the prescribed 100 Hz grid.  Algorithms also accept any replacement data
-set, keeping data provenance separate from model implementation.
+The original measurement files are unavailable. The explicit figure demo
+reconstructs the four PDF curves on their published 100 Hz time grid.
 """
 
 from __future__ import annotations
@@ -12,12 +9,13 @@ from __future__ import annotations
 import csv
 import hashlib
 import io
-import itertools
 import json
 import math
 import random
 from collections.abc import Sequence
 from dataclasses import dataclass
+from functools import lru_cache
+from importlib.resources import files
 from pathlib import Path
 
 C18_PUBLISHED_TRANSFER = (1.586, -0.5985, 0.5289, -0.5206)
@@ -38,69 +36,7 @@ C18_PUBLISHED_ERROR_TRENDS = {
     "dynamic_ann_validation": -0.178,
 }
 
-# (force, thickening), sampled from the vector curves at 0.2 s.  Values are
-# normalized exactly as the plots; they are evidence anchors, not a claim that
-# the unavailable original measurement files have been recovered.
-_TRAIN_FORCE = (
-    0.1, 0.6455, 0.3, 0.5121, 0.2485, 0.6, 0.7606, 0.5788, 0.697,
-    0.3636, 0.8606, 0.5152, 0.1667, 0.5242, 0.8455, 0.8515, 0.5061,
-    0.197, 0.3424, 0.7091, 0.803, 0.9152, 0.9242, 0.9455, 0.5606,
-    0.297, 0.1727, 0.1212, 0.0879, 0.0727, 0.2818, 0.8, 0.8273,
-    0.4788, 0.1909, 0.2636, 0.7212, 0.6364, 0.3848, 0.1818, 0.1273,
-    0.1212, 0.6727, 0.5576, 0.697, 0.6242, 0.7576, 0.7636, 0.8485,
-    0.9152, 0.9515, 0.9182, 0.5485, 0.297, 0.2061, 0.1485, 0.1152,
-    0.0909, 0.0788, 0.0667, 0.3606, 0.6182, 0.6061, 0.4939, 0.7152,
-    0.8, 0.6758, 0.5576, 0.3303, 0.2909, 0.4636, 0.4818, 0.7727,
-    0.7879, 0.7818, 0.8364, 0.8212, 0.8576, 0.9, 0.9121, 0.6909,
-    0.6455, 0.3909, 0.2818, 0.2, 0.1485, 0.1212, 0.097, 0.0848,
-    0.0727, 0.0667, 0.0606, 0.0545, 0.0485, 0.0485, 0.0424, 0.0424,
-    0.0424, 0.0424, 0.0364, 0.0364,
-)
-_TRAIN_THICKENING = (
-    0.1667, 0.6909, 0.4848, 0.5758, 0.4515, 0.703, 0.797, 0.7606,
-    0.8061, 0.6212, 0.8788, 0.7485, 0.4515, 0.6606, 0.8697, 0.903,
-    0.7606, 0.503, 0.5576, 0.8121, 0.8727, 0.9394, 0.9455, 0.9758,
-    0.8212, 0.6364, 0.4939, 0.397, 0.3455, 0.2909, 0.4727, 0.8697,
-    0.9273, 0.7606, 0.503, 0.5091, 0.8545, 0.8152, 0.7, 0.5061,
-    0.4182, 0.3727, 0.7939, 0.7818, 0.8485, 0.8273, 0.9, 0.9091,
-    0.9394, 0.9636, 0.9758, 0.9182, 0.8606, 0.6788, 0.5879, 0.497,
-    0.4333, 0.3848, 0.3485, 0.3212, 0.5697, 0.8303, 0.8212, 0.7545,
-    0.8848, 0.9152, 0.8848, 0.8455, 0.703, 0.6121, 0.7576, 0.7455,
-    0.897, 0.9364, 0.9394, 0.9576, 0.9576, 0.9636, 0.9818, 0.9576,
-    0.9333, 0.9212, 0.7879, 0.6879, 0.5909, 0.5212, 0.4636, 0.4242,
-    0.3848, 0.3545, 0.3333, 0.3212, 0.297, 0.2848, 0.2667, 0.2545,
-    0.2485, 0.2394, 0.2303, 0.2242, 0.2182,
-)
-_VALID_FORCE = (
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    0.0303, 0.3667, 0.3303, 0.6848, 0.2364, 0.5939, 0.5, 0.7576,
-    0.7515, 0.7061, 0.4697, 0.8212, 0.603, 0.3303, 0.4485, 0.7848,
-    0.8303, 0.6758, 0.3545, 0.4152, 0.703, 0.7667, 0.903, 0.9576,
-    0.9455, 0.6424, 0.3576, 0.2424, 0.1879, 0.1515, 0.1152, 0.4939,
-    0.8061, 0.7273, 0.3727, 0.2333, 0.4545, 0.6455, 0.6424, 0.3848,
-    0.2303, 0.1697, 0.3242, 0.6758, 0.6727, 0.6758, 0.7485, 0.703,
-    0.7545, 0.8364, 0.8909, 0.9182, 0.8939, 0.6121, 0.3848, 0.2727,
-    0.2242, 0.1727, 0.1455, 0.1212, 0.1, 0.4121, 0.5636, 0.5758,
-    0.4212, 0.697, 0.7545, 0.6909, 0.6485, 0.4152, 0.3485, 0.5333,
-    0.4545, 0.7212, 0.7879, 0.7667, 0.7576, 0.7909, 0.7364, 0.8152,
-    0.8545, 0.8303, 0.7394, 0.6273, 0.4303, 0.3273, 0.2455, 0.197,
-    0.16,
-)
-_VALID_THICKENING = (
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    0.0485, 0.5758, 0.4273, 0.7697, 0.503, 0.7485, 0.6727, 0.8394,
-    0.8727, 0.8303, 0.7636, 0.8848, 0.8364, 0.6758, 0.6939, 0.8727,
-    0.9212, 0.8848, 0.7061, 0.6879, 0.8545, 0.8879, 0.9424, 0.9758,
-    0.9348, 0.8939, 0.7394, 0.6303, 0.5697, 0.5, 0.4364, 0.7152,
-    0.903, 0.9091, 0.7303, 0.6091, 0.703, 0.8606, 0.8697, 0.7394,
-    0.6152, 0.5333, 0.6303, 0.8606, 0.8697, 0.8848, 0.9061, 0.9061,
-    0.9212, 0.9455, 0.9727, 0.9495, 0.9263, 0.903, 0.7818, 0.6909,
-    0.6333, 0.5758, 0.5212, 0.4818, 0.4455, 0.6879, 0.8364, 0.8485,
-    0.7636, 0.8879, 0.9182, 0.9121, 0.9, 0.7909, 0.703, 0.8273,
-    0.7848, 0.903, 0.9455, 0.9455, 0.9515, 0.9515, 0.9455, 0.9636,
-    0.9818, 0.9818, 0.9636, 0.9303, 0.8364, 0.7576, 0.6848, 0.6212,
-    0.5697,
-)
+C18_FIGURE_PDF_SHA256 = "af31e3a2c385d498529c89482f20764b8629f42e353b25a7017f0bd3d7507886"
 
 
 @dataclass(frozen=True)
@@ -249,6 +185,12 @@ class C18Metrics:
 
 
 @dataclass(frozen=True)
+class C18DynamicTrial:
+    seed: int
+    training_free_run_rmse: float
+
+
+@dataclass(frozen=True)
 class C18Tasks:
     training_data: C18DataEvidence
     validation_data: C18DataEvidence
@@ -267,37 +209,53 @@ class C18Tasks:
     dynamic_validation: tuple[float, ...]
     dynamic_training_one_step: tuple[float, ...]
     dynamic_validation_one_step: tuple[float, ...]
+    dynamic_trials: tuple[C18DynamicTrial, ...] = ()
+    dynamic_selected_seed: int = 18
+    first_scored_sample: int = 2
 
 
-def _interpolate_anchors(values: Sequence[float], output_hz: int = 100) -> tuple[float, ...]:
-    if isinstance(output_hz, bool) or not isinstance(output_hz, int) or output_hz <= 0 or output_hz % 5:
-        raise ValueError("output_hz must be an integer multiple of 5")
-    factor = output_hz // 5
-    result = []
-    for left, right in itertools.pairwise(values):
-        result.extend(left + (right - left) * index / factor for index in range(factor))
-    result.append(float(values[-1]))
-    return tuple(result)
+@lru_cache(maxsize=1)
+def _figure_curves() -> tuple[tuple[float, ...], ...]:
+    path = (
+        files("argesim_benchmarks").joinpath("data").joinpath("c18_figure_traces.csv")
+    )
+    with path.open("r", encoding="ascii", newline="") as source:
+        reader = csv.reader(source)
+        next(reader)  # time, training thickening/force, validation thickening/force
+        rows = [tuple(map(float, row[1:])) for row in reader]
+    return tuple(zip(*rows, strict=True))
 
 
 def c18_digitized_data(*, sampling_hz: int = 100) -> tuple[C18DataSet, C18DataSet]:
-    """Return training/validation data reconstructed from official figures."""
+    """Sample the published vector traces over their actual span, 0..19.99 s."""
+    if type(sampling_hz) is not int or sampling_hz <= 0 or sampling_hz % 5:
+        raise ValueError("sampling_hz must be a positive integer multiple of 5")
 
-    training = C18DataSet(
-        _interpolate_anchors(_TRAIN_THICKENING, sampling_hz),
-        _interpolate_anchors(_TRAIN_FORCE, sampling_hz),
-        float(sampling_hz),
-        "digitized official C18 Figure 1 (5 Hz anchors, interpolated)",
-        "digitized",
-    )
-    validation = C18DataSet(
-        _interpolate_anchors(_VALID_THICKENING, sampling_hz),
-        _interpolate_anchors(_VALID_FORCE, sampling_hz),
-        float(sampling_hz),
-        "digitized official C18 Figure 2 (5 Hz anchors, interpolated)",
-        "digitized",
-    )
-    return training, validation
+    def resample(curve):
+        if sampling_hz == 100:
+            return curve
+        result = []
+        for i in range((len(curve) - 1) * sampling_hz // 100 + 1):
+            left, remainder = divmod(i * 100, sampling_hz)
+            value = curve[left]
+            if remainder:
+                value += (curve[left + 1] - value) * remainder / sampling_hz
+            result.append(value)
+        return tuple(result)
+
+    curves = _figure_curves()
+
+    def dataset(start, figure):
+        return C18DataSet(
+            resample(curves[start]),
+            resample(curves[start + 1]),
+            float(sampling_hz),
+            f"digitized official C18 Figure {figure}, PDF vector traces on a 100 Hz grid",
+            "digitized",
+            C18_FIGURE_PDF_SHA256,
+        )
+
+    return dataset(0, 1), dataset(2, 2)
 
 
 def _least_squares(rows: list[tuple[float, ...]], target: Sequence[float],
@@ -384,13 +342,22 @@ def c18_correlation(left: Sequence[float], right: Sequence[float]) -> float:
         raise ValueError("correlation signals must have common length >= 2")
     if not all(math.isfinite(value) for signal in (left, right) for value in signal):
         raise ValueError("correlation signals must be finite")
-    left_mean = sum(left) / len(left)
-    right_mean = sum(right) / len(right)
-    covariance = sum((a - left_mean) * (b - right_mean) for a, b in zip(left, right))
-    left_energy = sum((value - left_mean) ** 2 for value in left)
-    right_energy = sum((value - right_mean) ** 2 for value in right)
-    denominator = math.sqrt(left_energy * right_energy)
-    return 0.0 if denominator == 0.0 else covariance / denominator
+
+    def centered_unit(signal):
+        # Power-of-two scaling before subtraction handles large opposite
+        # signs. Centering relative to an observation preserves small spreads.
+        exponent = math.frexp(max(map(abs, signal)))[1]
+        origin = math.ldexp(signal[0], -exponent)
+        offsets = [math.ldexp(x, -exponent) - origin for x in signal]
+        mean = math.fsum(offsets) / len(offsets)
+        centered = [x - mean for x in offsets]
+        norm = math.hypot(*centered)
+        return [x / norm for x in centered] if norm else []
+
+    x, y = centered_unit(left), centered_unit(right)
+    if not x or not y:
+        return 0.0
+    return max(-1.0, min(1.0, math.fsum(a * b for a, b in zip(x, y))))
 
 
 def c18_error_trend(
@@ -431,16 +398,16 @@ def _c18_metrics(
     validation_prediction: Sequence[float],
 ) -> C18Metrics:
     return C18Metrics(
-        c18_correlation(training.force, training_prediction),
-        c18_correlation(validation.force, validation_prediction),
+        c18_correlation(training.force[2:], training_prediction[2:]),
+        c18_correlation(validation.force[2:], validation_prediction[2:]),
         c18_error_trend(
-            training.force,
-            training_prediction,
+            training.force[2:],
+            training_prediction[2:],
             sampling_hz=training.sampling_hz,
         ),
         c18_error_trend(
-            validation.force,
-            validation_prediction,
+            validation.force[2:],
+            validation_prediction[2:],
             sampling_hz=validation.sampling_hz,
         ),
     )
@@ -590,6 +557,7 @@ def run_c18_tasks(
     *,
     epochs: int = 400,
     use_digitized: bool = False,
+    dynamic_seeds: Sequence[int] = (18, 19, 20),
 ) -> C18Tasks:
     """Run the three identification methods on an explicit data pair.
 
@@ -602,7 +570,9 @@ def run_c18_tasks(
             raise ValueError("use_digitized cannot be combined with supplied C18 data")
         training, validation = c18_digitized_data()
     elif training is None or validation is None:
-        raise ValueError("C18 requires both training and validation data; use_digitized=True selects only the reconstruction demo")
+        raise ValueError(
+            "C18 requires both training and validation data; use_digitized=True selects only the reconstruction demo"
+        )
     if isinstance(training, (str, Path)):
         training = load_c18_csv(training)
     if isinstance(validation, (str, Path)):
@@ -611,8 +581,24 @@ def run_c18_tasks(
         raise TypeError("C18 inputs must be C18DataSet instances or CSV paths")
     if training.sampling_hz != validation.sampling_hz:
         raise ValueError("C18 training and validation sampling rates must match")
-    if (training.kind == "digitized" or validation.kind == "digitized") and training.kind != validation.kind:
+    if (
+        training.kind == "digitized" or validation.kind == "digitized"
+    ) and training.kind != validation.kind:
         raise ValueError("C18 digitized data cannot be mixed with another data source")
+    if (
+        training.thickening == validation.thickening
+        and training.force == validation.force
+    ):
+        raise ValueError("C18 validation must use a distinct recording from training")
+    seeds = tuple(dynamic_seeds)
+    if (
+        not seeds
+        or any(type(seed) is not int for seed in seeds)
+        or len(set(seeds)) != len(seeds)
+    ):
+        raise ValueError(
+            "dynamic_seeds must contain distinct integers and cannot be empty"
+        )
     linear_model = fit_c18_linear(training)
     linear_training = predict_c18_linear(linear_model, training)
     linear_validation = predict_c18_linear(linear_model, validation)
@@ -625,23 +611,38 @@ def run_c18_tasks(
         _parallel_features(training), residual, hidden=7, epochs=epochs
     )
     parallel_training = tuple(
-        base if index < 2 else base + parallel_model.predict_one(
-            (training.thickening[index],)
-        )
+        base
+        if index < 2
+        else base + parallel_model.predict_one((training.thickening[index],))
         for index, base in enumerate(linear_training)
     )
     parallel_validation = tuple(
-        base if index < 2 else base + parallel_model.predict_one(
-            (validation.thickening[index],)
-        )
+        base
+        if index < 2
+        else base + parallel_model.predict_one((validation.thickening[index],))
         for index, base in enumerate(linear_validation)
     )
 
-    dynamic_model = fit_c18_mlp(
-        _dynamic_features(training), training.force[2:], hidden=10, epochs=epochs
-    )
+    # Task C repeats training from independent starts. Select on a training
+    # rollout with feedback, excluding the two measured initialization values.
+    features = _dynamic_features(training)
+    targets = training.force[2:]
+    trials = []
+    best_score = math.inf
+    for seed in seeds:
+        candidate = fit_c18_mlp(features, targets, hidden=10, epochs=epochs, seed=seed)
+        rollout = _predict_dynamic(candidate, training)
+        score = math.hypot(*(a - b for a, b in zip(targets, rollout[2:]))) / math.sqrt(
+            len(targets)
+        )
+        if not math.isfinite(score):
+            raise ValueError(f"non-finite C18 training rollout for seed {seed}")
+        trials.append(C18DynamicTrial(seed, score))
+        if score < best_score:
+            best_score, selected_seed = score, seed
+            dynamic_model, dynamic_training = candidate, rollout
     dynamic_training_one_step = training.force[:2] + tuple(
-        dynamic_model.predict_one(row) for row in _dynamic_features(training)
+        dynamic_model.predict_one(row) for row in features
     )
     dynamic_validation_one_step = validation.force[:2] + tuple(
         dynamic_model.predict_one(row) for row in _dynamic_features(validation)
@@ -649,7 +650,6 @@ def run_c18_tasks(
     # Task C is a true simulation with delayed network outputs fed back.  Keep
     # the teacher-forced one-step metric separate so it cannot be mistaken for
     # that harder validation problem.
-    dynamic_training = _predict_dynamic(dynamic_model, training)
     dynamic_validation = _predict_dynamic(dynamic_model, validation)
     return C18Tasks(
         training_data=_data_evidence(training),
@@ -657,9 +657,7 @@ def run_c18_tasks(
         linear_model=linear_model,
         parallel_model=parallel_model,
         dynamic_model=dynamic_model,
-        linear=_c18_metrics(
-            training, validation, linear_training, linear_validation
-        ),
+        linear=_c18_metrics(training, validation, linear_training, linear_validation),
         parallel_ann=_c18_metrics(
             training, validation, parallel_training, parallel_validation
         ),
@@ -680,4 +678,6 @@ def run_c18_tasks(
         dynamic_validation=dynamic_validation,
         dynamic_training_one_step=dynamic_training_one_step,
         dynamic_validation_one_step=dynamic_validation_one_step,
+        dynamic_trials=tuple(trials),
+        dynamic_selected_seed=selected_seed,
     )

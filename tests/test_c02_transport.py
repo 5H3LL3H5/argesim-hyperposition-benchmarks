@@ -53,6 +53,35 @@ class C02TransportTests(unittest.TestCase):
         self.assertIsNone(early["average_throughput_time"])
         self.assertFalse(early["deadlock"])
 
+    def test_service_only_changes_headway_without_removing_travel_or_adding_slots(self):
+        for timing, headway in (("exclusive", 1840), ("service-only", 1800)):
+            with self.subTest(unit_timing=timing):
+                c = C02Constants(warmup_minutes=0, end_minutes=2)
+                plant = C02Plant(2, constants=c, unit_timing=timing, trace=True)
+                for station in plant.stations:
+                    for belt in (station.bypass, station.connector):
+                        if belt is not None:
+                            belt.queue.clear()
+                            belt.next_entry = 0
+                a2 = plant.stations[1]
+                self.assertEqual((a2.before.capacity, a2.after.capacity), (2, 1))
+                a2.before.queue.extend(
+                    [(_Pallet(0, loaded_at=0), 0), (_Pallet(1, loaded_at=0), 36)]
+                )
+                plant.run()
+                starts = [
+                    e["tick"]
+                    for e in plant.trace
+                    if e["event"] == "work" and e["station"] == a2.name
+                ]
+                self.assertEqual(len(starts), 2)
+                self.assertEqual(starts[1] - starts[0], headway)
+                single = C02Plant(1, unit_timing=timing).run()
+                self.assertAlmostEqual(
+                    single["average_including_handling_seconds"], 191 + 2 / 3
+                )
+                self.assertEqual(single["throughput"], 150)
+
     def test_two_adjacent_shifters_need_an_exit_before_the_first_move(self):
         for previous, operations in ((3, 1), (7, 15)):
             with self.subTest(previous=previous):
@@ -114,6 +143,30 @@ class C02TransportTests(unittest.TestCase):
         a6.due = plant.now
         a6.after.reserve(_Pallet(102), arrival=1)
         self.assertFalse(plant._takes_branch(part, 4))
+
+    def test_a6_input_arrival_wakes_a_blocked_a3_transfer(self):
+        plant = short_plant(7, 0.1, trace=True)
+        for station in plant.stations:
+            for belt in (station.bypass, station.connector):
+                if belt is not None:
+                    belt.queue.clear()
+                    belt.next_entry = 0
+        a3, a6 = plant.stations[4], plant.stations[7]
+        # All four bypass slots are occupied. The first becomes free at tick 34.
+        for identifier, ready in enumerate((34, 70, 106, 142)):
+            a3.bypass.queue.append((_Pallet(identifier), ready))
+        waiting = _Pallet(4, loaded_at=0, operations=1)
+        plant.stations[3].after.queue.append((waiting, 0))
+        a6.pallet, a6.phase, a6.due = _Pallet(5, loaded_at=0), "work", 300
+        a6.before.reserve(_Pallet(6, loaded_at=0), arrival=30)
+        a6.sx_free = 30
+        plant.run()
+        starts = [
+            (e["tick"], e["destination"])
+            for e in plant.trace
+            if e["event"] == "transfer" and e["pallet"] == waiting.identifier
+        ]
+        self.assertEqual(starts, [(30, "A3.pre")])
 
     def test_cyclic_a2_counts_committed_passages_including_bypasses(self):
         for index, period in ((1, 3), (2, 2)):
@@ -284,6 +337,8 @@ class C02TransportTests(unittest.TestCase):
                 c02_pallet_study(*bounds)
         with self.assertRaises(ValueError):
             c02_pallet_study(1, 1, controller="unknown")
+        with self.assertRaisesRegex(ValueError, "unit_timing"):
+            c02_pallet_study(1, 1, unit_timing="unknown")
         self.assertEqual(
             c02_pallet_study(1, 1, controller="cyclic-a2")["runs"][0]["controller"],
             "cyclic-a2",

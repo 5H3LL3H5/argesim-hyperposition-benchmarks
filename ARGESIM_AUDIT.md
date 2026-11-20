@@ -1,5 +1,19 @@
 # ARGESIM implementation audit
 
+## C02 timing and C18 published curves, 2026-11-20
+
+C02 now wakes A3 on physical arrival at the A6 input. The exclusive-unit
+experiment reproduces all 60 archived numerical rows. Assigning approach and
+clearance to the adjoining transport gives 10 of 12 SimEvents rows within
+the same 6% band. The independent 25-pallet window balance closes exactly
+under both assumptions. See the [C02 comparisons](C02_IMPLEMENTATION.md).
+
+C18's digitization now recovers four 2,000-sample curves. The published
+linear coefficients give 0.95347/0.94231 training/validation correlation.
+Task C repeats training, ranks candidates on training rollouts and evaluates
+the selected model on the second recording. The original measurement files
+remain outstanding. See the [C18 evidence](docs/C18_FIGURE_RECONSTRUCTION.md).
+
 ## C02 finite transport and pallet study, 2026-11-20
 
 The registered C02 solver runs the 1–60 pallet study with finite belts and
@@ -109,7 +123,7 @@ references listed below, not universal correctness.
 | C04 | The original open-ended comparison asks for successive refinements: actual dirty/clean chopstick state, cleaning, neighbour request tokens and conspiracy/starvation experiments. Ordered atomic fork acquisition is not the cleaning process. |
 | C05 | Sampled y1(t) output and the requested relative-accuracy study across numerical solver settings. The exact event oracle is useful but does not perform that solver experiment. The definition's printed c1=2.7e-6 conflicts with its stiff example; c1=2.7e6 is retained consistently with the published Maple solution and reference events. |
 | C06 | Individual doctor identity, service completion and exchange scheduling. Alternation gives equal counts of service starts, which is not equivalent to two servers with different service durations. |
-| C18 | Original measured 100 Hz identification/validation data, or an explicitly agreed substitute task. Interpolated 5 Hz figure digitizations cannot validate the original data experiment. |
+| C18 | Original measured 100 Hz identification/validation data, or an explicitly agreed substitute task. The published-figure reconstruction supports a separate reproducible comparison. |
 | C20 | A validated transport topology, junction/buffer occupancy and propagation of downstream blocking. Entry headway in a reduced two-ring abstraction is insufficient evidence for the complete physical conveyor model. |
 
 ### Independent numerical spot checks

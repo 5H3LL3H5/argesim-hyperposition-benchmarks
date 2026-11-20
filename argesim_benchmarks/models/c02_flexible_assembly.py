@@ -793,13 +793,20 @@ def solve_c02_legacy(num_pallets: int) -> dict[str, float | None]:
     }
 
 
-def solve_c02(num_pallets: int, *, controller: str = "first-eligible") -> dict:
+def solve_c02(
+    num_pallets: int,
+    *,
+    controller: str = "first-eligible",
+    unit_timing: str = "exclusive",
+) -> dict:
     """Run the standard 120-to-600-minute C02 experiment for one pallet count.
 
     The mean part time spans completion of loading to the start of unloading.
     Also report means through completed unloading and with both A1 handling
     operations. Means are None when no part completes in the counting window.
+    The optional service-only timing assigns approach and clearance to the
+    adjoining conveyors to quantify sensitivity to processor occupancy.
     """
     from .c02_transport import C02Plant
 
-    return C02Plant(num_pallets, controller=controller).run()
+    return C02Plant(num_pallets, controller=controller, unit_timing=unit_timing).run()
