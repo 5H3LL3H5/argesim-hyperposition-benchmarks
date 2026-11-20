@@ -50,24 +50,11 @@ class C02Tests(unittest.TestCase):
         self.assertEqual(station.occupancy, config.buffer_capacity)
         self.assertEqual(len(station.reserved_admissions), config.buffer_capacity - 1)
 
-    @unittest.expectedFailure
-    def test_ten_pallet_case_has_known_published_reference_mismatch(self):
-        # Historical proximity check against SNE 21(3-4), 2011, Table 2.
-        # Correct geometry exposes a >6% mismatch for 10 pallets. Keep the
-        # reference threshold unchanged and the failure explicit until the
-        # missing blocking/merging model is implemented; do not recalibrate
-        # physical lengths or operation times to fit this table.
-        result = solve_c02(10)
-        self.assertIsNone(result["deadlock"])
-        self.assertAlmostEqual(result["throughput"] / 959.0, 1.0, delta=0.06)
-        self.assertAlmostEqual(
-            result["average_throughput_time"] / 285.0, 1.0, delta=0.06
-        )
-
     def test_parameter_study_tracks_published_reference(self):
-        # Keep the other reference cases active: the known ten-pallet mismatch
-        # must not hide regressions in the currently matching cases.
+        # Pingel & Pawletta (2011), Table 2. The original 6% band also
+        # applies to the former ten-pallet expected failure.
         reference = {
+            10: (959.0, 285.0),
             14: (1439.0, 265.0),
             20: (1439.0, 385.0),
             40: (1437.0, 787.0),
@@ -75,14 +62,13 @@ class C02Tests(unittest.TestCase):
         for num_pallets, (throughput, transit_time) in reference.items():
             with self.subTest(num_pallets=num_pallets):
                 result = solve_c02(num_pallets)
-                self.assertIsNone(result["deadlock"])
+                self.assertIs(result["deadlock"], False)
+                self.assertEqual(result["pending_admission"], 0)
                 self.assertAlmostEqual(
                     result["throughput"] / throughput, 1.0, delta=0.06
                 )
                 self.assertAlmostEqual(
-                    result["average_throughput_time"] / transit_time,
-                    1.0,
-                    delta=0.06,
+                    result["average_throughput_time"] / transit_time, 1.0, delta=0.06
                 )
 
     def test_all_shifts_and_transport_lengths_follow_the_clarification(self):
@@ -132,18 +118,28 @@ class C02Tests(unittest.TestCase):
         self.assertAlmostEqual(durations[0], 2.0 + 2.0 / 0.3 + 7.5 + 2.0)
         self.assertAlmostEqual(durations[1] - durations[0], 7.5)
 
-    def test_unimplemented_deadlock_is_not_returned_as_simulated_evidence(self):
-        # Keep execution errors outside the expected-failure reference test.
-        partial = solve_c02(10)
-        self.assertIsNone(partial["deadlock"])
-        self.assertGreater(partial["throughput"], 0)
-        self.assertTrue(math.isfinite(partial["average_throughput_time"]))
-        for num_pallets in (50, 60):
-            with (
-                self.subTest(num_pallets=num_pallets),
-                self.assertRaisesRegex(NotImplementedError, "deadlock detection"),
-            ):
-                solve_c02(num_pallets)
+    def test_high_load_deadlock_has_a_closed_resource_wait_cycle(self):
+        for n in (50, 60):
+            with self.subTest(pallets=n):
+                result = solve_c02(n)
+                self.assertIs(result["deadlock"], True)
+                self.assertEqual(result["pending_admission"], 0)
+                self.assertLess(
+                    result["fully_admitted_at_seconds"], result["stopped_at_seconds"]
+                )
+                self.assertLess(result["stopped_at_seconds"], 7200)
+                self.assertEqual(result["throughput"], 0)
+                self.assertIsNone(result["average_throughput_time"])
+                blocked = result["deadlock_witness"]
+                inventory = blocked["occupied_capacity"]
+                self.assertEqual(sum(used for used, _ in inventory.values()), n)
+                waits = blocked["waits_for"]
+                self.assertEqual(set(waits), set(inventory))
+                for destinations in waits.values():
+                    self.assertTrue(destinations)
+                    for destination in destinations:
+                        used, capacity = inventory[destination]
+                        self.assertEqual(used, capacity)
 
     def test_invalid_pallet_counts_are_rejected(self):
         for value in (0, -1, 2.5, True):

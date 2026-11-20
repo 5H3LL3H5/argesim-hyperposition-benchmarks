@@ -1,7 +1,7 @@
 """ARGESIM C02: Flexible Assembly System.
 
-This is a partial DEVS transport abstraction, not a conformant C02 solution.
-It does not model finite B1 storage, physical merge blocking or deadlocks.
+The public solver uses the finite conveyor plant. The earlier DEVS delay blocks
+and solve_c02_legacy remain available to reproduce historical results.
 """
 
 from __future__ import annotations
@@ -656,7 +656,7 @@ def _station_configs(constants: C02Constants) -> tuple[StationConfig, ...]:
     )
 
 
-def solve_c02(num_pallets: int) -> dict[str, float | None]:
+def solve_c02_legacy(num_pallets: int) -> dict[str, float | None]:
     """Run the partial C02 transport abstraction, not a validated plant model.
 
     Belt blocking and merge contention are not implemented. ``deadlock`` is
@@ -791,3 +791,15 @@ def solve_c02(num_pallets: int) -> dict[str, float | None]:
         "average_throughput_time": avg_throughput_time,
         "deadlock": None,
     }
+
+
+def solve_c02(num_pallets: int) -> dict:
+    """Run the standard 120-to-600-minute C02 experiment for one pallet count.
+
+    The mean part time spans completion of loading to the start of unloading.
+    Also report means through completed unloading and with both A1 handling
+    operations. Means are None when no part completes in the counting window.
+    """
+    from .c02_transport import C02Plant
+
+    return C02Plant(num_pallets).run()

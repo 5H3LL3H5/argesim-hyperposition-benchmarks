@@ -1,5 +1,13 @@
 # ARGESIM implementation audit
 
+## C02 finite transport and pallet study, 2026-11-20
+
+The registered C02 solver now runs 1–60 pallets with finite belts, exclusive
+shifters and an atomic handoff across each gapless pair. The original 6%
+checks at 10/14/20/40 pass. At 50–60 all pallets are admitted before a closed
+resource wait cycle forms. C02 reaches `implemented`. The 25-pallet time and
+the reported optimum differ from the SimEvents study. See the [C02 report](C02_IMPLEMENTATION.md).
+
 ## Routing, numerical and experiment follow-up, 2026-11-20
 
 C02 now prevents assembly of empty pallets, interleaving A2 with an unfinished
