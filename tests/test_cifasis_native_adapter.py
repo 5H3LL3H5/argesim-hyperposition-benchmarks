@@ -425,6 +425,14 @@ class CifasisAnalyticAssessmentTests(unittest.TestCase):
             ):
                 _analytic_assessment(self.configuration, times, [1.0, 1.0])
 
+    def test_boundary_roundoff_uses_emitted_sample_time(self) -> None:
+        configuration = self.configuration | {"rate": 1e12}
+        result = _analytic_assessment(configuration, [-1e-13], [math.exp(0.1)])
+        self.assertTrue(result["sampled_points_within_requested_tolerance"])
+        configuration["rate"] = 1e16
+        with self.assertRaisesRegex(AdapterError, "analytic reference is not finite"):
+            _analytic_assessment(configuration, [-1e-13], [1.0])
+
     def test_rmse_preserves_large_and_small_finite_errors(self) -> None:
         configuration = self.configuration | {"initial_value": 0.0}
         for error in (1e200, 1e-200):

@@ -379,11 +379,14 @@ def _analytic_assessment(
     time_tolerance = 1e-12 * (stop - start)
     if start - times[0] > time_tolerance or times[-1] - stop > time_tolerance:
         raise AdapterError("trajectory sample is outside the requested time interval")
-    references = [
-        configuration["initial_value"]
-        * math.exp(-configuration["rate"] * max(0.0, time_value - start))
-        for time_value in times
-    ]
+    try:
+        references = [
+            configuration["initial_value"]
+            * math.exp(-configuration["rate"] * (time_value - start))
+            for time_value in times
+        ]
+    except OverflowError as exc:
+        raise AdapterError("analytic reference is not finite") from exc
     absolute_errors = [
         abs(state_value - reference)
         for state_value, reference in zip(values, references)
