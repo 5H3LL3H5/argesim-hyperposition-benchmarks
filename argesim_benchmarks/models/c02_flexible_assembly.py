@@ -798,6 +798,7 @@ def solve_c02(
     *,
     controller: str = "first-eligible",
     unit_timing: str = "exclusive",
+    initial_seed: int | None = None,
 ) -> dict:
     """Run the standard 120-to-600-minute C02 experiment for one pallet count.
 
@@ -806,7 +807,13 @@ def solve_c02(
     operations. Means are None when no part completes in the counting window.
     The optional service-only timing assigns approach and clearance to the
     adjoining conveyors to quantify sensitivity to processor occupancy.
+    An integer initial_seed samples occupied B1 slots without replacement.
     """
     from .c02_transport import C02Plant
 
-    return C02Plant(num_pallets, controller=controller, unit_timing=unit_timing).run()
+    return C02Plant(
+        num_pallets,
+        controller=controller,
+        unit_timing=unit_timing,
+        initial_seed=initial_seed,
+    ).run()
