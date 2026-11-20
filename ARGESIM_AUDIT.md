@@ -1,5 +1,17 @@
 # ARGESIM implementation audit
 
+## C02 initial positions and C18 feedback training, 2026-11-20
+
+With the service-only positioning assumption, three of twelve fixed initial
+seeds give 1,440 completions and 265 s at 14 pallets. Each of those three
+seeds meets 11/12 SimEvents rows. The 25-pallet mean stays outside the 6%
+band for all twelve seeds. [C02 experiments](C02_IMPLEMENTATION.md)
+
+C18 Task C now fits the entire output-feedback trajectory for up to 50 epochs
+per seed. The selected training run gives correlations of 0.99377 on the
+training muscle and 0.92642 on the held-out muscle. The measurement files
+remain unavailable. [C18 experiment](docs/C18_FIGURE_RECONSTRUCTION.md)
+
 ## C02 timing and C18 published curves, 2026-11-20
 
 C02 now wakes A3 on physical arrival at the A6 input. The exclusive-unit

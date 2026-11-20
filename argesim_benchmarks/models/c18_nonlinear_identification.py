@@ -18,6 +18,8 @@ from functools import lru_cache
 from importlib.resources import files
 from pathlib import Path
 
+from ._c18_recurrent import fit_sequence
+
 C18_PUBLISHED_TRANSFER = (1.586, -0.5985, 0.5289, -0.5206)
 C18_PUBLISHED_CORRELATIONS = {
     "linear_training": 0.95,
@@ -148,6 +150,14 @@ class C18LinearModel:
         return self.a1, self.a2, self.b0, self.b1
 
 
+def _standardized_value(value: float, mean: float, scale: float) -> float:
+    delta = value - mean
+    if math.isfinite(delta):
+        return delta / scale
+    # Opposite signs can overflow the subtraction before division by a large scale.
+    return value / scale - mean / scale
+
+
 @dataclass(frozen=True)
 class C18MLP:
     input_mean: tuple[float, ...]
@@ -163,7 +173,7 @@ class C18MLP:
         if len(features) != len(self.input_mean):
             raise ValueError("feature dimension does not match C18MLP")
         normalized = tuple(
-            (float(value) - mean) / scale
+            _standardized_value(float(value), mean, scale)
             for value, mean, scale in zip(features, self.input_mean, self.input_scale)
         )
         hidden = tuple(
@@ -212,6 +222,8 @@ class C18Tasks:
     dynamic_trials: tuple[C18DynamicTrial, ...] = ()
     dynamic_selected_seed: int = 18
     first_scored_sample: int = 2
+    dynamic_fit: str = "one-step"
+    dynamic_epochs: int | None = None
 
 
 @lru_cache(maxsize=1)
@@ -522,6 +534,39 @@ def fit_c18_mlp(
     )
 
 
+def fit_c18_dynamic(data: C18DataSet, *, seed: int = 18, epochs: int = 50) -> C18MLP:
+    """Fit the ten-unit C18 network using its own two delayed outputs."""
+    if type(epochs) is not int or epochs <= 0:
+        raise ValueError("epochs must be a positive integer")
+    if type(seed) is not int:
+        raise TypeError("seed must be an integer")
+
+    def standardize(signal):
+        # Compute moments in scaled units to avoid intermediate overflow.
+        exponent = math.frexp(max(map(abs, signal)))[1]
+        scaled = [math.ldexp(v, -exponent) for v in signal]
+        center = math.fsum(scaled) / len(scaled)
+        spread = math.hypot(*(v - center for v in scaled)) / math.sqrt(len(scaled))
+        mean = math.ldexp(center, exponent)
+        scale = max(math.ldexp(spread, exponent), math.ulp(0.0)) if spread else 1.0
+        return tuple(_standardized_value(v, mean, scale) for v in signal), mean, scale
+
+    inputs, input_mean, input_scale = standardize(data.thickening)
+    targets, force_mean, force_scale = standardize(data.force)
+    parameters = fit_sequence(inputs, targets, hidden=10, epochs=epochs, seed=seed)
+    units = [parameters[i : i + 6] for i in range(0, len(parameters) - 1, 6)]
+    return C18MLP(
+        (force_mean, force_mean, input_mean, input_mean),
+        (force_scale, force_scale, input_scale, input_scale),
+        force_mean,
+        force_scale,
+        tuple(tuple(unit[:4]) for unit in units),
+        tuple(unit[4] for unit in units),
+        tuple(unit[5] for unit in units),
+        parameters[-1],
+    )
+
+
 def _parallel_features(data: C18DataSet) -> tuple[tuple[float, ...], ...]:
     # The published seven-unit static ANN has one input: the current
     # thickening sample.  It learns the residual in parallel with G(z).
@@ -555,16 +600,28 @@ def run_c18_tasks(
     training: C18DataSet | str | Path | None = None,
     validation: C18DataSet | str | Path | None = None,
     *,
-    epochs: int = 400,
+    epochs: int | None = None,
     use_digitized: bool = False,
     dynamic_seeds: Sequence[int] = (18, 19, 20),
+    dynamic_fit: str = "output-feedback",
 ) -> C18Tasks:
     """Run the three identification methods on an explicit data pair.
+
+    Task C defaults to 50 recurrent epochs. An explicit epochs limit applies
+    to both neural networks. The previous one-step fit is selectable.
 
     CSV paths are accepted for CLI use. ``use_digitized=True`` explicitly runs
     the figure reconstruction demo; it does not validate the original measured
     data experiment. Missing one member is never filled with unrelated data.
     """
+    if dynamic_fit not in ("output-feedback", "one-step"):
+        raise ValueError("dynamic_fit must be 'output-feedback' or 'one-step'")
+    if epochs is not None and (type(epochs) is not int or epochs <= 0):
+        raise ValueError("epochs must be a positive integer")
+    parallel_epochs = 400 if epochs is None else epochs
+    dynamic_epochs = (
+        50 if epochs is None and dynamic_fit == "output-feedback" else parallel_epochs
+    )
     if use_digitized:
         if training is not None or validation is not None:
             raise ValueError("use_digitized cannot be combined with supplied C18 data")
@@ -608,7 +665,7 @@ def run_c18_tasks(
         for actual, predicted in zip(training.force[2:], linear_training[2:])
     )
     parallel_model = fit_c18_mlp(
-        _parallel_features(training), residual, hidden=7, epochs=epochs
+        _parallel_features(training), residual, hidden=7, epochs=parallel_epochs
     )
     parallel_training = tuple(
         base
@@ -630,7 +687,12 @@ def run_c18_tasks(
     trials = []
     best_score = math.inf
     for seed in seeds:
-        candidate = fit_c18_mlp(features, targets, hidden=10, epochs=epochs, seed=seed)
+        if dynamic_fit == "output-feedback":
+            candidate = fit_c18_dynamic(training, epochs=dynamic_epochs, seed=seed)
+        else:
+            candidate = fit_c18_mlp(
+                features, targets, hidden=10, epochs=dynamic_epochs, seed=seed
+            )
         rollout = _predict_dynamic(candidate, training)
         score = math.hypot(*(a - b for a, b in zip(targets, rollout[2:]))) / math.sqrt(
             len(targets)
@@ -680,4 +742,6 @@ def run_c18_tasks(
         dynamic_validation_one_step=dynamic_validation_one_step,
         dynamic_trials=tuple(trials),
         dynamic_selected_seed=selected_seed,
+        dynamic_fit=dynamic_fit,
+        dynamic_epochs=dynamic_epochs,
     )
