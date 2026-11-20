@@ -41,12 +41,12 @@ requires an external analytical or published numeric reference. Partial code sta
 
 | ID | Executable scope | Verification evidence |
 |---|---|---|
-| C02 | finite B1/B2 assembly plant, exclusive shifters, parameter study over 1–60 pallets | one-pallet analytical travel, FIFO/merge replay and closed deadlock wait sets. [Reference comparisons](C02_IMPLEMENTATION.md) |
+| C02 | finite B1/B2 assembly plant, exclusive shifters, parameter study over 1–60 pallets | single-pallet cycle, FIFO/merge replay, deadlock wait sets and finite-window accounting. [Reference comparisons](C02_IMPLEMENTATION.md) |
 | C04 | Atomic, unsafe, waiter, cleaning, neighbour-request and put-back policies; dirty-fork delays, request age priority, explicit hoarding/targeted-hold experiments | conservation of every individual horizon, deterministic replay, resource-cycle deadlock/progress tests |
 | C05 | sampled piecewise solution including fast transients, default/62-event Task D, decimal precision studies at the specified accuracies | published event checks; 80-digit reference, independently checked by 90-digit logarithmic event calculations; requested and attained precision reported separately |
 | C09 | I-FC1, I-FC2 and P-FC surfaces; nonlinear tanks; 1 s sampled 60,000 s scenario; reference `change-level` and literal printed difference modes | I-FC final errors below 0.02 mm, <0.06 mm setpoint overshoot and published qualitative disturbance/P-FC behaviour |
 | C17R | identified ODE, hexagonal FHP-I CA, homogeneous random movement, Task-1 sweeps and persistent soft/repeatable hard/spatial interventions | population conservation, lattice/contact equation, seeded replay and shared RK/QSS2 hybrid-event paths |
-| C18 | second-order ARX, seven-unit parallel residual ANN and ten-unit free-running dynamic ANN; complete trajectories and error trends | synthetic coefficient recovery; digitized-figure ARX correlations 0.962/0.942 versus published 0.95/0.94; provenance gap retained |
+| C18 | second-order ARX, static residual ANN and repeated dynamic ANN training with free-run selection | published ARX gives 0.95347/0.94231 on the two digitized curves. [Reconstruction and independent validation results](docs/C18_FIGURE_RECONSTRUCTION.md) |
 | C20 | 284-node/368-track causal layout, 90 buffer slots, 19 located machines, downstream blocking, source/sink/rework, setups, disruptions and Task A–D statistics | all 12 scenarios at 100 orders and OSc3/PSc4 at 5,000 orders; independent geometry and blocking fixtures; no independent full-output validation |
 | C21 | event/dynamic ball studies, pendulum basic/kick studies, and algebraic/interpolated/index-reduced Shockley RLC variants | published pendulum stop/kick values, event contact limits and dynamic-contact samples plus algebraic residual below 1e-8 |
 | CP1 | 1000-run RK4 study, five-pair ODE decomposition and 800-line rope MOL decomposition | serial/parallel bitwise parity; published task-B terminal table |
@@ -79,7 +79,7 @@ requires an external analytical or published numeric reference. Partial code sta
 - The original C18 100 Hz measurements were not recovered by this audit.
   Figure reconstruction requires explicit selection; regular runs require both
   input datasets. CSV import checks sampling and retains hashes/provenance.
-  Interpolated 5 Hz anchors cannot validate the original data experiment.
+  Each published vector trace now has 2,000 reconstructed samples from 0.00 to 19.99 s.
 - C09 and C17R have internal/cross-form or qualitative published checks
   but no archived independent numeric full-output reference, so they remain
   `implemented`.

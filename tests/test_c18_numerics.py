@@ -57,6 +57,8 @@ class C18NumericsTests(unittest.TestCase):
             "linear_model",
             "parallel_model",
             "dynamic_model",
+            "dynamic_trials",
+            "dynamic_selected_seed",
             "linear_validation",
             "parallel_validation",
             "dynamic_validation",
@@ -65,6 +67,50 @@ class C18NumericsTests(unittest.TestCase):
         self.assertNotEqual(
             first.dynamic_validation_one_step, second.dynamic_validation_one_step
         )
+
+    def test_dynamic_restarts_are_selected_by_training_free_run(self):
+        training, validation = known_system(18), known_system(19)
+        seeds = (18, 19, 20)
+        result = run_c18_tasks(training, validation, epochs=2)
+        singles = [
+            run_c18_tasks(training, validation, dynamic_seeds=[s], epochs=2)
+            for s in seeds
+        ]
+        scores = [
+            math.sqrt(
+                sum(
+                    (x - y) ** 2
+                    for x, y in zip(training.force[2:], r.dynamic_training[2:])
+                )
+                / (len(training.force) - 2)
+            )
+            for r in singles
+        ]
+        best = min(range(len(seeds)), key=scores.__getitem__)
+        self.assertEqual(result.dynamic_selected_seed, seeds[best])
+        self.assertEqual(result.dynamic_model, singles[best].dynamic_model)
+        for trial, seed, score in zip(result.dynamic_trials, seeds, scores):
+            self.assertEqual(trial.seed, seed)
+            self.assertAlmostEqual(trial.training_free_run_rmse, score)
+        self.assertEqual(result.first_scored_sample, 2)
+        self.assertAlmostEqual(
+            result.dynamic_ann.validation_correlation,
+            c18_correlation(validation.force[2:], result.dynamic_validation[2:]),
+        )
+        for invalid in ((), (18, 18), (False,), ("18",)):
+            with (
+                self.subTest(seeds=invalid),
+                self.assertRaisesRegex(ValueError, "dynamic_seeds"),
+            ):
+                run_c18_tasks(training, validation, dynamic_seeds=invalid, epochs=1)
+
+    def test_correlation_is_invariant_to_signal_units(self):
+        for exponent in (-1000, -500, 0, 500, 1000):
+            scale = math.ldexp(1.0, exponent)
+            signal = tuple(scale * n for n in (-2, -1, 0, 1, 2))
+            self.assertAlmostEqual(c18_correlation(signal, signal), 1)
+            self.assertAlmostEqual(c18_correlation(signal, (2, 1, 0, -1, -2)), -1)
+        self.assertEqual(c18_correlation((1.0, 1.0), (0.0, 1.0)), 0)
 
     def test_nonfinite_metrics_and_neural_training_inputs_are_rejected(self):
         for bad in (math.nan, math.inf, -math.inf):

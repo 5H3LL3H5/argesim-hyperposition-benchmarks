@@ -22,3 +22,6 @@ typing-extensions = false
 
 [tool.setuptools.packages.find]
 include = ["argesim_benchmarks*", "nsa_devs*"]
+
+[tool.setuptools.package-data]
+argesim_benchmarks = ["data/c18_figure_traces.csv"]

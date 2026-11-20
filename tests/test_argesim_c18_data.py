@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 from argesim_benchmarks.models.c18_nonlinear_identification import (
+    C18_FIGURE_PDF_SHA256,
     C18DataSet,
     c18_digitized_data,
     load_c18_csv,
@@ -56,7 +57,39 @@ class C18DataTests(unittest.TestCase):
             result.training_data.signal_sha256, result.validation_data.signal_sha256
         )
         self.assertEqual(len(result.training_data.signal_sha256), 64)
-        self.assertIsNone(result.training_data.source_sha256)
+        self.assertEqual(result.training_data.source_sha256, C18_FIGURE_PDF_SHA256)
+        self.assertEqual(result.validation_data.source_sha256, C18_FIGURE_PDF_SHA256)
+
+    def test_vector_figure_grid_preserves_endpoints_and_sub_200_ms_structure(self):
+        training, validation = c18_digitized_data()
+        low, _ = c18_digitized_data(sampling_hz=5)
+        double, _ = c18_digitized_data(sampling_hz=200)
+        self.assertEqual(len(low.force), 100)
+        self.assertEqual(low.force, training.force[::20])
+        self.assertEqual(double.force[::2], training.force)
+        self.assertEqual((training.force[0], validation.force[0]), (0.298535, 0.010657))
+        self.assertEqual(
+            (training.force[-1], validation.force[-1]), (0.036499, 0.135793)
+        )
+        linear_midpoint = (training.force[0] + training.force[20]) / 2
+        self.assertGreater(abs(training.force[10] - linear_midpoint), 0.05)
+
+    def test_distinct_filenames_cannot_turn_training_into_validation(self):
+        header = "time_s,thickening,force\n"
+        with tempfile.TemporaryDirectory() as directory:
+            a, b = (
+                Path(directory) / f"{name}.csv" for name in ("training", "validation")
+            )
+            a.write_text(header + "".join(f"{i / 100},{i},{2 * i}\n" for i in range(8)))
+            b.write_text(
+                header
+                + "".join(f"{i / 100:.2f},{i:.1f},{2 * i:.1f}\n" for i in range(8))
+            )
+            self.assertNotEqual(
+                load_c18_csv(a).source_sha256, load_c18_csv(b).source_sha256
+            )
+            with self.assertRaisesRegex(ValueError, "distinct recording"):
+                run_c18_tasks(a, b, epochs=1)
 
     def test_csv_preserves_values_and_checks_byte_identity(self):
         raw = (

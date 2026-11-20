@@ -5,6 +5,7 @@ from argesim_benchmarks.catalog import BenchmarkStatus, benchmark
 from argesim_benchmarks.models.c18_nonlinear_identification import (
     C18_PUBLISHED_TRANSFER,
     C18DataSet,
+    C18LinearModel,
     c18_correlation,
     c18_digitized_data,
     c18_error_trend,
@@ -18,18 +19,28 @@ class C18Tests(unittest.TestCase):
     def test_digitized_provenance_and_published_scale_correlations(self) -> None:
         self.assertEqual(benchmark("C18").status, BenchmarkStatus.SPECIFIED)
         training, validation = c18_digitized_data()
-        self.assertEqual(len(training.force), 2001)
+        self.assertEqual(len(training.force), 2000)
+        self.assertEqual(len(validation.force), 2000)
         self.assertIn("digitized", training.provenance)
         model = fit_c18_linear(training)
         self.assertEqual(C18_PUBLISHED_TRANSFER, (1.586, -0.5985, 0.5289, -0.5206))
-        self.assertGreater(
-            c18_correlation(training.force, predict_c18_linear(model, training)),
-            0.95,
-        )
-        self.assertGreater(
-            c18_correlation(validation.force, predict_c18_linear(model, validation)),
-            0.93,
-        )
+        # Apply the published coefficients without fitting to these curves.
+        published = C18LinearModel(*C18_PUBLISHED_TRANSFER)
+        for data, reference, refitted in (
+            (training, 0.95, 0.9418),
+            (validation, 0.94, 0.9331),
+        ):
+            self.assertEqual(
+                round(
+                    c18_correlation(data.force, predict_c18_linear(published, data)), 2
+                ),
+                reference,
+            )
+            self.assertAlmostEqual(
+                c18_correlation(data.force, predict_c18_linear(model, data)),
+                refitted,
+                delta=0.0001,
+            )
 
     def test_arx_estimator_recovers_known_system(self) -> None:
         rng = random.Random(18)
