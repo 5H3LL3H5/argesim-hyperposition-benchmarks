@@ -13,6 +13,8 @@ from enum import Enum, auto
 
 from nsa_devs import DesScheduler, HyperTime
 
+from ..parallel import ordered_map
+
 
 @dataclass(frozen=True)
 class C16Parameters:
@@ -143,6 +145,10 @@ def initialize_people(parameters: C16Parameters, seed: int | None = None) -> lis
         city_counts[0] -= -diff
 
     for city, count in zip(CITIES, city_counts):
+        dx = max(0.0, -city.x, city.x - parameters.area_width)
+        dy = max(0.0, -city.y, city.y - parameters.area_height)
+        if count and math.hypot(dx, dy) >= city.max_r:
+            raise ValueError(f"population of city {city.name} cannot be placed inside the area")
         for _ in range(count):
             while True:
                 angle = rng.uniform(0, 2 * math.pi)
@@ -261,9 +267,9 @@ class C16Simulation:
         max_days: float,
         tax_rate: float | None = None,
         *,
-        max_events: int = 1_000_000,
+        max_events: int | None = None,
     ) -> int:
-        """Run the event-driven simulation until the specified macro time."""
+        """Run through the horizon, with an optional explicit limit on this call."""
         if tax_rate is None:
             tax_rate = self.parameters.initial_tax_rate
         if isinstance(max_days, bool) or not isinstance(max_days, (int, float)):
@@ -274,6 +280,11 @@ class C16Simulation:
             raise TypeError("tax_rate must be a real number")
         if not math.isfinite(tax_rate) or not 0.0 <= tax_rate <= 1.0:
             raise ValueError("tax_rate must be finite and between zero and one")
+        if max_events is None:
+            # Each person can dine at most once per day, with one weekly close.
+            # Include the current day when resuming after a caller's event limit.
+            days = math.floor(max_days) - math.floor(self.current_time.macro) + 1
+            max_events = max(1_000_000, days * len(self.people) + (days + 6) // 7)
         self._active_tax_rate = tax_rate
         return self.scheduler.run(max_days, max_events=max_events)
 
@@ -395,46 +406,51 @@ class C16Simulation:
         ]
         return tuple(self._closed_new_restaurant_revenues + surviving)
 
+
+def _weekly_restaurant_counts(parameters: C16Parameters, seed: int, weeks: int) -> list[int]:
+    sim = C16Simulation(parameters=parameters, seed=seed)
+    counts = []
+    for week in range(1, weeks + 1):
+        sim.run_until(week * 7)
+        counts.append(len(sim.restaurants))
+    return counts
+
+
+def _year_five_observations(workload: tuple[C16Parameters, int, int]) -> tuple[int, float]:
+    counts = _weekly_restaurant_counts(*workload)
+    following_weeks = counts[5 * 52:]
+    return counts[5 * 52 - 1], sum(following_weeks) / len(following_weeks)
+
+
 def c16_task_a(
     runs: int = 50,
     seed: int = 42,
     *,
     parameters: C16Parameters = _C16_DEFAULT_PARAMETERS,
     years: int = 10,
+    workers: int = 1,
 ) -> dict[str, object]:
-    """Task A: Time Domain Analysis."""
+    """Report the year-five endpoint and subsequent time average over independent runs."""
     if isinstance(runs, bool) or not isinstance(runs, int) or runs <= 0:
         raise ValueError("runs must be a positive integer")
     if isinstance(years, bool) or not isinstance(years, int) or years < 6:
         raise ValueError("Task A requires at least six years to estimate the post-year-5 limit")
     rng = random.Random(seed)
 
-    sim = C16Simulation(parameters=parameters, seed=rng.randint(0, 1000000))
-    time_series = []
-
     total_weeks = years * 52
-    for week in range(total_weeks):
-        sim.run_until((week + 1) * 7)
-        time_series.append(len(sim.restaurants))
-
-    total_avg_after_5_years = 0.0
-
-    for _ in range(runs):
-        sim_run = C16Simulation(parameters=parameters, seed=rng.randint(0, 1000000))
-        run_sum = 0
-        run_count = 0
-        for week in range(total_weeks):
-            sim_run.run_until((week + 1) * 7)
-            if week >= 5 * 52:
-                run_sum += len(sim_run.restaurants)
-                run_count += 1
-        total_avg_after_5_years += (run_sum / run_count)
+    trajectory_seed = rng.randint(0, 1_000_000)
+    workloads = ((parameters, rng.randint(0, 1_000_000), total_weeks) for _ in range(runs))
+    observations = ordered_map(_year_five_observations, workloads, workers=workers, backend="process")
+    year_five_counts = [count for count, _ in observations]
+    time_series = _weekly_restaurant_counts(parameters, trajectory_seed, total_weeks)
 
     return {
         "time_series_1_year": time_series[:52],
         "time_series_5_years": time_series[: 5 * 52],
         "time_series_10_years": time_series,
-        "average_after_5_years": total_avg_after_5_years / runs,
+        "restaurants_at_year_5": year_five_counts,
+        "mean_at_year_5": sum(year_five_counts) / runs,
+        "average_after_5_years": sum(mean for _, mean in observations) / runs,
     }
 
 

@@ -44,13 +44,39 @@ Each policy runs 100 independent days of 250 patients, with seeds 0–99. The co
 | C11 | Robot dynamics, control tasks and numerical residual checks. | Published controller trajectories under matching gains, sampling and initial conditions are outstanding. |
 | C13 | Independent plant checks distinguish the 2006 and revised 2007 damping parameters. | Published Task B/C traces for the revised parameters remain outstanding. |
 | C14 | Midnight demand belongs to the new day. The reported sale-triggered Task A ordering rule is selectable alongside literal daily ordering. All three policies have 100-run comparisons. | Reference implementations disagree on Task A ordering and costs. The default and published variants are identified separately. [Results and sources](../C14_VALIDATION.md) |
-| C16 | Seeded restaurant simulations, policy sweeps and internal economic accounting. | Independent population and financial reference traces for matched policies remain outstanding. |
+| C16 | Task A records the restaurant count at the end of year five in each replication. Tasks B and C can complete their five- and ten-year horizons with the official population. | Published studies use different horizons and definitions of revenue for Tasks B and C. See the C16 comparison below. |
 | C17R | Aggregate conservation and seeded numerical replay. | Independent matched numeric trajectories remain outstanding. |
 | C18 | Published linear model on the digitized training/validation curves gives 0.95347/0.94231. The recurrent model gives 0.99377/0.92642 on separate muscles. | Neither original recording was located in the publisher archives. The recovered figures support a separate reconstruction experiment. [Data provenance and searches](C18_FIGURE_RECONSTRUCTION.md) |
 | C19R | Table 1 parameters, finite-volume source and sink areas, weekday switching and numerical homogeneous profiles. | The 1 m grid retains measurable spatial error at breakthrough and near the treatment disks. See the numerical comparisons below. |
 | C20 | The archived 360 runs complete 1,800,000 orders. All five model/replay file hashes match the archived experiment. Its checkpoint wrapper subsequently changed. | The original three FlexSim order books and matching reservation controller are required for external production-output parity. [Full protocol and replay](ARGESIM_CLOSURE_20261120.md) |
 
+## C16 restaurant count and economic studies
+
+The definition requests 50 independent replications for Task A. AnyLogic and
+Java report the number of restaurants at the end of the fifth year. The
+registered task returns all 50 counts at week 260 and their mean. It also
+returns the previously reported time average over weeks 261–520. The
+exemplar trajectory has a separate seed. Serial and parallel execution use
+the same ordered replication seeds. [Definition](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C16/C16-definition.pdf) · [AnyLogic](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C16/C16-solution-AnyLogic.pdf) · [Java](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C16/C16-solution-Java-OO.pdf)
+
+The former one-million-event budget stopped Task B before the end of year five
+and Task C before the end of year ten. A diner visits at most once per day and
+the financial accounts close once every seven days. C16 uses these bounds to
+size its default event budget for the requested horizon. The explicit
+`max_events` argument still enforces a caller's limit.
+
+For the endpoint comparison, use the reported 50-run variance for each
+publication and the sample variance from the candidate. Accept a difference
+of up to three estimated standard errors of the difference of means plus
+0.005 for rounding. Each side has 50 replications. The reference checker
+reports both comparisons and the candidate counts.
+
+```bash
+python -m argesim_benchmarks run C16 A --kwargs-json '{"workers": 6}' | python scripts/c16_reference_check.py
+```
+
 ## C19R spatial and time accuracy
+
 
 Table 1 of the revised definition gives a pore velocity of `1e-5 m/s`, equivalent to 0.864 m/day. The adjacent prose says about 1.7 m/day. The COMSOL model's settings show `10^(-5)`. The registered model follows Table 1. Its conservative advection flux uses a monotonized central limiter. Treatment rates use the actual disk area in each cell. A subgrid receives source mass only when it contains the origin. Scheduled integration ends a step at every change of treatment mode. [Definition, p. 64](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_16_34/sne.16.34.pdf) · [COMSOL, Fig. 5](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C19/C19R-solution-COMSOL.pdf)
 
