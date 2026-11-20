@@ -101,6 +101,14 @@ orders per run: 360 runs / 1.8 million completed orders. Every run undergoes
 independent metric recomputation; the first replication of each book/scenario
 also undergoes full transport replay (36 complete traces).
 
+All **360 runs / 1,800,000 completed orders** passed. The 36 replay checks
+covered **55,648,862 trace events and 1,263,763 completed transport trips**
+without a violation of the replayed rules. Observed WIP and buffer reservations
+both peaked at 30. Each deterministic PSc1 group had zero makespan IQR across
+its ten replications. The complete per-run metrics, all 36 scenario/book
+summaries and source identities are in
+[C20_EXPERIMENT_20261120.json](C20_EXPERIMENT_20261120.json).
+
 ```sh
 python scripts/c20_experiment.py --workers 6 \
   --checkpoints /tmp/c20-study \
@@ -109,13 +117,33 @@ python benchmarks/benchmark_argesim_c20.py \
   --repeat 1 --warmup 0 --orders 5 --plant PSc1
 ```
 
-Checkpoints pin the source files and protocol; resuming with stale inputs is
-rejected. The report records every run's metrics, deterministic result hash,
+Checkpoints pin the source files, protocol and Python implementation/version;
+resuming with stale inputs or another runtime is rejected. The report records
+every run's metrics, deterministic result hash,
 input-book hash, replay counts and source hashes. Generated books are not
 renamed to the unavailable published OB1000/OB1001/OB1002 files. The published
 FlexSim controller uses reservation scheduling, whereas this repository uses
 rush/due-date dispatch with a 30-part WIP bound. Its numerical table is
 therefore not an exact acceptance oracle for this controller.
+
+The study's recorded source hashes identify the code in commit
+`48dc0b2499ea2a6e45a9298999c1ee2c93063a39`. The subsequent checkpoint-runtime
+guard changes metadata and cache acceptance only; model, replay and statistical
+calculations are unchanged. Numerical result hashes can be reproduced with
+the current runner even though its report/checkpoint fingerprint changes.
+
+## Repository verification
+
+The Python 3.12.14 full suite completed 387 tests: 386 passed and the known C02
+ten-pallet comparison remained an expected failure. The additional checkpoint
+regression passed separately and covers reuse plus rejection after source,
+input or Python-version changes. All 74 smoke tasks passed; smoke is execution
+coverage, not an external scientific oracle. Compile, Ruff, generated status
+checks and whitespace checks also passed. The optional LAPACK probe passed
+6/6 cases with a maximum coefficient difference of `4.663e-15`.
+
+[PR #62](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/pull/62)
+contains the Python 3.10–3.13 CI checks for the final proposed source.
 
 ## Remaining completion criteria
 

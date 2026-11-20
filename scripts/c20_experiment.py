@@ -45,6 +45,13 @@ def encoded(value: object) -> bytes:
     ).encode()
 
 
+def runtime_identity() -> dict[str, str]:
+    return {
+        "implementation": platform.python_implementation(),
+        "python": platform.python_version(),
+    }
+
+
 def run_one(spec: dict, fingerprint: str, checkpoint_dir: str) -> dict:
     path = Path(checkpoint_dir) / (
         f"{spec['order_scenario']}-{spec['plant_scenario']}-"
@@ -53,7 +60,11 @@ def run_one(spec: dict, fingerprint: str, checkpoint_dir: str) -> dict:
     if path.exists():
         with gzip.open(path, "rt") as stream:
             saved = json.load(stream)
-        if saved["fingerprint"] != fingerprint or saved["spec"] != spec:
+        if (
+            saved["fingerprint"] != fingerprint
+            or saved["spec"] != spec
+            or saved.get("runtime") != runtime_identity()
+        ):
             raise ValueError(f"stale checkpoint; choose a new directory: {path}")
         return saved
     started = time.perf_counter()
@@ -76,6 +87,7 @@ def run_one(spec: dict, fingerprint: str, checkpoint_dir: str) -> dict:
     data.pop("orders")
     saved = {
         "fingerprint": fingerprint,
+        "runtime": runtime_identity(),
         "spec": spec,
         "metrics": data,
         "result_sha256": digest,
@@ -122,6 +134,7 @@ def main() -> None:
         parser.error("order-book seeds must be distinct")
     sources = source_hashes()
     protocol = {
+        "runtime": runtime_identity(),
         "order_count": args.orders,
         "replications_per_book": args.replications,
         "book_seeds": args.book_seeds,
