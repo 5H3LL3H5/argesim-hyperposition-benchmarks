@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "model": {
+    "type": "scalar-linear-decay",
+    "rate": 1.0,
+    "initial_value": 1.0
+  },
+  "method": "QSS1",
+  "simulation": {
+    "start_time": 0.0,
+    "stop_time": 1.0,
+    "relative_tolerance": 0.0001,
+    "absolute_tolerance": 1e-07
+  },
+  "outputs": [
+    "x"
+  ]
+}

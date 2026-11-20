@@ -42,6 +42,7 @@ class Installation:
     install_root: Path
     commit: str
     mmoc: Path
+    khmetis: Path
     compile_script: Path
     simulate_script: Path
 
@@ -166,16 +167,36 @@ def _resolve_installation(
         "mmoc": bin_directory / "mmoc",
         "compile.sh": bin_directory / "compile.sh",
         "simulate.sh": bin_directory / "simulate.sh",
-        "khmetis": bin_directory / "khmetis",
     }
     for label, path in required.items():
         if not path.is_file() or not os.access(path, os.X_OK):
             raise AdapterError(f"required CIFASIS executable is unavailable: {label}")
+    khmetis_candidates = (
+        bin_directory / "khmetis",
+        source_root
+        / "src"
+        / "engine"
+        / "3rd-party"
+        / "partitioners"
+        / "hmetis"
+        / "khmetis",
+    )
+    khmetis = next(
+        (
+            path
+            for path in khmetis_candidates
+            if path.is_file() and os.access(path, os.X_OK)
+        ),
+        None,
+    )
+    if khmetis is None:
+        raise AdapterError("required CIFASIS executable is unavailable: khmetis")
     return Installation(
         source_root=source_root,
         install_root=install_root,
         commit=_git_commit(source_root),
         mmoc=required["mmoc"],
+        khmetis=khmetis,
         compile_script=required["compile.sh"],
         simulate_script=required["simulate.sh"],
     )
@@ -248,6 +269,8 @@ def _validated_request(request: Mapping[str, Any]) -> dict[str, Any]:
     )
     if stop_time <= start_time:
         raise AdapterError("simulation.stop_time must be greater than start_time")
+    if not math.isfinite(stop_time - start_time):
+        raise AdapterError("simulation duration must be finite")
     relative_tolerance = _positive_number(
         simulation.get("relative_tolerance"), "simulation.relative_tolerance"
     )
@@ -344,7 +367,98 @@ def _read_trajectory(output_directory: Path) -> tuple[list[float], list[float], 
     return times, values, path.name
 
 
-def _environment(installation: Installation, workspace: Path) -> dict[str, str]:
+def _analytic_assessment(
+    configuration: Mapping[str, Any],
+    times: Sequence[float],
+    values: Sequence[float],
+) -> dict[str, Any]:
+    start = configuration["start_time"]
+    stop = configuration["stop_time"]
+    # Scale by the interval, not its absolute origin or a one-second floor:
+    # otherwise a short run can mistake its initial sample for its endpoint.
+    time_tolerance = 1e-12 * (stop - start)
+    if start - times[0] > time_tolerance or times[-1] - stop > time_tolerance:
+        raise AdapterError("trajectory sample is outside the requested time interval")
+    try:
+        references = [
+            configuration["initial_value"]
+            * math.exp(-configuration["rate"] * (time_value - start))
+            for time_value in times
+        ]
+    except OverflowError as exc:
+        raise AdapterError("analytic reference is not finite") from exc
+    absolute_errors = [
+        abs(state_value - reference)
+        for state_value, reference in zip(values, references)
+    ]
+    error_budgets = [
+        configuration["absolute_tolerance"]
+        + configuration["relative_tolerance"] * abs(reference)
+        for reference in references
+    ]
+    if any(not math.isfinite(value) for value in (*absolute_errors, *error_budgets)):
+        raise AdapterError("analytic error or tolerance budget is not finite")
+    scaled_errors = [
+        absolute_error / budget
+        for absolute_error, budget in zip(absolute_errors, error_budgets)
+    ]
+    relative_errors = [
+        absolute_error
+        / max(abs(reference), configuration["absolute_tolerance"])
+        for absolute_error, reference in zip(absolute_errors, references)
+    ]
+    if any(not math.isfinite(value) for value in (*scaled_errors, *relative_errors)):
+        raise AdapterError("analytic error ratio is not finite")
+    max_absolute_error = max(absolute_errors)
+    # Squaring raw errors can overflow or underflow even when the RMS is finite.
+    rmse = (
+        max_absolute_error
+        * math.sqrt(
+            math.fsum((error / max_absolute_error) ** 2 for error in absolute_errors)
+            / len(absolute_errors)
+        )
+        if max_absolute_error
+        else 0.0
+    )
+    return {
+        "reference": "x(t)=initial_value*exp(-rate*(t-start_time))",
+        "sampled_points_within_requested_tolerance": max(scaled_errors) <= 1.0,
+        "max_scaled_error": max(scaled_errors),
+        "max_absolute_error": max_absolute_error,
+        "max_relative_error": max(relative_errors),
+        "rmse": rmse,
+        "requested_start_time": configuration["start_time"],
+        "requested_stop_time": configuration["stop_time"],
+        "first_sample_time": times[0],
+        "last_sample_time": times[-1],
+        "terminal_gap": configuration["stop_time"] - times[-1],
+        "terminal_sample_present": abs(times[-1] - configuration["stop_time"])
+        <= time_tolerance,
+        "scope": "analytic comparison at emitted sample times",
+    }
+
+
+def _stage_bin(installation: Installation, workspace: Path) -> Path:
+    """Create the minimal bin layout required by the upstream shell drivers."""
+
+    bin_directory = workspace / "native-bin"
+    bin_directory.mkdir()
+    executables = (("mmoc", installation.mmoc), ("khmetis", installation.khmetis))
+    for name, target in executables:
+        try:
+            (bin_directory / name).symlink_to(target)
+        except OSError as exc:
+            raise AdapterError(
+                f"could not stage CIFASIS executable {name}: {exc}"
+            ) from exc
+    return bin_directory
+
+
+def _environment(
+    installation: Installation,
+    workspace: Path,
+    bin_directory: Path,
+) -> dict[str, str]:
     inherited_names = (
         "PATH",
         "HOME",
@@ -358,10 +472,9 @@ def _environment(installation: Installation, workspace: Path) -> dict[str, str]:
     environment = {
         name: os.environ[name] for name in inherited_names if name in os.environ
     }
-    bin_directory = installation.install_root / "bin"
     library_candidates = (
         installation.install_root / "lib",
-        bin_directory / "lib",
+        installation.install_root / "bin" / "lib",
     )
     existing_library_path = environment.get("LD_LIBRARY_PATH", "")
     library_path = os.pathsep.join(
@@ -370,11 +483,20 @@ def _environment(installation: Installation, workspace: Path) -> dict[str, str]:
     )
     environment.update(
         {
+            "MMOC_PATH": str(installation.install_root),
+            "MMOC_SRC": str(installation.source_root / "src"),
+            "MMOC_DOC": str(installation.source_root / "doc"),
+            "MMOC_LIBS": str(installation.install_root / "lib"),
             "MMOC_BIN": str(bin_directory),
             "MMOC_MODELS": str(workspace / "models"),
             "MMOC_BUILD": str(workspace / "build"),
             "MMOC_OUTPUT": str(workspace / "output"),
             "MMOC_LOG": str(workspace / "log"),
+            "MMOC_PACKAGES": str(installation.source_root / "packages"),
+            "MMOC_LIBRARIES": str(installation.install_root / "lib"),
+            "MMOC_TESTS": str(installation.source_root / "src" / "test-suite"),
+            "MMOC_ENGINE": str(installation.source_root / "src" / "engine"),
+            "MMOC_INCLUDE": str(installation.source_root / "src" / "usr" / "include"),
             "LC_ALL": "C",
             "LANG": "C",
         }
@@ -400,7 +522,8 @@ def _execute(
             (workspace / name).mkdir()
         model_path = workspace / "models" / f"{_MODEL_NAME}.mo"
         model_path.write_bytes(source_bytes)
-        environment = _environment(installation, workspace)
+        bin_directory = _stage_bin(installation, workspace)
+        environment = _environment(installation, workspace, bin_directory)
         compile_result = _run_checked(
             (
                 str(installation.compile_script),
@@ -438,6 +561,7 @@ def _execute(
             "source": source,
         },
         "trajectory": {"x": {"time": times, "value": values}},
+        "validation": _analytic_assessment(configuration, times, values),
         "metrics": {
             "compile_wall_seconds": compile_result[0],
             "simulation_wall_seconds": simulation_result[0],

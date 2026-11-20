@@ -179,6 +179,13 @@ external execution is a cross-engine observation, not independent validation,
 a speedup result or an ARGESIM evidence-gate promotion. See
 [the adapter contract](docs/CIFASIS_ORACLE.md).
 
+The pinned native engine has been built and exercised for both pilot methods.
+At the emitted sample times, QSS1 and QSS2 satisfy the requested analytic error
+budget. QSS2 does not emit a sample exactly at the requested stop time, which
+is reported separately from sample-point accuracy. The dated machine-readable
+record is in
+[`docs/evidence/cifasis-linear-decay-20260928.json`](docs/evidence/cifasis-linear-decay-20260928.json).
+
 ## Run the NSA-DEVS experiments
 
 ```bash

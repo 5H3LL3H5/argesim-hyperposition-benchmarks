@@ -80,7 +80,9 @@ The native adapter requires two separate locations:
 - `ARGESIM_CIFASIS_SOURCE`: a clean Git checkout used to establish the exact
   engine commit;
 - `ARGESIM_CIFASIS_ROOT`: an installation containing executable
-  `bin/mmoc`, `bin/compile.sh`, `bin/simulate.sh` and `bin/khmetis`.
+  `bin/mmoc`, `bin/compile.sh` and `bin/simulate.sh`. The adapter first looks
+  for `bin/khmetis` and otherwise uses the executable at the upstream source
+  location `src/engine/3rd-party/partitioners/hmetis/khmetis`.
 
 For the qualified baseline, check out the source commit exactly and build it
 with the upstream Ubuntu 24.04 dependencies:
@@ -98,12 +100,31 @@ export ARGESIM_CIFASIS_SOURCE="$PWD/cifasis-qss-solver"
 export ARGESIM_CIFASIS_ROOT="$PWD/cifasis-qss-solver"
 ```
 
+The exact pinned revision was configured, built and installed successfully in
+an Ubuntu 24.04-compatible x86_64 environment on 2026-09-28. Both pilot methods
+then completed through the public oracle boundary. QSS1 emitted 10,001 samples
+and had a maximum scaled analytic error of 0.499; QSS2 emitted 72 samples and
+had a maximum scaled error of 0.333. Both stayed within the requested tolerance
+at every emitted sample. QSS1 emitted the terminal point; QSS2's last emitted
+point was `0.9970234151851755`, leaving a terminal gap of about `0.00298`.
+These are integration and analytic pilot results, not ARGESIM benchmark
+qualification or performance claims. The concise machine-readable record is
+[`docs/evidence/cifasis-linear-decay-20260928.json`](evidence/cifasis-linear-decay-20260928.json).
+
 The upstream top-level CMake project sets its own install location and copies
 the installed tools into the checkout's `bin/` and `lib/` directories; it does
 not honor a caller-selected `CMAKE_INSTALL_PREFIX` at that level.  Those build
 outputs are ignored by the upstream repository.  A downstream packaged build
 may set `ARGESIM_CIFASIS_ROOT` to a separate installation while retaining the
 clean source checkout solely for commit provenance.
+
+At the pinned revision, the top-level install does not copy `khmetis` into
+`bin/`, although `simulate.sh` requires it there. The adapter stages a private
+run-local `MMOC_BIN` containing links to the installed `mmoc` and the verified
+`khmetis` executable; it does not mutate the CIFASIS checkout or installation.
+It also supplies the complete path-only `MMOC_*` environment required by the
+generated native makefile while continuing to exclude unrelated caller
+variables.
 
 The adapter refuses dirty source trees.  A different clean commit is reported
 by the probe and the outer oracle classifies it as `build-required` against the
@@ -136,6 +157,19 @@ variables plus the controlled paths and locale; the caller's complete
 environment is not forwarded.  The generated model source,
 its SHA-256 digest, normalized trajectory, bounded stage diagnostics and
 measured compile/simulation wall times are returned in `driver-result.json`.
+For this analytic pilot, the result also compares every emitted sample against
+`x(t)=initial_value*exp(-rate*(t-start_time))`. It reports absolute, relative,
+RMSE and tolerance-scaled errors, where the per-sample budget is
+`absolute_tolerance + relative_tolerance * abs(reference)`. Endpoint coverage
+is reported separately because event-based QSS output need not emit a sample
+at the requested stop time. Passing emitted samples therefore does not imply
+that a terminal sample exists and does not promote ARGESIM evidence by itself.
+The time-boundary tolerance is `1e-12 * (stop_time - start_time)`, so a short
+interval or a large time origin cannot make its initial point count as its
+terminal point. Samples outside that interval (beyond the boundary tolerance)
+are rejected. RMSE is evaluated with scaled squares to avoid unnecessary
+overflow and underflow; unrepresentable error metrics or tolerance budgets
+produce a controlled adapter error instead of a non-finite JSON result.
 No QSS event-count or peak-memory value is emitted until a native source for
 those measurements is qualified.
 
