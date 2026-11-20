@@ -25,10 +25,12 @@ class ArgesimCatalogTests(unittest.TestCase):
         expected_groups = {
             BenchmarkStatus.SPECIFIED: {"C18"},
             BenchmarkStatus.IMPLEMENTED: {
-                "C01", "C02", "C03", "C04", "C05", "C06", "C07", "C09", "C10", "C11", "C12", "C13",
-                "C14", "C15", "C16", "C17R", "C19R", "C20", "C22",
+                "C02", "C04", "C09", "C10", "C11", "C13", "C14", "C17R", "C19R", "C20",
             },
-            BenchmarkStatus.VALIDATED: {"C08", "C21", "CP1", "CP2"},
+            BenchmarkStatus.VALIDATED: {
+                "C01", "C03", "C05", "C06", "C07", "C08", "C12", "C15", "C16",
+                "C21", "C22", "CP1", "CP2",
+            },
         }
         expected = {
             identifier: status

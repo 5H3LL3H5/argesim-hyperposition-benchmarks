@@ -1,5 +1,6 @@
 import math
 import unittest
+from unittest.mock import patch
 
 from argesim_benchmarks.models.c14_supply_chain import (
     SECONDS_PER_HOUR,
@@ -71,6 +72,28 @@ class TestC14SupplyChain(unittest.TestCase):
         # Table 3: D1 and D2 draw p1 from F1; D3 and D4 from F4.
         self.assertEqual(sim.factories[1].stock[1], 80)
         self.assertEqual(sim.factories[4].stock[1], 80)
+
+    def test_midnight_wholesaler_order_belongs_to_new_demand_day(self):
+        first_midnight = WHOLESALER_START_TIME
+        for task in ("b", "c"):
+            sim = SupplyChainSim(task, seed=7)
+            with patch.object(sim, "place_factory_order", wraps=sim.place_factory_order) as orders:
+                sim.run(days=10)
+            times = [call.args[-1] for call in orders.call_args_list]
+            self.assertNotIn(first_midnight, times)
+            self.assertIn(first_midnight + 24 * SECONDS_PER_HOUR, times)
+
+    def test_published_simple_order_variant_requires_a_sale(self):
+        def orders_at_start_of_day_nine(policy):
+            sim = SupplyChainSim("a", seed=7, simple_order_policy=policy)
+            with patch.object(sim, "place_factory_order", wraps=sim.place_factory_order) as orders:
+                sim.run(days=10)
+            return [call.args for call in orders.call_args_list if call.args[-1] == WHOLESALER_START_TIME]
+
+        self.assertEqual(len(orders_at_start_of_day_nine("every-product")), 4 * 12)
+        self.assertEqual(orders_at_start_of_day_nine("sold-products"), [])
+        with self.assertRaises(ValueError):
+            SupplyChainSim("a", simple_order_policy="unknown")
 
     def test_single_run_tasks_return_full_stock_vectors(self):
         for task in (c14_task_a1, c14_task_b1):

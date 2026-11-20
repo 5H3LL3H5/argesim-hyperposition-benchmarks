@@ -1,5 +1,6 @@
 import math
 import unittest
+from unittest.mock import patch
 
 from argesim_benchmarks.models.c16_restaurant_business import (
     C16Parameters,
@@ -64,12 +65,24 @@ class TestC16RestaurantBusiness(unittest.TestCase):
         )
         self.assertEqual(sim.new_restaurant_revenues(), (123.0,))
 
+    def test_default_event_budget_covers_multiyear_tasks(self):
+        sim = C16Simulation(C16Parameters(maximum_dining_interval=1), seed=19)
+        with patch.object(sim.scheduler, "run", return_value=0) as run:
+            for years in (5, 10):
+                with self.subTest(years=years):
+                    days = years * 52 * 7
+                    sim.run_until(days)
+                    self.assertEqual(run.call_args.args, (days,))
+                    expected_events = days * len(sim.people) + days // 7
+                    self.assertGreaterEqual(run.call_args.kwargs["max_events"], expected_events)
+
     def test_tasks_execute_with_small_auditable_workloads(self):
         params = C16Parameters(total_people=30)
         task_a = c16_task_a(runs=1, seed=2, parameters=params, years=6)
         self.assertEqual(len(task_a["time_series_1_year"]), 52)
         self.assertEqual(len(task_a["time_series_5_years"]), 260)
         self.assertEqual(len(task_a["time_series_10_years"]), 312)
+        self.assertEqual(task_a, c16_task_a(runs=1, seed=2, parameters=params, years=6, workers=2))
 
         task_b = c16_task_b([0.0, 0.2], seed=2, runs=1, years=1, parameters=params)
         self.assertEqual(set(task_b), {0.0, 0.2})
@@ -78,6 +91,24 @@ class TestC16RestaurantBusiness(unittest.TestCase):
         task_c = c16_task_c([0.0, 2.0], seed=2, runs=1, years=1, parameters=params)
         self.assertEqual(set(task_c), {0.0, 2.0})
         self.assertTrue(all(value >= 0.0 for value in task_c.values()))
+
+    def test_year_five_endpoint_and_following_time_average(self):
+        first = [0] * 259 + [4] + [1] * 52
+        second = [0] * 259 + [8] + [3] * 52
+        with patch(
+            "argesim_benchmarks.models.c16_restaurant_business._weekly_restaurant_counts",
+            side_effect=[first, second, [30] * 312],
+        ):
+            task = c16_task_a(runs=2, years=6)
+        self.assertEqual(task["restaurants_at_year_5"], [4, 8])
+        self.assertEqual(task["mean_at_year_5"], 6.0)
+        self.assertEqual(task["average_after_5_years"], 2.0)
+        self.assertEqual(task["time_series_5_years"], [30] * 260)
+
+    def test_populated_city_outside_area_is_rejected(self):
+        params = C16Parameters(total_people=40, area_width=40, area_height=40)
+        with self.assertRaisesRegex(ValueError, "city B"):
+            C16Simulation(params, seed=1)
 
     def test_invalid_task_inputs_are_rejected(self):
         calls = (

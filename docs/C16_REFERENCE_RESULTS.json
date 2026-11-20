@@ -1,0 +1,241 @@
+{
+  "model_commit": "28e8d26c13abb62831f3be2bf3668833106ffe51",
+  "model_parameters": "C16 definition Table 2 and registered defaults",
+  "definition": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C16/C16-definition.pdf",
+  "references": {
+    "AnyLogic": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C16/C16-solution-AnyLogic.pdf",
+    "Java OO": "https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C16/C16-solution-Java-OO.pdf"
+  },
+  "task_a": {
+    "seed": 42,
+    "years": 10,
+    "replications": 50,
+    "workers": 6,
+    "exemplar_counts_at_years_1_5_10": [
+      6,
+      8,
+      5
+    ],
+    "week_260_counts": [
+      5,
+      5,
+      4,
+      6,
+      6,
+      5,
+      4,
+      7,
+      5,
+      6,
+      7,
+      5,
+      7,
+      7,
+      5,
+      6,
+      7,
+      6,
+      6,
+      6,
+      5,
+      6,
+      6,
+      6,
+      6,
+      8,
+      6,
+      4,
+      5,
+      7,
+      5,
+      5,
+      5,
+      7,
+      5,
+      4,
+      6,
+      5,
+      7,
+      6,
+      4,
+      6,
+      4,
+      8,
+      5,
+      5,
+      5,
+      7,
+      6,
+      7
+    ],
+    "mean": 5.72,
+    "sample_variance": 1.103673469387755,
+    "comparisons": {
+      "AnyLogic": {
+        "published_mean": 6.34,
+        "published_variance": 1.98,
+        "difference": -0.6200000000000001,
+        "tolerance": 0.7500243113414461,
+        "passed": true
+      },
+      "Java OO": {
+        "published_mean": 6.06,
+        "published_variance": 2.02,
+        "difference": -0.33999999999999986,
+        "tolerance": 0.754840799429983,
+        "passed": true
+      }
+    },
+    "mean_over_weeks_261_through_520": 6.0494615384615384
+  },
+  "task_b": {
+    "seed": 42,
+    "years": 5,
+    "replications_per_tax_rate": 5,
+    "results": [
+      {
+        "tax_rate": 0.0,
+        "mean_accumulated_tax": 0.0
+      },
+      {
+        "tax_rate": 0.05,
+        "mean_accumulated_tax": 38862.58
+      },
+      {
+        "tax_rate": 0.1,
+        "mean_accumulated_tax": 76344.16
+      },
+      {
+        "tax_rate": 0.15,
+        "mean_accumulated_tax": 112910.37
+      },
+      {
+        "tax_rate": 0.2,
+        "mean_accumulated_tax": 150619.24
+      },
+      {
+        "tax_rate": 0.25,
+        "mean_accumulated_tax": 188687.2
+      },
+      {
+        "tax_rate": 0.3,
+        "mean_accumulated_tax": 223344.42
+      },
+      {
+        "tax_rate": 0.35,
+        "mean_accumulated_tax": 208274.99
+      },
+      {
+        "tax_rate": 0.4,
+        "mean_accumulated_tax": 224840.24
+      },
+      {
+        "tax_rate": 0.45,
+        "mean_accumulated_tax": 167325.84
+      },
+      {
+        "tax_rate": 0.5,
+        "mean_accumulated_tax": 140389.0
+      },
+      {
+        "tax_rate": 0.55,
+        "mean_accumulated_tax": 84607.27
+      },
+      {
+        "tax_rate": 0.6,
+        "mean_accumulated_tax": 13893.36
+      },
+      {
+        "tax_rate": 0.65,
+        "mean_accumulated_tax": 15051.14
+      },
+      {
+        "tax_rate": 0.7,
+        "mean_accumulated_tax": 16208.92
+      },
+      {
+        "tax_rate": 0.75,
+        "mean_accumulated_tax": 17366.7
+      },
+      {
+        "tax_rate": 0.8,
+        "mean_accumulated_tax": 18524.48
+      },
+      {
+        "tax_rate": 0.85,
+        "mean_accumulated_tax": 19682.26
+      },
+      {
+        "tax_rate": 0.9,
+        "mean_accumulated_tax": 20840.04
+      },
+      {
+        "tax_rate": 0.95,
+        "mean_accumulated_tax": 21997.82
+      },
+      {
+        "tax_rate": 1.0,
+        "mean_accumulated_tax": 23155.6
+      }
+    ]
+  },
+  "task_c": {
+    "seed": 42,
+    "years": 10,
+    "replications_per_exponent": 5,
+    "results": [
+      {
+        "density_exponent": 0.0,
+        "mean_new_restaurant_lifetime_revenue": 3552.64
+      },
+      {
+        "density_exponent": 0.5,
+        "mean_new_restaurant_lifetime_revenue": 10569.96
+      },
+      {
+        "density_exponent": 1.0,
+        "mean_new_restaurant_lifetime_revenue": 10308.05
+      },
+      {
+        "density_exponent": 1.5,
+        "mean_new_restaurant_lifetime_revenue": 10134.27
+      },
+      {
+        "density_exponent": 2.0,
+        "mean_new_restaurant_lifetime_revenue": 9103.41
+      },
+      {
+        "density_exponent": 2.5,
+        "mean_new_restaurant_lifetime_revenue": 9250.69
+      },
+      {
+        "density_exponent": 3.0,
+        "mean_new_restaurant_lifetime_revenue": 6993.26
+      },
+      {
+        "density_exponent": 3.5,
+        "mean_new_restaurant_lifetime_revenue": 6555.53
+      },
+      {
+        "density_exponent": 4.0,
+        "mean_new_restaurant_lifetime_revenue": 6395.42
+      },
+      {
+        "density_exponent": 4.5,
+        "mean_new_restaurant_lifetime_revenue": 6468.2
+      },
+      {
+        "density_exponent": 5.0,
+        "mean_new_restaurant_lifetime_revenue": 5541.07
+      },
+      {
+        "density_exponent": 5.5,
+        "mean_new_restaurant_lifetime_revenue": 4931.4
+      },
+      {
+        "density_exponent": 6.0,
+        "mean_new_restaurant_lifetime_revenue": 4394.47
+      }
+    ]
+  }
+}

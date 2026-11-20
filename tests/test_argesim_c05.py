@@ -24,7 +24,7 @@ class C05Tests(unittest.TestCase):
             self.assertAlmostEqual(event.state[0], 4.1, places=12)
 
     def test_published_event_sequences(self) -> None:
-        self.assertEqual(benchmark("C05").status, BenchmarkStatus.IMPLEMENTED)
+        self.assertEqual(benchmark("C05").status, BenchmarkStatus.VALIDATED)
         result = simulate_c05()
         self.assertEqual(len(result.events), 5)
         for event, reference in zip(result.events, C05_REFERENCE_EVENT_TIMES):
@@ -35,6 +35,15 @@ class C05Tests(unittest.TestCase):
         self.assertEqual(validation.task_d_event_count, 62)
         self.assertLess(validation.task_d_boundary_event_error, 2.0e-11)
         self.assertLess(validation.task_d_final_y1_error, 1.0e-10)
+
+    def test_independently_published_task_d_values(self) -> None:
+        # Einzinger, SNE 22(1), p. 54, Ptolemy II frequent-events table.
+        result = simulate_c05(task_d=True)
+        for ordinal, expected in ((1, 1.1083061677768), (2, 1.1217299678991),
+                                  (60, 4.8093061100968), (61, 4.9230401079777),
+                                  (62, 4.9364639081008)):
+            self.assertAlmostEqual(result.events[ordinal - 1].time, expected, delta=2e-9)
+        self.assertAlmostEqual(result.final_state[0], 5.7804025201735, delta=1e-9)
 
     def test_exact_step_has_semigroup_property(self) -> None:
         whole = c05_exact_step((4.2, 0.3), 0.75, C05_MODE_1)

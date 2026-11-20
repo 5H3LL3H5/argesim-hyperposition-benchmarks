@@ -156,11 +156,16 @@ A-C are explicit in code. The weighted population balance
 \frac{d}{dt}(3r+2m+f)=p-l_f f
 \]
 
-provides a structural equation check. Task-A timing is allowed only after the
-endpoint agrees with a tighter, independently configured RK45 run within a
-method-specific threshold. The tight RK45 result is a numerical oracle, not a
-published reference solution; consequently C01 remains below the `validated`
-gate until cross-tool or published reference trajectories are archived.
+provides a structural equation check. Before timing a Task A solver, compare its
+endpoint with a tighter run of the repository's RK45 using the method-specific
+threshold. For independent validation, integrate a separate transcription of
+the equations with SciPy Radau. Compare the default RK45 trajectory at every
+output time for each of the five Task B loss rates. The absolute tolerance is
+`2e-6` for each component across the trajectory and `2e-7` at 10 s. The
+middle loss rate also covers the default Task A trajectory. For Task C, check
+both stationary states against the published Dymola values. The catalog's
+`validated` status covers these numerical cases. Timing comparisons between
+tools still require equivalent workloads. [C01 results](docs/C01_RESULTS.md)
 
 ## 10. Parallel and distributed workload protocol
 
@@ -177,13 +182,17 @@ timings as official benchmark results.
 
 ## 11. Completed-family reference protocol
 
-- C05 uses exact local linear solutions and published switch times. It is the
-  only newly completed hybrid family promoted to `validated` solely on event
-  evidence.
+- C05 checks the published event counts and switch times for the default and
+  Task D cases. An independent high-precision calculation checks the decimal
+  precision study. [Reference comparisons](docs/PUBLISHED_REFERENCE_CHECKS.md)
 - C09 implements the stable `change-level` FIS signal shown in the published
   Simulink solution and retains the contradictory literal printed error
   difference as an explicit alternative. The qualitative reference behaviour
   is tested without inventing numeric curve samples.
+- C16 compares the count of restaurants at week 260 across 50 replications
+  with the published AnyLogic and Java OO statistics. Report the time average
+  after week 260 separately. Use the sample and published variances to compute
+  the standard error of each difference of means. [C16 comparison](docs/PUBLISHED_REFERENCE_CHECKS.md)
 - C17R checks the CA population invariant and the published lattice/contact
   identification formula. Random seeds are local to each replication.
 - C18 keeps data provenance in `C18DataSet`. Figure digitizations are not

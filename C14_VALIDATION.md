@@ -16,35 +16,25 @@ The experiments conducted correspond to the official task definitions:
 - **Lead Times**: Configured matrix between distributors and factories (12h to 22h).
 - **Costs**: Transport = 10 Euro per delivery-hour per order (regardless of quantity), Storage = 1 Euro per product per day.
 
-## Historical run output
+## D1 over 100 replications
 
-We executed 100 Monte Carlo runs (with randomized seeds) to compare the performance for Distributor D1 across the three strategies.
+Demand windows run from midnight up to the following midnight. A wholesale order at exactly midnight contributes to the new day's total. Daily transport charges apply per fulfilled distributor/factory/product order, regardless of quantity.
 
-**Summary of D1 Metrics:**
+The definition states that Task A orders two units of each product every day. A published MATLAB solution orders two units only for a product sold during the past day. Both policies add unfilled wholesale demand and use the same day-eight initial supply. `every-product` is the default. The optional `sold-products` argument makes the published ordering rule reproducible. [Definition](https://www.argesim.org/benchmarks/c14) · [MATLAB, section 3](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_28_1/articles/sne.28.1.10407.bn14.OA.pdf)
 
-| Strategy        | Metric (C/N/R) | Mean    | Dev    | Min     | Max     |
-|-----------------|----------------|---------|--------|---------|---------|
-| Strategy A      | C (Total Cost) | 58658.92 | 159.31 | 58210.00 | 59044.00 |
-|                 | N (Delivered)  | 227.42   | 12.82  | 191.00   | 257.00   |
-|                 | R (Cost/Item)  | 258.81   | 15.72  | 226.50   | 309.09   |
-| Strategy B      | C (Total Cost) | 32695.98 | 1374.35| 29759.00 | 35866.00 |
-|                 | N (Delivered)  | 227.42   | 12.82  | 191.00   | 257.00   |
-|                 | R (Cost/Item)  | 143.97   | 5.36   | 127.76   | 158.90   |
-| Strategy C      | C (Total Cost) | 26344.58 | 1084.10| 23879.00 | 28869.00 |
-|                 | N (Delivered)  | 227.42   | 12.82  | 191.00   | 257.00   |
-|                 | R (Cost/Item)  | 116.01   | 4.40   | 104.98   | 131.15   |
+Seed 42 generates the same 100 workloads for each row. Values in parentheses are sample standard deviations. R is averaged from per-run C/N.
 
-The table was generated with seed 42 and 100 runs after applying the official
-Table 3 mappings and lead-time-weighted transport costs.
+| Policy | Cost C (€) | Delivered N | Relative cost R (€/unit) |
+|---|---:|---:|---:|
+| Strategy A | 58,659.07 (159.29) | 227.42 (12.82) | 258.81 (15.72) |
+| Strategy B | 32,673.78 (1,372.27) | 227.42 (12.82) | 143.88 (5.40) |
+| Strategy C | 26,807.78 (1,080.73) | 227.42 (12.82) | 118.06 (4.50) |
+| Strategy A (sold-products) | 33,515.35 (1,425.34) | 227.42 (12.82) | 147.59 (5.92) |
 
-### Trajectory Plot
-A trajectory plot illustrating the total stock of Distributor D1 over the 30-day period (for Task A1) has been generated using `numpy` and `matplotlib` and is available at `c14_trajectory.png`.
 
-## Evidence boundary
+AutoMod reports mean costs of €33,157, €32,698 and €26,364 for A/B/C. The `sold-products` comparison gives €33,515, €32,674 and €26,808. The default literal Task A gives €58,659. The publications do not establish common order books or identical accounting across their models. C14 retains the `implemented` gate. [AutoMod results](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C14/C14-solution-AutoMod.pdf)
 
-The committed conformance tests cover the official product/factory table, the
-independent uniform wholesaler choices, all-or-nothing orders, lead-time-weighted
-transport cost, and the 720-hour horizon. The numerical table above is retained
-as historical run output and must be regenerated after model changes; it is not
-an independent validation data set. C14 therefore remains `implemented` rather
-than `validated`.
+```sh
+python -m argesim_benchmarks run C14 C2
+python -m argesim_benchmarks run C14 C2 --kwargs-json '{"simple_order_policy":"sold-products"}'
+```

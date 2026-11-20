@@ -31,7 +31,7 @@ results = {
 }
 
 
-def record(case, maximum, tolerance, details):
+def record(case, maximum, tolerance, details, *, reference_endpoint=None):
     row = {
         "case": case,
         "maximum_absolute_error": float(maximum),
@@ -39,11 +39,13 @@ def record(case, maximum, tolerance, details):
         "passed": bool(maximum <= tolerance),
         "details": details,
     }
+    if reference_endpoint is not None:
+        row["reference_endpoint"] = reference_endpoint
     results["checks"].append(row)
     print(json.dumps(row), flush=True)
 
 
-for loss in (100.0, 1000.0, 10000.0):
+for loss in (100.0, 10.0**2.5, 1000.0, 10.0**3.5, 10000.0):
 
     def lithium(t, y, loss=loss):
         r, m, f = y
@@ -72,6 +74,7 @@ for loss in (100.0, 1000.0, 10000.0):
         error,
         2e-6,
         f"Radau reference, all {len(candidate.times)} candidate trajectory samples",
+        reference_endpoint=reference.y[:, -1].tolist(),
     )
 
 # C03 ideal-switch limit: exact affine flow on each ON/OFF half-period.

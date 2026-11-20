@@ -466,7 +466,8 @@ def _summarize_patients(patients: list[Patient]) -> dict[str, float]:
         times_by_type[patient.type_].append(treatment_time)
 
     overall = sum(treatment_times) / len(treatment_times)
-    metrics = {"overall": overall}
+    # Simulation minute zero is 07:30. Closing is the last patient departure.
+    metrics = {"overall": overall, "closing_minutes": max(p.end_time for p in patients)}
     for patient_type, values in times_by_type.items():
         metrics[f"type_{patient_type}"] = sum(values) / len(values) if values else 0.0
     variance = sum((value - overall) ** 2 for value in treatment_times) / len(

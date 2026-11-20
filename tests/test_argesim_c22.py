@@ -14,7 +14,7 @@ from argesim_benchmarks.models.c22_queuing_policies import ClassingSystem
 class C22Tests(unittest.TestCase):
     def test_c22_catalog_status(self) -> None:
         c22 = next(b for b in BENCHMARKS if b.identifier == "C22")
-        self.assertEqual(c22.status, BenchmarkStatus.IMPLEMENTED)
+        self.assertEqual(c22.status, BenchmarkStatus.VALIDATED)
 
     def test_c22_basic_runs_without_errors(self) -> None:
         results = c22_basic()
@@ -48,8 +48,12 @@ class C22Tests(unittest.TestCase):
     def test_c22_jockeying_has_events(self) -> None:
         results = c22_jockeying()
 
-        # In jockeying, deterministic might have a small number of events or 0
-        # depending on exact event timings, but we expect the dicts to have the key
+        # Junglas & Pawletta, MatlabGPSS C22, Table 3 (time, ID, source, destination).
+        self.assertEqual(results["deterministic"]["jockey_table"], [
+            (6.5, 6, 1, 2), (7.5, 7, 1, 3), (8.5, 8, 1, 4),
+            (11, 10, 1, 2), (12, 11, 1, 3), (89.5, 89, 2, 4),
+            (93, 92, 2, 3), (94, 93, 2, 4), (98.5, 98, 3, 4), (103, 100, 1, 4),
+        ])
         self.assertIn("jockey_events", results["deterministic"])
         self.assertIn("jockey_table", results["deterministic"])
         self.assertIn("jockey_events", results["stochastic"])
@@ -60,7 +64,9 @@ class C22Tests(unittest.TestCase):
         results = c22_reneging()
 
         self.assertIn("renege_events", results["deterministic"])
-        self.assertIn("renege_table", results["deterministic"])
+        # Table 5 lists every deterministic abandonment (time, ID).
+        self.assertEqual(results["deterministic"]["renege_table"],
+                         [(77, 68), (86, 77), (95, 86), (104, 95)])
         self.assertIn("renege_events", results["stochastic"])
         self.assertEqual(results["deterministic"]["tq_max"], 9.0)
         self.assertEqual(results["deterministic"]["active_entities"], 0)
@@ -79,9 +85,13 @@ class C22Tests(unittest.TestCase):
         self.assertEqual(results["deterministic"]["first_arrival_time"], 1.0)
         self.assertEqual(results["deterministic"]["active_entities"], 0)
 
-        # Classes should have non-negative avg wait times
-        for c in range(1, 6):
-            self.assertGreaterEqual(det_stats[c]["avg"], 0.0)
+        # Table 7 prints means to two decimal places, with different
+        # roundings at an exact half-cent for classes four and five.
+        means = (66.80, 60.85, 41.85, 50.98, 60.77)
+        maxima = (121.50, 104.00, 77.00, 120.00, 125.50)
+        for c, (avg, maximum) in enumerate(zip(means, maxima), start=1):
+            self.assertAlmostEqual(det_stats[c]["avg"], avg, delta=0.0050000001)
+            self.assertEqual(det_stats[c]["max"], maximum)
 
     def test_c22_deterministic_classes_ascend_before_first_operator_call(self) -> None:
         # C22 §4: assignment starts at 1; calls start at 5 after t=10.
