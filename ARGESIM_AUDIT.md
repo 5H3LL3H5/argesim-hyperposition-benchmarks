@@ -1,5 +1,16 @@
 # ARGESIM implementation audit
 
+## Routing, numerical and experiment follow-up, 2026-11-20
+
+C02 now prevents assembly of empty pallets, interleaving A2 with an unfinished
+A3/A4/A5 group, and overbooking branch slots through simultaneous DEVS arrivals.
+C18 uses a scaled QR estimator with independent LAPACK checks and explicit
+hold-out isolation tests. C20 separates order-book and failure seeds, adds
+transport trace replay, and uses the physical engine in its timing harness.
+See [the corrective report](docs/ARGESIM_CLOSURE_20261120.md) for evidence,
+reproduction commands and remaining completion criteria. These corrections
+do not change catalog validation gates.
+
 ## Transport/data follow-up, 2026-11-19
 
 C20 now implements the individual directed tracks, junctions, buffer slots and

@@ -80,6 +80,9 @@ class C20Flow:
         self.node_free_at = dict.fromkeys(self.layout.nodes, 0.0)
         self.closed_nodes: set[str] = set()
         self.tracks = {name: _TrackState() for name in self.layout.tracks}
+        self._track_rank = {name: index for index, name in enumerate(self.tracks)}
+        self._occupied_tracks: set[str] = set()
+        self._failed_tracks: set[str] = set()
         self.on_change: Callable[[], None] | None = None
         self.trace_enabled = trace
         self.trace: list[tuple[float, str, int, str, int]] = []
@@ -150,6 +153,8 @@ class C20Flow:
             return False
         self.parts[identifier] = _Part(identifier, node)
         self.at_node[node] = identifier
+        if self.trace_enabled:
+            self.trace.append((self.now, "insert", identifier, node, 1))
         self._notify()
         return True
 
@@ -157,6 +162,8 @@ class C20Flow:
         part = self.parts[identifier]
         if part.node is None or part.target is not None:
             raise ValueError("only a stopped part can be removed")
+        if self.trace_enabled:
+            self.trace.append((self.now, "remove", identifier, part.node, 0))
         del self.at_node[part.node]
         self.node_free_at[part.node] = self.now + 1.0
         del self.parts[identifier]
@@ -165,9 +172,12 @@ class C20Flow:
         self._notify()
 
     def route(self, source: str, target: str) -> tuple[str, ...]:
-        unavailable = frozenset(
-            name for name, state in self.tracks.items() if state.failed_until > self.now
-        )
+        self._failed_tracks = {
+            name
+            for name in self._failed_tracks
+            if self.tracks[name].failed_until > self.now
+        }
+        unavailable = frozenset(self._failed_tracks)
         key = source, target, unavailable
         if key not in self._route_cache:
             try:
@@ -236,8 +246,13 @@ class C20Flow:
             while progress:
                 progress = False
                 # Release downstream places before considering new admissions.
-                for name, state in self.tracks.items():
-                    if not state.parts or state.failed_until > self.now:
+                # Preserve the layout's tie order while visiting only occupied
+                # tracks. Set insertion order must not become a routing policy.
+                for name in sorted(
+                    self._occupied_tracks, key=self._track_rank.__getitem__
+                ):
+                    state = self.tracks[name]
+                    if state.failed_until > self.now:
                         continue
                     part = self.parts[state.parts[0]]
                     target = self.layout.tracks[name].target
@@ -248,6 +263,8 @@ class C20Flow:
                     ):
                         continue
                     state.parts.popleft()
+                    if not state.parts:
+                        self._occupied_tracks.remove(name)
                     state.next_exit = self.now + 1.0
                     part.node, part.track = target, None
                     self.at_node[target] = part.identifier
@@ -277,6 +294,7 @@ class C20Flow:
                     part.path.popleft()
                     part.ready = self.now + track.length  # fixed 1 m/s
                     state.parts.append(identifier)
+                    self._occupied_tracks.add(name)
                     state.next_entry = self.now + 1.0
                     state.maximum_occupancy = max(
                         state.maximum_occupancy, len(state.parts)
@@ -286,7 +304,13 @@ class C20Flow:
                         callback, part.on_departure = part.on_departure, None
                         self.call_at(self.now, callback)
                     progress = any_progress = True
-            for name, state in self.tracks.items():
+            relevant = self._occupied_tracks | {
+                self.parts[identifier].path[0]
+                for identifier in self.at_node.values()
+                if self.parts[identifier].path
+            }
+            for name in sorted(relevant, key=self._track_rank.__getitem__):
+                state = self.tracks[name]
                 track = self.layout.tracks[name]
                 if state.parts:
                     head = self.parts[state.parts[0]]
@@ -318,6 +342,7 @@ class C20Flow:
             raise ValueError("track is already failed")
         finish = self.now + duration
         state.failed_until = finish
+        self._failed_tracks.add(name)
         for identifier in state.parts:
             part = self.parts[identifier]
             if part.ready > self.now:
@@ -368,6 +393,10 @@ class C20Flow:
         return count
 
     def assert_conservation(self) -> None:
+        if self._occupied_tracks != {
+            name for name, state in self.tracks.items() if state.parts
+        }:
+            raise RuntimeError("C20 occupied-track index is inconsistent")
         present = list(self.at_node.values())
         for node, identifier in self.at_node.items():
             part = self.parts[identifier]

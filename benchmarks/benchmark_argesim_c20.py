@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Timing experiment for ARGESIM C20 (Complex Production System)."""
+"""Timing harness for the physical ARGESIM C20 production model.
+
+For statistical replications across fixed books use scripts/c20_experiment.py.
+This harness repeats identical seeded inputs to measure execution time.
+"""
 
 from __future__ import annotations
 
@@ -8,123 +12,94 @@ import json
 import statistics
 import sys
 import time
-from collections.abc import Callable
+from dataclasses import asdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from argesim_benchmarks.models.c20_complex_production import (
-    Conveyor,
-    Order,
-    SimulationEnvironment,
-    WorkStation,
-    WorkStationType,
-    generate_osc1_order_book,
-    generate_osc2_order_book,
-    generate_osc3_order_book,
-    get_operation_ws,
-    get_process_plan,
-    get_processing_time,
-)
+from argesim_benchmarks.models.c20_complex_production import run_c20_replication
 
 
-def _quartiles(values: list[int]) -> tuple[float, float]:
-    if len(values) < 2:
-        return float(values[0]), float(values[0])
-    quartiles = statistics.quantiles(values, n=4, method="inclusive")
-    return quartiles[0], quartiles[2]
-
-
-def run_scenario(generator: Callable[[], list[Order]]) -> dict[str, float]:
-    """Run one C20 scenario and return measured metrics."""
-    env = SimulationEnvironment()
-    stations = {ws_type: WorkStation(env, ws_type) for ws_type in WorkStationType}
-    conveyor = Conveyor(env, transport_time=5.0)
-
-    orders = generator()
-    throughput_times: list[float] = []
-
-    def process_next_step(order: Order, plan: list, step: int) -> None:
-        if step >= len(plan):
-            completion_time = float(env.now.macro)
-            throughput_times.append(completion_time - order.earliest_release_date)
-            return
-
-        op = plan[step]
-        ws_type = get_operation_ws(op)
-        ws = stations[ws_type]
-        delay = get_processing_time(ws_type, order.product_type)
-
-        def on_finish(finished_order: Order) -> None:
-            conveyor.transport(
-                finished_order, lambda o: process_next_step(o, plan, step + 1)
-            )
-
-        ws.request(order, delay, on_finish)
-
-    for order in orders:
-        plan = get_process_plan(order.product_type)
-        env.schedule(
-            order.earliest_release_date,
-            lambda o=order, p=plan: process_next_step(o, p, 0),
+def run_scenario(
+    order_scenario: str,
+    plant_scenario: str = "PSc1",
+    *,
+    seed: int = 20,
+    order_seed: int = 20,
+    order_count: int = 5000,
+) -> dict:
+    """Run the same physical engine as the registered C20 benchmark."""
+    metrics = asdict(
+        run_c20_replication(
+            order_scenario,
+            plant_scenario,
+            seed=seed,
+            order_seed=order_seed,
+            order_count=order_count,
         )
-
-    env.run(until_macro=100000.0)
-
-    makespan = float(env.now.macro)
-    median_tt = statistics.median(throughput_times) if throughput_times else 0.0
-    return {
-        "makespan": makespan,
-        "median_tt": median_tt,
-        "processed_operations": float(
-            sum(ws.processed_count for ws in stations.values())
-        ),
-    }
+    )
+    metrics.pop("orders")
+    return metrics
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Timing experiment for ARGESIM C20."
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repeat", type=int, default=3)
+    parser.add_argument("--warmup", type=int, default=1)
+    parser.add_argument("--orders", type=int, default=5000)
+    parser.add_argument("--seed", type=int, default=20)
+    parser.add_argument("--order-seed", type=int, default=20)
+    parser.add_argument(
+        "--plant",
+        nargs="+",
+        choices=[f"PSc{i}" for i in range(1, 5)],
+        default=[f"PSc{i}" for i in range(1, 5)],
     )
-    parser.add_argument("--repeat", type=int, default=9, help="Number of repetitions.")
-    parser.add_argument("--warmup", type=int, default=1, help="Number of warmup runs.")
     arguments = parser.parse_args()
-    if arguments.repeat < 1 or arguments.warmup < 0:
-        parser.error("repeat must be positive and warmup must be non-negative")
-
-    report: dict[str, object] = {
+    if arguments.repeat < 1 or arguments.warmup < 0 or arguments.orders < 1:
+        parser.error("repeat/orders must be positive; warmup must be non-negative")
+    report = {
         "benchmark": "ARGESIM-C20",
-        "definition": "https://www.argesim.org/benchmarks/c20/",
+        "model": "physical",
+        "order_book": "generated",
+        "order_seed": arguments.order_seed,
+        "order_count": arguments.orders,
+        "seed": arguments.seed,
         "scenarios": {},
     }
-
-    scenarios = {
-        "OSc1_FullInfo": generate_osc1_order_book,
-        "OSc2_MediumInfo": generate_osc2_order_book,
-        "OSc3_Reactive": generate_osc3_order_book,
-    }
-
-    for scenario_name, generator in scenarios.items():
-        for _ in range(arguments.warmup):
-            run_scenario(generator)
-
-        durations: list[int] = []
-        last_metrics = None
-        for _ in range(arguments.repeat):
-            started = time.perf_counter_ns()
-            last_metrics = run_scenario(generator)
-            durations.append(time.perf_counter_ns() - started)
-        assert last_metrics is not None
-
-        first_quartile, third_quartile = _quartiles(durations)
-        report["scenarios"][scenario_name] = {
-            "metrics": last_metrics,
-            "durations_ns": durations,
-            "median_ns": statistics.median(durations),
-            "iqr_ns": third_quartile - first_quartile,
-        }
-
-    print(json.dumps(report, indent=2))
+    for osc in ("OSc1", "OSc2", "OSc3"):
+        for psc in arguments.plant:
+            durations = []
+            metrics = None
+            for iteration in range(-arguments.warmup, arguments.repeat):
+                started = time.perf_counter_ns()
+                current = run_scenario(
+                    osc,
+                    psc,
+                    seed=arguments.seed,
+                    order_seed=arguments.order_seed,
+                    order_count=arguments.orders,
+                )
+                elapsed = time.perf_counter_ns() - started
+                if metrics is not None and current != metrics:
+                    raise RuntimeError(
+                        "identical seeded inputs produced different results"
+                    )
+                metrics = current
+                if iteration >= 0:
+                    durations.append(elapsed)
+            quartiles = (
+                statistics.quantiles(durations, n=4, method="inclusive")
+                if len(durations) > 1
+                else [float(durations[0])] * 3
+            )
+            report["scenarios"][f"{osc}/{psc}"] = {
+                "metrics": metrics,
+                "durations_ns": durations,
+                "median_ns": statistics.median(durations),
+                "iqr_ns": quartiles[2] - quartiles[0],
+            }
+    print(json.dumps(report, indent=2, allow_nan=False))
 
 
 if __name__ == "__main__":

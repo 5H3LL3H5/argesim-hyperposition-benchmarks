@@ -7,6 +7,13 @@ fails the retained 6% reference check, explicitly marked as an expected
 failure. The 14/20/40-pallet checks remain active but do not prove physical
 conformance.
 
+The 2026-11-20 follow-up fixes routing of empty pallets, forbids interleaving A2
+with an unfinished A3/A4/A5 group, and reserves admission before DEVS message
+delivery to prevent simultaneous overbooking. These fixes do not supply the
+missing physical blocking model. See the
+[corrective report](docs/ARGESIM_CLOSURE_20261120.md), including the differences
+between the registered controller and the published reference controller.
+
 The previous document claimed full geometry/routing and a simulated high-load
 deadlock, and listed obsolete outputs. Those claims were incorrect and are
 withdrawn.

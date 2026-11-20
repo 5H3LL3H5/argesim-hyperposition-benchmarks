@@ -6,12 +6,50 @@ from argesim_benchmarks.models.c02_flexible_assembly import (
     C02Constants,
     Message,
     Pallet,
+    RouterModel,
     StationModel,
     _station_configs,
 )
 
 
 class C02Tests(unittest.TestCase):
+    def test_empty_pallets_only_enter_loading_station(self):
+        constants = C02Constants()
+        for config in _station_configs(constants)[1:]:
+            station = StationModel(config.name, config, constants)
+            router = RouterModel(config.name, station)
+            for identifier in range(6):
+                router.dext(0, Message("in", Pallet(identifier)))
+            self.assertTrue(all(port == "to_conveyor" for _, port in router.queue))
+
+    def test_a2_cannot_interrupt_the_a3_a4_a5_group(self):
+        constants = C02Constants()
+        config = _station_configs(constants)[3]  # A2_3 accepts every eligible pallet.
+        for operations in ({"A3"}, {"A4"}, {"A5"}, {"A3", "A4"}):
+            station = StationModel(config.name, config, constants)
+            router = RouterModel(config.name, station)
+            router.dext(
+                0, Message("in", Pallet(0, operations_done=operations, in_system=True))
+            )
+            self.assertEqual(router.out().port, "to_conveyor")
+
+    def test_simultaneous_arrivals_reserve_before_delivery(self):
+        constants = C02Constants()
+        config = _station_configs(constants)[3]
+        station = StationModel(config.name, config, constants)
+        router = RouterModel(config.name, station)
+        for identifier in range(config.buffer_capacity + 1):
+            router.dext(0, Message("in", Pallet(identifier, in_system=True)))
+        self.assertEqual(station.occupancy, config.buffer_capacity)
+        self.assertEqual(router.queue[-1][1], "to_conveyor")
+        # Remove the routing event, then deliver on the next DEVS microstep.
+        message = router.out()
+        router.dint()
+        self.assertEqual(station.occupancy, config.buffer_capacity)
+        station.dext(0, Message("in", message.value))
+        self.assertEqual(station.occupancy, config.buffer_capacity)
+        self.assertEqual(len(station.reserved_admissions), config.buffer_capacity - 1)
+
     @unittest.expectedFailure
     def test_ten_pallet_case_has_known_published_reference_mismatch(self):
         # Historical proximity check against SNE 21(3-4), 2011, Table 2.
