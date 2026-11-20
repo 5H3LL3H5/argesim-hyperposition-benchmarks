@@ -12,6 +12,7 @@ from .ivp import InitialValueProblem, IntegrationError, SolverStats, Vector
 from .runtime import SolverOptions, normalise_solver_name, solve_ivp
 from .solvers import brentq
 
+
 @dataclass(frozen=True)
 class HybridReset:
     """State and optional mode selected by a discrete transition."""

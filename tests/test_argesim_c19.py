@@ -1,5 +1,5 @@
-import unittest
 import math
+import unittest
 from unittest.mock import patch
 
 from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
@@ -9,7 +9,6 @@ from argesim_benchmarks.models.c19_groundwater import (
     c19_analytical_steady_state,
     c19_analytical_transient,
     c19_problem,
-    c19_task_a,
     solve_c19,
 )
 

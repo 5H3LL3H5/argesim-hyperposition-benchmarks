@@ -6,6 +6,7 @@ import heapq
 import math
 import random
 from collections.abc import Callable
+from dataclasses import dataclass
 from enum import Enum
 
 from nsa_devs import DesScheduler
@@ -110,26 +111,129 @@ class Resource:
             self.env.schedule(0.0, callback)
 
 
+@dataclass(eq=False)
+class Doctor:
+    """One non-preemptive server, retaining experience across ward changes."""
+
+    identifier: int
+    home_ward: int
+    ward: int
+    busy: bool = False
+
+
+class DoctorWard:
+    """A patient queue served by the actual doctors currently in this ward."""
+
+    def __init__(self, facilities: Facilities, number: int) -> None:
+        self.facilities = facilities
+        self.number = number
+        self.queue: list[tuple[int, int, Callable[[Doctor], None]]] = []
+        self._sequence = 0
+
+    @property
+    def capacity(self) -> int:
+        if not self.facilities.wards_open:
+            return 0
+        return sum(doctor.ward == self.number for doctor in self.facilities.doctors)
+
+    @property
+    def in_use(self) -> int:
+        return sum(
+            doctor.ward == self.number and doctor.busy
+            for doctor in self.facilities.doctors
+        )
+
+    def request(self, priority: int = 0) -> Callable[[Callable[[Doctor], None]], None]:
+        def enqueue(callback: Callable[[Doctor], None]) -> None:
+            if not callable(callback):
+                raise TypeError("ward request callback must be callable")
+            self._sequence += 1
+            rank = (
+                priority
+                if self.facilities.discipline is QueueDiscipline.PRIORITY
+                else 0
+            )
+            heapq.heappush(self.queue, (rank, self._sequence, callback))
+            self.facilities.dispatch_doctors()
+
+        return enqueue
+
+    def release(self, doctor: Doctor) -> None:
+        if (
+            doctor not in self.facilities.doctors
+            or doctor.ward != self.number
+            or not doctor.busy
+        ):
+            raise RuntimeError("doctor is not treating a patient in this ward")
+        doctor.busy = False
+        self.facilities.dispatch_doctors()
+
+
 class Facilities:
     def __init__(
         self,
         env: Simulation,
         discipline: QueueDiscipline = QueueDiscipline.FIFO,
+        *,
+        task_b_active: bool = False,
     ):
+        self.env = env
+        self.discipline = discipline
+        self.task_b_active = task_b_active
+        self.wards_open = False
+        self.doctors = [Doctor(i, 1 + i // 2, 1 + i // 2) for i in range(4)]
+        self.doctors_exchanged = False
+        self.exchange_history: list[tuple[float, bool]] = []
         self.registration = Resource(
             env,
             capacity=1,
             discipline=discipline,
             name="Registration",
         )
-        self.cw1 = Resource(env, capacity=0, discipline=discipline, name="CW1")
-        self.cw2 = Resource(env, capacity=0, discipline=discipline, name="CW2")
+        self.cw1 = DoctorWard(self, 1)
+        self.cw2 = DoctorWard(self, 2)
         self.xray = Resource(env, capacity=0, discipline=discipline, name="X-Ray")
         self.plaster = Resource(env, capacity=0, discipline=discipline, name="Plaster")
 
         self.cw2_queue_was_large = False
-        self.cw1_transferred_doctor_turn = False
-        self.cw2_transferred_doctor_turn = False
+
+    def dispatch_doctors(self) -> None:
+        """Exchange a fixed pair after both finish, then allocate waiting work.
+
+        The definition does not prescribe interruption of an ongoing treatment.
+        The selected pair therefore rendezvous while idle; an idle partner is
+        reserved until the other finishes. The atomic exchange preserves two
+        doctors per ward and never changes a patient's treatment mid-service.
+        A pending exchange is cancelled if the queue reaches the return limit.
+        """
+        if not self.wards_open:
+            return
+        pair = (self.doctors[0], self.doctors[2])
+        while True:
+            if self.task_b_active:
+                if not self.cw2_queue_was_large and len(self.cw2.queue) > 20:
+                    self.cw2_queue_was_large = True
+                elif self.cw2_queue_was_large and len(self.cw2.queue) <= 5:
+                    self.cw2_queue_was_large = False
+            desired = self.task_b_active and self.cw2_queue_was_large
+            pending = desired != self.doctors_exchanged
+            if pending and all(not doctor.busy for doctor in pair):
+                pair[0].ward, pair[1].ward = pair[1].ward, pair[0].ward
+                self.doctors_exchanged = desired
+                self.exchange_history.append((self.env.now, desired))
+                pending = False
+            assigned = False
+            for doctor in self.doctors:
+                if doctor.busy or (pending and doctor in pair):
+                    continue
+                ward = self.cw1 if doctor.ward == 1 else self.cw2
+                if ward.queue:
+                    _, _, callback = heapq.heappop(ward.queue)
+                    doctor.busy = True
+                    self.env.schedule(0.0, lambda d=doctor, cb=callback: cb(d))
+                    assigned = True
+            if not assigned:
+                break
 
 
 def exp_dist(env: Simulation, mean: float) -> float:
@@ -139,9 +243,8 @@ def exp_dist(env: Simulation, mean: float) -> float:
         raise ValueError("exponential mean must be positive and finite")
     return env.rng.expovariate(1.0 / mean)
 
-def triangular_dist(
-    rng: random.Random, low: float, mode: float, high: float
-) -> float:
+
+def triangular_dist(rng: random.Random, low: float, mode: float, high: float) -> float:
     return rng.triangular(low, high, mode)
 
 
@@ -156,7 +259,6 @@ class Patient:
         self.ward = 0  # 1 for CW1, 2 for CW2
 
 
-
 _CW1_TREATMENT = (1.5, 3.2, 5.0)
 _CW2_TREATMENT = (2.8, 4.1, 6.3)
 
@@ -168,49 +270,20 @@ def _update_doctor_exchange(
 ) -> None:
     """Apply the Task-B hysteresis for exchanging one CW1 and CW2 doctor."""
 
-    if not task_b_active:
-        return
-    cw2_queue_len = len(facilities.cw2.queue)
-    if not facilities.cw2_queue_was_large and cw2_queue_len > 20:
-        facilities.cw2_queue_was_large = True
-    elif facilities.cw2_queue_was_large and cw2_queue_len <= 5:
-        facilities.cw2_queue_was_large = False
+    facilities.task_b_active = task_b_active
+    facilities.dispatch_doctors()
 
 
 def _ward_treatment_time(
     patient: Patient,
-    facilities: Facilities,
-    *,
-    task_b_active: bool,
+    doctor: Doctor,
 ) -> float:
-    """Sample the treating doctor's service time for the selected casualty ward.
-
-    Task B exchanges one of the two doctors between CW1 and CW2 while the
-    CW2 queue is above the hysteresis threshold.  The ward capacities remain
-    unchanged; one alternating service in each ward therefore uses the other
-    ward's doctor-time distribution.
-    """
-
-    if patient.ward not in (1, 2):
-        raise ValueError("patient must be assigned to CW1 or CW2 before treatment")
-
-    local = _CW1_TREATMENT if patient.ward == 1 else _CW2_TREATMENT
-    if not task_b_active or not facilities.cw2_queue_was_large:
-        return triangular_dist(patient.rng, *local)
-
-    if patient.ward == 1:
-        facilities.cw1_transferred_doctor_turn = (
-            not facilities.cw1_transferred_doctor_turn
-        )
-        transferred = facilities.cw1_transferred_doctor_turn
-        distribution = _CW2_TREATMENT if transferred else _CW1_TREATMENT
-    else:
-        facilities.cw2_transferred_doctor_turn = (
-            not facilities.cw2_transferred_doctor_turn
-        )
-        transferred = facilities.cw2_transferred_doctor_turn
-        distribution = _CW1_TREATMENT if transferred else _CW2_TREATMENT
-
+    """Sample the actual doctor's distribution, including CW1's 20% penalty."""
+    if patient.ward not in (1, 2) or doctor.ward != patient.ward:
+        raise ValueError("doctor must be assigned to the patient's ward")
+    distribution = _CW1_TREATMENT if doctor.home_ward == 1 else _CW2_TREATMENT
+    if doctor.home_ward == 2 and doctor.ward == 1:
+        distribution = tuple(1.2 * value for value in distribution)
     return triangular_dist(patient.rng, *distribution)
 
 
@@ -222,15 +295,7 @@ def process_patient(
     task_b_active: bool = False,
 ) -> None:
 
-    def check_doctor_swap() -> None:
-        _update_doctor_exchange(facilities, task_b_active=task_b_active)
-
-    def ward_treatment_time() -> float:
-        return _ward_treatment_time(
-            patient,
-            facilities,
-            task_b_active=task_b_active,
-        )
+    facilities.task_b_active = task_b_active
 
     req_reg = facilities.registration.request(priority=0)
 
@@ -248,20 +313,16 @@ def process_patient(
                 patient.ward = 2
                 ward_res = facilities.cw2
 
-            check_doctor_swap()
-
             req_ward = ward_res.request(priority=0)
-            req_ward(lambda: after_ward_1(ward_res))
-            check_doctor_swap()
+            req_ward(lambda doctor: after_ward_1(ward_res, doctor))
 
         env.schedule(delay, after_delay)
 
-    def after_ward_1(ward_res: Resource) -> None:
-        delay = ward_treatment_time()
+    def after_ward_1(ward_res: DoctorWard, doctor: Doctor) -> None:
+        delay = _ward_treatment_time(patient, doctor)
 
         def after_delay() -> None:
-            ward_res.release()
-            check_doctor_swap()
+            ward_res.release(doctor)
 
             if patient.type_ == 1:
                 # Type 1: X-ray -> Ward -> Leave
@@ -282,22 +343,21 @@ def process_patient(
 
         env.schedule(delay, after_delay)
 
-    def after_xray_type1(ward_res: Resource) -> None:
+    def after_xray_type1(ward_res: DoctorWard) -> None:
         delay = triangular_dist(patient.rng, 2.0, 2.8, 4.1)
 
         def after_delay() -> None:
             facilities.xray.release()
             req_ward = ward_res.request(priority=-1)
-            req_ward(lambda: after_ward_2_type1(ward_res))
+            req_ward(lambda doctor: after_ward_2_type1(ward_res, doctor))
 
         env.schedule(delay, after_delay)
 
-    def after_ward_2_type1(ward_res: Resource) -> None:
-        delay = ward_treatment_time()
+    def after_ward_2_type1(ward_res: DoctorWard, doctor: Doctor) -> None:
+        delay = _ward_treatment_time(patient, doctor)
 
         def after_delay() -> None:
-            ward_res.release()
-            check_doctor_swap()
+            ward_res.release(doctor)
             patient.end_time = env.now
             on_finish(patient)
 
@@ -313,7 +373,7 @@ def process_patient(
 
         env.schedule(delay, after_delay)
 
-    def after_xray_1_type3(ward_res: Resource) -> None:
+    def after_xray_1_type3(ward_res: DoctorWard) -> None:
         delay = triangular_dist(patient.rng, 2.0, 2.8, 4.1)
 
         def after_delay() -> None:
@@ -323,7 +383,7 @@ def process_patient(
 
         env.schedule(delay, after_delay)
 
-    def after_plaster_type3(ward_res: Resource) -> None:
+    def after_plaster_type3(ward_res: DoctorWard) -> None:
         delay = triangular_dist(patient.rng, 3.0, 3.8, 4.7)
 
         def after_delay() -> None:
@@ -333,22 +393,21 @@ def process_patient(
 
         env.schedule(delay, after_delay)
 
-    def after_xray_2_type3(ward_res: Resource) -> None:
+    def after_xray_2_type3(ward_res: DoctorWard) -> None:
         delay = triangular_dist(patient.rng, 2.0, 2.8, 4.1)
 
         def after_delay() -> None:
             facilities.xray.release()
             req_ward = ward_res.request(priority=-1)
-            req_ward(lambda: after_ward_2_type3(ward_res))
+            req_ward(lambda doctor: after_ward_2_type3(ward_res, doctor))
 
         env.schedule(delay, after_delay)
 
-    def after_ward_2_type3(ward_res: Resource) -> None:
-        delay = ward_treatment_time()
+    def after_ward_2_type3(ward_res: DoctorWard, doctor: Doctor) -> None:
+        delay = _ward_treatment_time(patient, doctor)
 
         def after_delay() -> None:
-            ward_res.release()
-            check_doctor_swap()
+            ward_res.release(doctor)
             patient.end_time = env.now
             on_finish(patient)
 
@@ -392,8 +451,8 @@ def generate_patients(
 def open_facilities(facilities: Facilities) -> None:
     """Open the treatment resources at minute 30 (08:00)."""
 
-    facilities.cw1.set_capacity(2)
-    facilities.cw2.set_capacity(2)
+    facilities.wards_open = True
+    facilities.dispatch_doctors()
     facilities.xray.set_capacity(2)
     facilities.plaster.set_capacity(1)
 
@@ -409,9 +468,7 @@ def _summarize_patients(patients: list[Patient]) -> dict[str, float]:
     overall = sum(treatment_times) / len(treatment_times)
     metrics = {"overall": overall}
     for patient_type, values in times_by_type.items():
-        metrics[f"type_{patient_type}"] = (
-            sum(values) / len(values) if values else 0.0
-        )
+        metrics[f"type_{patient_type}"] = sum(values) / len(values) if values else 0.0
     variance = sum((value - overall) ** 2 for value in treatment_times) / len(
         treatment_times
     )
@@ -435,7 +492,7 @@ def solve_c06(
     if not isinstance(task_b_active, bool):
         raise TypeError("task_b_active must be bool")
     env = Simulation(seed=seed)
-    facilities = Facilities(env, discipline=discipline)
+    facilities = Facilities(env, discipline=discipline, task_b_active=task_b_active)
     finished_patients: list[Patient] = []
 
     generate_patients(

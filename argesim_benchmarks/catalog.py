@@ -61,7 +61,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.DES,),
         _source("c02"),
         "DES",
-        BenchmarkStatus.VALIDATED,
+        BenchmarkStatus.SPECIFIED,
     ),
     BenchmarkDefinition(
         "C03",
@@ -85,7 +85,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.STIFF_ODE, ModelClass.HYBRID),
         _source("c05"),
         "stiff ODE, state events",
-        BenchmarkStatus.VALIDATED,
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C06",
@@ -199,7 +199,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         ),
         _source("c18"),
         "ARX, static/dynamic ANN",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.SPECIFIED,
     ),
     BenchmarkDefinition(
         "C19R",

@@ -1,8 +1,6 @@
 import math
 import unittest
 
-from nsa_devs import DesScheduler
-
 from argesim_benchmarks.models.c16_restaurant_business import (
     C16Parameters,
     C16Simulation,
@@ -12,6 +10,7 @@ from argesim_benchmarks.models.c16_restaurant_business import (
     c16_task_c,
     restaurant_density_at,
 )
+from nsa_devs import DesScheduler
 
 
 class TestC16RestaurantBusiness(unittest.TestCase):
@@ -90,9 +89,8 @@ class TestC16RestaurantBusiness(unittest.TestCase):
             lambda: c16_task_c([1.0], runs=1.5),
         )
         for call in calls:
-            with self.subTest(call=call):
-                with self.assertRaises(ValueError):
-                    call()
+            with self.subTest(call=call), self.assertRaises(ValueError):
+                call()
 
     def test_parameter_validation_rejects_invalid_numeric_domains(self):
         for arguments in (
@@ -101,9 +99,8 @@ class TestC16RestaurantBusiness(unittest.TestCase):
             {"dinner_cost": -1.0},
             {"cell_size": 1000.0},
         ):
-            with self.subTest(arguments=arguments):
-                with self.assertRaises(ValueError):
-                    C16Parameters(**arguments)
+            with self.subTest(arguments=arguments), self.assertRaises(ValueError):
+                C16Parameters(**arguments)
 
     def test_simulation_rejects_time_reversal_and_invalid_tax(self):
         sim = C16Simulation(C16Parameters(total_people=20), seed=1)

@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
 from ..runtime import solve_ivp
 
+
 @dataclass(frozen=True)
 class C11Parameters:
     # Mechanical system parameters
@@ -134,9 +135,10 @@ def c11_rhs(
 
     Theta1, Theta2, Theta3 = c11_inertia_terms(p)
 
-    I1_max = p.T1_max * p.phase_factor / p.kT1
-    I2_max = p.T2_max * p.phase_factor / p.kT2
-    I3_max = p.T3_max * p.phase_factor / p.kT3
+    # The specified Tmax is motor torque before gearing: Tmax = (3/2)*kT*Imax.
+    I1_max = p.T1_max / (p.phase_factor * p.kT1)
+    I2_max = p.T2_max / (p.phase_factor * p.kT2)
+    I3_max = p.T3_max / (p.phase_factor * p.kT3)
 
     def rhs(_time: float, state: Sequence[float]) -> Vector:
         q1, q2, q3, dq1, dq2, dq3, I1, I2, I3 = state

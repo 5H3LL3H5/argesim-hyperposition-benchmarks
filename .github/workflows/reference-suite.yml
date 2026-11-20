@@ -26,5 +26,5 @@ jobs:
       - name: Ruff
         if: matrix.python-version == '3.13'
         run: |
-          python -m pip install ruff
+          python -m pip install ruff==0.17.5
           ruff check .

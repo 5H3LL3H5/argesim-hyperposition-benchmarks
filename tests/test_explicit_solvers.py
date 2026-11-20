@@ -106,7 +106,9 @@ class ExplicitSolverTests(unittest.TestCase):
         self.assertEqual(result.stats.accepted_steps, 4)
         self.assertAlmostEqual(result.final_state[0], math.exp(-1), delta=1e-6)
         tiny = rk45(InitialValueProblem(lambda t, y: (1,), 0, (0,), 1e-15))
-        self.assertEqual(tiny.final_state, (1e-15,))
+        # Summation differs by one ULP on Python 3.10/3.11 versus 3.12+.
+        # Keep a scale-aware bound that still rejects a skipped/zero interval.
+        self.assertAlmostEqual(tiny.final_state[0], 1e-15, delta=2 * math.ulp(1e-15))
         # An inaccurate endpoint trial must not be accepted merely to finish.
         with self.assertRaises(IntegrationError):
             rk45(InitialValueProblem(lambda t, y: (-1e6 * y[0],), 0, (1,), 1e-6),

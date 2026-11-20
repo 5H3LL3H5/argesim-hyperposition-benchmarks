@@ -234,7 +234,10 @@ def c09_controller_surface(
     else:
         y_axis = tuple(-0.05 + 0.1 * index / (points - 1) for index in range(points))
         values = tuple(
-            tuple(c09_ifc_increment(error / 100.0, delta, selected) for error in x_axis)
+            tuple(
+                c09_ifc_increment(error / 100.0, delta / 100.0, selected)
+                for error in x_axis
+            )
             for delta in y_axis
         )
     return C09Surface(x_axis, y_axis, values, selected)
@@ -326,8 +329,8 @@ def simulate_c09(
         raise ValueError("valid positive simulation and output steps are required")
     if not math.isfinite(actuator_scale) or actuator_scale <= 0.0:
         raise ValueError("actuator_scale must be positive and finite")
-    steps = int(round(t_bound / sample_time))
-    stride = int(round(output_step / sample_time))
+    steps = round(t_bound / sample_time)
+    stride = round(output_step / sample_time)
     if not math.isclose(steps * sample_time, t_bound, abs_tol=1.0e-10):
         raise ValueError("t_bound must be an integer multiple of sample_time")
     if not math.isclose(stride * sample_time, output_step, abs_tol=1.0e-10):

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
@@ -73,19 +74,23 @@ def _r_t(time: float, parameters: C03Parameters) -> float:
     # half period + TRF to end of period: ON
     else:
         return parameters.r_on
+
+
+def _c03_derivative(state: Sequence[float], parameters: C03Parameters, r: float) -> Vector:
+    x1, x2, x3, x4 = state
+    return (
+        -x2 / parameters.l1 + parameters.vdc / parameters.l1,
+        x1 / parameters.c2 - x2 / (parameters.c2 * r) - x3 / parameters.c2,
+        x2 / parameters.l3 - parameters.rl * x3 / parameters.l3 - x4 / parameters.l3,
+        x3 / parameters.c4,
+    )
+
+
 def c03_rhs(parameters: C03Parameters = _C03_DEFAULT_PARAMETERS) -> Rhs:
     """Return the official four-state continuous right-hand side."""
 
     def rhs(time: float, state: Sequence[float]) -> Vector:
-        x1, x2, x3, x4 = state
-        r = _r_t(time, parameters)
-
-        dx1 = -x2 / parameters.l1 + parameters.vdc / parameters.l1
-        dx2 = x1 / parameters.c2 - x2 / (parameters.c2 * r) - x3 / parameters.c2
-        dx3 = x2 / parameters.l3 - parameters.rl * x3 / parameters.l3 - x4 / parameters.l3
-        dx4 = x3 / parameters.c4
-
-        return (dx1, dx2, dx3, dx4)
+        return _c03_derivative(state, parameters, _r_t(time, parameters))
 
     return rhs
 
@@ -207,24 +212,48 @@ def solve_c03(
             parameters.trf,
             half_period,
             half_period + parameters.trf,
-            parameters.period,
         ):
+            # Ramp endpoints at a cycle edge use the canonical cycle
+            # boundary below, including the maximum allowed rise/fall time.
+            if not 0.0 < offset < parameters.period:
+                continue
             boundary = base + offset
             if 0.0 < boundary < t_bound:
                 boundaries.add(boundary)
+        # Use the same expression as the next cycle's start. base+period can
+        # differ by one ULP and create an unresolvable artificial interval.
+        boundary = (cycle + 1) * parameters.period
+        if 0.0 < boundary < t_bound:
+            boundaries.add(boundary)
         cycle += 1
 
     ordered = sorted(boundaries)
     segments: list[IntegrationResult] = []
     state = tuple(float(value) for value in initial_state)
 
-    for start, end in zip(ordered, ordered[1:]):
-        problem = c03_problem(
-            parameters=parameters,
-            initial_state=state,
-            t0=start,
-            t_bound=end,
-        )
+    for start, end in itertools.pairwise(ordered):
+        if parameters.trf == 0.0:
+            # An instantaneous switch belongs to the next segment. All RK
+            # stages in this segment, including its endpoint, use its fixed
+            # circuit; sampling R(end) would introduce the next discontinuity.
+            resistance = _r_t(start + (end - start) / 2.0, parameters)
+
+            def segment_rhs(
+                _time: float, values: Sequence[float], r: float = resistance
+            ) -> Vector:
+                return _c03_derivative(values, parameters, r)
+
+            problem = InitialValueProblem(
+                segment_rhs, start, state, end,
+                name="ARGESIM-C03-ideal-switch-segment", autonomous=True,
+            )
+        else:
+            problem = c03_problem(
+                parameters=parameters,
+                initial_state=state,
+                t0=start,
+                t_bound=end,
+            )
         span = end - start
         defaults = {
             "euler": {"step": 1.0e-10},

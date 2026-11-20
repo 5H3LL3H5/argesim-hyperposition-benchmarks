@@ -2,24 +2,23 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from hashlib import sha256
 import json
 import math
 import os
-from pathlib import Path
 import statistics
 import subprocess
 import sys
 import tempfile
 import time
 import tracemalloc
+from datetime import datetime, timezone
+from hashlib import sha256
+from pathlib import Path
 from typing import Any
 
 from .evidence import RuntimeEnvironment, _git_sha
 from .ivp import IntegrationResult
 from .runner import CONTRACTS, _suite_arguments, contract, to_jsonable
-
 
 PERFORMANCE_SCHEMA_VERSION = 1
 
@@ -177,7 +176,7 @@ def measure_task(
         q1, _, q3 = statistics.quantiles(raw, n=4, method="inclusive")
         values["iqr_seconds"] = q3 - q1
         outcome["status"] = "passed"
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 - failed tasks must emit explicit evidence records
         outcome["error"] = f"{type(exc).__name__}: {exc}"
         outcome["unavailable"]["timing_summary"] = (
             "Parity or execution failed; raw durations are diagnostic only."

@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 from .base import OracleStatus
 from .cifasis import CIFASIS_PINNED_COMMIT, CifasisOracle
@@ -76,7 +77,7 @@ def handle_oracle_command(arguments: argparse.Namespace) -> int:
     except (OSError, json.JSONDecodeError) as exc:
         raise ValueError(f"could not read oracle request: {exc}") from exc
     if not isinstance(payload, dict):
-        raise ValueError("oracle request must be a JSON object")
+        raise TypeError("oracle request must be a JSON object")
     result = oracle.run(
         payload,
         arguments.output_dir,

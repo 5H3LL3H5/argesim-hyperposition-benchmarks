@@ -54,7 +54,7 @@ def c13_linear_rhs(
     """Return the explicit continuous rate equations for the linear model."""
 
     def rhs(_time: float, state: Sequence[float]) -> Vector:
-        xc, xc_dot, alpha, alpha_dot, current_fc = state
+        _xc, xc_dot, alpha, alpha_dot, current_fc = state
 
         fc_dot = -4.0 * (current_fc - fc_desired)
 
@@ -88,7 +88,7 @@ def c13_nonlinear_rhs(
     dc = dc_current if dc_current is not None else parameters.dc
 
     def rhs(_time: float, state: Sequence[float]) -> Vector:
-        xc, xc_dot, alpha, alpha_dot, current_fc = state
+        _xc, xc_dot, alpha, alpha_dot, current_fc = state
 
         fc_dot = -4.0 * (current_fc - fc_desired)
 

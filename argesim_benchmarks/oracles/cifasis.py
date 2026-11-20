@@ -15,9 +15,10 @@ import shlex
 import shutil
 import subprocess
 import tempfile
-from pathlib import Path
+from collections.abc import Mapping, Sequence
 from numbers import Real
-from typing import Any, Mapping, Sequence
+from pathlib import Path
+from typing import Any
 
 from ..external import (
     AtomicArtifactDirectory,
@@ -246,7 +247,7 @@ class CifasisOracle(SolverOracle):
         timeout_seconds: float = 300.0,
     ) -> OracleResult:
         if not isinstance(request, Mapping):
-            raise ValueError("oracle request must be a JSON object")
+            raise TypeError("oracle request must be a JSON object")
         try:
             request_bytes = canonical_json_bytes(request)
         except ValueError as exc:

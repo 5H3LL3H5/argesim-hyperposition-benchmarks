@@ -16,13 +16,13 @@ import subprocess
 import sys
 import tempfile
 import time
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from ..external import canonical_json_bytes
 from .cifasis import ORACLE_PROTOCOL_VERSION
-
 
 _MAX_REQUEST_BYTES = 16_777_216
 _MAX_OUTPUT_BYTES = 16_777_216
@@ -81,8 +81,7 @@ def _run_checked(
             cwd=cwd,
             env=dict(environment),
             stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             shell=False,
             check=False,
         )
@@ -104,8 +103,7 @@ def _git_commit(source_root: Path) -> str:
         completed = subprocess.run(
             ["git", "-C", str(source_root), "rev-parse", "--verify", "HEAD"],
             stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             shell=False,
             check=False,
             timeout=5.0,
@@ -128,8 +126,7 @@ def _git_commit(source_root: Path) -> str:
                 "--untracked-files=normal",
             ],
             stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             shell=False,
             check=False,
             timeout=5.0,
@@ -272,6 +269,8 @@ def _validated_request(request: Mapping[str, Any]) -> dict[str, Any]:
     )
     if stop_time <= start_time:
         raise AdapterError("simulation.stop_time must be greater than start_time")
+    if not math.isfinite(stop_time - start_time):
+        raise AdapterError("simulation duration must be finite")
     relative_tolerance = _positive_number(
         simulation.get("relative_tolerance"), "simulation.relative_tolerance"
     )
@@ -373,9 +372,16 @@ def _analytic_assessment(
     times: Sequence[float],
     values: Sequence[float],
 ) -> dict[str, Any]:
+    start = configuration["start_time"]
+    stop = configuration["stop_time"]
+    # Scale by the interval, not its absolute origin or a one-second floor:
+    # otherwise a short run can mistake its initial sample for its endpoint.
+    time_tolerance = 1e-12 * (stop - start)
+    if start - times[0] > time_tolerance or times[-1] - stop > time_tolerance:
+        raise AdapterError("trajectory sample is outside the requested time interval")
     references = [
         configuration["initial_value"]
-        * math.exp(-configuration["rate"] * (time_value - configuration["start_time"]))
+        * math.exp(-configuration["rate"] * max(0.0, time_value - start))
         for time_value in times
     ]
     absolute_errors = [
@@ -387,6 +393,8 @@ def _analytic_assessment(
         + configuration["relative_tolerance"] * abs(reference)
         for reference in references
     ]
+    if any(not math.isfinite(value) for value in (*absolute_errors, *error_budgets)):
+        raise AdapterError("analytic error or tolerance budget is not finite")
     scaled_errors = [
         absolute_error / budget
         for absolute_error, budget in zip(absolute_errors, error_budgets)
@@ -396,23 +404,33 @@ def _analytic_assessment(
         / max(abs(reference), configuration["absolute_tolerance"])
         for absolute_error, reference in zip(absolute_errors, references)
     ]
-    terminal_tolerance = 1e-12 * max(1.0, abs(configuration["stop_time"]))
+    if any(not math.isfinite(value) for value in (*scaled_errors, *relative_errors)):
+        raise AdapterError("analytic error ratio is not finite")
+    max_absolute_error = max(absolute_errors)
+    # Squaring raw errors can overflow or underflow even when the RMS is finite.
+    rmse = (
+        max_absolute_error
+        * math.sqrt(
+            math.fsum((error / max_absolute_error) ** 2 for error in absolute_errors)
+            / len(absolute_errors)
+        )
+        if max_absolute_error
+        else 0.0
+    )
     return {
         "reference": "x(t)=initial_value*exp(-rate*(t-start_time))",
         "sampled_points_within_requested_tolerance": max(scaled_errors) <= 1.0,
         "max_scaled_error": max(scaled_errors),
-        "max_absolute_error": max(absolute_errors),
+        "max_absolute_error": max_absolute_error,
         "max_relative_error": max(relative_errors),
-        "rmse": math.sqrt(
-            sum(error * error for error in absolute_errors) / len(absolute_errors)
-        ),
+        "rmse": rmse,
         "requested_start_time": configuration["start_time"],
         "requested_stop_time": configuration["stop_time"],
         "first_sample_time": times[0],
         "last_sample_time": times[-1],
         "terminal_gap": configuration["stop_time"] - times[-1],
         "terminal_sample_present": abs(times[-1] - configuration["stop_time"])
-        <= terminal_tolerance,
+        <= time_tolerance,
         "scope": "analytic comparison at emitted sample times",
     }
 

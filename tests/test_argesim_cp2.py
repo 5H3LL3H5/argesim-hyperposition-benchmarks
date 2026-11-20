@@ -1,24 +1,24 @@
-import unittest
 import math
+import unittest
 
 from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
 from argesim_benchmarks.models.cp2_parallel_and_distributed import (
     CP2_PRINTED_ROPE_PARAMETERS,
     CP2LBMCell,
     CP2MonteCarloParameters,
-    cp2_monte_carlo_problem,
-    cp2_lbm_initial_state,
-    cp2_lbm_geometry,
-    cp2_lbm_step,
-    cp2_task2_lid_driven_cavity,
     CP2SwingingRopeParameters,
-    cp2_swinging_rope_problem,
+    cp2_lbm_geometry,
+    cp2_lbm_initial_state,
     cp2_lbm_relaxation,
+    cp2_lbm_step,
     cp2_lbm_step_parallel,
     cp2_monte_carlo_analytical,
+    cp2_monte_carlo_problem,
     cp2_swinging_rope_analytical,
     cp2_swinging_rope_implicit,
+    cp2_swinging_rope_problem,
     cp2_task1_monte_carlo,
+    cp2_task2_lid_driven_cavity,
     cp2_task3_swinging_rope,
 )
 

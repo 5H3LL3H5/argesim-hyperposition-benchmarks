@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import Enum
 import math
 import random
 import statistics
-from typing import Callable
+from collections.abc import Callable
+from dataclasses import dataclass
+from enum import Enum
+
 from nsa_devs.hypertime import HyperTime
 from nsa_devs.scheduler import DesScheduler
 
@@ -54,6 +55,9 @@ class CanalAndLock:
 
         self.active_cycle_direction: Direction | None = None
         self.active_cycle_barges: set[Barge] = set()
+        # Eastmax/Westmax bound all admissions during a cycle, including
+        # barges that have already left while the last barge is still inside.
+        self.active_cycle_admissions = 0
         self.pre_lock_barges: set[Barge] = set()
         self.last_cycle_direction: Direction | None = None
 
@@ -96,10 +100,11 @@ class CanalAndLock:
             max_allowed = (
                 self.eastmax if barge.direction == Direction.EASTBOUND else self.westmax
             )
-            if len(self.active_cycle_barges) < max_allowed:
+            if self.active_cycle_admissions < max_allowed:
                 self.queues[barge.direction].remove(barge)
                 self._record_queues()
                 self.active_cycle_barges.add(barge)
+                self.active_cycle_admissions += 1
                 self.pre_lock_barges.add(barge)
                 canal_time = (
                     self.west_canal_time
@@ -148,6 +153,7 @@ class CanalAndLock:
                 self.eastmax if next_dir == Direction.EASTBOUND else self.westmax
             )
             admitted = self.queues[next_dir][:max_allowed]
+            self.active_cycle_admissions = len(admitted)
             self.queues[next_dir] = self.queues[next_dir][max_allowed:]
             self._record_queues()
 
@@ -230,6 +236,7 @@ class CanalAndLock:
         if not self.active_cycle_barges:
             self.last_cycle_direction = self.active_cycle_direction
             self.active_cycle_direction = None
+            self.active_cycle_admissions = 0
             self.try_start_cycle()
 
     def average_transit_times(self) -> dict[str, float]:

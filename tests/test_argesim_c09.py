@@ -15,6 +15,21 @@ from argesim_benchmarks.models.c09_fuzzy_tanks import (
 
 
 class C09Tests(unittest.TestCase):
+    def test_ifc_surface_uses_centimetres_for_both_axes(self) -> None:
+        # Figure 4: e=15 cm gives good=.4, low=.6; de=.0125 cm
+        # gives rising=.5. Product rule weights are therefore .2 and .6.
+        # IFC2: (-1e-4*.2 + 2e-4*.6)/.8 = 1.25e-4.
+        # IFC1: use triangular areas 2.5e-4 and 1.25e-4 and their centroids.
+        for controller, expected in (
+            (C09Controller.IFC1, 1.5e-4),
+            (C09Controller.IFC2, 1.25e-4),
+        ):
+            with self.subTest(controller=controller):
+                surface = c09_controller_surface(controller, points=9)
+                self.assertAlmostEqual(surface.x[6], 15.0)
+                self.assertAlmostEqual(surface.y[5], 0.0125)
+                self.assertAlmostEqual(surface.z[5][6], expected, places=12)
+
     def test_controller_surfaces_and_rule_directions(self) -> None:
         self.assertEqual(benchmark("C09").status, BenchmarkStatus.IMPLEMENTED)
         for controller in C09Controller:

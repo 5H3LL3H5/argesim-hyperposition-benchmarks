@@ -1,7 +1,7 @@
-import unittest
 import random
+import unittest
 
-import argesim_benchmarks.catalog as catalog
+from argesim_benchmarks import catalog
 from argesim_benchmarks.models.c20_complex_production import (
     C20ConveyorCluster,
     C20ConveyorElement,
@@ -17,13 +17,13 @@ from argesim_benchmarks.models.c20_complex_production import (
     generate_osc1_order_book,
     generate_osc2_order_book,
     generate_osc3_order_book,
-    run_c20_replication,
     get_process_plans,
+    run_c20_replication,
 )
 
 
 class C20Tests(unittest.TestCase):
-    def test_c20_is_implemented(self):
+    def test_c20_implementation_does_not_claim_independent_validation(self):
         c20 = catalog.benchmark("C20")
         self.assertEqual(c20.status, catalog.BenchmarkStatus.IMPLEMENTED)
 

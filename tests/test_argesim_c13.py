@@ -1,19 +1,19 @@
 """Tests for the ARGESIM C13 benchmark implementation."""
 
-import unittest
 import math
+import unittest
 
+from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
 from argesim_benchmarks.models.c13_crane import (
+    C13_INITIAL_STATE,
     C13Controller,
     C13Parameters,
-    C13_INITIAL_STATE,
-    c13_linear_rhs,
     _c13_disturbance_force,
+    c13_linear_rhs,
     c13_task_a,
     c13_task_b_study,
     c13_task_c_study,
 )
-from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
 
 
 class C13Tests(unittest.TestCase):

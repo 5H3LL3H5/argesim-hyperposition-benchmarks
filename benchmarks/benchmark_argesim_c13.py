@@ -124,7 +124,7 @@ def main() -> None:
         result = None
         for _ in range(arguments.repeat):
             started = time.perf_counter_ns()
-            full_result, xl_traj, brake_traj = solve_c13_task_b_c(
+            full_result, _xl_traj, _brake_traj = solve_c13_task_b_c(
                 with_diagnosis=with_diag
             )
             durations.append(time.perf_counter_ns() - started)

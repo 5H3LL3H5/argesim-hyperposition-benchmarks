@@ -21,45 +21,21 @@ class ArgesimCatalogTests(unittest.TestCase):
         self.assertEqual(identifiers, expected)
         self.assertEqual(len(BENCHMARKS), 24)
 
-    def test_implemented_benchmarks_status(self) -> None:
-        statuses = {entry.identifier: entry.status for entry in BENCHMARKS}
-        implemented = (
-            "C01",
-            "C03",
-            "C04",
-            "C09",
-            "C10",
-            "C12",
-            "C06",
-            "C07",
-            "C11",
-            "C13",
-            "C14",
-            "C15",
-            "C16",
-            "C17R",
-            "C18",
-            "C19R",
-            "C20",
-            "C22",
-        )
-        for identifier in implemented:
-            self.assertEqual(statuses[identifier], BenchmarkStatus.IMPLEMENTED)
-        self.assertEqual(statuses["C02"], BenchmarkStatus.VALIDATED)
-        self.assertEqual(statuses["C08"], BenchmarkStatus.VALIDATED)
-        self.assertEqual(statuses["C21"], BenchmarkStatus.VALIDATED)
-        self.assertEqual(statuses["CP2"], BenchmarkStatus.VALIDATED)
-        self.assertTrue(
-            all(
-                status is BenchmarkStatus.CATALOGED
-                for identifier, status in statuses.items()
-                if identifier not in implemented
-                and identifier
-                not in {"C02", "C05", "C08", "C21", "CP1", "CP2"}
-            )
-        )
-        self.assertEqual(statuses["C05"], BenchmarkStatus.VALIDATED)
-        self.assertEqual(statuses["CP1"], BenchmarkStatus.VALIDATED)
+    def test_benchmark_status_reflects_remaining_definition_gaps(self) -> None:
+        expected_groups = {
+            BenchmarkStatus.SPECIFIED: {"C02", "C18"},
+            BenchmarkStatus.IMPLEMENTED: {
+                "C01", "C03", "C04", "C05", "C06", "C07", "C09", "C10", "C11", "C12", "C13",
+                "C14", "C15", "C16", "C17R", "C19R", "C20", "C22",
+            },
+            BenchmarkStatus.VALIDATED: {"C08", "C21", "CP1", "CP2"},
+        }
+        expected = {
+            identifier: status
+            for status, identifiers in expected_groups.items()
+            for identifier in identifiers
+        }
+        self.assertEqual({entry.identifier: entry.status for entry in BENCHMARKS}, expected)
 
     def test_sources_are_official_and_lookup_is_strict(self) -> None:
         self.assertTrue(
@@ -90,9 +66,8 @@ class ArgesimCatalogTests(unittest.TestCase):
             valid.replace(COVERAGE_END, f"{COVERAGE_START}\n{COVERAGE_END}"),
         )
         for text in malformed:
-            with self.subTest(text=text):
-                with self.assertRaises(ValueError):
-                    replace_generated_section(text, "new")
+            with self.subTest(text=text), self.assertRaises(ValueError):
+                replace_generated_section(text, "new")
 
     def test_coverage_families_are_present(self) -> None:
         self.assertTrue(all(entry.coverage_family.strip() for entry in BENCHMARKS))

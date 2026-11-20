@@ -1,10 +1,15 @@
+import itertools
 import unittest
+
 from argesim_benchmarks.models.c12_collision import (
     C12_QUASI_PLASTIC_E,
+    C12Parameters,
     c12_task_a,
     c12_task_b,
     c12_task_c,
 )
+from argesim_benchmarks.models.c12_collision.c12_collision_processes import _simulate
+
 
 class ArgesimC12Tests(unittest.TestCase):
     def test_c12_task_a(self) -> None:
@@ -31,7 +36,33 @@ class ArgesimC12Tests(unittest.TestCase):
         )
         first_collision = result["a1_trajectory"][1]
         self.assertAlmostEqual(first_collision[0], 1.0)
-        self.assertEqual(result["a1_trajectory"][0][1], [1.0, 0.0, 0.0])
+        self.assertEqual(result["a1_trajectory"][0][1], [1.0, 1.0, 1.0])
+
+    def test_elastic_collisions_follow_equal_initial_gaps(self) -> None:
+        # Definition (4): y1(0) = y2(0) = y3(0) = a. Equal masses
+        # exchange velocities on impact, so a/v0 elapses between impacts.
+        count, velocities, end, history = _simulate(C12Parameters(e=1.0))
+        self.assertEqual(count, 3)
+        self.assertEqual([row[0] for row in history], [0.0, 1.0, 2.0, 3.0])
+        self.assertEqual(velocities, [0.0, 0.0, 0.0, 1.0])
+        self.assertEqual(end, 3.0)
+
+    def test_collisions_conserve_momentum_and_dissipate_energy(self) -> None:
+        _, _, _, history = _simulate(C12Parameters(e=0.2))
+        previous_energy = 0.5
+        for _, gaps, velocities in history:
+            self.assertAlmostEqual(sum(velocities), 1.0)
+            self.assertGreaterEqual(min(gaps), -1.0e-12)
+            energy = sum(value * value for value in velocities) / 2.0
+            self.assertLessEqual(energy, previous_energy + 1.0e-14)
+            previous_energy = energy
+
+    def test_plastic_collapse_preserves_nonoverlap_and_momentum(self) -> None:
+        _, velocities, _, history = _simulate(C12Parameters(e=0.0, max_time=None))
+        self.assertAlmostEqual(sum(velocities), 1.0)
+        for velocity in velocities:
+            self.assertAlmostEqual(velocity, 0.25, delta=1.0e-10)
+        self.assertTrue(all(min(gaps) >= 0.0 for _, gaps, _ in history))
 
     def test_c12_task_b(self) -> None:
         """Validates Task B (Number of collisions and final velocities over e).
@@ -46,6 +77,13 @@ class ArgesimC12Tests(unittest.TestCase):
         self.assertEqual(sweep[1.0]["collisions"], 3)
         self.assertEqual(min(sweep), C12_QUASI_PLASTIC_E)
         self.assertGreater(sweep[C12_QUASI_PLASTIC_E]["collisions"], 3)
+        # At e=.5 two impacts occur after t=15. Tasks B/C require the final
+        # velocities, not a cutoff at the plotting horizon of Task A1.
+        self.assertEqual(sweep[0.5]["collisions"], 6)
+        self.assertEqual(
+            sweep[0.5]["velocities"],
+            [0.173828125, 0.193359375, 0.2109375, 0.421875],
+        )
 
     def test_c12_task_c(self) -> None:
         """Validates Task C (Boundary value problem and stochastic study).
@@ -65,13 +103,12 @@ class ArgesimC12Tests(unittest.TestCase):
         cdf = result["c2_empirical_cdf"]
         self.assertEqual(len(cdf), 10000)
         self.assertEqual(cdf[-1][1], 1.0)
-        self.assertTrue(all(a[0] <= b[0] and a[1] < b[1] for a, b in zip(cdf, cdf[1:])))
+        self.assertTrue(all(a[0] <= b[0] and a[1] < b[1] for a, b in itertools.pairwise(cdf)))
 
     def test_c12_task_c_rejects_too_few_samples(self) -> None:
         for value in (1, 1.5, True):
-            with self.subTest(value=value):
-                with self.assertRaises(ValueError):
-                    c12_task_c(n_samples=value)
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                c12_task_c(n_samples=value)
 
 if __name__ == "__main__":
     unittest.main()

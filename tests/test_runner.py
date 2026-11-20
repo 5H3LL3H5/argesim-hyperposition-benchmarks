@@ -7,8 +7,8 @@ from unittest.mock import patch
 
 from argesim_benchmarks.cli import main
 from argesim_benchmarks.runner import (
-    BenchmarkTaskError,
     CONTRACTS,
+    BenchmarkTaskError,
     contract,
     run_suite,
     to_jsonable,
@@ -63,8 +63,9 @@ class UnifiedRunnerTests(unittest.TestCase):
         self.assertEqual(len(result["bombardment"]), 3)
 
     def test_suite_covers_every_registered_task_and_records_required_inputs(self) -> None:
-        from argesim_benchmarks.runner import _suite_arguments
         import inspect
+
+        from argesim_benchmarks.runner import _suite_arguments
 
         for profile in ("smoke", "definition"):
             arguments = _suite_arguments(profile)
@@ -138,9 +139,8 @@ class UnifiedRunnerTests(unittest.TestCase):
         with patch("argesim_benchmarks.cli.run_suite", return_value={
             "profile": "smoke", "scope": "execution only", "tasks": [],
             "passed": 0, "failed": 1, "total": 1,
-        }):
-            with redirect_stdout(StringIO()):
-                self.assertEqual(main(["run-suite", "--fail-fast"]), 1)
+        }), redirect_stdout(StringIO()):
+            self.assertEqual(main(["run-suite", "--fail-fast"]), 1)
 
 
 if __name__ == "__main__":

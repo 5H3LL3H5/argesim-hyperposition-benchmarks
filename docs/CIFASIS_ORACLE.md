@@ -164,6 +164,12 @@ RMSE and tolerance-scaled errors, where the per-sample budget is
 is reported separately because event-based QSS output need not emit a sample
 at the requested stop time. Passing emitted samples therefore does not imply
 that a terminal sample exists and does not promote ARGESIM evidence by itself.
+The time-boundary tolerance is `1e-12 * (stop_time - start_time)`, so a short
+interval or a large time origin cannot make its initial point count as its
+terminal point. Samples outside that interval (beyond the boundary tolerance)
+are rejected. RMSE is evaluated with scaled squares to avoid unnecessary
+overflow and underflow; unrepresentable error metrics or tolerance budgets
+produce a controlled adapter error instead of a non-finite JSON result.
 No QSS event-count or peak-memory value is emitted until a native source for
 those measurements is qualified.
 

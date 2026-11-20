@@ -9,20 +9,25 @@ two deliberately separate purposes:
 
 ## Current status
 
-The official inventory was re-audited on 2026-08-17: C01-C22 plus CP1 and
+The official inventory was re-audited on 2026-11-18: C01-C22 plus CP1 and
 CP2, with C17R and C19R as the active revised definitions. The machine-readable
 inventory in `argesim_benchmarks.catalog` records the evidence reached by each
 complete task family instead of treating file presence as implementation.
 
-C02, C05, C08, C21, CP1 and CP2 currently reach the `validated` gate. Every
-other catalog family reaches `implemented`: all required task types have an
-executable path, while independent external full-output references are still
-missing for several families. Each benchmark must pass five evidence gates:
+C08, C21, CP1 and CP2 retain limited `validated` evidence for the cases
+listed in the audit. Eighteen other families reach `implemented`, including
+the causal C20 transport model added on 2026-11-19. C02 and C18 remain
+`specified` with partial executable code because
+required model behaviour, experiments or original data are missing. Passing
+unit tests or a smoke run does not establish full benchmark correctness.
+Each benchmark must pass five evidence gates:
 
 `cataloged -> specified -> implemented -> validated -> benchmark-ready`
 
 See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status and
 [ARGESIM_AUDIT.md](ARGESIM_AUDIT.md) for the definition-by-definition review.
+The [2026-11-19 transport/data report](docs/ARGESIM_TRANSPORT_DATA_20261119.md)
+records the C20 geometry, controller, test scope and C18 input-data contract.
 
 ## Implemented numerical foundation
 
@@ -93,7 +98,10 @@ error, if any. A failure gives a nonzero exit code; later tasks still run unless
 `--fail-fast` is set. The smoke profile shortens costly workloads, and the
 definition profile uses the documented task defaults (including long CP2 LBM
 runs). Passing a suite run proves execution only; published reference checks
-and catalog evidence gates are assessed separately.
+and catalog evidence gates are assessed separately. C18 smoke explicitly uses
+the labelled figure-reconstruction demo. A regular C18 run requires both data
+sets (objects or CSV paths); missing measurements fail instead of silently
+loading substitutes.
 
 Each task also contains a versioned `evidence` object. Its nested
 `experiment` records the Git commit (when available), effective arguments
@@ -190,6 +198,25 @@ python benchmarks/benchmark_cqss_liqss_bdf.py --repeat 9 --warmup 1
 
 The event-chain benchmark validates result parity before recording timing. It
 reports median and interquartile range and makes no speedup claim.
+
+## Discrete-event ordering
+
+`DesScheduler.schedule` and `schedule_at` accept a keyword-only integer
+`priority` (default `0`). Pending events are ordered by macro time, microstep,
+priority, then insertion sequence. Lower priority numbers run first at the
+same exact `HyperTime`; equal priorities preserve FIFO order. Existing calls
+therefore retain their ordering. Priority never overrides macro time or a
+causal microstep, and zero-delay `schedule` calls still advance the microstep.
+
+Models must choose their own simultaneous-event policy. For example, queue an
+abort at priority `-1` and a result at priority `0` at the same time to process
+the abort first while still accounting for the result. This applies to pending
+events only: an event inserted by a callback cannot run before that callback,
+and late external arrivals cannot undo completed handlers. The scheduler does
+not provide network-arrival independence or automatic confluent transitions.
+
+Both run methods count executed callbacks toward `max_events`; cancelled
+entries are discarded without consuming that budget or advancing time.
 
 ## Interpretation
 

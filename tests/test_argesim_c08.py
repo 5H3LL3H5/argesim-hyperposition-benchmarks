@@ -1,14 +1,60 @@
 import unittest
+
 from argesim_benchmarks.models.c08_canal_and_lock import (
-    CanalAndLock,
     Barge,
+    CanalAndLock,
     Direction,
     c08_task_c,
     run_c08_replication,
 )
 from nsa_devs.hypertime import HyperTime
 
+
 class TestC08(unittest.TestCase):
+    def test_departure_does_not_reopen_a_full_cycle(self):
+        """Eastmax/Westmax limit cumulative admissions, not current occupancy."""
+        for direction in Direction:
+            with self.subTest(direction=direction):
+                opposite = next(value for value in Direction if value != direction)
+                model = CanalAndLock(2, 2)
+                for identifier, heading, arrival in (
+                    (0, direction, 0.0),
+                    (1, direction, 0.0),
+                    (2, opposite, 1.0),
+                    (3, direction, 55.0),
+                ):
+                    model.schedule_arrival(
+                        Barge(identifier, heading, HyperTime.at(arrival))
+                    )
+                model.run(250.0)
+                self.assertEqual(
+                    [barge.id for barge, _ in model.completed_barges],
+                    [0, 1, 2, 3],
+                )
+                departures = {
+                    barge.id: float(barge.arrival_time.standard_part()) + transit
+                    for barge, transit in model.completed_barges
+                }
+                self.assertEqual(departures, {0: 54.0, 1: 88.0, 2: 142.0, 3: 196.0})
+
+    def test_arrival_can_fill_an_incomplete_cycle(self):
+        model = CanalAndLock(2, 1)
+        for identifier, heading, arrival in (
+            (0, Direction.EASTBOUND, 0.0),
+            (1, Direction.WESTBOUND, 1.0),
+            (2, Direction.EASTBOUND, 10.0),
+        ):
+            model.schedule_arrival(Barge(identifier, heading, HyperTime.at(arrival)))
+        model.run(200.0)
+        self.assertEqual(
+            [barge.id for barge, _ in model.completed_barges], [0, 2, 1]
+        )
+        self.assertEqual(
+            [float(barge.arrival_time.standard_part()) + transit
+             for barge, transit in model.completed_barges],
+            [54.0, 88.0, 142.0],
+        )
+
     def test_dataset_1(self):
         """Validate C08 Dataset 1: Alternating minimal cycles (Eastmax 1, Westmax 1).
 
@@ -161,9 +207,8 @@ class TestC08(unittest.TestCase):
 
     def test_invalid_cycle_limits_are_rejected(self):
         for eastmax, westmax in ((0, 1), (1, 0), (True, 1), (1.5, 1)):
-            with self.subTest(eastmax=eastmax, westmax=westmax):
-                with self.assertRaises(ValueError):
-                    CanalAndLock(eastmax, westmax)
+            with self.subTest(eastmax=eastmax, westmax=westmax), self.assertRaises(ValueError):
+                CanalAndLock(eastmax, westmax)
 
     def test_invalid_experiment_controls_are_rejected(self):
         for arguments in (
@@ -172,9 +217,8 @@ class TestC08(unittest.TestCase):
             {"paired_replications": 1.5},
             {"starting_seeds": (True,)},
         ):
-            with self.subTest(arguments=arguments):
-                with self.assertRaises(ValueError):
-                    c08_task_c(**arguments)
+            with self.subTest(arguments=arguments), self.assertRaises(ValueError):
+                c08_task_c(**arguments)
 
     def test_scheduler_rejects_time_reversal(self):
         model = CanalAndLock(1, 1)

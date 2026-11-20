@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """Validation script for ARGESIM C03 (Generalized Class-E Amplifier)."""
 
-import os
 import sys
 from pathlib import Path
-import json
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 try:
-    import numpy as np
     import matplotlib.pyplot as plt
+    import numpy as np
     HAS_PLOTTING = True
 except ImportError:
     HAS_PLOTTING = False
@@ -20,6 +18,7 @@ from argesim_benchmarks.models.c03_amplifier import (
     c03_task_b,
     c03_task_c,
 )
+
 
 def plot_task_b(result) -> None:
     if not HAS_PLOTTING:
@@ -43,7 +42,7 @@ def plot_task_b(result) -> None:
     ir = states[:, 1] / rt
     vl = states[:, 2] * p.rl
 
-    fig, axes = plt.subplots(3, 1, figsize=(10, 12), sharex=True)
+    _fig, axes = plt.subplots(3, 1, figsize=(10, 12), sharex=True)
 
     # State variables
     axes[0].plot(times, states[:, 0], label="IL1 (A)")
@@ -74,7 +73,7 @@ def plot_task_c(results) -> None:
     if not HAS_PLOTTING:
         return
 
-    fig, axes = plt.subplots(1, 1, figsize=(8, 6))
+    _fig, axes = plt.subplots(1, 1, figsize=(8, 6))
 
     for trf, result in results.items():
         states = np.array(result.states)

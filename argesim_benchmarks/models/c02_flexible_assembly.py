@@ -8,24 +8,29 @@ from __future__ import annotations
 import heapq
 import math
 from dataclasses import dataclass, field
-from fractions import Fraction
+
 from nsa_devs.hypertime import HyperTime
 
 
 @dataclass(frozen=True)
 class C02Constants:
     """System-wide configuration parameters for C02."""
+
     speed_m_min: float = 18.0
     speed_m_s: float = 18.0 / 60.0
     pallet_length: float = 0.36
     shift_time: float = 2.0
+    shifter_width: float = 0.4
+    positioning_unit_length: float = 0.4
     space_between_subsystems: float = 0.4
     warmup_minutes: int = 120
     end_minutes: int = 600
 
+
 @dataclass
 class Pallet:
     """A single pallet in the assembly system."""
+
     id: int
     arrival_time: HyperTime | None = None
     operations_done: set[str] = field(default_factory=set)
@@ -38,6 +43,7 @@ class Pallet:
         self.in_system = True
         self.fallback_to_a6 = False
 
+
 @dataclass(frozen=True)
 class StationConfig:
     name: str
@@ -46,6 +52,10 @@ class StationConfig:
     length_buffer: float
     buffer_capacity: int
     shift_time: float
+
+    def b1_transport_length(self, constants: C02Constants) -> float:
+        """Through lane plus the two 0.4 m shifter sections (clarification 1)."""
+        return self.length_b1 + 2 * constants.shifter_width
 
     @classmethod
     def create(
@@ -67,12 +77,15 @@ class StationConfig:
             shift_time=shift_time,
         )
 
+
 # --- Formal DEVS Framework ---
+
 
 class Message:
     def __init__(self, port: str, value: object):
         self.port = port
         self.value = value
+
 
 class AtomicModel:
     def __init__(self, name: str):
@@ -82,7 +95,6 @@ class AtomicModel:
 
     def init_state(self):
         """Initialize model state."""
-        pass
 
     def ta(self) -> float:
         """Time advance function."""
@@ -90,15 +102,14 @@ class AtomicModel:
 
     def dint(self):
         """Internal transition function."""
-        pass
 
     def dext(self, e: float, message: Message):
         """External transition function."""
-        pass
 
     def out(self) -> Message | None:
         """Output function."""
         return None
+
 
 @dataclass(order=True)
 class DEVS_Event:
@@ -108,12 +119,15 @@ class DEVS_Event:
     model: AtomicModel = field(compare=False)
     message: Message | None = field(compare=False, default=None)
 
+
 class Coordinator:
     def __init__(self, end_minutes: int):
         self.end_minutes = end_minutes
         self.time = HyperTime.at(0)
         self.models: list[AtomicModel] = []
-        self.couplings: dict[tuple[AtomicModel, str], list[tuple[AtomicModel, str]]] = {}
+        self.couplings: dict[
+            tuple[AtomicModel, str], list[tuple[AtomicModel, str]]
+        ] = {}
         self.model_next_event: dict[AtomicModel, HyperTime] = {}
         self.model_last_event: dict[AtomicModel, HyperTime] = {}
         self.throughput = 0
@@ -126,7 +140,9 @@ class Coordinator:
         self.model_last_event[model] = self.time
         model.init_state()
 
-    def add_coupling(self, source: AtomicModel, src_port: str, dest: AtomicModel, dst_port: str):
+    def add_coupling(
+        self, source: AtomicModel, src_port: str, dest: AtomicModel, dst_port: str
+    ):
         key = (source, src_port)
         if key not in self.couplings:
             self.couplings[key] = []
@@ -147,10 +163,9 @@ class Coordinator:
         min_time = None
         min_model = None
         for model, t in self.model_next_event.items():
-            if t is not None:
-                if min_time is None or t < min_time:
-                    min_time = t
-                    min_model = model
+            if t is not None and (min_time is None or t < min_time):
+                min_time = t
+                min_model = model
         if min_time is None:
             return None
         return min_time, min_model
@@ -179,8 +194,12 @@ class Coordinator:
                 time for time in self.model_next_event.values() if time is not None
             ]
             next_internal = min(internal_times) if internal_times else None
-            next_external = self.external_events[0].time if self.external_events else None
-            candidates = [time for time in (next_internal, next_external) if time is not None]
+            next_external = (
+                self.external_events[0].time if self.external_events else None
+            )
+            candidates = [
+                time for time in (next_internal, next_external) if time is not None
+            ]
             if not candidates:
                 break
             t_next = min(candidates)
@@ -219,6 +238,7 @@ class Coordinator:
 
 # --- C02 DEVS Models ---
 
+
 class StationModel(AtomicModel):
     """
     Formal DEVS Atomic Model for a Station.
@@ -236,7 +256,14 @@ class StationModel(AtomicModel):
     sigma, we track multiple events using a single state variable that
     predicts the *next* event time.
     """
-    def __init__(self, name: str, config: StationConfig, constants: C02Constants, is_a1: bool = False):
+
+    def __init__(
+        self,
+        name: str,
+        config: StationConfig,
+        constants: C02Constants,
+        is_a1: bool = False,
+    ):
         super().__init__(name)
         self.config = config
         self.constants = constants
@@ -249,7 +276,9 @@ class StationModel(AtomicModel):
 
         # Next event times relative to current time
         self.next_internal_event: str | None = None
-        self.events: list[tuple[float, str, Pallet]] = [] # (remaining_time, event_type, pallet)
+        self.events: list[
+            tuple[float, str, Pallet]
+        ] = []  # (remaining_time, event_type, pallet)
 
     @property
     def occupancy(self) -> int:
@@ -258,23 +287,39 @@ class StationModel(AtomicModel):
         Capacity decisions must include pallets that are still shifting in and
         out; otherwise simultaneous arrivals can overbook the finite branch.
         """
-        shifting_in = sum(event_type == "SHIFT_IN_DONE" for _, event_type, _ in self.events)
-        travelling = sum(event_type == "BUFFER_ARRIVAL" for _, event_type, _ in self.events)
-        shifting_out = sum(event_type == "SHIFT_OUT_DONE" for _, event_type, _ in self.events)
+        shifting_in = sum(
+            event_type == "SHIFT_IN_DONE" for _, event_type, _ in self.events
+        )
+        travelling = sum(
+            event_type == "BUFFER_ARRIVAL" for _, event_type, _ in self.events
+        )
+        shifting_out = sum(
+            event_type == "SHIFT_OUT_DONE" for _, event_type, _ in self.events
+        )
+        leaving_station = sum(
+            event_type == "POST_TRAVEL_DONE" for _, event_type, _ in self.events
+        )
         return (
             len(self.buffer_queue)
             + shifting_in
             + travelling
             + shifting_out
+            + leaving_station
             + int(self.processing_pallet is not None)
         )
 
     @property
     def buffer_load(self) -> int:
         """Pallets committed to the travelling and waiting part of B2."""
-        shifting_in = sum(event_type == "SHIFT_IN_DONE" for _, event_type, _ in self.events)
-        travelling = sum(event_type == "BUFFER_ARRIVAL" for _, event_type, _ in self.events)
-        shifting_out = sum(event_type == "SHIFT_OUT_DONE" for _, event_type, _ in self.events)
+        shifting_in = sum(
+            event_type == "SHIFT_IN_DONE" for _, event_type, _ in self.events
+        )
+        travelling = sum(
+            event_type == "BUFFER_ARRIVAL" for _, event_type, _ in self.events
+        )
+        shifting_out = sum(
+            event_type == "SHIFT_OUT_DONE" for _, event_type, _ in self.events
+        )
         return len(self.buffer_queue) + travelling + shifting_in + shifting_out
 
     def _schedule_internal(self, delay: float, event_type: str, pallet: Pallet):
@@ -293,7 +338,11 @@ class StationModel(AtomicModel):
     def dext(self, e: float, message: Message):
         # Time advance all pending events
         for i in range(len(self.events)):
-            self.events[i] = (self.events[i][0] - e, self.events[i][1], self.events[i][2])
+            self.events[i] = (
+                self.events[i][0] - e,
+                self.events[i][1],
+                self.events[i][2],
+            )
 
         if message.port == "in":
             pallet: Pallet = message.value
@@ -314,7 +363,11 @@ class StationModel(AtomicModel):
         # Time advance by sigma (which is events[0][0])
         e = self.sigma
         for i in range(len(self.events)):
-            self.events[i] = (self.events[i][0] - e, self.events[i][1], self.events[i][2])
+            self.events[i] = (
+                self.events[i][0] - e,
+                self.events[i][1],
+                self.events[i][2],
+            )
 
         # Pop the first event (it is now at time 0)
         _, event_type, pallet = self.events.pop(0)
@@ -323,8 +376,10 @@ class StationModel(AtomicModel):
             # The B2 belt keeps moving while the station processes another
             # pallet.  Model that travel independently instead of adding it to
             # every serial processing cycle.
+            # The buffer is part of B2, not an additional conveyor length.
+            # Place the processing point at the positioning unit's centre.
             travel_time = (
-                self.config.length_b1 + self.config.length_buffer
+                self.config.length_buffer + self.constants.positioning_unit_length / 2
             ) / self.constants.speed_m_s
             self._schedule_internal(travel_time, "BUFFER_ARRIVAL", pallet)
 
@@ -337,7 +392,7 @@ class StationModel(AtomicModel):
 
             # Apply operation
             if self.is_a1:
-                pass # Unload/load happens, but we handle in_system tracking at SourceSink
+                pass  # Unload/load happens, but we handle in_system tracking at SourceSink
             else:
                 if self.config.name.startswith("A2"):
                     pallet.operations_done.add("A2")
@@ -351,9 +406,22 @@ class StationModel(AtomicModel):
                     missing = {"A3", "A4", "A5"} - pallet.operations_done
                     pallet.operations_done.update(missing)
 
-            # Now shift out
-            self._schedule_internal(self.config.shift_time, "SHIFT_OUT_DONE", pallet)
+            # Travel from the positioning unit to Sy is separate from both
+            # processing and shifting, as required by clarification 4.
+            remaining_length = (
+                self.config.length_b1
+                - self.config.length_buffer
+                - self.constants.positioning_unit_length / 2
+            )
+            self._schedule_internal(
+                remaining_length / self.constants.speed_m_s,
+                "POST_TRAVEL_DONE",
+                pallet,
+            )
             self._check_buffer_to_processing()
+
+        elif event_type == "POST_TRAVEL_DONE":
+            self._schedule_internal(self.config.shift_time, "SHIFT_OUT_DONE", pallet)
 
         elif event_type == "SHIFT_OUT_DONE":
             # Output was already sent
@@ -367,7 +435,11 @@ class StationModel(AtomicModel):
             pallet = self.buffer_queue.pop(0)
             self.processing_pallet = pallet
 
-            self._schedule_internal(self.config.op_time, "PROCESSING_DONE", pallet)
+            duration = self.config.op_time
+            if self.is_a1 and not pallet.in_system:
+                # Initially empty pallets require loading only (7.5 s).
+                duration /= 2
+            self._schedule_internal(duration, "PROCESSING_DONE", pallet)
 
 
 class ConveyorModel(AtomicModel):
@@ -375,6 +447,7 @@ class ConveyorModel(AtomicModel):
     Formal DEVS Atomic Model for a conveyor belt segment.
     Transports a pallet with a fixed delay.
     """
+
     def __init__(self, name: str, length: float, constants: C02Constants):
         super().__init__(name)
         self.delay = length / constants.speed_m_s
@@ -406,17 +479,19 @@ class ConveyorModel(AtomicModel):
         else:
             self.sigma = math.inf
 
+
 class RouterModel(AtomicModel):
     """
     Formal DEVS Atomic Model for the Sx routing point.
     Decides if a pallet enters the station or bypasses it.
     It takes 0 delay (passes through instantly) but modifies routing.
     """
+
     def __init__(self, name: str, station_model: StationModel, is_a1: bool = False):
         super().__init__(name)
         self.station_model = station_model
         self.is_a1 = is_a1
-        self.queue: list[tuple[Pallet, str]] = [] # (pallet, destination_port)
+        self.queue: list[tuple[Pallet, str]] = []  # (pallet, destination_port)
         self.arrival_counter = 0
         self.alternative_a6: StationModel | None = None
 
@@ -433,9 +508,8 @@ class RouterModel(AtomicModel):
                 # A1 loads an initially empty pallet and unloads only a
                 # finished workpiece.  An incomplete pallet stays on B1 for
                 # another circuit instead of being counted as throughput.
-                needs_processing = (
-                    not pallet.in_system
-                    or required.issubset(pallet.operations_done)
+                needs_processing = not pallet.in_system or required.issubset(
+                    pallet.operations_done
                 )
             elif s_name.startswith("A2"):
                 if "A2" not in pallet.operations_done:
@@ -449,15 +523,18 @@ class RouterModel(AtomicModel):
                 if not needs_processing:
                     pallet.fallback_to_a6 = True
             elif s_name == "A4" and "A4" not in pallet.operations_done:
-                needs_processing = not pallet.fallback_to_a6 and "A3" in pallet.operations_done
-            elif s_name == "A5" and "A5" not in pallet.operations_done:
                 needs_processing = (
-                    not pallet.fallback_to_a6
-                    and {"A3", "A4"}.issubset(pallet.operations_done)
+                    not pallet.fallback_to_a6 and "A3" in pallet.operations_done
+                )
+            elif s_name == "A5" and "A5" not in pallet.operations_done:
+                needs_processing = not pallet.fallback_to_a6 and {"A3", "A4"}.issubset(
+                    pallet.operations_done
                 )
             elif s_name == "A6":
                 needs_processing = pallet.fallback_to_a6 or not {
-                    "A3", "A4", "A5"
+                    "A3",
+                    "A4",
+                    "A5",
                 }.issubset(pallet.operations_done)
 
             # Check buffer occupancy. We peek into the station model's state.
@@ -468,13 +545,12 @@ class RouterModel(AtomicModel):
             # We can count events destined for SHIFT_IN_DONE, plus len(buffer_queue), plus 1 if processing
             occupancy = self.station_model.occupancy
 
-            can_shift = needs_processing and occupancy < self.station_model.config.buffer_capacity
-
-            if (
+            can_shift = (
                 needs_processing
-                and not can_shift
-                and s_name in {"A3", "A4", "A5"}
-            ):
+                and occupancy < self.station_model.config.buffer_capacity
+            )
+
+            if needs_processing and not can_shift and s_name in {"A3", "A4", "A5"}:
                 pallet.fallback_to_a6 = True
 
             if can_shift:
@@ -482,7 +558,7 @@ class RouterModel(AtomicModel):
             else:
                 self.queue.append((pallet, "to_conveyor"))
 
-            self.sigma = 0.0 # route immediately
+            self.sigma = 0.0  # route immediately
 
     def out(self) -> Message | None:
         if self.queue:
@@ -497,10 +573,12 @@ class RouterModel(AtomicModel):
         else:
             self.sigma = math.inf
 
+
 class SourceSinkModel(AtomicModel):
     """
     Handles the overall throughput collection at A1 and initial pallet injection.
     """
+
     def __init__(self, constants: C02Constants, num_pallets: int):
         super().__init__("SourceSink")
         self.constants = constants
@@ -514,11 +592,15 @@ class SourceSinkModel(AtomicModel):
             pallet: Pallet = message.value
             # Output record if it completed a loop
             time = self.coordinator.time if self.coordinator else HyperTime.at(0)
-            if pallet.in_system:
-                if time.macro >= self.constants.warmup_minutes * 60:
-                    if self.coordinator:
-                        self.coordinator.throughput += 1
-                        self.coordinator.total_throughput_time += float(time.macro - pallet.arrival_time.macro)
+            if (
+                pallet.in_system
+                and time.macro >= self.constants.warmup_minutes * 60
+                and self.coordinator
+            ):
+                self.coordinator.throughput += 1
+                self.coordinator.total_throughput_time += float(
+                    time.macro - pallet.arrival_time.macro
+                )
 
             pallet.reset(time)
             self.queue.append(pallet)
@@ -537,40 +619,54 @@ class SourceSinkModel(AtomicModel):
             self.sigma = math.inf
 
 
-def solve_c02(num_pallets: int) -> dict[str, float | bool]:
-    """Solve ARGESIM C02 for the specified number of pallets using formal DEVS."""
-    if isinstance(num_pallets, bool) or not isinstance(num_pallets, int) or num_pallets <= 0:
+def _station_configs(constants: C02Constants) -> tuple[StationConfig, ...]:
+    return tuple(
+        StationConfig.create(
+            name,
+            operation,
+            length,
+            buffer,
+            constants.pallet_length,
+            shift_time=constants.shift_time,
+        )
+        for name, operation, length, buffer in (
+            ("A1", 15.0, 2.0, 1.2),
+            ("A2_1", 60.0, 1.6, 0.8),
+            ("A2_2", 60.0, 1.6, 0.8),
+            ("A2_3", 60.0, 1.6, 0.8),
+            ("A3", 20.0, 1.6, 0.8),
+            ("A4", 20.0, 1.6, 0.8),
+            ("A5", 20.0, 1.6, 0.8),
+            ("A6", 30.0, 2.0, 1.2),
+        )
+    )
+
+
+def solve_c02(num_pallets: int) -> dict[str, float | None]:
+    """Run the partial C02 transport abstraction, not a validated plant model.
+
+    Belt blocking and merge contention are not implemented. ``deadlock`` is
+    therefore unknown (None). High-load cases requiring those mechanisms are
+    rejected rather than returning a published deadlock as a simulated result.
+    See ARGESIM_AUDIT.md for the remaining timing and transport mismatches.
+    """
+    if (
+        isinstance(num_pallets, bool)
+        or not isinstance(num_pallets, int)
+        or num_pallets <= 0
+    ):
         raise ValueError("num_pallets must be a positive integer")
 
-    # The closed conveyor is physically overfilled at this point.  The
-    # benchmark's reference parameter study reports deadlock for 50--60
-    # pallets, so do not manufacture a throughput value from a collision-free
-    # abstraction beyond the admissible loading range.
     if num_pallets >= 50:
-        return {
-            "throughput": 0.0,
-            "average_throughput_time": 0.0,
-            "deadlock": True,
-        }
+        raise NotImplementedError(
+            "C02 high-load cases require belt blocking and merge contention; "
+            "deadlock detection is not implemented"
+        )
 
     constants = C02Constants()
     coord = Coordinator(constants.end_minutes)
 
-    # Define Stations
-    station_configs = [
-        StationConfig.create(
-            "A1", 15.0, 2.0, 1.2, constants.pallet_length, shift_time=4.0 / 3.0
-        ),
-        StationConfig.create("A2_1", 60.0, 1.6, 0.8, constants.pallet_length),
-        StationConfig.create("A2_2", 60.0, 1.6, 0.8, constants.pallet_length),
-        StationConfig.create("A2_3", 60.0, 1.6, 0.8, constants.pallet_length),
-        StationConfig.create("A3", 20.0, 1.6, 0.8, constants.pallet_length),
-        StationConfig.create("A4", 20.0, 1.6, 0.8, constants.pallet_length),
-        StationConfig.create("A5", 20.0, 1.6, 0.8, constants.pallet_length),
-        StationConfig.create(
-            "A6", 30.0, 2.0, 1.2, constants.pallet_length, shift_time=4.0 / 3.0
-        ),
-    ]
+    station_configs = _station_configs(constants)
 
     distances = [0.4, 0.4, 0.4, 0.0, 0.4, 0.4, 0.4, 0.0]
 
@@ -584,11 +680,11 @@ def solve_c02(num_pallets: int) -> dict[str, float | bool]:
     coord.add_model(source_sink)
 
     for i, config in enumerate(station_configs):
-        is_a1 = (i == 0)
+        is_a1 = i == 0
         station = StationModel(f"Station_{config.name}", config, constants, is_a1)
         router = RouterModel(f"Router_{config.name}", station, is_a1)
         b1 = ConveyorModel(
-            f"B1_{config.name}", config.length_b1 + config.length_buffer, constants
+            f"B1_{config.name}", config.b1_transport_length(constants), constants
         )
         gap_len = distances[i]
 
@@ -624,10 +720,10 @@ def solve_c02(num_pallets: int) -> dict[str, float | bool]:
         if conveyor_gaps[i]:
             coord.add_coupling(stations[i], "out", conveyor_gaps[i], "in")
             coord.add_coupling(conveyor_b1s[i], "out", conveyor_gaps[i], "in")
-            coord.add_coupling(conveyor_gaps[i], "out", routers[(i+1)%8], "in")
+            coord.add_coupling(conveyor_gaps[i], "out", routers[(i + 1) % 8], "in")
         else:
-            coord.add_coupling(stations[i], "out", routers[(i+1)%8], "in")
-            coord.add_coupling(conveyor_b1s[i], "out", routers[(i+1)%8], "in")
+            coord.add_coupling(stations[i], "out", routers[(i + 1) % 8], "in")
+            coord.add_coupling(conveyor_b1s[i], "out", routers[(i + 1) % 8], "in")
 
     # Connect A1 logic to SourceSink
     # Actually, the problem says A1 unloads and loads.
@@ -644,7 +740,9 @@ def solve_c02(num_pallets: int) -> dict[str, float | bool]:
 
     # Inject pallets initially.
     # We simulate them being evenly spaced.
-    total_b1_length = sum(s.length_b1 for s in station_configs) + sum(distances)
+    total_b1_length = sum(
+        s.b1_transport_length(constants) for s in station_configs
+    ) + sum(distances)
     spacing = total_b1_length / num_pallets
 
     # We will use an Injector model to send them at time 0 to various segments.
@@ -653,7 +751,7 @@ def solve_c02(num_pallets: int) -> dict[str, float | bool]:
         pos = i * spacing
         current_dist = 0.0
         for s_idx, config in enumerate(station_configs):
-            segment_len = config.length_b1 + distances[s_idx]
+            segment_len = config.b1_transport_length(constants) + distances[s_idx]
             if current_dist + segment_len >= pos or s_idx == 7:
                 dist_to_end = current_dist + segment_len - pos
                 travel_time = dist_to_end / constants.speed_m_s
@@ -677,5 +775,5 @@ def solve_c02(num_pallets: int) -> dict[str, float | bool]:
     return {
         "throughput": float(coord.throughput),
         "average_throughput_time": avg_throughput_time,
-        "deadlock": False,
+        "deadlock": None,
     }

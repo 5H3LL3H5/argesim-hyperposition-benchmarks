@@ -1,7 +1,7 @@
 """ARGESIM C18: nonlinear dynamic identification benchmark.
 
-The original downloadable 100 Hz files are no longer served by the benchmark
-site.  ``c18_digitized_data`` therefore reconstructs explicitly labelled 5 Hz
+The original downloadable 100 Hz files have not been recovered by this audit.
+``c18_digitized_data`` reconstructs explicitly labelled 5 Hz
 anchors from Figures 1 and 2 of the official definition and interpolates them
 onto the prescribed 100 Hz grid.  Algorithms also accept any replacement data
 set, keeping data provenance separate from model implementation.
@@ -9,10 +9,16 @@ set, keeping data provenance separate from model implementation.
 
 from __future__ import annotations
 
+import csv
+import hashlib
+import io
+import itertools
+import json
 import math
 import random
 from collections.abc import Sequence
 from dataclasses import dataclass
+from pathlib import Path
 
 C18_PUBLISHED_TRANSFER = (1.586, -0.5985, 0.5289, -0.5206)
 C18_PUBLISHED_CORRELATIONS = {
@@ -103,8 +109,12 @@ class C18DataSet:
     force: tuple[float, ...]
     sampling_hz: float = 100.0
     provenance: str = "user-supplied"
+    kind: str = "supplied"
+    source_sha256: str | None = None
 
     def __post_init__(self) -> None:
+        object.__setattr__(self, "thickening", tuple(float(value) for value in self.thickening))
+        object.__setattr__(self, "force", tuple(float(value) for value in self.force))
         if len(self.thickening) != len(self.force) or len(self.force) < 5:
             raise ValueError("C18 signals must have one common length >= 5")
         if any(
@@ -115,6 +125,79 @@ class C18DataSet:
             raise ValueError("C18 signals must be finite")
         if not math.isfinite(self.sampling_hz) or self.sampling_hz <= 0.0:
             raise ValueError("sampling_hz must be positive and finite")
+        if self.kind not in {"supplied", "csv", "digitized"}:
+            raise ValueError("unknown C18 data kind")
+        if not isinstance(self.provenance, str) or not self.provenance.strip():
+            raise ValueError("C18 data need a nonempty provenance description")
+        if self.source_sha256 is not None:
+            _validate_sha256(self.source_sha256)
+
+
+@dataclass(frozen=True)
+class C18DataEvidence:
+    """Reproducible data identity, without asserting original-data authenticity."""
+
+    kind: str
+    provenance: str
+    samples: int
+    sampling_hz: float
+    signal_sha256: str
+    source_sha256: str | None
+
+
+def _validate_sha256(value: str) -> None:
+    if not isinstance(value, str) or len(value) != 64 or any(char not in "0123456789abcdefABCDEF" for char in value):
+        raise ValueError("SHA-256 must contain exactly 64 hexadecimal characters")
+
+
+def load_c18_csv(
+    path: str | Path, *, sampling_hz: float = 100.0,
+    expected_sha256: str | None = None,
+) -> C18DataSet:
+    """Read time_s/thickening/force CSV without resampling or filling gaps.
+
+    By default samples must be uniformly spaced at the specified 100 Hz.
+    An optional checksum pins the input bytes; it does not authenticate their
+    authorship. The result always records the actual input-file checksum.
+    """
+    if not math.isfinite(sampling_hz) or sampling_hz <= 0:
+        raise ValueError("sampling_hz must be positive and finite")
+    if expected_sha256 is not None:
+        _validate_sha256(expected_sha256)
+    source = Path(path)
+    raw = source.read_bytes()
+    digest = hashlib.sha256(raw).hexdigest()
+    if expected_sha256 is not None and digest != expected_sha256.lower():
+        raise ValueError("C18 input-file SHA-256 mismatch")
+    reader = csv.reader(io.StringIO(raw.decode("utf-8-sig")))
+    header = next(reader, [])
+    required = ("time_s", "thickening", "force")
+    if len(header) != 3 or set(header) != set(required):
+        raise ValueError("C18 CSV requires exactly time_s, thickening, force columns")
+    columns = tuple(header.index(name) for name in required)
+    signals: list[list[float]] = [[], [], []]
+    for line, row in enumerate(reader, 2):
+        if len(row) != 3:
+            raise ValueError(f"C18 CSV line {line} must contain three values")
+        try:
+            values = tuple(float(row[index]) for index in columns)
+        except ValueError as error:
+            raise ValueError(f"C18 CSV line {line} contains a non-numeric value") from error
+        if not all(math.isfinite(value) for value in values):
+            raise ValueError(f"C18 CSV line {line} contains a non-finite value")
+        if signals[0] and not math.isclose(values[0] - signals[0][-1], 1.0 / sampling_hz, rel_tol=1e-7, abs_tol=1e-10):
+            raise ValueError(f"C18 CSV line {line} is not on the uniform {sampling_hz:g} Hz time grid")
+        for signal, value in zip(signals, values):
+            signal.append(value)
+    return C18DataSet(tuple(signals[1]), tuple(signals[2]), sampling_hz,
+                      f"CSV input: {source.name}", "csv", digest)
+
+
+def _data_evidence(data: C18DataSet) -> C18DataEvidence:
+    payload = json.dumps({"sampling_hz": float(data.sampling_hz), "thickening": data.thickening,
+                          "force": data.force}, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    return C18DataEvidence(data.kind, data.provenance, len(data.force), data.sampling_hz,
+                           hashlib.sha256(payload.encode("utf-8")).hexdigest(), data.source_sha256)
 
 
 @dataclass(frozen=True)
@@ -167,6 +250,8 @@ class C18Metrics:
 
 @dataclass(frozen=True)
 class C18Tasks:
+    training_data: C18DataEvidence
+    validation_data: C18DataEvidence
     linear_model: C18LinearModel
     parallel_model: C18MLP
     dynamic_model: C18MLP
@@ -185,11 +270,11 @@ class C18Tasks:
 
 
 def _interpolate_anchors(values: Sequence[float], output_hz: int = 100) -> tuple[float, ...]:
-    factor = output_hz // 5
-    if output_hz % 5:
+    if isinstance(output_hz, bool) or not isinstance(output_hz, int) or output_hz <= 0 or output_hz % 5:
         raise ValueError("output_hz must be an integer multiple of 5")
+    factor = output_hz // 5
     result = []
-    for left, right in zip(values, values[1:]):
+    for left, right in itertools.pairwise(values):
         result.extend(left + (right - left) * index / factor for index in range(factor))
     result.append(float(values[-1]))
     return tuple(result)
@@ -203,12 +288,14 @@ def c18_digitized_data(*, sampling_hz: int = 100) -> tuple[C18DataSet, C18DataSe
         _interpolate_anchors(_TRAIN_FORCE, sampling_hz),
         float(sampling_hz),
         "digitized official C18 Figure 1 (5 Hz anchors, interpolated)",
+        "digitized",
     )
     validation = C18DataSet(
         _interpolate_anchors(_VALID_THICKENING, sampling_hz),
         _interpolate_anchors(_VALID_FORCE, sampling_hz),
         float(sampling_hz),
         "digitized official C18 Figure 2 (5 Hz anchors, interpolated)",
+        "digitized",
     )
     return training, validation
 
@@ -467,17 +554,34 @@ def _predict_dynamic(model: C18MLP, data: C18DataSet) -> tuple[float, ...]:
 
 
 def run_c18_tasks(
-    training: C18DataSet | None = None,
-    validation: C18DataSet | None = None,
+    training: C18DataSet | str | Path | None = None,
+    validation: C18DataSet | str | Path | None = None,
     *,
     epochs: int = 400,
+    use_digitized: bool = False,
 ) -> C18Tasks:
-    """Run official linear, parallel-ANN, and dynamic-ANN tasks."""
+    """Run the three identification methods on an explicit data pair.
 
-    if training is None or validation is None:
-        default_training, default_validation = c18_digitized_data()
-        training = training or default_training
-        validation = validation or default_validation
+    CSV paths are accepted for CLI use. ``use_digitized=True`` explicitly runs
+    the figure reconstruction demo; it does not validate the original measured
+    data experiment. Missing one member is never filled with unrelated data.
+    """
+    if use_digitized:
+        if training is not None or validation is not None:
+            raise ValueError("use_digitized cannot be combined with supplied C18 data")
+        training, validation = c18_digitized_data()
+    elif training is None or validation is None:
+        raise ValueError("C18 requires both training and validation data; use_digitized=True selects only the reconstruction demo")
+    if isinstance(training, (str, Path)):
+        training = load_c18_csv(training)
+    if isinstance(validation, (str, Path)):
+        validation = load_c18_csv(validation)
+    if not isinstance(training, C18DataSet) or not isinstance(validation, C18DataSet):
+        raise TypeError("C18 inputs must be C18DataSet instances or CSV paths")
+    if training.sampling_hz != validation.sampling_hz:
+        raise ValueError("C18 training and validation sampling rates must match")
+    if (training.kind == "digitized" or validation.kind == "digitized") and training.kind != validation.kind:
+        raise ValueError("C18 digitized data cannot be mixed with another data source")
     linear_model = fit_c18_linear(training)
     linear_training = predict_c18_linear(linear_model, training)
     linear_validation = predict_c18_linear(linear_model, validation)
@@ -517,6 +621,8 @@ def run_c18_tasks(
     dynamic_training = _predict_dynamic(dynamic_model, training)
     dynamic_validation = _predict_dynamic(dynamic_model, validation)
     return C18Tasks(
+        training_data=_data_evidence(training),
+        validation_data=_data_evidence(validation),
         linear_model=linear_model,
         parallel_model=parallel_model,
         dynamic_model=dynamic_model,

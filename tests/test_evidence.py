@@ -1,9 +1,8 @@
 import json
 import unittest
-
-import argesim_benchmarks.evidence as evidence
 from unittest.mock import Mock, patch
 
+from argesim_benchmarks import evidence
 from argesim_benchmarks.evidence import (
     ExperimentRecord,
     RuntimeEnvironment,
