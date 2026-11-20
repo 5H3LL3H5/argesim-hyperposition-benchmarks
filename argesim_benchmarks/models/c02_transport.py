@@ -84,13 +84,17 @@ class C02Plant:
         num_pallets: int,
         *,
         controller: str = "first-eligible",
+        unit_timing: str = "exclusive",
         constants: C02Constants | None = None,
         trace: bool = False,
     ) -> None:
         _positive_count(num_pallets)
         if controller not in ("first-eligible", "cyclic-a2"):
             raise ValueError("controller must be 'first-eligible' or 'cyclic-a2'")
+        if unit_timing not in ("exclusive", "service-only"):
+            raise ValueError("unit_timing must be 'exclusive' or 'service-only'")
         self.controller = controller
+        self.unit_timing = unit_timing
         self.a2_passages = [0, 0]
         c = constants or C02Constants()
         if not math.isfinite(c.speed_m_s) or c.speed_m_s <= 0:
@@ -110,11 +114,14 @@ class C02Plant:
             raise ValueError("a pallet must fit on a shifter, unit and connector")
         if unit % 2 or pitch % 2:
             raise ValueError("unit and pallet centres must lie on the cm lattice")
-        self.half_unit = unit // 2
+        # The reference sensitivity assigns approach and clearance to the
+        # adjoining transports. Physical distances and slot counts are fixed.
+        self.exclusive_half_travel = unit // 2 if unit_timing == "exclusive" else 0
+        belt_half_travel = unit // 2 - self.exclusive_half_travel
         self.stations: list[_Station] = []
 
-        def belt(name: str, length: int) -> _Belt:
-            return _Belt(name, length // pitch, length, pitch)
+        def belt(name: str, length: int, extra_travel: int = 0) -> _Belt:
+            return _Belt(name, length // pitch, length + extra_travel, pitch)
 
         for i, config in enumerate(_station_configs(c)):
             length = self._ticks(config.length_b1 / c.speed_m_s)
@@ -127,8 +134,8 @@ class C02Plant:
                 _Station(
                     config.name,
                     belt(f"{config.name}.B1", length),
-                    belt(f"{config.name}.pre", pre),
-                    belt(f"{config.name}.post", post),
+                    belt(f"{config.name}.pre", pre, belt_half_travel),
+                    belt(f"{config.name}.post", post, belt_half_travel),
                     None if i in (3, 7) else belt(f"{config.name}.gap", gap),
                     self._ticks(config.op_time),
                 )
@@ -224,7 +231,10 @@ class C02Plant:
             if part is None or not self._ready(station.due):
                 return False
             station.pallet = station.before.release(self.now)
-            station.phase, station.due = "position", self.now + self.half_unit
+            station.phase, station.due = (
+                "position",
+                self.now + self.exclusive_half_travel,
+            )
             self._record("unit_enter", part, station=station.name)
             return True
         if not self._ready(station.due):
@@ -271,10 +281,10 @@ class C02Plant:
             )
         station.phase = "done"
         if station.after.full or not self._ready(
-            station.after.next_entry - self.half_unit
+            station.after.next_entry - self.exclusive_half_travel
         ):
             return False  # the finished pallet still owns the positioning unit
-        station.due = self.now + self.half_unit
+        station.due = self.now + self.exclusive_half_travel
         station.after.reserve(part, station.due)
         station.pallet, station.phase = None, "idle"
         self._record("unit_exit", part, station=station.name, clear=station.due)
@@ -430,6 +440,12 @@ class C02Plant:
         while True:
             self.next_time = None
             self._settle()
+            # A reserved pallet changes A3's routing as soon as it enters
+            # the A6 input belt, before it is ready at that belt's outlet.
+            a6_input = self.stations[7].before
+            for _, ready_at in a6_input.queue:
+                if not self._ready(ready_at - a6_input.transit):
+                    break  # subsequent reservations arrive in FIFO order
             if self.next_time is None:
                 # A reserved transfer or a queued pallet behind a stopped FIFO
                 # head may still be travelling without enabling a new departure.
@@ -459,6 +475,7 @@ class C02Plant:
         return {
             "num_pallets": self.num_pallets,
             "controller": self.controller,
+            "unit_timing": self.unit_timing,
             "throughput": float(self.throughput),
             "average_throughput_time": mean(self.part_ticks),
             "average_to_unload_complete_seconds": mean(self.with_unload_ticks),
@@ -482,7 +499,11 @@ def _simevents_listing3_value(throughput: float, mean_seconds: float) -> float:
 
 
 def c02_pallet_study(
-    min_pallets: int = 1, max_pallets: int = 60, *, controller: str = "first-eligible"
+    min_pallets: int = 1,
+    max_pallets: int = 60,
+    *,
+    controller: str = "first-eligible",
+    unit_timing: str = "exclusive",
 ) -> dict:
     """Run independently initialized loads; rank productive, fully admitted runs."""
     _positive_count(min_pallets)
@@ -492,7 +513,7 @@ def c02_pallet_study(
     runs = []
     candidates = []
     for n in range(min_pallets, max_pallets + 1):
-        plant = C02Plant(n, controller=controller)
+        plant = C02Plant(n, controller=controller, unit_timing=unit_timing)
         result = plant.run()
         result.pop("deadlock_witness")  # solve_c02(n) exposes the full graph
         runs.append(result)

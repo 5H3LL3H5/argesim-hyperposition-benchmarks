@@ -13,7 +13,8 @@
       "num_pallets": 1,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 150.0
+      "throughput": 150.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 191.66666666666666,
@@ -26,7 +27,8 @@
       "num_pallets": 2,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 300.0
+      "throughput": 300.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 191.66666666666669,
@@ -39,7 +41,8 @@
       "num_pallets": 3,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 451.0
+      "throughput": 451.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 245.33333333333334,
@@ -52,7 +55,8 @@
       "num_pallets": 4,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 470.0
+      "throughput": 470.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 306.6666666666667,
@@ -65,7 +69,8 @@
       "num_pallets": 5,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 470.0
+      "throughput": 470.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 281.47937024972856,
@@ -78,7 +83,8 @@
       "num_pallets": 6,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 614.0
+      "throughput": 614.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 268.3945849977807,
@@ -91,7 +97,8 @@
       "num_pallets": 7,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 751.0
+      "throughput": 751.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 267.76411446249034,
@@ -104,7 +111,8 @@
       "num_pallets": 8,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 862.0
+      "throughput": 862.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 275.9840255591054,
@@ -117,7 +125,8 @@
       "num_pallets": 9,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 939.0
+      "throughput": 939.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 306.68335108271214,
@@ -130,7 +139,8 @@
       "num_pallets": 10,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 939.0
+      "throughput": 939.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 303.6452540747843,
@@ -143,7 +153,8 @@
       "num_pallets": 11,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1043.0
+      "throughput": 1043.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 306.6130846654825,
@@ -156,7 +167,8 @@
       "num_pallets": 12,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1126.0
+      "throughput": 1126.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 306.5680327868852,
@@ -169,7 +181,8 @@
       "num_pallets": 13,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1220.0
+      "throughput": 1220.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 303.0525920360631,
@@ -182,7 +195,8 @@
       "num_pallets": 14,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1331.0
+      "throughput": 1331.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 306.6695055594985,
@@ -195,7 +209,8 @@
       "num_pallets": 15,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1409.0
+      "throughput": 1409.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 327.07623106060606,
@@ -208,7 +223,8 @@
       "num_pallets": 16,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 347.74810606060606,
@@ -221,7 +237,8 @@
       "num_pallets": 17,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 367.91983901515147,
@@ -234,7 +251,8 @@
       "num_pallets": 18,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 388.3214962121212,
@@ -247,7 +265,8 @@
       "num_pallets": 19,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 408.83167731251484,
@@ -260,7 +279,8 @@
       "num_pallets": 20,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1409.0
+      "throughput": 1409.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 429.284209280303,
@@ -273,7 +293,8 @@
       "num_pallets": 21,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 449.96640643482374,
@@ -286,7 +307,8 @@
       "num_pallets": 22,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1409.0
+      "throughput": 1409.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 470.40827423167843,
@@ -299,7 +321,8 @@
       "num_pallets": 23,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1410.0
+      "throughput": 1410.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 490.6446339729922,
@@ -312,7 +335,8 @@
       "num_pallets": 24,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1407.0
+      "throughput": 1407.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 511.46699787083037,
@@ -325,7 +349,8 @@
       "num_pallets": 25,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1409.0
+      "throughput": 1409.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 532.7063829787234,
@@ -338,7 +363,8 @@
       "num_pallets": 26,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1410.0
+      "throughput": 1410.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 552.2172576832152,
@@ -351,7 +377,8 @@
       "num_pallets": 27,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1410.0
+      "throughput": 1410.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 572.2878464818764,
@@ -364,7 +391,8 @@
       "num_pallets": 28,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1407.0
+      "throughput": 1407.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 592.8937780932104,
@@ -377,7 +405,8 @@
       "num_pallets": 29,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1409.0
+      "throughput": 1409.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 615.2741477272727,
@@ -390,7 +419,8 @@
       "num_pallets": 30,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 633.5583155902531,
@@ -403,7 +433,8 @@
       "num_pallets": 31,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1409.0
+      "throughput": 1409.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 654.90625,
@@ -416,7 +447,8 @@
       "num_pallets": 32,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 675.1387310606061,
@@ -429,7 +461,8 @@
       "num_pallets": 33,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 694.8629261363636,
@@ -442,7 +475,8 @@
       "num_pallets": 34,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 714.1511710432931,
@@ -455,7 +489,8 @@
       "num_pallets": 35,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1409.0
+      "throughput": 1409.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 735.0236742424242,
@@ -468,7 +503,8 @@
       "num_pallets": 36,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 755.6250295718004,
@@ -481,7 +517,8 @@
       "num_pallets": 37,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1409.0
+      "throughput": 1409.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 777.2380952380952,
@@ -494,7 +531,8 @@
       "num_pallets": 38,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1407.0
+      "throughput": 1407.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 799.4625946969696,
@@ -507,7 +545,8 @@
       "num_pallets": 39,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 816.1951334750768,
@@ -520,7 +559,8 @@
       "num_pallets": 40,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1411.0
+      "throughput": 1411.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 836.1502013740819,
@@ -533,7 +573,8 @@
       "num_pallets": 41,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1407.0
+      "throughput": 1407.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 862.3061079545455,
@@ -546,7 +587,8 @@
       "num_pallets": 42,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 877.3726325757576,
@@ -559,7 +601,8 @@
       "num_pallets": 43,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 901.3766571969696,
@@ -572,7 +615,8 @@
       "num_pallets": 44,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 916.9373077832979,
@@ -585,7 +629,8 @@
       "num_pallets": 45,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1409.0
+      "throughput": 1409.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 944.3780776515151,
@@ -598,7 +643,8 @@
       "num_pallets": 46,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 962.2803406671399,
@@ -611,7 +657,8 @@
       "num_pallets": 47,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1409.0
+      "throughput": 1409.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 948.4125857582209,
@@ -624,7 +671,8 @@
       "num_pallets": 48,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1409.0
+      "throughput": 1409.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": 1005.6995738636364,
@@ -637,7 +685,8 @@
       "num_pallets": 49,
       "pending_admission": 0,
       "stopped_at_seconds": 36000.0,
-      "throughput": 1408.0
+      "throughput": 1408.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": null,
@@ -650,7 +699,8 @@
       "num_pallets": 50,
       "pending_admission": 0,
       "stopped_at_seconds": 3412.1666666666665,
-      "throughput": 0.0
+      "throughput": 0.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": null,
@@ -663,7 +713,8 @@
       "num_pallets": 51,
       "pending_admission": 0,
       "stopped_at_seconds": 1990.1666666666667,
-      "throughput": 0.0
+      "throughput": 0.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": null,
@@ -676,7 +727,8 @@
       "num_pallets": 52,
       "pending_admission": 0,
       "stopped_at_seconds": 2235.5,
-      "throughput": 0.0
+      "throughput": 0.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": null,
@@ -689,7 +741,8 @@
       "num_pallets": 53,
       "pending_admission": 0,
       "stopped_at_seconds": 1806.1666666666667,
-      "throughput": 0.0
+      "throughput": 0.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": null,
@@ -702,7 +755,8 @@
       "num_pallets": 54,
       "pending_admission": 0,
       "stopped_at_seconds": 1756.1666666666667,
-      "throughput": 0.0
+      "throughput": 0.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": null,
@@ -715,7 +769,8 @@
       "num_pallets": 55,
       "pending_admission": 0,
       "stopped_at_seconds": 1806.1666666666667,
-      "throughput": 0.0
+      "throughput": 0.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": null,
@@ -728,7 +783,8 @@
       "num_pallets": 56,
       "pending_admission": 0,
       "stopped_at_seconds": 1806.1666666666667,
-      "throughput": 0.0
+      "throughput": 0.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": null,
@@ -741,7 +797,8 @@
       "num_pallets": 57,
       "pending_admission": 0,
       "stopped_at_seconds": 1744.8333333333333,
-      "throughput": 0.0
+      "throughput": 0.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": null,
@@ -754,7 +811,8 @@
       "num_pallets": 58,
       "pending_admission": 0,
       "stopped_at_seconds": 1622.1666666666667,
-      "throughput": 0.0
+      "throughput": 0.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": null,
@@ -767,7 +825,8 @@
       "num_pallets": 59,
       "pending_admission": 0,
       "stopped_at_seconds": 886.1666666666666,
-      "throughput": 0.0
+      "throughput": 0.0,
+      "unit_timing": "exclusive"
     },
     {
       "average_including_handling_seconds": null,
@@ -780,7 +839,8 @@
       "num_pallets": 60,
       "pending_admission": 0,
       "stopped_at_seconds": 886.1666666666666,
-      "throughput": 0.0
+      "throughput": 0.0,
+      "unit_timing": "exclusive"
     }
   ],
   "simevents_listing_3": {

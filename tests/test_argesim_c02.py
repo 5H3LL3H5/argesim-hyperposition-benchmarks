@@ -181,6 +181,20 @@ class C02PublishedComparisons(unittest.TestCase):
         # Only the mean is outside the band at 25 pallets.
         self.assertAlmostEqual(self.runs[25]["throughput"] / 1439, 1, delta=0.06)
 
+    def test_processing_only_sensitivity_against_reference_cases(self):
+        for n, (count, mean_time) in self.references.items():
+            with self.subTest(n=n):
+                r = solve_c02(n, unit_timing="service-only")
+                self.assertEqual(r["unit_timing"], "service-only")
+                self.assertFalse(r["deadlock"])
+                self.assertGreater(r["average_throughput_time"], 0)
+                if n != 14:
+                    self.assertAlmostEqual(r["throughput"] / count, 1, delta=0.06)
+                if n not in (14, 25):
+                    self.assertAlmostEqual(
+                        r["average_throughput_time"] / mean_time, 1, delta=0.06
+                    )
+
     @unittest.expectedFailure
     def test_simevents_13_pallets(self):
         self.assert_reference(13)
