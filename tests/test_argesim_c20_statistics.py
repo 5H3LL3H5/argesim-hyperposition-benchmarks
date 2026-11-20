@@ -10,8 +10,9 @@ from argesim_benchmarks.models.c20_complex_production import (
 
 class C20StatisticsTests(unittest.TestCase):
     def test_task_b_retains_order_spread_and_task_c_unweighted_tardiness(self):
-        def replication(osc, psc, *, seed, order_count):
+        def replication(osc, psc, *, seed, order_count, order_seed):
             self.assertEqual(order_count, 2)
+            self.assertEqual(order_seed, 20)
             orders = tuple(
                 C20OrderResult(
                     i,

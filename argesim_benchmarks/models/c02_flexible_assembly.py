@@ -1,6 +1,7 @@
 """ARGESIM C02: Flexible Assembly System.
 
-This model is a Formal Discrete Event Simulation (DEVS) implementation.
+This is a partial DEVS transport abstraction, not a conformant C02 solution.
+It does not model finite B1 storage, physical merge blocking or deadlocks.
 """
 
 from __future__ import annotations
@@ -273,6 +274,9 @@ class StationModel(AtomicModel):
         self.buffer_queue: list[Pallet] = []
         self.processing_pallet: Pallet | None = None
         self.shifting_out_pallet: Pallet | None = None
+        # Reserve synchronously at routing, before the DEVS message arrives.
+        # Several arrivals in one macro/micro instant must not claim one slot.
+        self.reserved_admissions: set[int] = set()
 
         # Next event times relative to current time
         self.next_internal_event: str | None = None
@@ -306,6 +310,7 @@ class StationModel(AtomicModel):
             + shifting_out
             + leaving_station
             + int(self.processing_pallet is not None)
+            + len(self.reserved_admissions)
         )
 
     @property
@@ -320,7 +325,8 @@ class StationModel(AtomicModel):
         shifting_out = sum(
             event_type == "SHIFT_OUT_DONE" for _, event_type, _ in self.events
         )
-        return len(self.buffer_queue) + travelling + shifting_in + shifting_out
+        return (len(self.buffer_queue) + travelling + shifting_in + shifting_out
+                + len(self.reserved_admissions))
 
     def _schedule_internal(self, delay: float, event_type: str, pallet: Pallet):
         self.events.append((delay, event_type, pallet))
@@ -346,6 +352,7 @@ class StationModel(AtomicModel):
 
         if message.port == "in":
             pallet: Pallet = message.value
+            self.reserved_admissions.discard(pallet.id)
             # Pallet is shifting in (takes 2 sec)
             self._schedule_internal(self.config.shift_time, "SHIFT_IN_DONE", pallet)
 
@@ -511,8 +518,14 @@ class RouterModel(AtomicModel):
                 needs_processing = not pallet.in_system or required.issubset(
                     pallet.operations_done
                 )
+            elif not pallet.in_system:
+                # Initially empty pallets must reach A1 before any assembly.
+                needs_processing = False
             elif s_name.startswith("A2"):
-                if "A2" not in pallet.operations_done:
+                group = pallet.operations_done & {"A3", "A4", "A5"}
+                if "A2" not in pallet.operations_done and group in (
+                    set(), {"A3", "A4", "A5"}
+                ):
                     stride = {"A2_1": 3, "A2_2": 2, "A2_3": 1}[s_name]
                     needs_processing = self.arrival_counter % stride == 0
             elif s_name == "A3" and "A3" not in pallet.operations_done:
@@ -554,6 +567,7 @@ class RouterModel(AtomicModel):
                 pallet.fallback_to_a6 = True
 
             if can_shift:
+                self.station_model.reserved_admissions.add(pallet.id)
                 self.queue.append((pallet, "to_station"))
             else:
                 self.queue.append((pallet, "to_conveyor"))

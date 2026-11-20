@@ -300,30 +300,58 @@ def c18_digitized_data(*, sampling_hz: int = 100) -> tuple[C18DataSet, C18DataSe
     return training, validation
 
 
-def _solve_linear(matrix: list[list[float]], vector: list[float]) -> tuple[float, ...]:
-    size = len(vector)
-    augmented = [row[:] + [value] for row, value in zip(matrix, vector)]
-    for column in range(size):
-        pivot = max(range(column, size), key=lambda row: abs(augmented[row][column]))
-        if abs(augmented[pivot][column]) < 1.0e-15:
-            raise ValueError("singular C18 normal equations")
-        augmented[column], augmented[pivot] = augmented[pivot], augmented[column]
-        divisor = augmented[column][column]
-        augmented[column] = [value / divisor for value in augmented[column]]
-        for row in range(size):
-            if row == column:
-                continue
-            multiplier = augmented[row][column]
-            augmented[row] = [
-                value - multiplier * pivot_value
-                for value, pivot_value in zip(augmented[row], augmented[column])
-            ]
-    return tuple(augmented[index][-1] for index in range(size))
+def _least_squares(rows: list[tuple[float, ...]], target: Sequence[float],
+                   ridge: float) -> tuple[float, ...]:
+    """Column-scaled Householder QR, without squaring the condition number.
+
+    Ridge regularization is represented by extra sqrt(ridge)*I observations,
+    preserving its original units. Column scaling changes coordinates only;
+    it does not change the least-squares objective or penalization.
+    """
+    width = len(rows[0])
+    matrix = [list(row) for row in rows]
+    rhs = list(target)
+    if ridge:
+        for index in range(width):
+            matrix.append([math.sqrt(ridge) if index == j else 0.0
+                           for j in range(width)])
+            rhs.append(0.0)
+    scales = [math.hypot(*(row[j] for row in matrix)) for j in range(width)]
+    if len(matrix) < width or any(scale == 0 for scale in scales):
+        raise ValueError("rank-deficient C18 regression; supply nonzero ridge")
+    matrix = [[value / scale for value, scale in zip(row, scales)] for row in matrix]
+    for column in range(width):
+        vector = [matrix[i][column] for i in range(column, len(matrix))]
+        norm = math.hypot(*vector)
+        if norm <= 1e-12:
+            raise ValueError("rank-deficient C18 regression; supply nonzero ridge")
+        vector[0] += math.copysign(norm, vector[0])
+        scale = math.hypot(*vector)
+        vector = [value / scale for value in vector]
+        for j in range(column, width):
+            projection = 2 * math.fsum(
+                value * matrix[i][j] for i, value in enumerate(vector, column)
+            )
+            for i, value in enumerate(vector, column):
+                matrix[i][j] -= projection * value
+        projection = 2 * math.fsum(
+            value * rhs[i] for i, value in enumerate(vector, column)
+        )
+        for i, value in enumerate(vector, column):
+            rhs[i] -= projection * value
+    solution = [0.0] * width
+    for i in range(width - 1, -1, -1):
+        solution[i] = (rhs[i] - math.fsum(
+            matrix[i][j] * solution[j] for j in range(i + 1, width)
+        )) / matrix[i][i]
+    return tuple(value / scale for value, scale in zip(solution, scales))
 
 
 def fit_c18_linear(data: C18DataSet, *, ridge: float = 1.0e-10) -> C18LinearModel:
     """Least-squares second-order ARX transfer-function identification."""
 
+    if not math.isfinite(ridge) or ridge < 0:
+        raise ValueError("ridge must be non-negative and finite")
     rows = [
         (
             data.force[index - 1],
@@ -334,16 +362,7 @@ def fit_c18_linear(data: C18DataSet, *, ridge: float = 1.0e-10) -> C18LinearMode
         for index in range(2, len(data.force))
     ]
     target = data.force[2:]
-    normal = [[0.0] * 4 for _ in range(4)]
-    right = [0.0] * 4
-    for row, value in zip(rows, target):
-        for i in range(4):
-            right[i] += row[i] * value
-            for j in range(4):
-                normal[i][j] += row[i] * row[j]
-    for index in range(4):
-        normal[index][index] += ridge
-    return C18LinearModel(*_solve_linear(normal, right))
+    return C18LinearModel(*_least_squares(rows, target, ridge))
 
 
 def predict_c18_linear(model: C18LinearModel, data: C18DataSet) -> tuple[float, ...]:
@@ -363,6 +382,8 @@ def predict_c18_linear(model: C18LinearModel, data: C18DataSet) -> tuple[float, 
 def c18_correlation(left: Sequence[float], right: Sequence[float]) -> float:
     if len(left) != len(right) or len(left) < 2:
         raise ValueError("correlation signals must have common length >= 2")
+    if not all(math.isfinite(value) for signal in (left, right) for value in signal):
+        raise ValueError("correlation signals must be finite")
     left_mean = sum(left) / len(left)
     right_mean = sum(right) / len(right)
     covariance = sum((a - left_mean) * (b - right_mean) for a, b in zip(left, right))
@@ -382,6 +403,8 @@ def c18_error_trend(
 
     if len(measured) != len(simulated) or len(measured) < 2:
         raise ValueError("error signals must have common length >= 2")
+    if not all(math.isfinite(value) for signal in (measured, simulated) for value in signal):
+        raise ValueError("error signals must be finite")
     if not math.isfinite(sampling_hz) or sampling_hz <= 0.0:
         raise ValueError("sampling_hz must be positive and finite")
     count = len(measured)
@@ -441,8 +464,16 @@ def fit_c18_mlp(
     dimension = len(rows[0])
     if dimension == 0 or any(len(row) != dimension for row in rows):
         raise ValueError("all feature rows must have one positive dimension")
-    if hidden <= 0 or epochs <= 0 or learning_rate <= 0.0:
-        raise ValueError("hidden, epochs, and learning_rate must be positive")
+    if any(type(value) is not int or value <= 0 for value in (hidden, epochs)):
+        raise ValueError("hidden and epochs must be positive integers")
+    if not math.isfinite(learning_rate) or learning_rate <= 0.0:
+        raise ValueError("learning_rate must be positive and finite")
+    if type(seed) is not int:
+        raise TypeError("seed must be an integer")
+    if not all(math.isfinite(value) for row in rows for value in row) or not all(
+        math.isfinite(value) for value in values
+    ):
+        raise ValueError("features and targets must be finite")
     means = tuple(sum(row[index] for row in rows) / len(rows) for index in range(dimension))
     scales = tuple(
         max(

@@ -79,12 +79,17 @@ class C20Production:
         seed: int,
         order_count: int,
         wip_limit: int = 30,
+        order_seed: int | None = None,
         trace: bool = False,
     ) -> None:
         order_scenario = C20OrderScenario(order_scenario)
         plant_scenario = C20PlantScenario(plant_scenario)
         if isinstance(seed, bool) or not isinstance(seed, int):
             raise TypeError("seed must be an integer")
+        if order_seed is not None and (
+            isinstance(order_seed, bool) or not isinstance(order_seed, int)
+        ):
+            raise TypeError("order_seed must be an integer or None")
         if (
             isinstance(order_count, bool)
             or not isinstance(order_count, int)
@@ -111,10 +116,21 @@ class C20Production:
         self.rng = random.Random(seed + 1_000_003)
         self.machines = _c20_machines(plant_scenario, self.rng)
         self.machine_nodes = [C20_MACHINE_LOCATIONS[m.name] for m in self.machines]
+        self._eligible_machines = {
+            (product, operation): tuple(
+                index
+                for index, machine in enumerate(self.machines)
+                if machine.supports(operation, product)
+            )
+            for product in C20_PRODUCT_WEIGHTS
+            for operation in Operation
+        }
         self.jobs: dict[int, _Job] = {}
         self.active: set[int] = set()
         self.pending: list[tuple[tuple[float, ...], int]] = []
-        for order in _c20_order_book(order_scenario, seed, order_count):
+        for order in _c20_order_book(
+            order_scenario, seed if order_seed is None else order_seed, order_count
+        ):
             plans = get_process_plans(order.product_type)
             job = _Job(order, plans[order.identifier % len(plans)])
             self.jobs[order.identifier] = job
@@ -132,7 +148,19 @@ class C20Production:
         for name, node in self.flow.layout.nodes.items():
             if node.kind == "workstation" and name not in self.machine_nodes:
                 self.flow.set_open(name, False)
-        self.flow.on_change = self.dispatch
+        self.flow.on_change = self._flow_changed
+
+    def _flow_changed(self) -> None:
+        # Operation completions, source departures and destination arrivals
+        # already dispatch explicitly. Intermediate belt crossings can only
+        # enable admission at the source; they do not free machine/buffer
+        # reservations. Avoid rescheduling every waiting job at every junction.
+        if (
+            self.pending
+            and len(self.flow.parts) < self.wip_limit
+            and self.flow.can_insert("a0:out")
+        ):
+            self.dispatch()
 
     def _record(self, kind: str, job: _Job, operation: Operation, machine: int) -> None:
         if self.trace_enabled:
@@ -417,9 +445,10 @@ class C20Production:
                     continue
                 eligible = [
                     index
-                    for index, machine in enumerate(self.machines)
-                    if not machine.busy
-                    and machine.supports(job.plan[job.index], job.order.product_type)
+                    for index in self._eligible_machines[
+                        job.order.product_type, job.plan[job.index]
+                    ]
+                    if not self.machines[index].busy
                 ]
                 if self.flow.now >= job.not_before and eligible:
                     source = self._source(job)

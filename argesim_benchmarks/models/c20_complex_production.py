@@ -1,7 +1,7 @@
 """ARGESIM C20: Complex Production System.
 
 The small public components at the top remain useful independently.  The full
-scenario engine below adds the official order books, alternative routes,
+scenario engine below adds generated order books following the definition, alternative routes,
 workstation generations, setup/tool changes, failures, transport, due dates,
 and replication summaries while retaining HyperTime for event ordering.
 """
@@ -243,7 +243,9 @@ class C20ConveyorNetwork:
                 k=1,
             )[0]
             candidates = tuple(
-                element for element in self.elements.values() if element.cluster is cluster
+                element
+                for element in self.elements.values()
+                if element.cluster is cluster
             )
             selected = self.rng.choice(candidates)
             finish = self._next_failure + 600.0
@@ -282,13 +284,17 @@ class C20ConveyorNetwork:
                     cost += failure.finish - departure
         return cost
 
-    def _select_path(self, source: int, target: int, departure: float) -> tuple[str, ...]:
+    def _select_path(
+        self, source: int, target: int, departure: float
+    ) -> tuple[str, ...]:
         if source == target:
             return () if source == 0 else (f"local_{source}",)
         outer = self._ring_path(source, target, outer=True)
         inner = self._ring_path(source, target, outer=False)
         # Deterministic tie breaking keeps seeded replications reproducible.
-        return min((outer, inner), key=lambda path: (self._path_cost(path, departure), path))
+        return min(
+            (outer, inner), key=lambda path: (self._path_cost(path, departure), path)
+        )
 
     def _traverse(
         self,
@@ -323,7 +329,9 @@ class C20ConveyorNetwork:
             failure_delay += delay
         return arrival, capacity_delay, failure_delay
 
-    def transport(self, departure: float, source_area: int, target_area: int) -> C20TransportTrace:
+    def transport(
+        self, departure: float, source_area: int, target_area: int
+    ) -> C20TransportTrace:
         """Reserve a route and return its physically scheduled arrival."""
 
         if source_area not in {0, 1, 2, 3} or target_area not in {0, 1, 2, 3}:
@@ -480,9 +488,7 @@ def get_processing_time(
     elif ws_type == WorkStationType.II:
         base_time = 30.0
     elif ws_type == WorkStationType.III:
-        base_time = {"B": 40.0, "C": 44.0, "D": 44.0, "E": 50.0}.get(
-            product_type, 44.0
-        )
+        base_time = {"B": 40.0, "C": 44.0, "D": 44.0, "E": 50.0}.get(product_type, 44.0)
     elif ws_type == WorkStationType.IV:
         base_time = 120.0
     elif ws_type == WorkStationType.V:
@@ -677,7 +683,11 @@ class _C20Machine:
         if self.ws_type is not get_operation_ws(operation):
             return False
         if self.ws_type is WorkStationType.II:
-            limits = {1: {"A", "B"}, 2: {"A", "B", "C", "D"}, 3: {"A", "B", "C", "D", "E"}}
+            limits = {
+                1: {"A", "B"},
+                2: {"A", "B", "C", "D"},
+                3: {"A", "B", "C", "D", "E"},
+            }
             return product in limits[self.generation]
         if self.ws_type is WorkStationType.III:
             return product in {"B", "C", "D", "E"}
@@ -802,7 +812,9 @@ def _c20_machines(scenario: C20PlantScenario, rng: random.Random) -> list[_C20Ma
     for ws_type, generation, number, area in definitions:
         key = _machine_failure_key(ws_type, generation)
         shape, scale, mttr = failures.get(key, (0.0, 0.0, 0.0))
-        next_failure = math.inf if shape == 0.0 else rng.gammavariate(shape, scale * 3600.0)
+        next_failure = (
+            math.inf if shape == 0.0 else rng.gammavariate(shape, scale * 3600.0)
+        )
         suffix = f"g{generation}" if generation else ""
         machines.append(
             _C20Machine(
@@ -819,9 +831,7 @@ def _c20_machines(scenario: C20PlantScenario, rng: random.Random) -> list[_C20Ma
     return machines
 
 
-def _c20_order_book(
-    scenario: C20OrderScenario, seed: int, count: int
-) -> list[Order]:
+def _c20_order_book(scenario: C20OrderScenario, seed: int, count: int) -> list[Order]:
     generators = {
         C20OrderScenario.OSC1: generate_osc1_order_book,
         C20OrderScenario.OSC2: generate_osc2_order_book,
@@ -855,6 +865,7 @@ def run_c20_replication(
     order_count: int = 5000,
     transport_time: float | None = None,
     wip_limit: int = 30,
+    order_seed: int | None = None,
 ) -> C20ReplicationResult:
     """Run a C20 order book through the Figure 4/5 directed conveyor layout.
 
@@ -863,12 +874,22 @@ def run_c20_replication(
     calendar, so downstream blockage propagates upstream. ``transport_time``
     explicitly selects the legacy reduced fixed-delay experiment, which has
     no physical transport capacity and is not a full C20 replication.
+    ``order_seed`` fixes an order book independently of the replication's
+    failure seed. Omitting it preserves the historical single-seed behaviour.
     """
     selected_orders = C20OrderScenario(order_scenario)
     selected_plant = C20PlantScenario(plant_scenario)
     if not isinstance(seed, int) or isinstance(seed, bool):
         raise TypeError("seed must be an integer")
-    if not isinstance(order_count, int) or isinstance(order_count, bool) or order_count <= 0:
+    if order_seed is not None and (
+        isinstance(order_seed, bool) or not isinstance(order_seed, int)
+    ):
+        raise TypeError("order_seed must be an integer or None")
+    if (
+        not isinstance(order_count, int)
+        or isinstance(order_count, bool)
+        or order_count <= 0
+    ):
         raise ValueError("order_count must be a positive integer")
     if transport_time is not None and (
         not math.isfinite(transport_time) or transport_time < 0.0
@@ -879,21 +900,42 @@ def run_c20_replication(
     if transport_time is None:
         from .c20_production import C20Production
 
-        return C20Production(selected_orders, selected_plant, seed=seed,
-                             order_count=order_count, wip_limit=wip_limit).run()
+        return C20Production(
+            selected_orders,
+            selected_plant,
+            seed=seed,
+            order_count=order_count,
+            wip_limit=wip_limit,
+            order_seed=order_seed,
+        ).run()
     if wip_limit != 30:
-        raise ValueError("wip_limit does not apply to the reduced fixed-delay experiment")
-    return _run_c20_reduced_replication(selected_orders, selected_plant, seed=seed,
-                                       order_count=order_count, transport_time=transport_time)
+        raise ValueError(
+            "wip_limit does not apply to the reduced fixed-delay experiment"
+        )
+    return _run_c20_reduced_replication(
+        selected_orders,
+        selected_plant,
+        seed=seed,
+        order_count=order_count,
+        transport_time=transport_time,
+        order_seed=order_seed,
+    )
 
 
 def _run_c20_reduced_replication(
-    selected_orders: C20OrderScenario, selected_plant: C20PlantScenario,
-    *, seed: int, order_count: int, transport_time: float,
+    selected_orders: C20OrderScenario,
+    selected_plant: C20PlantScenario,
+    *,
+    seed: int,
+    order_count: int,
+    transport_time: float,
+    order_seed: int | None = None,
 ) -> C20ReplicationResult:
     """Legacy experiment with infinite transport capacity and fixed delays."""
     rng = random.Random(seed + 1_000_003)
-    orders = _c20_order_book(selected_orders, seed, order_count)
+    orders = _c20_order_book(
+        selected_orders, seed if order_seed is None else order_seed, order_count
+    )
     contexts = [
         _C20Context(
             order,
@@ -957,7 +999,9 @@ def _run_c20_reduced_replication(
     ) -> int:
         areas = candidate_areas(operation, product)
         if not areas:
-            raise RuntimeError(f"no workstation can perform {operation.value} for {product}")
+            raise RuntimeError(
+                f"no workstation can perform {operation.value} for {product}"
+            )
 
         def score(area: int) -> tuple[float, float, int]:
             eligible = sum(
@@ -1228,6 +1272,7 @@ def run_c20_experiment(
     replications: int = 10,
     order_count: int = 5000,
     seed: int = 20,
+    order_seed: int = 20,
 ) -> tuple[C20ScenarioSummary, ...]:
     """Run all 3 x 4 scenarios and report Task A--D median/IQR values.
 
@@ -1235,9 +1280,15 @@ def run_c20_experiment(
     release-to-sink observations across replications. The distribution of
     per-run medians is retained separately and must not replace that spread.
     Task C includes both unweighted and weighted sums of tardiness per run.
+    The generated order book is held fixed while failure seeds vary. Call
+    again with a different ``order_seed`` to compare multiple order books.
     """
 
-    if not isinstance(replications, int) or isinstance(replications, bool) or replications < 10:
+    if (
+        not isinstance(replications, int)
+        or isinstance(replications, bool)
+        or replications < 10
+    ):
         raise ValueError("the official experiment requires at least 10 replications")
     summaries = []
     for order_scenario in C20OrderScenario:
@@ -1248,6 +1299,7 @@ def run_c20_experiment(
                     plant_scenario,
                     seed=seed + index,
                     order_count=order_count,
+                    order_seed=order_seed,
                 )
                 for index in range(replications)
             )
@@ -1257,7 +1309,13 @@ def run_c20_experiment(
                     plant_scenario,
                     replications,
                     _c20_statistic(tuple(run.makespan for run in runs)),
-                    _c20_statistic(tuple(order.throughput_time for run in runs for order in run.orders)),
+                    _c20_statistic(
+                        tuple(
+                            order.throughput_time
+                            for run in runs
+                            for order in run.orders
+                        )
+                    ),
                     _c20_statistic(tuple(float(run.tardy_orders) for run in runs)),
                     _c20_statistic(tuple(run.weighted_tardiness for run in runs)),
                     _c20_statistic(tuple(float(run.max_nok_parts) for run in runs)),

@@ -28,6 +28,8 @@ See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status and
 [ARGESIM_AUDIT.md](ARGESIM_AUDIT.md) for the definition-by-definition review.
 The [2026-11-19 transport/data report](docs/ARGESIM_TRANSPORT_DATA_20261119.md)
 records the C20 geometry, controller, test scope and C18 input-data contract.
+The [2026-11-20 corrective report](docs/ARGESIM_CLOSURE_20261120.md) adds C02
+routing fixes, C18 numerical verification and the reproducible C20 study.
 
 ## Implemented numerical foundation
 
