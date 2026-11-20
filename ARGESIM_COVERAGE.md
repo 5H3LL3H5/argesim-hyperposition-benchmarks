@@ -6,13 +6,13 @@ Inventory reviewed: 2026-11-18. Primary catalog:
 The status is an evidence gate, not a code-size label. `implemented` means all
 required task types have an executable path and tests; `validated` additionally
 requires an external analytical or published numeric reference. Partial code stays
-`specified`; see the follow-up audit for the two remaining incomplete families, C02 and C18.
+`specified`; see the follow-up audit for C18 and its outstanding measurement data.
 
 <!-- BEGIN GENERATED BENCHMARK STATUS -->
 | ID | Official benchmark | Model family | Status |
 |---|---|---|---|
 | C01 | Lithium-Cluster Dynamics | stiff ODE | implemented |
-| C02 | Flexible Assembly System | DES | specified |
+| C02 | Flexible Assembly System | DES | implemented |
 | C03 | Class-E Amplifier | ODE, hybrid | implemented |
 | C04 | Dining Philosophers | DES/concurrency | implemented |
 | C05 | Two State Model | stiff ODE, state events | implemented |
@@ -41,6 +41,7 @@ requires an external analytical or published numeric reference. Partial code sta
 
 | ID | Executable scope | Verification evidence |
 |---|---|---|
+| C02 | finite B1/B2 assembly plant, exclusive shifters, parameter study over 1–60 pallets | one-pallet analytical travel, FIFO/merge replay and closed deadlock wait sets. [Reference comparisons](C02_IMPLEMENTATION.md) |
 | C04 | Atomic, unsafe, waiter, cleaning, neighbour-request and put-back policies; dirty-fork delays, request age priority, explicit hoarding/targeted-hold experiments | conservation of every individual horizon, deterministic replay, resource-cycle deadlock/progress tests |
 | C05 | sampled piecewise solution including fast transients, default/62-event Task D, decimal precision studies at the specified accuracies | published event checks; 80-digit reference, independently checked by 90-digit logarithmic event calculations; requested and attained precision reported separately |
 | C09 | I-FC1, I-FC2 and P-FC surfaces; nonlinear tanks; 1 s sampled 60,000 s scenario; reference `change-level` and literal printed difference modes | I-FC final errors below 0.02 mm, <0.06 mm setpoint overshoot and published qualitative disturbance/P-FC behaviour |

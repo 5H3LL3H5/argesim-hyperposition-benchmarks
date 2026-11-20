@@ -61,7 +61,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.DES,),
         _source("c02"),
         "DES",
-        BenchmarkStatus.SPECIFIED,
+        BenchmarkStatus.IMPLEMENTED,
     ),
     BenchmarkDefinition(
         "C03",

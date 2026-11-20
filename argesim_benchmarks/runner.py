@@ -74,7 +74,7 @@ def _m(function: str) -> str:
 
 _TASKS: dict[str, dict[str, str]] = {
     "C01": {"A": _m("solve_c01"), "B": _m("c01_task_b"), "C": _m("c01_task_c")},
-    "C02": {"main": _m("solve_c02")},
+    "C02": {"main": _m("solve_c02"), "study": _m("c02_pallet_study")},
     "C03": {"A": _m("c03_task_a"), "B": _m("c03_task_b"), "C": _m("c03_task_c")},
     "C04": {"run": _m("run_c04"), "compare": _m("c04_compare_strategies"), "refinements": _m("c04_refinement_study")},
     "C05": {"simulate": _m("simulate_c05"), "validate": _m("c05_validate"), "C": _m("c05_task_c"), "D": _m("c05_task_d")},
@@ -218,6 +218,7 @@ def _suite_arguments(profile: str) -> dict[tuple[str, str], dict[str, Any]]:
     if profile != "smoke":
         raise ValueError("profile must be 'smoke' or 'definition'")
     bounded = {
+        ("C02", "study"): {"max_pallets": 2},
         ("C04", "compare"): {"replications": 1},
         ("C08", "C"): {"duration": 600, "independent_replications": 2,
                          "paired_replications": 2, "starting_seeds": (42,)},

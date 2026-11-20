@@ -1,5 +1,17 @@
 # ARGESIM implementation audit
 
+## C02 finite transport and pallet study, 2026-11-20
+
+The registered C02 solver runs the 1–60 pallet study with finite belts and
+exclusive shifters. One pallet completes a full cycle in 191.67 s. The
+default controller meets both SimEvents reference measures at 9 of 12
+published numeric loads, including 10, 20 and 40 pallets. At 13 and 14
+both measures are outside the 6% band, and at 25 the mean is outside it.
+All 50–60 pallet runs admit the full population, then reach a closed wait
+cycle. On the paper's own numbers, 14 cannot minimize its printed objective.
+The CLI also evaluates that expression over its published range. C02 reaches
+`implemented`. See the [C02 comparison and evidence](C02_IMPLEMENTATION.md).
+
 ## Routing, numerical and experiment follow-up, 2026-11-20
 
 C02 now prevents assembly of empty pallets, interleaving A2 with an unfinished
