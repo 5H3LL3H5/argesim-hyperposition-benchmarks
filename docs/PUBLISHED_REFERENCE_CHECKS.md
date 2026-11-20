@@ -6,7 +6,7 @@ The catalog has 24 families. Twelve reach `validated` for the cases identified b
 
 | Family | Evidence and scope |
 |---|---|
-| C01 | All five Task B loss rates have three-component, 10 s Radau endpoint checks. The Dymola Task C publication gives the two stationary states. Three of the five rates also have archived full-trajectory Radau comparisons. [Dymola](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C01/C1-solution-Dymola.pdf) |
+| C01 | Across all five Task B loss rates, every stored RK45 sample agrees with independent Radau integration within `1.51e-8`. Each component at 10 s meets the `2e-7` regression tolerance. The two Task C stationary states agree with Dymola. [Trajectories, endpoints and source](C01_RESULTS.md) |
 | C03 | Four ON/OFF eigenvalues per switch state, 20 ideal-switch half cycles and four finite-ramp endpoints computed independently with Radau and matrix exponentials. [Circuit and tolerances](../C03_VALIDATION_REPORT.md) |
 | C05 | Five default events, 62 Task D switches, return states and the published initial/final event times. An independent 90-digit calculation checks the decimal precision study. [Ptolemy II, p. 54](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_22_1/articles/sne.22.1.10117.bn05.OA.pdf) |
 | C06 | All 21 daily metrics for the FIFO, doctor-exchange and return-priority policies meet the statistical comparison below. [STROBOSCOPE, Table 1](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_36_1/articles/sne.36.1.10769.bn06.OA.pdf) |
