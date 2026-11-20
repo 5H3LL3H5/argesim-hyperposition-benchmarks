@@ -782,5 +782,15 @@
       "stopped_at_seconds": 886.1666666666666,
       "throughput": 0.0
     }
-  ]
+  ],
+  "simevents_listing_3": {
+    "best_num_pallets": 49,
+    "evaluated_populations": 40,
+    "objective": "minimize abs(throughput - mean part time in seconds) * throughput",
+    "objective_value": 587559.0,
+    "published_pallet_range": [
+      10,
+      49
+    ]
+  }
 }

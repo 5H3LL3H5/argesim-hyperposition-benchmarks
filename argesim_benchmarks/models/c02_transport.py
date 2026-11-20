@@ -476,6 +476,11 @@ class C02Plant:
         }
 
 
+def _simevents_listing3_value(throughput: float, mean_seconds: float) -> float:
+    """Literal objective minimized by Pingel and Pawletta in Listing 3."""
+    return abs(throughput - mean_seconds) * throughput
+
+
 def c02_pallet_study(
     min_pallets: int = 1, max_pallets: int = 60, *, controller: str = "first-eligible"
 ) -> dict:
@@ -507,8 +512,26 @@ def c02_pallet_study(
             r["num_pallets"],
         ),
     )
+    # Their MATLAB listing ranks only the 10..49 experiment. A shortened
+    # study can evaluate just the productive loads in its intersection.
+    published_scores = [
+        (
+            _simevents_listing3_value(r["throughput"], r["average_throughput_time"]),
+            r["num_pallets"],
+        )
+        for r in candidates
+        if 10 <= r["num_pallets"] <= 49
+    ]
+    score, published_best = min(published_scores, default=(None, None))
     return {
         "objective": "maximum measured throughput, then minimum mean part time, then fewest pallets",
         "best_num_pallets": best["num_pallets"] if best is not None else None,
+        "simevents_listing_3": {
+            "objective": "minimize abs(throughput - mean part time in seconds) * throughput",
+            "published_pallet_range": [10, 49],
+            "evaluated_populations": len(published_scores),
+            "best_num_pallets": published_best,
+            "objective_value": score,
+        },
         "runs": runs,
     }

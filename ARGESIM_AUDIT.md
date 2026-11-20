@@ -8,7 +8,8 @@ default controller meets both SimEvents reference measures at 9 of 12
 published numeric loads, including 10, 20 and 40 pallets. At 13 and 14
 both measures are outside the 6% band, and at 25 the mean is outside it.
 All 50–60 pallet runs admit the full population, then reach a closed wait
-cycle. The choice of optimum depends on controller and objective. C02 reaches
+cycle. On the paper's own numbers, 14 cannot minimize its printed objective.
+The CLI also evaluates that expression over its published range. C02 reaches
 `implemented`. See the [C02 comparison and evidence](C02_IMPLEMENTATION.md).
 
 ## Routing, numerical and experiment follow-up, 2026-11-20

@@ -107,8 +107,15 @@ rule 40 pallets produce the highest count (1,411, mean 801.20 s). Already
 at 15 pallets the plant produces 1,409 (291.67 s). Three A2 units with
 60 s of work and 4/3 s of positioning each have a combined nominal rate of
 1,408.70 parts per eight hours. Completions close to the window boundaries
-affect the integer count. SimEvents reports an optimum of 14 with a different
-objective. Its 14-pallet result and the measured maximum here remain distinct.
+affect the integer count.
+
+The study also executes SimEvents Listing 3 on its published range of 10–49.
+It minimizes `abs(throughput - mean_seconds) * throughput`. On the default
+simulation the minimum is 587,559 at 49 pallets. On the paper's own Table 2,
+10 pallets score 646,366 and 14 score 1,689,386. Thus 14 cannot minimize the
+printed expression even on the paper's data. The article reports 14. Resolving
+which objective or input data produced that claim requires further source
+material. Shorter studies explicitly report how many eligible loads they score.
 
 ## Cyclic A2 comparison
 

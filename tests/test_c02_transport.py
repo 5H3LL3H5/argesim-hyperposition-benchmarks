@@ -3,7 +3,11 @@ import unittest
 
 from argesim_benchmarks.models import c02_pallet_study
 from argesim_benchmarks.models.c02_flexible_assembly import C02Constants
-from argesim_benchmarks.models.c02_transport import C02Plant, _Pallet
+from argesim_benchmarks.models.c02_transport import (
+    C02Plant,
+    _Pallet,
+    _simevents_listing3_value,
+)
 
 
 def short_plant(count, minutes, *, warmup=0, trace=False):
@@ -269,7 +273,11 @@ class C02TransportTests(unittest.TestCase):
                 self.assertEqual(used, capacity)
 
     def test_study_ranks_only_fully_admitted_productive_loads(self):
-        self.assertEqual(c02_pallet_study(1, 2)["best_num_pallets"], 2)
+        low = c02_pallet_study(1, 2)
+        self.assertEqual(low["best_num_pallets"], 2)
+        self.assertEqual(low["simevents_listing_3"]["evaluated_populations"], 0)
+        self.assertIsNone(low["simevents_listing_3"]["objective_value"])
+        self.assertIsNone(low["simevents_listing_3"]["best_num_pallets"])
         self.assertIsNone(c02_pallet_study(60, 60)["best_num_pallets"])
         for bounds in ((2, 1), (False, 1), (1, math.inf)):
             with self.subTest(bounds=bounds), self.assertRaises(ValueError):
@@ -279,4 +287,19 @@ class C02TransportTests(unittest.TestCase):
         self.assertEqual(
             c02_pallet_study(1, 1, controller="cyclic-a2")["runs"][0]["controller"],
             "cyclic-a2",
+        )
+
+    def test_simevents_listing3_reproduces_the_literal_objective_and_range(self):
+        # The published data at 10 already rule out the stated minimum at 14.
+        self.assertEqual(_simevents_listing3_value(959, 285), 646366)
+        self.assertEqual(_simevents_listing3_value(1439, 265), 1689386)
+        study = c02_pallet_study(9, 11)
+        listing = study["simevents_listing_3"]
+        self.assertEqual(listing["evaluated_populations"], 2)
+        self.assertEqual(listing["published_pallet_range"], [10, 49])
+        self.assertEqual(listing["best_num_pallets"], 10)
+        ten = study["runs"][1]
+        self.assertAlmostEqual(
+            listing["objective_value"],
+            abs(ten["throughput"] - ten["average_throughput_time"]) * ten["throughput"],
         )
