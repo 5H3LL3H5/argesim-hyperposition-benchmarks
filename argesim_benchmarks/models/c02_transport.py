@@ -83,10 +83,15 @@ class C02Plant:
         self,
         num_pallets: int,
         *,
+        controller: str = "first-eligible",
         constants: C02Constants | None = None,
         trace: bool = False,
     ) -> None:
         _positive_count(num_pallets)
+        if controller not in ("first-eligible", "cyclic-a2"):
+            raise ValueError("controller must be 'first-eligible' or 'cyclic-a2'")
+        self.controller = controller
+        self.a2_passages = [0, 0]
         c = constants or C02Constants()
         if not math.isfinite(c.speed_m_s) or c.speed_m_s <= 0:
             raise ValueError("belt speed must be positive and finite")
@@ -95,12 +100,13 @@ class C02Plant:
         self.end = self._ticks(c.end_minutes * 60)
         if not 0 <= self.warmup < self.end:
             raise ValueError("require 0 <= warm-up < end")
-        self.shift = self._ticks(c.shift_time)
+        shift = self._ticks(c.shift_time)
         self.straight = self._ticks(c.shifter_width / c.speed_m_s)
+        self.lateral_crossing = self.straight + shift
         pitch = self._ticks(c.pallet_length / c.speed_m_s)
         unit = self._ticks(c.positioning_unit_length / c.speed_m_s)
         gap = self._ticks(c.space_between_subsystems / c.speed_m_s)
-        if min(self.shift, pitch) <= 0 or min(unit, self.straight, gap) < pitch:
+        if min(shift, pitch) <= 0 or min(unit, self.straight, gap) < pitch:
             raise ValueError("a pallet must fit on a shifter, unit and connector")
         if unit % 2 or pitch % 2:
             raise ValueError("unit and pallet centres must lie on the cm lattice")
@@ -189,12 +195,24 @@ class C02Plant:
             return False
         group = part.operations & 14
         if index <= 3:
-            # First eligible A2 with room. Never split the A3/A4/A5 group.
-            return not part.operations & 1 and group in (0, 14)
+            if part.operations & 1 or group not in (0, 14):
+                return False
+            if self.controller == "first-eligible" or index == 3:
+                return True
+            # For the cyclic policy, count a passage only once the transfer
+            # commits. Testing an outlet or retrying a blocked head is read-only.
+            period = 3 if index == 1 else 2
+            return (self.a2_passages[index - 1] + 1) % period == 0
         if index == 7:
             return group != 14
         if index == 4:
-            return not group & 2 and self.stations[7].unit_busy(self.now)
+            # Herzog's executable C02 controller observes A6's input belt
+            # and positioning/processing unit, excluding shifters and output.
+            a6 = self.stations[7]
+            on_input = sum(
+                ready - a6.before.transit <= self.now for _, ready in a6.before.queue
+            )
+            return not group & 2 and on_input + a6.unit_busy(self.now) >= 2
         if index == 5:
             return group & 6 == 2
         return group == 6
@@ -277,7 +295,7 @@ class C02Plant:
         if sy is not None:
             if not self._ready(sy.sy_free):
                 return False
-            sy_duration = self.shift if source is sy.after else self.straight
+            sy_duration = self.lateral_crossing if source is sy.after else self.straight
         sx_start = self.now + sy_duration
         if sx is None:
             assert sy is not None and sy.connector is not None
@@ -291,9 +309,11 @@ class C02Plant:
             if (
                 self._takes_branch(part, next_index)
                 and not sx.before.full
-                and self._ready(sx.before.next_entry - sy_duration - self.shift)
+                and self._ready(
+                    sx.before.next_entry - sy_duration - self.lateral_crossing
+                )
             ):
-                dest, arrival = sx.before, sx_start + self.shift
+                dest, arrival = sx.before, sx_start + self.lateral_crossing
         if dest.full or not self._ready(dest.next_entry - (arrival - self.now)):
             return False
         source.release(self.now)
@@ -302,6 +322,8 @@ class C02Plant:
             sy.sy_free = sx_start
         if sx is not None:
             sx.sx_free = arrival
+            if self.controller == "cyclic-a2" and next_index in (1, 2):
+                self.a2_passages[next_index - 1] += 1
         if source is self.feed and not source.queue:
             self.filled_at = self.now
         if self.trace is not None:
@@ -340,8 +362,8 @@ class C02Plant:
                 changed = True
 
     def _inventory(self) -> tuple[dict[str, tuple[int, int]], list[int]]:
-        counts = {}
-        parts = []
+        counts = {self.feed.name: (len(self.feed.queue), self.feed.capacity)}
+        parts = [p.identifier for p, _ in self.feed.queue]
         for station in self.stations:
             for belt in (
                 station.before,
@@ -425,7 +447,6 @@ class C02Plant:
                 break
             self.now = min(self.next_time, self.end)
         inventory, parts = self._inventory()
-        parts.extend(p.identifier for p, _ in self.feed.queue)
         if sorted(parts) != list(range(self.num_pallets)):
             raise RuntimeError("C02 pallet ownership is not conserved")
         deadlock = self.next_time is None
@@ -437,6 +458,7 @@ class C02Plant:
 
         return {
             "num_pallets": self.num_pallets,
+            "controller": self.controller,
             "throughput": float(self.throughput),
             "average_throughput_time": mean(self.part_ticks),
             "average_to_unload_complete_seconds": mean(self.with_unload_ticks),
@@ -454,7 +476,9 @@ class C02Plant:
         }
 
 
-def c02_pallet_study(min_pallets: int = 1, max_pallets: int = 60) -> dict:
+def c02_pallet_study(
+    min_pallets: int = 1, max_pallets: int = 60, *, controller: str = "first-eligible"
+) -> dict:
     """Run independently initialized loads; rank productive, fully admitted runs."""
     _positive_count(min_pallets)
     _positive_count(max_pallets)
@@ -463,7 +487,7 @@ def c02_pallet_study(min_pallets: int = 1, max_pallets: int = 60) -> dict:
     runs = []
     candidates = []
     for n in range(min_pallets, max_pallets + 1):
-        plant = C02Plant(n)
+        plant = C02Plant(n, controller=controller)
         result = plant.run()
         result.pop("deadlock_witness")  # solve_c02(n) exposes the full graph
         runs.append(result)

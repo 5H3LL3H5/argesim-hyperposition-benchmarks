@@ -1,5 +1,6 @@
 import math
 import unittest
+from typing import ClassVar
 
 from argesim_benchmarks.models import solve_c02
 from argesim_benchmarks.models.c02_flexible_assembly import (
@@ -49,27 +50,6 @@ class C02Tests(unittest.TestCase):
         station.dext(0, Message("in", message.value))
         self.assertEqual(station.occupancy, config.buffer_capacity)
         self.assertEqual(len(station.reserved_admissions), config.buffer_capacity - 1)
-
-    def test_parameter_study_tracks_published_reference(self):
-        # Pingel & Pawletta (2011), Table 2. The original 6% band also
-        # applies to the former ten-pallet expected failure.
-        reference = {
-            10: (959.0, 285.0),
-            14: (1439.0, 265.0),
-            20: (1439.0, 385.0),
-            40: (1437.0, 787.0),
-        }
-        for num_pallets, (throughput, transit_time) in reference.items():
-            with self.subTest(num_pallets=num_pallets):
-                result = solve_c02(num_pallets)
-                self.assertIs(result["deadlock"], False)
-                self.assertEqual(result["pending_admission"], 0)
-                self.assertAlmostEqual(
-                    result["throughput"] / throughput, 1.0, delta=0.06
-                )
-                self.assertAlmostEqual(
-                    result["average_throughput_time"] / transit_time, 1.0, delta=0.06
-                )
 
     def test_all_shifts_and_transport_lengths_follow_the_clarification(self):
         constants = C02Constants()
@@ -145,6 +125,91 @@ class C02Tests(unittest.TestCase):
         for value in (0, -1, 2.5, True):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 solve_c02(value)
+
+
+class C02PublishedComparisons(unittest.TestCase):
+    # Pingel & Pawletta (2011), Table 2. Preserve the original relative 6% band.
+    references: ClassVar[dict[int, tuple[int, int]]] = {
+        10: (959, 285),
+        11: (1072, 280),
+        12: (1185, 276),
+        13: (1298, 273),
+        14: (1439, 265),
+        15: (1439, 285),
+        20: (1439, 385),
+        25: (1439, 396),
+        30: (1440, 586),
+        35: (1438, 682),
+        40: (1437, 787),
+        45: (1440, 882),
+    }
+
+    @classmethod
+    def setUpClass(cls):
+        # Model or execution errors here are failures for every comparison.
+        cls.runs = {n: solve_c02(n) for n in cls.references}
+
+    def assert_reference(self, n):
+        expected_count, expected_mean = self.references[n]
+        r = self.runs[n]
+        errors = (
+            abs(r["throughput"] / expected_count - 1),
+            abs(r["average_throughput_time"] / expected_mean - 1),
+        )
+        self.assertLessEqual(max(errors), 0.06, (n, errors))
+
+    def test_all_reference_cases_complete_and_report_consistent_clocks(self):
+        for n, r in self.runs.items():
+            with self.subTest(n=n):
+                self.assertIs(r["deadlock"], False)
+                self.assertEqual(r["controller"], "first-eligible")
+                self.assertEqual(r["pending_admission"], 0)
+                self.assertGreater(r["throughput"], 0)
+                mean = r["average_throughput_time"]
+                self.assertGreater(mean, 0)
+                self.assertAlmostEqual(
+                    r["average_to_unload_complete_seconds"], mean + 7.5
+                )
+                self.assertAlmostEqual(
+                    r["average_including_handling_seconds"], mean + 15
+                )
+
+    def test_simevents_numeric_comparisons(self):
+        for n in (10, 11, 12, 15, 20, 30, 35, 40, 45):
+            with self.subTest(n=n):
+                self.assert_reference(n)
+        # Only the mean is outside the band at 25 pallets.
+        self.assertAlmostEqual(self.runs[25]["throughput"] / 1439, 1, delta=0.06)
+
+    @unittest.expectedFailure
+    def test_simevents_13_pallets(self):
+        self.assert_reference(13)
+
+    @unittest.expectedFailure
+    def test_simevents_14_pallets(self):
+        self.assert_reference(14)
+
+    @unittest.expectedFailure
+    def test_simevents_25_pallets(self):
+        self.assert_reference(25)
+
+    def test_cyclic_policy_tracks_anylogic_full_cycle_references(self):
+        # Breitenecker & Kittenberger (2003), p. 22, uses a full-cycle clock.
+        for n, count, full_cycle in (
+            (1, 150, 191.67),
+            (12, 1409, 245.32),
+            (13, 1409, 265.76),
+            (20, 1409, 408.67),
+            (40, 1409, 819.26),
+        ):
+            with self.subTest(n=n):
+                r = solve_c02(n, controller="cyclic-a2")
+                self.assertEqual(r["controller"], "cyclic-a2")
+                self.assertIs(r["deadlock"], False)
+                self.assertAlmostEqual(r["throughput"] / count, 1, delta=0.01)
+                self.assertAlmostEqual(
+                    r["average_including_handling_seconds"] / full_cycle, 1, delta=0.01
+                )
 
 
 if __name__ == "__main__":
