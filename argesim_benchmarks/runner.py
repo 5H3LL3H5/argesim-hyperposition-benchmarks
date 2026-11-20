@@ -217,6 +217,7 @@ def _suite_arguments(profile: str) -> dict[tuple[str, str], dict[str, Any]]:
         return required
     if profile != "smoke":
         raise ValueError("profile must be 'smoke' or 'definition'")
+    groundwater_grid = {"nx": 8, "ny": 9, "dx": 10.0, "dy": 5.0}
     bounded = {
         ("C02", "study"): {"max_pallets": 2},
         ("C04", "compare"): {"replications": 1},
@@ -236,9 +237,9 @@ def _suite_arguments(profile: str) -> dict[tuple[str, str], dict[str, Any]]:
         ("C17R", "ca"): {"steps": 2},
         ("C17R", "ode"): {"t_bound": 2.0},
         ("C18", "all"): {"epochs": 2, "use_digitized": True},
-        ("C19R", "A"): {"nx": 3, "ny": 3},
-        ("C19R", "B"): {"nx": 3, "ny": 3},
-        ("C19R", "C"): {"nx": 3, "ny": 3},
+        ("C19R", "A"): groundwater_grid,
+        ("C19R", "B"): groundwater_grid,
+        ("C19R", "C"): groundwater_grid,
         ("C20", "replication"): {"order_count": 10},
         ("C20", "experiment"): {"order_count": 10, "replications": 10},
         ("C21", "dynamic-contact"): {"t_bound": 0.2},

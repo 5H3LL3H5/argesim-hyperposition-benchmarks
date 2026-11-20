@@ -24,6 +24,7 @@ class C01Tests(unittest.TestCase):
     def test_task_c_steady_states_satisfy_the_ode(self) -> None:
         states = c01_task_c()
         self.assertEqual(states["no-bombardment"], (0.0, 0.0, 0.0))
+        # Dymola C1 solution, Task c (constant bombardment p = 10,000).
         expected = (1000.0, 10.0, 10.0)
         for candidate, reference in zip(states["bombardment"], expected):
             self.assertAlmostEqual(candidate, reference, places=12)
@@ -58,6 +59,18 @@ class C01Tests(unittest.TestCase):
     def test_task_b_returns_all_logarithmic_trajectories(self) -> None:
         trajectories = c01_task_b()
         self.assertEqual(tuple(trajectories), C01_LOG_LOSS_VALUES)
+        # Independently transcribed equations, SciPy Radau, t=10 s,
+        # rtol=2e-12 and atol=2e-13. The five rates span two decades.
+        endpoints = (
+            (35.506204997109, 3.479215004071, 0.101616870993),
+            (32.756541018625, 3.487300514722, 0.032069274358),
+            (31.755612494065, 3.479671316355, 0.010100722053),
+            (31.422834488577, 3.475750569249, 0.003188529708),
+            (31.315845979889, 3.474338071668, 0.001007685996),
+        )
+        for result, expected in zip(trajectories.values(), endpoints):
+            for actual, value in zip(result.final_state, expected):
+                self.assertAlmostEqual(actual, value, delta=2e-7)
         self.assertTrue(
             all(
                 result.final_time == 10.0

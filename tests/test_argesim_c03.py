@@ -111,6 +111,20 @@ class C03Tests(unittest.TestCase):
             self.assertEqual(result.states[0], initial_state)
             self.assertAlmostEqual(result.final_time, 9.0e-6)
 
+    def test_four_task_c_transients_against_independent_ramp_integration(self) -> None:
+        # Propagate each constant circuit by its augmented matrix exponential.
+        # Independently integrate each linear resistance ramp with Radau using
+        # normalized local time, starting from the end of a full 100 us Task B.
+        oracle = {
+            1e-15: (0.198657915818, 0.010926624171, -0.019865330655, -15.827365295785),
+            1e-11: (0.198657224759, 0.010926596886, -0.019865476030, -15.827353718003),
+            1e-9:  (0.198588801795, 0.010923895311, -0.019879869062, -15.826206638101),
+            1e-7:  (0.191726517891, 0.010652460615, -0.021313646363, -15.703719802271),
+        }
+        for ramp, result in c03_task_c().items():
+            for actual, expected in zip(result.final_state, oracle[ramp]):
+                self.assertAlmostEqual(actual, expected, delta=5e-5)
+
     def test_invalid_parameters_are_rejected(self) -> None:
         with self.assertRaises(ValueError):
             C03Parameters(rl=0.0)

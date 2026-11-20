@@ -1,3 +1,5 @@
+import math
+import statistics
 import unittest
 from unittest.mock import patch
 
@@ -22,9 +24,26 @@ class TestArgesimC06(unittest.TestCase):
         self.assertEqual(baseline, solve_c06_task_a())
         self.assertEqual(
             set(baseline),
-            {"overall", "type_1", "type_2", "type_3", "type_4", "std_dev"},
+            {"overall", "type_1", "type_2", "type_3", "type_4", "std_dev", "closing_minutes"},
         )
         self.assertTrue(all(value > 0.0 for value in baseline.values()))
+
+    def test_published_daily_statistics_for_all_three_policies(self):
+        # STROBOSCOPE C6, Table 1. Both experiments comprise 100 independent
+        # days, with 250 arrivals per day. Published values are whole minutes.
+        metrics = ("overall", "type_1", "type_2", "type_3", "type_4", "std_dev", "closing_minutes")
+        for policy, reference in (
+            ({}, (174, 237, 136, 252, 127, 82, 378)),
+            ({"task_b_active": True}, (184, 252, 144, 266, 136, 95, 420)),
+            ({"discipline": QueueDiscipline.PRIORITY}, (161, 164, 162, 175, 156, 75, 382)),
+        ):
+            days = [solve_c06(seed=seed, **policy) for seed in range(100)]
+            for metric, target in zip(metrics, reference):
+                values = [day[metric] for day in days]
+                # Equal-variance estimate of uncertainty of two sample means.
+                se = statistics.stdev(values) * math.sqrt(2 / len(days))
+                with self.subTest(policy=policy, metric=metric):
+                    self.assertAlmostEqual(statistics.mean(values), target, delta=3.5 * se + 0.5)
 
     def test_task_b_implements_capacity_preserving_doctor_swap(self):
         baseline = solve_c06_task_a()

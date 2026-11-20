@@ -322,12 +322,15 @@ class BaseDevsSystem(AtomicModel):
         self.queues[q_idx].append(entity)
         self.check_enter_server(q_idx)
 
+    def can_enter_server(self, q_idx: int) -> bool:
+        return self.servers[q_idx] is None and bool(self.queues[q_idx])
+
     def check_enter_server(self, q_idx: int) -> None:
-        if self.servers[q_idx] is None and self.queues[q_idx]:
+        if self.can_enter_server(q_idx):
             self.schedule_eps_event(2, "enter", q_idx)
 
     def handle_enter(self, q_idx: int) -> None:
-        if self.servers[q_idx] is None and self.queues[q_idx]:
+        if self.can_enter_server(q_idx):
             entity = self.queues[q_idx].pop(0)
             while entity.reneged and self.queues[q_idx]:
                 entity = self.queues[q_idx].pop(0)
@@ -492,6 +495,7 @@ class ClassingSystem(BaseDevsSystem):
         self.n_c = 5
         self.t_c = 10.0
         self.current_class = 0
+        self.called_through = 0
         # C22 §4 assigns deterministic classes 1, 2, ..., nC, 1, ...
         # The operator itself calls them in the opposite direction.
         self.det_class_counter = 1
@@ -501,13 +505,6 @@ class ClassingSystem(BaseDevsSystem):
         self.class_wait_times: dict[int, list[float]] = {
             i: [] for i in range(1, self.n_c + 1)
         }
-
-    def process_entity_arrival(self, entity: Entity) -> None:
-        super().process_entity_arrival(entity)
-        if self.operator_started and entity.entity_class == self.current_class:
-            q_idx = entity.assigned_queue
-            self.reorder_queues()
-            self.check_enter_server(q_idx)
 
     def handle_arrive(self) -> None:
         if self.entities_created >= self.num_entities:
@@ -565,6 +562,8 @@ class ClassingSystem(BaseDevsSystem):
             if self.current_class == 0:
                 self.current_class = self.n_c
 
+        # The call releases the matching entities already waiting (C22 §4).
+        self.called_through = self.entities_created
         self.reorder_queues()
 
         for i in range(self.num_queues):
@@ -580,50 +579,25 @@ class ClassingSystem(BaseDevsSystem):
             others = [e for e in q if e.entity_class != self.current_class]
             q[:] = called + others
 
-    def check_enter_server(self, q_idx: int) -> None:
-        if (self.servers[q_idx] is None and self.queues[q_idx]
-                and self.queues[q_idx][0].entity_class == self.current_class):
-            self.schedule_eps_event(2, "enter", q_idx)
+    def was_called(self, entity: Entity) -> bool:
+        return entity.entity_class == self.current_class and entity.id <= self.called_through
 
-    def handle_enter(self, q_idx: int) -> None:
-        if (
-            self.servers[q_idx] is None
-            and self.queues[q_idx]
-            and self.queues[q_idx][0].entity_class == self.current_class
-        ):
-            entity = self.queues[q_idx].pop(0)
-            while entity.reneged and self.queues[q_idx]:
-                entity = self.queues[q_idx].pop(0)
-            if entity.reneged:
-                return
-            self.servers[q_idx] = entity
-            entity.assigned_queue = -1
-            entity.in_service = True
-            entity.queue_wait_time += (
-                float(self.current_time.macro) - entity.enter_queue_time
-            )
-            self.wait_times.append(entity.queue_wait_time)
-            self.class_wait_times[entity.entity_class].append(entity.queue_wait_time)
-            self.schedule_event(self.get_service_time(), 1, "leave", q_idx)
+    def can_enter_server(self, q_idx: int) -> bool:
+        return super().can_enter_server(q_idx) and self.was_called(self.queues[q_idx][0])
+
+    def post_enter_server(self, q_idx: int, entity: Entity) -> None:
+        self.class_wait_times[entity.entity_class].append(entity.queue_wait_time)
 
     def post_leave_server(self, q_idx: int) -> None:
         self.check_operator_wait()
 
     def check_operator_wait(self) -> None:
-        if self.current_class != 0:
-            count = 0
-            for i in range(self.num_queues):
-                if (
-                    self.servers[i] is not None
-                    and self.servers[i].entity_class == self.current_class
-                ):
-                    count += 1
-                count += sum(
-                    1 for e in self.queues[i] if e.entity_class == self.current_class
-                )
-
-            if count == 0:
-                self.schedule_eps_event(6, "operator")
+        if self.current_class == 0:
+            return
+        for server, queue in zip(self.servers, self.queues):
+            if server is not None or (queue and self.was_called(queue[0])):
+                return
+        self.schedule_eps_event(6, "operator")
 
 
 def run_model(

@@ -30,7 +30,4 @@ not use SciPy.
 
 ## Evidence boundary
 
-Published trajectory figures support qualitative inspection but no digitized,
-independent transient table is archived here. C03 therefore remains at the
-`implemented` gate rather than claiming complete transient validation or
-benchmark-ready workload parity.
+Task A checks the published eigenvalues. An independent affine matrix exponential checks the ideal-switch trajectory at all 20 half-cycle boundaries. For Task C, an independent calculation uses Radau on every resistance ramp in normalized local time and a matrix exponential during each constant interval. Tests compare all four state components at 9 µs for 1 fs, 10 ps, 1 ns and 100 ns ramps, starting from the end of Task B. These controls qualify the listed cases for `validated`. [Numerical comparisons](docs/PUBLISHED_REFERENCE_CHECKS.md)

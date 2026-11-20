@@ -9,20 +9,15 @@ two deliberately separate purposes:
 
 ## Current status
 
-The official inventory was re-audited on 2026-11-18: C01-C22 plus CP1 and
-CP2, with C17R and C19R as the active revised definitions. The machine-readable
-inventory in `argesim_benchmarks.catalog` records the evidence reached by each
-complete task family instead of treating file presence as implementation.
-
-C08, C21, CP1 and CP2 retain limited `validated` evidence for the cases
-listed in the audit. Nineteen families reach `implemented`, including the
-finite C02 assembly plant and the C20 transport model. C18 remains
-`specified` pending the original measurement datasets. Passing
-unit tests or a smoke run does not establish full benchmark correctness.
-Each benchmark must pass five evidence gates:
+The catalog contains 24 families, including revised definitions C17R and C19R.
+Twelve have numerical reference checks for identified cases. Eleven have
+executable implementations. C18 has executable identification algorithms and
+digitized examples. It remains at `specified` pending the two original recordings.
+The catalog records the following evidence gates.
 
 `cataloged -> specified -> implemented -> validated -> benchmark-ready`
 
+The [published comparisons](docs/PUBLISHED_REFERENCE_CHECKS.md) give the tested cases, numerical differences and remaining evidence for all 24 families.
 See [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md) for the per-model status and
 [ARGESIM_AUDIT.md](ARGESIM_AUDIT.md) for the definition-by-definition review.
 The [2026-11-19 transport/data report](docs/ARGESIM_TRANSPORT_DATA_20261119.md)

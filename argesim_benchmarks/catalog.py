@@ -53,7 +53,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.STIFF_ODE,),
         _source("c01"),
         "stiff ODE",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
         "C02",
@@ -69,7 +69,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.ODE, ModelClass.HYBRID),
         _source("c03"),
         "ODE, hybrid",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
         "C04",
@@ -85,7 +85,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.STIFF_ODE, ModelClass.HYBRID),
         _source("c05"),
         "stiff ODE, state events",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
         "C06",
@@ -93,7 +93,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.DES, ModelClass.STOCHASTIC),
         _source("c06"),
         "stochastic DES",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
         "C07",
@@ -101,7 +101,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.ODE, ModelClass.HYBRID),
         _source("c07"),
         "hybrid mechanics",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
         "C08",
@@ -141,7 +141,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.ODE, ModelClass.HYBRID, ModelClass.STOCHASTIC),
         _source("c12"),
         "hybrid mechanics, stochastic study",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
         "C13",
@@ -165,7 +165,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.ODE, ModelClass.IDENTIFICATION, ModelClass.STOCHASTIC),
         _source("c15"),
         "ODE identification",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
         "C16",
@@ -231,7 +231,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.DES,),
         _source("c22"),
         "DES/queueing",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
         "CP1",

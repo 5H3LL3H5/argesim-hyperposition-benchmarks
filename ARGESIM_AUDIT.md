@@ -1,5 +1,12 @@
 # ARGESIM implementation audit
 
+## Current reference results
+
+The [reference comparison](docs/PUBLISHED_REFERENCE_CHECKS.md) records the current
+scope for all 24 families, including the remaining C02 and C18 differences. The
+full C20 experiment covers 360 runs on three generated books. Its independent
+transport replays cover 55,648,862 events. [C20 evidence](docs/ARGESIM_CLOSURE_20261120.md)
+
 ## C02 initial positions and C18 feedback training, 2026-11-20
 
 With the service-only positioning assumption, three of twelve fixed initial
@@ -182,8 +189,7 @@ python -m compileall -q argesim_benchmarks tests scripts
 
 ## Earlier reviews
 
-The dated sections below retain their original scope. Current family status
-is given by the per-definition table and the 2026-11-18 findings above.
+The dated sections below retain their original scope. Current family status is listed in [ARGESIM_COVERAGE.md](ARGESIM_COVERAGE.md).
 
 ## Isolated diagnostic performance mode (2026-09-28)
 
@@ -264,7 +270,7 @@ The event layer is independent of its continuous solver. Benchmark policy stays
 inside the model; event ordering, executor lifetime and timing summaries stay
 in shared runtime code.
 
-## Per-definition result
+## Per-definition result at the 2026-11-18 audit
 
 | ID | Gate | Audit result |
 |---|---|---|

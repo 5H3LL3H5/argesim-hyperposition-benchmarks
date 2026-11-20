@@ -117,6 +117,24 @@ printed expression even on the paper's data. The article reports 14. Resolving
 which objective or input data produced that claim requires further source
 material. Shorter studies explicitly report how many eligible loads they score.
 
+## Independent CSIM table
+
+Pllana and Fahringer report eleven loads. The table below uses even legal initial placement, first-eligible routing and service-only positioning for every load. The timer includes the two A1 handling intervals. The CSIM paper does not identify its timer edges, so this clock choice is part of the comparison. Both metrics pass the existing 6% relative band at all eleven loads. The separate SimEvents tests still use their published part-time target and the default model still misses three rows. [CSIM Table 1](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C02/C2-solution-CSIM.pdf)
+
+| Pallets | CSIM jobs | Model jobs | CSIM mean (s) | Model mean (s) |
+|---:|---:|---:|---:|---:|
+| 13 | 1320 | 1242 | 284.56 | 301.44 |
+| 16 | 1440 | 1440 | 321.25 | 320.00 |
+| 17 | 1442 | 1440 | 341.18 | 339.87 |
+| 18 | 1442 | 1440 | 361.64 | 360.17 |
+| 20 | 1438 | 1440 | 401.03 | 399.77 |
+| 21 | 1440 | 1440 | 420.86 | 420.12 |
+| 22 | 1442 | 1441 | 440.33 | 439.99 |
+| 23 | 1438 | 1443 | 460.79 | 459.79 |
+| 24 | 1439 | 1439 | 480.21 | 480.08 |
+| 25 | 1440 | 1441 | 499.33 | 500.68 |
+| 40 | 1440 | 1441 | 794.10 | 802.62 |
+
 ## Sensitivity to positioning-unit occupancy
 
 The default `unit_timing="exclusive"` includes the two half-unit journeys in
@@ -190,6 +208,8 @@ replays load and unload events and checks this identity in integer ticks.
 |---|---:|---:|---:|---:|---:|
 | Exclusive | 25 | 1,409 | 511.467 | −657.00 | 0 |
 | Service only | 25 | 1,441 | 500.684 | −1,485.33 | 0 |
+
+The same diagnostic can be computed using the paper alone. Subtract the published part-time mean from `pallets × 28,800 s / completed jobs`. Eleven of its twelve rows give 14.00–18.97 s. The 25-pallet row gives 104.35 s. This diagnostic assumes a closed population and is sensitive to occupancy and window boundaries.
 
 If the SimEvents row used the same part-time clock and all 25 workpieces
 were active throughout the window, its count of 1,439 and mean of 396 s

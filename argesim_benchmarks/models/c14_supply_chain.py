@@ -110,9 +110,14 @@ class Distributor:
 
 class SupplyChainSim:
     """Simulates the ARGESIM C14 supply chain model."""
-    def __init__(self, task: str, seed: int = 42):
+    def __init__(self, task: str, seed: int = 42, *, simple_order_policy: str = "every-product"):
         if task not in {"a", "b", "c"}:
             raise ValueError("task must be one of 'a', 'b', or 'c'")
+        if simple_order_policy not in {"every-product", "sold-products"}:
+            raise ValueError("simple_order_policy must be every-product or sold-products")
+        if task != "a" and simple_order_policy != "every-product":
+            raise ValueError("simple_order_policy applies only to Task A")
+        self.simple_order_policy = simple_order_policy
         self.task = task
         self.rng = random.Random(seed)
         self.factories = {i: Factory(i, self.rng) for i in range(1, 5)}
@@ -122,7 +127,7 @@ class SupplyChainSim:
         # The definition starts wholesaler ordering exactly at day 9, 00:00.
         self.next_wholesaler_order_time = WHOLESALER_START_TIME
 
-    def advance_time(self, new_time: int) -> None:
+    def advance_time(self, new_time: int, *, include_end_order: bool = True) -> None:
         """Advance the simulation chronologically to the specified time."""
         # Event loop to process events in chronological order up to new_time
         while True:
@@ -138,7 +143,9 @@ class SupplyChainSim:
                     event_data = f_id
 
             # Check wholesaler orders
-            if self.next_wholesaler_order_time < next_event_time:
+            if self.next_wholesaler_order_time < next_event_time and (
+                include_end_order or self.next_wholesaler_order_time != new_time
+            ):
                 next_event_time = self.next_wholesaler_order_time
                 event_type = "wholesaler"
 
@@ -220,7 +227,8 @@ class SupplyChainSim:
         end_time = days * HOURS_PER_DAY * SECONDS_PER_HOUR
         for day in range(8, days + 1): # next checkpoint is day 9 at 00:00
             target_time = day * HOURS_PER_DAY * SECONDS_PER_HOUR
-            self.advance_time(target_time)
+            # Close the previous demand window before the new day's first order.
+            self.advance_time(target_time, include_end_order=False)
 
             # calculate storage cost
             for d in self.distributors.values():
@@ -260,7 +268,12 @@ class SupplyChainSim:
                     # satisfy for wholesalers during the preceding day.
                     for p in TASK_A_B_MAPPING[d_id]:
                         f_id = TASK_A_B_MAPPING[d_id][p]
-                        amount = 2 + dist.unfulfilled_wholesaler_demand[p]
+                        unfilled = dist.unfulfilled_wholesaler_demand[p]
+                        sold = dist.wholesaler_demand[p] - unfilled
+                        base_amount = 2 if self.simple_order_policy == "every-product" or sold else 0
+                        amount = base_amount + unfilled
+                        if not amount:
+                            continue
                         if not self.place_factory_order(d_id, f_id, p, amount, target_time):
                             dist.backlogged_orders.append((p, amount, f_id))
                 elif self.task == "b":
@@ -296,13 +309,15 @@ class SupplyChainSim:
         return d1_stock_history
 
 
-def _run_monte_carlo(task: str, seed: int = 42, runs: int = 100) -> dict[str, dict[str, float]]:
+def _run_monte_carlo(
+    task: str, seed: int = 42, runs: int = 100, *, simple_order_policy: str = "every-product"
+) -> dict[str, dict[str, float]]:
     if runs <= 0:
         raise ValueError("runs must be positive")
     rng = random.Random(seed)
     costs, delivered, relative_costs = [], [], []
     for _ in range(runs):
-        sim = SupplyChainSim(task, seed=rng.randint(0, MAX_SEED_VAL))
+        sim = SupplyChainSim(task, seed=rng.randint(0, MAX_SEED_VAL), simple_order_policy=simple_order_policy)
         sim.run(DAYS_TO_SIMULATE)
         d1 = sim.distributors[1]
         costs.append(d1.total_cost)
@@ -329,15 +344,15 @@ def _run_monte_carlo(task: str, seed: int = 42, runs: int = 100) -> dict[str, di
         "R": stats(relative_costs)
     }
 
-def c14_task_a1(seed: int = 42) -> list[tuple[int, dict[int, int]]]:
+def c14_task_a1(seed: int = 42, *, simple_order_policy: str = "every-product") -> list[tuple[int, dict[int, int]]]:
     """Task a1: Simulate the system once for 30 days and show stock of D1 over time."""
-    sim = SupplyChainSim("a", seed=seed)
+    sim = SupplyChainSim("a", seed=seed, simple_order_policy=simple_order_policy)
     return sim.run(DAYS_TO_SIMULATE)
 
 
-def c14_task_a2(seed: int = 42, runs: int = 100) -> dict[str, dict[str, float]]:
+def c14_task_a2(seed: int = 42, runs: int = 100, *, simple_order_policy: str = "every-product") -> dict[str, dict[str, float]]:
     """Task a2: Perform 100 simulation runs, calculate metrics for D1."""
-    return _run_monte_carlo("a", seed, runs)
+    return _run_monte_carlo("a", seed, runs, simple_order_policy=simple_order_policy)
 
 
 def c14_task_b1(seed: int = 42) -> list[tuple[int, dict[int, int]]]:
@@ -356,10 +371,10 @@ def c14_task_c1(seed: int = 42, runs: int = 100) -> dict[str, dict[str, float]]:
     return _run_monte_carlo("c", seed, runs)
 
 
-def c14_task_c2(seed: int = 42, runs: int = 100) -> dict[str, dict[str, dict[str, float]]]:
+def c14_task_c2(seed: int = 42, runs: int = 100, *, simple_order_policy: str = "every-product") -> dict[str, dict[str, dict[str, float]]]:
     """Task c2: Compute comparative table for D1 for all three strategies."""
     return {
-        "Strategy A": c14_task_a2(seed, runs),
+        "Strategy A": c14_task_a2(seed, runs, simple_order_policy=simple_order_policy),
         "Strategy B": c14_task_b2(seed, runs),
         "Strategy C": c14_task_c1(seed, runs),
     }

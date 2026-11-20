@@ -94,3 +94,6 @@ papers. No original training/validation data pair was found in those links.
 - A. Belič, *Identification of Nonlinear Dynamics – Neural Networks versus Transfer Functions*, 2005. [Definition PDF](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-definition.pdf).
 - A. Belič, *A Classic MATLAB-based Solution of ARGESIM Benchmark C18*, SNE 17(3–4), pp. 77–78. [Publication](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_17_34/sne.17.34.pdf).
 - [ARGESIM catalog](https://www.argesim.org/benchmarks/c18) · [SNE definition and solutions](https://www.sne-journal.org/benchmarks/c18).
+
+
+The archived publisher definition page from October 2006 links to the definition PDF. Its solutions page links to two example PDFs. The published Excel solution has no embedded workbook, data files or download links. These searches yielded no original measurement pair. [Archived definition](https://web.archive.org/web/20061009001632/http://www.argesim.org/comparisons/c18/definition/c18def.html) · [Archived solutions](https://web.archive.org/web/20061009003608/http://www.argesim.org/comparisons/c18/solutions/c18sol.html) · [Excel solution](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-solution-Excel.pdf)

@@ -1,17 +1,24 @@
 """ARGESIM C19R: Pollution in Groundwater Flow.
 
-The equations, parameters, initial values and tasks follow the one-page
-official C19(R) definition. This is a 2D Method of Lines PDE approximation.
+The revised C19R definition specifies the aquifer, source and facility schedule.
+The grid model uses conservative fluxes. Task A also supports numerical
+integration of the unbounded homogeneous aquifer response.
 """
 
 from __future__ import annotations
 
+import bisect
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
-from ..ivp import InitialValueProblem, IntegrationResult, Rhs
-from ..runtime import solve_ivp
+from ..ivp import InitialValueProblem, IntegrationError, IntegrationResult, Rhs
+from ..runtime import (
+    merge_integration_results,
+    merge_solver_options,
+    normalise_solver_name,
+    solve_ivp,
+)
 
 
 @dataclass(frozen=True)
@@ -20,7 +27,7 @@ class C19Parameters:
     mass_rate: float = 2.0  # M (mg/s)
     thickness: float = 10.0  # m (m)
     porosity: float = 0.25  # ne
-    pore_velocity_x: float = 1.7 / (24 * 3600)  # ux (m/s)
+    pore_velocity_x: float = 1.0e-5  # ux (m/s), revised definition, Table 1
     dispersivity: float = 0.05  # alpha_T = alpha_L (m)
     retardation: float = 1.0  # R
     degradation: float = 1.0e-6 * math.log(10.0)  # lambda (1/s)
@@ -43,8 +50,8 @@ class C19Parameters:
 _C19_DEFAULT_PARAMETERS = C19Parameters()
 
 
-def _k0_approx(x: float) -> float:
-    """Analytical approximation for modified Bessel function K0.
+def _scaled_k0(x: float) -> float:
+    """Approximate exp(x) K0(x) without exponentiating a large argument.
 
     Uses polynomial approximations from Abramowitz & Stegun.
     """
@@ -62,7 +69,7 @@ def _k0_approx(x: float) -> float:
             + 0.0360768 * t2**5
             + 0.0045813 * t2**6
         )
-        return (
+        return math.exp(x) * (
             -math.log(x / 2.0) * i0
             - 0.57721566
             + 0.42278420 * y
@@ -73,7 +80,7 @@ def _k0_approx(x: float) -> float:
             + 0.00000740 * y**6
         )
     y = 2.0 / x
-    return (math.exp(-x) / math.sqrt(x)) * (
+    return (1.0 / math.sqrt(x)) * (
         1.25331414
         - 0.07832358 * y
         + 0.02189568 * y**2
@@ -84,20 +91,25 @@ def _k0_approx(x: float) -> float:
     )
 
 
+def _downstream_exponent(x: float, y: float, r: float, alpha: float) -> float:
+    # Rationalize x - r in the downstream plume where x and r nearly coincide.
+    difference = -abs(y) * (abs(y) / r) / (1.0 + x / r) if x > 0.0 else x - r
+    return difference / (2.0 * alpha)
+
+
 def c19_analytical_steady_state(
     x: float, y: float, parameters: C19Parameters = _C19_DEFAULT_PARAMETERS
 ) -> float:
     """Steady-state analytical approximation (without degradation)."""
-    r = math.sqrt(x * x + y * y)
+    r = math.hypot(x, y)
     if r == 0.0:
         return math.inf
     c0 = parameters.mass_rate / (
         parameters.thickness * parameters.porosity * parameters.pore_velocity_x
     )
     alpha = parameters.dispersivity
-    term1 = (c0 / (2.0 * math.pi * alpha)) * math.exp(x / (2.0 * alpha))
-    term2 = _k0_approx(r / (2.0 * alpha))
-    return term1 * term2
+    factor = math.exp(_downstream_exponent(x, y, r, alpha))
+    return c0 / (2.0 * math.pi * alpha) * factor * _scaled_k0(r / (2.0 * alpha))
 
 
 def c19_analytical_transient(
@@ -106,7 +118,7 @@ def c19_analytical_transient(
     """Transient analytical approximation for homogeneous spread."""
     if t <= 0:
         return 0.0
-    r = math.sqrt(x * x + y * y)
+    r = math.hypot(x, y)
     if r == 0.0:
         return math.inf
     u = parameters.pore_velocity_x
@@ -114,11 +126,94 @@ def c19_analytical_transient(
     c0 = parameters.mass_rate / (parameters.thickness * parameters.porosity * u)
 
     term1 = c0 / (4.0 * math.sqrt(math.pi * alpha) * math.sqrt(r))
-    term2 = math.exp((x - r) / (2.0 * alpha))
-    arg = (r - u * t) / math.sqrt(2.0 * alpha * u * t)
+    term2 = math.exp(_downstream_exponent(x, y, r, alpha))
+    distance = u * (t / parameters.retardation)
+    if distance == 0.0:
+        return 0.0
+    arg = -math.inf if math.isinf(distance) else (r - distance) / math.sqrt(2.0 * alpha * distance)
     term3 = math.erfc(arg)
 
     return term1 * term2 * term3
+
+def c19_homogeneous_transient(
+    x: float, y: float, t: float, parameters: C19Parameters = _C19_DEFAULT_PARAMETERS
+) -> float:
+    """Numerically integrate the homogeneous infinite-plane point-source response."""
+    if t <= 0:
+        return 0.0
+    r = math.hypot(x, y)
+    if r == 0:
+        return math.inf
+    alpha = parameters.dispersivity
+    distance = parameters.pore_velocity_x * (t / parameters.retardation)
+    if distance == 0.0:
+        return 0.0
+    # Logarithmic travel distance q = log(u*time/(R*r)) removes the singular
+    # 1/time factor in the 2D heat kernel. Its peak is always at q=0.
+    shape = r / alpha
+    cutoff = 2 * math.asinh(28 / math.sqrt(shape))
+    upper = min(math.log(distance) - math.log(r), cutoff)
+    if upper <= -cutoff:
+        return 0.0
+    # Composite eight-point Gauss-Legendre quadrature. In the far field the
+    # peak narrows as 1/sqrt(shape). Bound the panel width on that scale.
+    panels = math.ceil((upper + cutoff) * max(1.0, math.sqrt(shape)))
+    width = (upper + cutoff) / panels
+    nodes = ((0.1834346424956498, 0.3626837833783620),
+             (0.5255324099163290, 0.3137066458778873),
+             (0.7966664774136267, 0.2223810344533745),
+             (0.9602898564975363, 0.1012285362903763))
+    total = 0.0
+    for i in range(panels):
+        middle = -cutoff + (i + 0.5) * width
+        for node, weight in nodes:
+            delta = node * width / 2
+            for q in (middle - delta, middle + delta):
+                total += weight * math.exp(-shape * math.sinh(q / 2)**2)
+    scale = parameters.mass_rate / (
+        4 * math.pi * alpha * parameters.thickness * parameters.porosity * parameters.pore_velocity_x
+    )
+    return scale * math.exp(_downstream_exponent(x, y, r, alpha)) * total * width / 2
+
+
+def _disk_cell_area(x: float, y: float, dx: float, dy: float, radius: float) -> float:
+    """Area of an origin-centred disk in a cell centred at (x, y)."""
+    near_x = max(0.0, abs(x) - dx / 2)
+    near_y = max(0.0, abs(y) - dy / 2)
+    if math.hypot(near_x, near_y) >= radius:
+        return 0.0
+    if math.hypot(abs(x) + dx / 2, abs(y) + dy / 2) <= radius:
+        return dx * dy
+
+    def integral(u: float) -> float:
+        return (u * math.sqrt(max(0.0, radius**2 - u**2)) + radius**2 * math.asin(u / radius)) / 2
+
+    def quadrant(a: float, b: float) -> float:
+        width, height = min(abs(a), radius), min(abs(b), radius)
+        flat = min(width, math.sqrt(max(0.0, radius**2 - height**2)))
+        return math.copysign(height * flat + integral(width) - integral(flat), a * b)
+
+    left, right = x - dx / 2, x + dx / 2
+    bottom, top = y - dy / 2, y + dy / 2
+    return max(0.0, quadrant(right, top) - quadrant(left, top)
+               - quadrant(right, bottom) + quadrant(left, bottom))
+
+
+def _facility_schedule(t: float) -> tuple[bool, float]:
+    """Return activity and the next actual switch, starting Monday at midnight."""
+    hour = 3600
+    day = 24 * hour
+    day_index, seconds = divmod(t, day)
+    weekday = int(day_index) % 7
+    midnight = day_index * day
+    if weekday < 5:
+        if seconds < 8 * hour:
+            return True, midnight + 8 * hour
+        if seconds < 20 * hour:
+            return False, midnight + 20 * hour
+    days_to_opening = 1 if weekday < 4 else 7 - weekday
+    return True, midnight + days_to_opening * day + 8 * hour
+
 
 def c19_rhs(
     parameters: C19Parameters,
@@ -152,60 +247,39 @@ def c19_rhs(
     diff_x = (alpha_L * ux / R) / dx2
     diff_y = (alpha_T * ux / R) / dy2
 
-    # Upwind convection coefficient (assuming ux > 0, uy = 0)
+    # Cell-average transport coefficient, with positive x velocity.
     conv_x = (ux / R) / dx
 
     deg_val = parameters.degradation
 
-    # The source is a point source M at (0,0). In a discrete grid, it corresponds to the cell
-    # containing (0,0). The transport equation is integrated over the cell volume:
-    # the concentration rate is M / (dx * dy * thickness * ne).
-    # However, since we are doing 2D Method of Lines, the PDE is typically formulated
-    # in terms of concentration per unit length, or we need to ensure the delta function
-    # is scaled properly. The analytical solution uses c0 = M / (m * ne * u).
-    # Note: the entire time derivative is scaled by retardation R, so the source term
-    # must be divided by R as well. (m maps to thickness in parameters)
+    # A cell containing the source receives M/(volume * porosity * R).
     vol = dx * dy * parameters.thickness * parameters.porosity
     source_rate = parameters.mass_rate / (vol * R)
 
-    # Precalculate facility indices for efficiency (avoid distance checks in inner loop)
-    facility_indices: list[int] = []
-    if facility_mode in ("continuous", "schedule"):
+    # The two 5 m disks are tangent, so their cell areas add without overlap.
+    facility_rates = []
+    if facility_mode != "none":
         for j in range(ny):
-            y_pos = y_offset + j * dy
+            y = y_offset + j * dy
             for i in range(nx):
-                x_pos = x_offset + i * dx
-                r1 = math.sqrt((x_pos - 40.0)**2 + (y_pos - 5.0)**2)
-                r2 = math.sqrt((x_pos - 40.0)**2 + (y_pos + 5.0)**2)
-                if r1 <= 5.0 or r2 <= 5.0:
-                    facility_indices.append(j * nx + i)
+                x = x_offset + i * dx - 40.0
+                area = _disk_cell_area(x, y - 5.0, dx, dy, 5.0) + _disk_cell_area(x, y + 5.0, dx, dy, 5.0)
+                if area > 0.0:
+                    facility_rates.append((j * nx + i, deg_val * min(1.0, area / (dx * dy))))
 
-    # Find the closest cell to (0,0)
-    ix0 = max(0, min(nx - 1, round((0.0 - x_offset) / dx)))
-    iy0 = max(0, min(ny - 1, round((0.0 - y_offset) / dy)))
-
-    source_idx = iy0 * nx + ix0
-
-    is_continuous = (facility_mode == "continuous")
-    is_schedule = (facility_mode == "schedule")
+    # Half-open cells place a point on an interior face in the upper cell.
+    ix0 = math.floor(-x_offset / dx + 0.5)
+    iy0 = math.floor(-y_offset / dy + 0.5)
+    source_idx = iy0 * nx + ix0 if 0 <= ix0 < nx and 0 <= iy0 < ny else None
 
     def rhs(t: float, c: Sequence[float]) -> tuple[float, ...]:
         dc = [0.0] * (nx * ny)
-
-        is_active = False
-        if is_continuous:
-            is_active = True
-        elif is_schedule:
-            # Monday to Friday 0-8am, 8pm-12pm
-            # Weekends around the clock
-            # Assuming t=0 is Monday 00:00. Time is in seconds.
-            day_of_week = int(t / (24 * 3600)) % 7  # 0=Monday, 6=Sunday
-            hour_of_day = (t % (24 * 3600)) / 3600.0
-
-            if day_of_week >= 5 or hour_of_day < 8.0 or hour_of_day >= 20.0: # Saturday, Sunday
-                is_active = True
+        is_active = facility_mode == "continuous" or (
+            facility_mode == "schedule" and _facility_schedule(t)[0]
+        )
 
         for j in range(ny):
+            west_face = c[j * nx]
             for i in range(nx):
                 idx = j * nx + i
                 c_ij = c[idx]
@@ -220,9 +294,19 @@ def c19_rhs(
                 c_down = c[idx - nx] if j > 0 else c_ij
                 c_up = c[idx + nx] if j < ny - 1 else c_ij
 
-                # Upwind convection: - ux * dC/dx
-                # (c_ij - c_left)/dx
-                conv = -conv_x * (c_ij - c_left)
+                # Conservative upwind face reconstruction with the monotonized
+                # central limiter. Reuse the east face at the next cell.
+                left_jump = c_ij - c_left
+                right_jump = c_right - c_ij
+                if left_jump > 0.0 and right_jump > 0.0:
+                    slope = min(2 * left_jump, 2 * right_jump, (left_jump + right_jump) / 2)
+                elif left_jump < 0.0 and right_jump < 0.0:
+                    slope = max(2 * left_jump, 2 * right_jump, (left_jump + right_jump) / 2)
+                else:
+                    slope = 0.0
+                east_face = c_ij + slope / 2
+                conv = -conv_x * (east_face - west_face)
+                west_face = east_face
 
                 # Central difference diffusion: alpha * |u| * d2C/dx2
                 diff = diff_x * (c_left - 2.0 * c_ij + c_right) + diff_y * (c_down - 2.0 * c_ij + c_up)
@@ -231,11 +315,12 @@ def c19_rhs(
 
         # Degradation application
         if is_active:
-            for idx in facility_indices:
-                dc[idx] -= deg_val * c[idx]
+            for idx, rate in facility_rates:
+                dc[idx] -= rate * c[idx]
 
         # Source application
-        dc[source_idx] += source_rate
+        if source_idx is not None:
+            dc[source_idx] += source_rate
 
         return tuple(dc)
 
@@ -311,29 +396,68 @@ def solve_c19(
         t_bound=t_bound,
         initial_state=initial_state,
     )
-    return solve_ivp(
-        problem,
-        method,
-        options=options,
-        defaults={"rk45": {"max_step": max_step_value}},
-    )
+    defaults = {"rk45": {"max_step": max_step_value}}
+    method = normalise_solver_name(method)
+    if facility_mode != "schedule" or method not in {"rk45", "rk4", "euler"}:
+        return solve_ivp(problem, method, options=options, defaults=defaults)
 
-def c19_task_a(nx: int = 71, ny: int = 41, dx: float = 1.0, dy: float = 1.0, x_offset: float = -10.0, y_offset: float = -20.0) -> IntegrationResult:
-    """Task A: Simulation of unregulated pollution spread for 150 days."""
-    # Using explicit RK45. The spatial discretization of diffusion makes the system stiff.
-    # For a realistic grid (dx=1), the stability limit forces very small steps.
-    # An implicit solver would be more appropriate, but explicit is used here out of necessity
-    # to maintain benchmark framework compatibility.
-    return solve_c19(
-        nx=nx,
-        ny=ny,
-        dx=dx,
-        dy=dy,
-        x_offset=x_offset,
-        y_offset=y_offset,
-        facility_mode="none",
-        max_step=12 * 3600,
-    )
+    # Freeze the forcing on each side so even RK stages at a switch use the
+    # correct one-sided derivative. Reuse the two spatial operators all week.
+    modes = {
+        active: c19_rhs(parameters, nx, ny, dx, dy, x_offset, y_offset, mode)
+        for active, mode in ((False, "none"), (True, "continuous"))
+    }
+    segment_options = merge_solver_options(options)
+    start, state = problem.t0, problem.y0
+    segments = []
+    while start < problem.t_bound:
+        active, next_switch = _facility_schedule(start)
+        end = min(next_switch, problem.t_bound)
+        part = InitialValueProblem(modes[active], start, state, end, name=problem.name, autonomous=True)
+        result = solve_ivp(part, method, options=segment_options, defaults=defaults)
+        segments.append(result)
+        if end < problem.t_bound and "max_steps" in segment_options:
+            segment_options["max_steps"] -= result.stats.accepted_steps + result.stats.rejected_steps
+            if segment_options["max_steps"] <= 0:
+                raise IntegrationError("C19 schedule reached max_steps")
+        start, state = end, result.final_state
+    return merge_integration_results(segments)
+
+
+def c19_task_a(
+    nx: int = 71, ny: int = 41, dx: float = 1.0, dy: float = 1.0,
+    x_offset: float = -10.0, y_offset: float = -20.0, *, profiles: bool = False,
+) -> IntegrationResult | list[dict[str, float]]:
+    """Return the grid trajectory or the Task A transverse profiles at x=50 m."""
+    if not isinstance(profiles, bool):
+        raise TypeError("profiles must be bool")
+    if profiles and not x_offset <= 50.0 <= x_offset + (nx - 1) * dx:
+        raise ValueError("Task A profiles require a grid containing x=50 m")
+    result = solve_c19(nx=nx, ny=ny, dx=dx, dy=dy, x_offset=x_offset, y_offset=y_offset)
+    if not profiles:
+        return result
+
+    position = (50.0 - x_offset) / dx
+    left = min(math.floor(position), nx - 2)
+    frac = position - left
+    rows = []
+    for day in (50, 100, 150):
+        time = day * 86400
+        end = bisect.bisect_left(result.times, time)
+        start = end - 1
+        w = (time - result.times[start]) / (result.times[end] - result.times[start])
+        for j in range(ny):
+            y = y_offset + j * dy
+            i = j * nx + left
+            before, after = result.states[start], result.states[end]
+            a = before[i] + frac * (before[i + 1] - before[i])
+            b = after[i] + frac * (after[i + 1] - after[i])
+            value = a + w * (b - a)
+            printed = c19_analytical_transient(50, y, time)
+            rows.append({"day": day, "y_m": y, "mol": value, "printed_approximation": printed,
+                         "mol_minus_printed": value - printed,
+                         "infinite_plane": c19_homogeneous_transient(50, y, time)})
+    return rows
 
 
 def _steady_state_grid(

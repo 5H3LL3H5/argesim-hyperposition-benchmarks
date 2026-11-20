@@ -215,6 +215,21 @@ class C02PublishedComparisons(unittest.TestCase):
         self.assertEqual(other["throughput"], 1344)
         self.assertAlmostEqual(other["average_throughput_time"], 285)
 
+    def test_csim_table_one_against_counts_and_full_pallet_clock(self):
+        # Pllana & Fahringer (2003), Table 1. The paper does not specify the
+        # two timer edges. Use the same full pallet clock for every row.
+        published = {
+            13: (1320, 284.56), 16: (1440, 321.25), 17: (1442, 341.18),
+            18: (1442, 361.64), 20: (1438, 401.03), 21: (1440, 420.86),
+            22: (1442, 440.33), 23: (1438, 460.79), 24: (1439, 480.21),
+            25: (1440, 499.33), 40: (1440, 794.10),
+        }
+        for n, (jobs, seconds) in published.items():
+            with self.subTest(n=n):
+                result = solve_c02(n, unit_timing="service-only")
+                self.assertAlmostEqual(result["throughput"] / jobs, 1, delta=0.06)
+                self.assertAlmostEqual(result["average_including_handling_seconds"] / seconds, 1, delta=0.06)
+
     @unittest.expectedFailure
     def test_simevents_13_pallets(self):
         self.assert_reference(13)

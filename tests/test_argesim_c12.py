@@ -98,8 +98,9 @@ class ArgesimC12Tests(unittest.TestCase):
         self.assertLess(result["c1_target_e"], 1.0)
         self.assertAlmostEqual(result["c1_target_e"], 0.5874011, delta=2.0e-6)
 
-        self.assertGreater(result["c2_mean_v4"], 0.0)
-        self.assertGreater(result["c2_std_v4"], 0.0)
+        # Wibmer, C12 Dymola solution, Task c2, published confidence intervals.
+        self.assertTrue(0.4216 <= result["c2_mean_v4"] <= 0.4269)
+        self.assertTrue(0.0403 <= result["c2_std_v4"] <= 0.0440)
         cdf = result["c2_empirical_cdf"]
         self.assertEqual(len(cdf), 10000)
         self.assertEqual(cdf[-1][1], 1.0)

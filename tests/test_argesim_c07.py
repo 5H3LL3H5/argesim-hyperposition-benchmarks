@@ -16,7 +16,7 @@ from argesim_benchmarks.models.c07_constrained_pendulum import (
 class TestC07(unittest.TestCase):
     def test_c07_catalog_status(self):
         c07 = next(b for b in BENCHMARKS if b.identifier == "C07")
-        self.assertEqual(c07.status, BenchmarkStatus.IMPLEMENTED)
+        self.assertEqual(c07.status, BenchmarkStatus.VALIDATED)
 
     def test_parameters_validation(self):
         with self.assertRaises(ValueError):
@@ -61,6 +61,17 @@ class TestC07(unittest.TestCase):
         self.assertGreater(len(r1.times), 10)
         self.assertEqual(r1.times[0], 0.0)
         self.assertAlmostEqual(r1.times[-1], 10.0)
+        # Setinek et al. (2021), Table 3, nonlinear MATLAB results
+        # (column F). Collapse adjacent samples on opposite sides of a reset.
+        hits = []
+        for t, (phi, _) in zip(r1.times, r1.states):
+            if abs(phi + math.pi / 12) < 1e-12 and (not hits or t - hits[-1] > 1e-8):
+                hits.append(t)
+        expected = (0.703427, 1.151778, 2.590338, 2.990403,
+                    4.542705, 4.867492, 6.648731, 6.720995)
+        self.assertEqual(len(hits), len(expected))
+        for t, published in zip(hits, expected):
+            self.assertAlmostEqual(t, published, delta=0.001)
 
         r2 = res["task_a_ii"]
         self.assertGreater(len(r2.times), 10)
