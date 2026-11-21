@@ -16,7 +16,7 @@ Im entpackten Rechenlabor startet `python methodenlabor.py` die Handrechnungen u
 
 ## Ausgabe aktualisieren
 
-Die Fassung auf `main` ist unter demselben PDF- und ZIP-Link erreichbar. Die Buchquellen, Abbildungen und Begleitdateien liegen gemeinsam unter [studienbuch](studienbuch/). Für den Satz werden XeLaTeX mit deutscher Silbentrennung, `xdvipdfmx`, die Schriften Noto Serif, Noto Sans Display, DejaVu Sans Mono und Latin Modern Math sowie PyMuPDF benötigt. Unter Ubuntu liefert `texlive-fonts-recommended` die von Hyperref verwendeten Schriftmetriken. Für die Prüfung des eingecheckten Buchstands genügt Python ab 3.10.
+Die Fassung auf `main` ist unter demselben PDF- und ZIP-Link erreichbar. Die Buchquellen, Abbildungen und Begleitdateien liegen gemeinsam unter [studienbuch](studienbuch/). Für den Satz werden XeLaTeX mit deutscher Silbentrennung, `xdvipdfmx`, die Schriften Noto Serif, Noto Sans Display, DejaVu Sans Mono und Latin Modern Math sowie PyMuPDF benötigt. Unter Debian und Ubuntu liefert `texlive-fonts-recommended` die von Hyperref verwendeten Schriftmetriken. Für die Prüfung des eingecheckten Buchstands genügt Python ab 3.10.
 
 ```sh
 python -m pip install PyMuPDF==1.26.6
