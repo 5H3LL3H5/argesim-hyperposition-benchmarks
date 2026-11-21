@@ -1,0 +1,42 @@
+{
+  "case": "cavity",
+  "seed": 2027,
+  "train_validation_test_counts": [
+    96,
+    16,
+    24
+  ],
+  "epochs": 80,
+  "best_epoch": 78,
+  "validation_mean_relative_l2": 0.11438082158565521,
+  "test": {
+    "mean_relative_l2": 0.11975634098052979,
+    "max_relative_l2": 0.18012739717960358
+  },
+  "train_mean_baseline_test": {
+    "mean_relative_l2": 0.14912405610084534,
+    "max_relative_l2": 0.23757819831371307
+  },
+  "canonical": {
+    "nodes_per_axis": 17,
+    "iterations": 16,
+    "reynolds": 1000.0,
+    "lid_speed": 0.1,
+    "fluid_relative_l2": 0.1158880939414381,
+    "max_abs_relative_speed": 0.15760720831184272,
+    "lbm_mass_change": -0.007460760933440724,
+    "minimum_predicted_relative_speed": 0.0002648551017045975
+  },
+  "seconds": {
+    "data_generation": 2.5742494280002575,
+    "training": 14.76896713899987,
+    "cpu_inference_test_batch": 0.016916425999625062
+  },
+  "versions": {
+    "python": "3.12.14",
+    "numpy": "2.3.5",
+    "torch": "2.8.0+cpu",
+    "neuraloperator": "2.0.0"
+  },
+  "cpu_threads": 1
+}

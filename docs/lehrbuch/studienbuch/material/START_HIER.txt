@@ -1,0 +1,80 @@
+Numerische Simulation dynamischer Systeme
+Christian Stenzel · Begleitmaterial zur deutschsprachigen Bachelor-Ausgabe
+
+Erster Versuch
+
+Entpacken Sie das Archiv vollständig in einen Ordner. Öffnen Sie dort ein Terminal.
+Auf Rechnern mit dem Befehl python3 verwenden Sie ihn anstelle von python.
+
+    python kapitelproben.py 2
+
+Erwartet werden im Federversuch 0,15 m und −0,65 m/s nach dem ersten Schritt.
+Python verwendet den Punkt als Dezimalzeichen. Ohne Kapitelnummer prüft das
+Programm die kurzen Rechnungen aus allen 13 Kapiteln. Python 3 genügt.
+
+Das ARGESIM-Praktikum
+
+labor.py und nachrechnen.py benötigen zusätzlich NumPy und SciPy. Die Ausgabe
+des Lehrbuchs wurde mit Python 3.12.14, NumPy 2.3.5 und SciPy 1.17.0 geprüft.
+In einer virtuellen Python-Umgebung können Sie die beiden Pakete installieren.
+
+    python -m pip install numpy==2.3.5 scipy==1.17.0
+    python labor.py --help
+    python labor.py pumpe
+    python labor.py rc
+    python labor.py c05
+
+Beim Abschlussprojekt vergleichen Sie die Rechnungen zum C07-Stiftpendel.
+
+    python labor.py c07
+    python labor.py c07linear
+
+Für die Bilanz der archivierten Läufe müssen die CSV-Dateien im selben Ordner
+wie labor.py liegen. Die vollständigen Aufrufe lauten
+
+    python labor.py alle
+    python labor.py archiv
+    python nachrechnen.py
+
+Die Versuche des Lehrbuchs verwenden unterschiedliche Modelle und Messgrößen.
+Lesen Sie die Ausgabe zusammen mit dem jeweiligen Kapitel. Eine Zahl von
+Funktionsaufrufen ist eine andere Aufwandsgröße als die Zeit auf Ihrem Rechner.
+
+Dateien
+
+kapitelproben.py         Kurze Kontrollrechnungen zu den 13 Kapiteln
+labor.py                Pumpe, Prüfwagen, Pendel, RC-Kreis und ARGESIM-Versuche
+nachrechnen.py          Zeitverfahren, Wärmemodell, Gitter und Ereignisse
+qss-extension.csv       Acht Modellfenster und 456 archivierte Einstellungen
+rk23-devs.csv           138 weitere Konfigurationen
+c21-idas.json           Archivierter Vergleich für die C21-Diode
+Studienanhang_Archiv.pdf  Technische Berichte der Vorauflage, Originalpaginierung
+
+Die in den Kapiteln ausdrücklich als Übungsdaten bezeichneten Tabellen sind
+konstruierte Beispiele. Herkunft, Referenzen und Geltungsbereich der
+ARGESIM-Messungen stehen im Quellen- und Datenteil des Buchs.
+Kapitel 13 · Python-Werkstatt und CP2
+
+Starten Sie im entpackten Rechenlabor mit
+
+    python kapitelproben.py 13
+    python cp2_feldlabor/auswerten.py
+
+Die erste Rechnung verwendet die Standardbibliothek. Die zweite benötigt NumPy
+und wertet die mitgelieferten Felder aus. Bei der Saite berechnet sie die exakte
+d’Alembert-Referenz erneut. Für die Deckelströmung vergleicht sie die Vorhersage
+mit der mitgelieferten D2Q9-Rechnung des verkleinerten Lehrversuchs.
+
+Im Verzeichnis cp2_feldlabor finden Sie die Anleitung LESEN.txt, Referenzfelder,
+Netzvorhersagen, trainierte Gewichte und die Messwerte der beiden Läufe.
+LESEN.txt erklärt, wie Sie mit den Gewichten eigene Felder vorhersagen und
+wie Sie beide Modelle mit dem verlinkten Stand des Projekts neu trainieren.
+
+Weitere Handrechnungen und die CP2-Saite mit Störmer–Verlet
+
+    python methodenlabor.py
+
+Das Skript verwendet die Python-Standardbibliothek. Es rechnet ein Transportprofil,
+die Kollision an einer Lattice-Boltzmann-Zelle, einen Lernschritt und vier
+Fehlerwerte der Saite nach. Für Newmark und FNO enthält cp2_feldlabor dieselben
+Vergleichsfelder wie im bisherigen CP2-Versuch.

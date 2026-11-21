@@ -1,0 +1,32 @@
+CP2-Feldlabor zu Kapitel 13
+Christian Stenzel · Numerische Simulation dynamischer Systeme
+
+1. Ohne Training nachrechnen
+   In diesem Ordner:
+       python -m pip install numpy
+       python auswerten.py
+   Das Skript vergleicht die gespeicherten Felder und berechnet die Referenz der
+   Saite unabhängig mit der d’Alembert-Formel. rope/ enthält physikalische Höhen
+   in Metern, cavity/ den Geschwindigkeitsbetrag relativ zur Deckelgeschwindigkeit.
+
+2. Eigene Anfangsform vorhersagen
+   Das Projekt und der Python-Aufruf gehören zu diesem exakten Stand:
+   https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/tree/52f8a33e469d36514e7830db544b9fc27243a82c
+   Im Projektcheckout:
+       python -m pip install -e '.[operators]'
+   Anschließend im entpackten Ordner cp2_feldlabor (POSIX-Shell):
+       lab=argesim_benchmarks.experiments.cp2_operators
+       python -m "$lab" predict rope/rope-weights.npz rope/rope-501-input.npy neu.npy
+   Für eine eigene Saite eine .npy-Datei als eindimensionalen Vektor mit
+   äquidistanten Knoten, festen Nullenden und Auslenkungen in Metern speichern.
+   Der Ausgang enthält die zwei Profile bei 5 und 8 s. Für die Kavität nimmt das
+   zweite Modell ein 17 × 17-Feld positiver Anfangsdichten bei Anfangsruhe an.
+   Der volle stationäre CP2-Kavitätsauftrag ist größer als dieser Lehrversuch.
+
+3. Neu trainieren
+       python -m "$lab" train rope --out eigener_lauf/saite
+       python -m "$lab" train cavity --out eigener_lauf/kavitaet
+   Beide Läufe verwenden standardmäßig Seed 2027, 80 Epochen und einen
+   CPU-Thread. Die getrennten Felder für Training, Validierung und Test werden
+   pro Lauf reproduzierbar aufgebaut. Die Auswahl der Epoche erfolgt anhand
+   der Validierung. Rechenzeiten hängen von Rechner und Software ab.

@@ -1,0 +1,211 @@
+\newcommand{\cpcode}[2]{\href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/52f8a33e469d36514e7830db544b9fc27243a82c/#1}{#2}}
+\seite{}{Python-Werkstatt}\anchorpage{1}{kap13}{13 · Python-Werkstatt und CP2}\ey{KAPITEL 13\enspace / \enspace PROGRAMMIEREN UND RECHNEN}
+\ptitle{Wer ruft das Modell auf?}
+\lernziel{Sie können dieselbe Modellfunktion an verschiedene Integratoren übergeben und erklären, was sich bei einem Gittermodell und bei einem trainierten Feldoperator an den Ein- und Ausgaben ändert.}
+Ein Heizstab startet auf Umgebungstemperatur. Ein Student baut für Euler einen „Euler-Heizstab“ und für Runge--Kutta einen zweiten Heizstab. Nach einer Änderung der Heizleistung liefern die Programme verschiedene Gleichgewichtstemperaturen. Wie müsste der Code aufgebaut sein, damit beide Versuche dieselbe physikalische Annahme prüfen?
+
+\subt{Vom Bauteil zur Funktion}
+Der Temperaturüberschuss \(\theta\) wird in Kelvin gemessen. Die Wärmekapazität des Stabes beträgt \(120\unitm{J/K}\), der Heizer liefert \(10\unitm W\), der Wärmeverlust beträgt \(\theta/4\) Watt, wenn \(\theta\) in Kelvin eingesetzt wird. Die Bilanz aus Kapitel 4 liefert \(\dot\theta=(10-\theta/4)/120\) in Kelvin pro Sekunde. Die Modellfunktion nimmt die aktuelle Zeit und den Zustand entgegen und gibt einen Vektor von Änderungsraten zurück.
+{\small\begin{verbatim}
+def heizstab(t, zustand):
+    theta, = zustand
+    return ((10.0 - theta / 4.0) / 120.0,)
+\end{verbatim}}
+Das Komma in einem Tupel mit einem Element ist wichtig. Ein Modell mit zwei Zuständen liefert entsprechend zwei Raten. Hier kann dieselbe Uhrzeit mit verschiedenen angenommenen Temperaturen aufgerufen werden. Das kommt bei Zwischenstufen tatsächlich vor.
+
+\subt{Warum ohne Klammern?}
+\texttt{heizstab} ist das Funktionsobjekt. Python kann es wie eine Zahl an eine andere Funktion übergeben. \texttt{heizstab(0.0, (0.0,))} führt die Funktion sofort aus und ergibt das Tupel \((1/12,)\) in K/s. In C kann ein Funktionszeiger dieselbe Rolle übernehmen. Im Projekt heißt die Python-Typangabe für diese aufrufbare rechte Seite \texttt{Rhs}.
+\notebox{Erst ausprobieren}{Setzen Sie \(40\unitm K\) in die rechte Seite ein. Die Rate muss null sein, unabhängig vom später gewählten Solver. Damit haben Sie bereits einen Test für das Modell.}
+\srcs{\see{zeit}{Handrechnung am Heizstab} · \cpcode{argesim_benchmarks/ivp.py}{InitialValueProblem und Rhs} · \see{pyregler}{Solveraufruf} · \see{ueb13}{Aufgaben}.}
+
+\lektion{Einen Schritt annehmen oder verwerfen}{pyregler}{Solvertechnik}{Python}
+Das Anfangswertproblem sammelt Gleichung, Startzeit, Startzustand und Endzeit. Das Projekt prüft beim Auswerten Dimension und Endlichkeit der zurückgegebenen Raten. Erst der Aufruf von \texttt{solve\_ivp} legt das Verfahren fest.
+{\footnotesize\begin{verbatim}
+from argesim_benchmarks.ivp import InitialValueProblem
+from argesim_benchmarks.runtime import solve_ivp
+
+p = InitialValueProblem(heizstab, 0.0, (0.0,), 60.0)
+for name in ("euler", "rk4"):
+    r = solve_ivp(p, name, options={"step": 60.0})
+    print(name, r.final_state[0], r.stats.rhs_evaluations)
+\end{verbatim}}
+Für die unabhängige Kontrolle trennen wir die Variablen. Mit \(\theta(0)=0\) folgt \(\theta(t)=40(1-e^{-t/480})\) in Kelvin. Nach einer Minute erwarten wir \(4{,}700123897\unitm K\).
+{\tblstart\begin{tabularx}{\linewidth}{@{}Yrrrr@{}}\toprule
+\hd{Verfahren}&\hd{\(\theta(60)\) [K]}&\hd{angenommen}&\hd{verworfen}&\hd{Aufrufe}\\\midrule
+Euler&5,000000&1&0&1\\
+RK4&4,700114&1&0&4\\
+RK45 adaptiv&4,700124&3&2&31\\\bottomrule
+\end{tabularx}\par}
+Für RK45 lauteten die Optionen \texttt{initial\_step=60.0}, \texttt{rtol=1e-8} und \texttt{atol=1e-10} als Einträge des Wörterbuchs \texttt{options}. Das eingebettete Paar schätzt den lokalen Fehler aus zwei Näherungen. Wird die skalierte Toleranz verfehlt, probiert der Solver von der letzten angenommenen Zeit einen kleineren Schritt. Der verworfene Zustand gehört zu keinem gespeicherten Messpunkt.
+
+\subt{Wie erkennt man einen fehlerhaften Callback?}
+Ein Zähler der Modellaufrufe darf zu Diagnosezwecken wachsen. Würde derselbe Code dabei eine Pumpe dauerhaft umschalten oder die Modelluhr erhöhen, hingen spätere Raten von verworfenen Versuchen ab. Prüfen Sie die Rate bei identischen Eingaben zweimal sowie die gespeicherten Zeiten separat.
+\srcs{\cpcode{argesim_benchmarks/runtime.py}{Auswahl und Optionen} · \cpcode{argesim_benchmarks/solvers/explicit.py}{Schritte und Auswertungen} · \see{kap5}{DAE mit Residuum und konsistentem Start}.}
+
+\lektion{CP2/2 · Wie bewegt ein Deckel die Flüssigkeit?}{pylbm}{Modellierung}{CP2 · Kavität}
+Ein quadratischer Behälter ist mit ruhender Flüssigkeit gefüllt. Sein oberer Deckel fährt nach rechts. Die anderen Wände stehen. Gesucht ist die örtliche Geschwindigkeit. Die Lattice-Boltzmann-Methode (LBM) speichert pro Gitterzelle gerichtete Verteilungswerte \(f_i\). \textbf{D2Q9} bedeutet zwei Raumrichtungen und neun mögliche Gittergeschwindigkeiten \(\mathbf c_i\): Ruhe, vier Achsenrichtungen, vier Diagonalen.
+\subt{Was ein Schritt wirklich berechnet}
+Im Inneren liefern \(\rho=\sum_i f_i\) und \(\rho\mathbf u=\sum_i f_i\mathbf c_i\) die Dichte und den Impuls. Bei der BGK-Kollision nähert sich jede Population mit dem Faktor \(\omega\) ihrem lokalen Gleichgewicht an:
+\[
+ f_i^*=f_i+\omega(f_i^{\mathrm{eq}}-f_i).
+\]
+Danach rückt jeder gerichtete Anteil um seinen Gittervektor weiter. An ruhenden Wänden kehren die Richtungen in der implementierten Vollweg-Reflexion um. An der oberen Zeile gibt die Implementierung das Gleichgewicht des bewegten Deckels vor. Ein eigener Ausgaberand setzt den vorgeschriebenen Deckelwert.
+\subt{Was lässt sich im kleinen Versuch messen?}
+Das Original fordert \(257\times257\) Zellen und 350\,000 Iterationen. Für einen CPU-Lehrversuch verwenden wir \(17\times17\) und 16 Iterationen, \(u_\mathrm{Deckel}=0{,}1\) in Gittereinheiten und \(\mathrm{Re}=1000\). Die Messung betrifft den frühen Anlauf. Eine stationäre Wirbelstruktur würde eine eigene Rechnung erfordern.
+\minifig{cp2kavitaet}{55mm}{Geschwindigkeitsbetrag geteilt durch die Deckelgeschwindigkeit. Die erste und zweite Karte haben dieselbe Skala. Die dritte vergrößert den absoluten Unterschied. Die oberste Gitterzeile ist vorgegeben.}
+\srcs{\href{https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/CP/CP2-definition.pdf}{ARGESIM-Definition CP2, Fall 2} · \cpcode{argesim_benchmarks/models/cp2_parallel_and_distributed.py}{D2Q9-Schritt und Randregeln}.}
+
+\lektion{Neun Zahlen in einer einzigen Zelle}{zellenlbm}{Rechenversuch}{Lattice-Boltzmann}
+\lernziel{Sie können vorhersagen, wie eine Lattice-Boltzmann-Zelle auf eine kleine Störung reagiert und was die Nachbarzelle im nächsten Schritt erhält.}
+Die Einträge \(f_i\) verteilen die lokale Dichte auf mögliche Bewegungsrichtungen. Für Flüssigkeit in Ruhe bei \(\rho=1\) hat der D2Q9-Gleichgewichtszustand in Gittereinheiten die folgenden Werte.
+{\tblstart\begin{tabularx}{\linewidth}{@{}Yrr@{}}\toprule
+\hd{Richtung}&\hd{Anzahl}&\hd{Wert je Richtung}\\\midrule
+Ruhe, \(\mathbf c=(0,0)\)&1&4/9\\
+Ost, Nord, West, Süd&4&1/9\\
+Diagonalen&4&1/36\\\bottomrule
+\end{tabularx}\par}
+Die Dichte ist \(4/9+4/9+4/36=1\). Gegenüberliegende Richtungen haben gleiches Gewicht. Ihre Impulse heben sich auf, also ist die mittlere Geschwindigkeit null. In einer gleichmäßig ruhenden Flüssigkeit wiederholt sich dieser Zustand nach Kollision und Transport.
+\subt{Ein Schritt außerhalb des Gleichgewichts}
+Geben Sie Ost und West je \(0{,}02\) zusätzlich und nehmen Sie dem Ruheanteil \(0{,}04\) weg. Dichte und Impuls bleiben gleich. Trotzdem hat sich der Zustand geändert. Wählen wir für die Handrechnung \(\omega=1/2\), halbiert die BGK-Kollision jede Abweichung vom Gleichgewicht. Der Ostanteil geht von \(1/9+0{,}02=0{,}131111\ldots\) auf \(1/9+0{,}01=0{,}121111\ldots\) zurück. Der Ruheanteil bleibt um \(0{,}02\) unter \(4/9\).
+
+Beim anschließenden Transport wandert der neue Ostanteil in die östliche Nachbarzelle. Dort muss seine Dichtewirkung mit den acht anderen ankommenden oder ruhenden Anteilen zusammengezählt werden. Erst daraus lässt sich eine Geschwindigkeit an diesem Ort bestimmen. Am Deckel greift zusätzlich die vorgeschriebene Randregel.
+\notebox{Probe}{Welchen Unterschied hätte eine einzige gespeicherte Geschwindigkeit vor der Kollision gezeigt? Beide Zustände haben Geschwindigkeit null. Die neun gespeicherten Anteile bewahren zusätzlich das Richtungsungleichgewicht.}
+\srcs{\href{https://benchpress.readthedocs.io/autodoc_benchmarks/lattice_boltzmann_D2Q9.html}{D2Q9-Gewichte im Rechenbeispiel von Jonas Latt} · \texttt{python methodenlabor.py} · \see{schluss13}{Lokaler Erhaltungsbeweis}.}
+
+\lektion{CP2/3 · Wohin wandert ein Knick in der Saite?}{pysaite}{Modellierung}{CP2 · Saite}
+Eine an beiden Enden befestigte Saite ist \(L=0{,}5\unitm m\) lang. Ziehen Sie ihre Mitte um \(0{,}05\unitm m\) aus und lassen Sie sie aus der Ruhe los. Für kleine Auslenkungen bei konstanter Spannung und homogener Massendichte gilt
+\[
+ u_{tt}=c^2u_{xx},\qquad u(0,t)=u(L,t)=0,\qquad u(x,0)=g(x),\quad u_t(x,0)=0 .
+\]
+Wir verwenden \(c=0{,}06\unitm{m/s}\) aus der korrigierten CP2-Studie. Der Buchversuch fragt nach den Profilen bei fünf und acht Sekunden.
+\subt{Eine Referenz ohne Zeit- oder Raumgitterfehler}
+Setzen wir die Anfangsform \(g\) ungerade und \(2L\)-periodisch fort, nennen wir diese Fortsetzung \(\tilde g\). Je eine halbe Welle wandert nach links und rechts:
+\[
+ u(x,t)=\tfrac12[\tilde g(x-ct)+\tilde g(x+ct)] .
+\]
+Bei \(t=0\) gibt die Formel \(g\) zurück, die beiden Anfangsgeschwindigkeiten heben sich auf. Die ungerade Spiegelung liefert an beiden Enden null. Auf glatten Teilstücken bestätigt zweimaliges Ableiten die Wellengleichung. Die stetige Dreiecksform besitzt am Knick eine schwache Lösung, die dieselbe Verschiebungsformel beschreibt.
+\subt{Was wird zum Gleichungssystem?}
+Die Linienmethode ersetzt \(u_{xx}\) durch \((u_{j-1}-2u_j+u_{j+1})/\Delta x^2\). Auf 500 Intervallen bleiben 499 innere Auslenkungen. Der vorhandene implizite Newmark-Solver berechnet sie mit \(\Delta t=0{,}01\unitm s\). Verglichen wird am selben Ort zur selben Zeit.
+\minifig{cp2seil}{40mm}{Gemessene Netzvorhersage und d’Alembert-Referenz auf 501 Knoten. Nahezu übereinanderliegende Kurven können im Knickbereich noch messbare Unterschiede haben.}
+\srcs{\href{https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_32_4/articles/sne.32.4.10625.bncp2.OA.pdf}{Jammer, Junglas und Pawletta (2022), korrigierte CP2-Saitendaten} · \see{kap6}{Linienmethode}.}
+
+\lektion{Dieselbe Saite mit Störmer--Verlet}{cpverlet}{Solvertechnik}{CP2 · Saite}
+Durch die Linienmethode hat jeder innere Knoten eine Beschleunigung \(A_j(U)=c^2(U_{j-1}-2U_j+U_{j+1})/\Delta x^2\). Bei festen Enden bleiben \(U_0=U_{N-1}=0\). Wie weit kommt eine explizite Rechnung, wenn wir den gleichen Zeitschritt wie für Newmark verwenden?
+\subt{Aus Beschleunigung werden neue Auslenkungen}
+Für Anfangsruhe lautet der erste Schritt \(U^1=U^0+\tfrac12 h^2 A(U^0)\). Danach berechnet die Ortsform von Störmer--Verlet die nächste Auslenkung aus den beiden vorangegangenen und der aktuellen Beschleunigung:
+\[
+ U^{n+1}=2U^n-U^{n-1}+h^2 A(U^n).
+\]
+Die Formel folgt aus der zentralen zweiten Differenz in der Zeit. Bei glatter Lösung bleibt nach Division durch \(h^2\) ein Taylor-Rest der Ordnung \(h^2\). Das dreieckige Anfangsprofil hat einen Knick. Dort muss die Fehlerentwicklung gesondert gemessen werden.
+\subt{Die Schrittgrenze vor der Rechnung prüfen}
+Für eine Eigenmode mit Kreisfrequenz \(\omega\) lautet die Faktoren-Gleichung \(r^2-(2-h^2\omega^2)r+1=0\). Bei \(0<h\omega<2\) sind die Wurzeln komplex konjugiert und haben Betrag eins. Bei \(h\omega>2\) wächst eine Mode. Die größten Kreisfrequenzen der zentralen Raumdifferenz liegen bei festen Enden unter \(2c/\Delta x\). Daher genügt hier \(C=ch/\Delta x\le1\). Mit \(h=0{,}01\unitm s\) ist \(C=0{,}0768\) auf 65 Knoten und \(0{,}6\) auf 501 Knoten.
+{\tblstart\begin{tabularx}{\linewidth}{@{}Yrrr@{}}\toprule
+\hd{501 Knoten, relativer Feldfehler}&\hd{Verlet}&\hd{Newmark}&\hd{FNO}\\\midrule
+CP2-Dreieck, \(5\unitm s\)&0,231\,\%&0,374\,\%&3,001\,\%\\
+CP2-Dreieck, \(8\unitm s\)&0,095\,\%&0,152\,\%&0,882\,\%\\\bottomrule
+\end{tabularx}\par}
+Die Gegenprobe ist wieder die verschobene und gespiegelte Anfangsform. Bei 65 Knoten beträgt der Verlet-Fehler 2,484\,\% und 0,931\,\%. Prüfen Sie, was bei Beibehaltung von \(h\) und 1001 Knoten geschieht. Dann ist \(C=1{,}2\) und die hier verwendete Stabilitätsbedingung verletzt.
+\srcs{\href{https://www.cambridge.org/core/journals/acta-numerica/article/abs/geometric-numerical-integration-illustrated-by-the-stormerverlet-method/E55395D5DD7A4E0526D10EA74DA6C46B}{Hairer, Lubich und Wanner (2003), Störmer--Verlet} · \texttt{python methodenlabor.py} · \see{pyvergleich}{Referenz und Fehlermaß}.}
+
+\lektion{Wie lernt ein einzelnes Neuron?}{nnrechnen}{Einstieg}{Neuronale Netze}
+\lernziel{Sie können eine Vorhersage, einen Fehler und eine Gewichtsänderung selbst berechnen.}
+Stellen Sie sich einen normierten Sensor vor. Für den Eingang \(x=2\) wurde als Ziel \(y=1\) gemessen. Ein künstliches Neuron bildet eine gewichtete Summe und wendet eine Funktion darauf an. Wir verwenden \(\hat y=\max(0,wx)\). Die Funktion \(\max(0,z)\) heißt \emph{ReLU}. Zur ersten Handrechnung setzen wir die sonst häufig verwendete additive Verschiebung auf null.
+\subt{Vorhersagen und bewerten}
+Wir starten bei \(w=1\). Die Vorhersage ist \(\hat y=2\). Als Verlust dient die Hälfte des quadratischen Fehlers \(L(w)=\tfrac12(\hat y-y)^2\), hier also \(0{,}5\). Der Verlust misst an diesem Trainingsbeispiel, wie gut das Gewicht passt.
+\subt{Ein Schritt, der den Verlust verkleinert}
+Auf dem positiven Ast der ReLU ist \(\hat y=wx\). Nach der Kettenregel ist \(L'(w)=(wx-y)x=2\). Mit Lernrate \(\eta=0{,}1\) geht der Gradientenabstieg entgegen der positiven Ableitung:
+\[
+ w_{\rm neu}=w-\eta L'(w)=0{,}8,\qquad
+ \hat y_{\rm neu}=1{,}6,\qquad L(w_{\rm neu})=0{,}18 .
+\]
+Ein Netz verknüpft viele solcher Einheiten zu Schichten. Beim Training werden die Ableitungen mit der Kettenregel von der Ausgabe zurück zu den Gewichten gerechnet (Backpropagation). In der Vorhersage bleiben die gewählten Gewichte fest. Ob das Modell für andere Eingaben taugt, wird an zurückgehaltenen Beispielen geprüft.
+\notebox{Eine eigene Gegenprobe}{Bei \(x=-2\) wäre für die Regel \(y=x/2\) das Ziel \(-1\). Die ReLU am Ausgang kann nur Werte ab null liefern. Für eine schwingende Saite muss die Netzausgabe beide Vorzeichen zulassen. Für den Betrag einer Strömungsgeschwindigkeit passt eine nichtnegative Ausgabe.}
+\srcs{\texttt{python methodenlabor.py} · \see{pyfno}{Von einzelnen Zahlen zu ganzen Feldern} · \see{netzarten}{Drei Arten, Physik und Lernen zu verbinden}.}
+
+\lektion{Was lernt ein neuronaler Operator?}{pyfno}{Verfahren}{Neuronale Operatoren}
+Ein gewöhnliches künstliches Neuron bildet Eingaben \(z_j\) auf \(a=\sigma(b+\sum_j w_j z_j)\) ab. Die Gewichte \(w_j\) und der Versatz \(b\) werden gelernt. \(\sigma\) ist eine vorgegebene, gewöhnlich nichtlineare Aktivierungsfunktion. Ein \emph{Operator} ordnet hier einer ganzen Eingabefunktion eine oder mehrere Ausgabefunktionen zu. An einem Gitter sehen wir diese Funktionen als Zahlenfelder.
+\subt{Eine Schicht des Fourier Neural Operator}
+Ein FNO zerlegt seine internen Felder mit einer diskreten Fouriertransformation in räumliche Frequenzen. Für ausgewählte Frequenzen mischt er die Merkmale mit lernbaren Matrizen. Nach der Rücktransformation addiert er einen lokalen Beitrag und wendet eine Aktivierung an. Aus mehreren solchen Schichten entsteht in der Saite die Abbildung \(g(\cdot)\mapsto (u(\cdot,5),u(\cdot,8))\). Die analytische Kontrollrechnung verwendet bekannte Wellengesetze; die Matrizen des Netzes werden an Beispielen bestimmt.
+\subt{Woher kommen richtige Trainingsantworten?}
+Für die Saite ziehen wir unabhängige Anfangsprofile aus acht Sinusmoden. Die \(k\)-te Mode wird mit \(\cos(k\pi ct/L)\) multipliziert. Für die Kavität variieren wir die anfängliche Dichte sanft um eins, bei ruhender Flüssigkeit und gleichem Deckel. Für jedes Eingabefeld erzeugt D2Q9 das Ziel \(|\mathbf u|/u_\mathrm{Deckel}\). Ein Betrag am Netzausgang erzwingt nichtnegative Vorhersagen. Bei der Saite erzwingt eine ungerade Projektion verschwindende Randwerte.
+\subt{Welche Daten darf das Netz sehen?}
+Je Fall dienen 96 ganze Felder zum Optimieren der Gewichte. Nach jeder Epoche bewerten wir 16 weitere Felder und speichern die besten Gewichte. Erst danach werten wir 24 andere Felder aus. Bei der Saite kommen Dreiecksform und feineres Gitter als zusätzlicher Transfer hinzu, bei der Kavität der gleichförmige Ruhezustand. Eine Aufteilung einzelner Gitterpunkte derselben Trajektorie könnte dasselbe Experiment in beiden Mengen erscheinen lassen.
+\srcs{\href{https://github.com/neuraloperator/neuraloperator}{NeuralOperator, Python-Paket neuraloperator} · \href{https://openreview.net/pdf?id=c8P9NQVtmnO}{Li u.\,a. (2021), Fourier Neural Operator} · \cpcode{argesim_benchmarks/experiments/cp2_fields.py}{Erzeugung der Referenzfelder}.}
+
+\lektion{PINN, DeepONet oder Fourier-Operator?}{netzarten}{Methodenwahl}{Neuronale Verfahren}
+Bei der Saite kann man zwei verschiedene Fragen stellen. Wie schwingt \emph{diese} Anfangsform? Wie ändern sich die späteren Profile, wenn wir die Anfangsform austauschen? Der Auftrag bestimmt die Eingaben eines Netzes und die Information, aus der es lernt.
+\subt{Ein physikinformiertes Netz für eine feste Saite}
+Ein Physics-Informed Neural Network (PINN) bekommt hier Ort und Zeit und gibt \(u_\theta(x,t)\) aus. Wir bewerten an ausgewählten Punkten den Gleichungsrest \(r=u_{\theta,tt}-c^2u_{\theta,xx}\). Automatische Differentiation leitet dafür die im Netz ausgeführten Operationen ab. In den Verlust gehen außerdem die Fehler bei Anfangsauslenkung, Anfangsgeschwindigkeit und Randwerten ein. Die Nullfunktion hat überall Rest null und erfüllt die festen Ränder. Für eine ausgelenkte Saite verfehlt sie die Anfangsform. Dieser Gegenversuch erklärt, warum die einzelnen Verlustanteile nötig sind.
+\subt{DeepONet lernt aus einer Familie von Anfangsformen}
+Ein Teilnetz liest Messwerte der Eingabefunktion \(g\) an festgelegten Sensororten und liefert Koeffizienten \(b_k(g)\). Ein zweites Teilnetz liest den abzufragenden Ort und die Zeit und liefert Basiswerte \(t_k(x,t)\). Ihre Summe von Produkten \(\sum_k b_k(g)t_k(x,t)\) gibt die Vorhersage. Für die Familie \(g(x)=a\sin(\pi x/L)\) genügt ein Produkt bereits exakt: Der Mittensensor liefert \(a\), der zweite Faktor ist \(\sin(\pi x/L)\cos(\pi ct/L)\). Ein einziges Sensorsignal reicht für beliebige Anfangsformen dagegen nicht aus.
+\subt{FNO liefert im CP2-Versuch ganze Gitterprofile}
+Unser FNO bekommt das Eingabefeld auf dem Gitter. Es mischt räumliche Frequenzen und lokale Merkmale. Die Trainingsziele stammen für die Saite aus der Modenlösung und für die Kavität aus dem D2Q9-Code. PINN und DeepONet sind hier Entwurfsalternativen. Die gemessenen CP2-Netzfehler gelten für das tatsächlich trainierte FNO.
+\srcs{\href{https://doi.org/10.1016/j.jcp.2018.10.045}{Raissi u.\,a. (2019), PINNs} · \href{https://www.nature.com/articles/s42256-021-00302-5}{Lu u.\,a. (2021), DeepONet} · \see{pyvergleich}{Gemessene FNO-Fehler}.}
+
+\lektion{Wie groß ist der Fehler wirklich?}{pyvergleich}{Messung}{CP2}
+Für eine Feldvorhersage \(p\) und eine Referenz \(r\ne0\) messen wir den relativen Fehler \(\|p-r\|_2/\|r\|_2\). Die Norm ist die Quadratwurzel aus der Summe der quadrierten Gitterwerte. Beim Mittel zählt jedes unabhängige Feld und bei der Saite jeder Ausgabetermin gleich. Bei der Kavität bewerten wir die \(15\times15\) inneren Fluidzellen. Als einfache Vergleichsvorhersage dient das ortsweise Mittel der Trainingszielfelder.
+{\tblstart\begin{tabularx}{\linewidth}{@{}YrP{43mm}@{}}\toprule
+\hd{Versuch und Referenz}&\hd{FNO}&\hd{Vergleich}\\\midrule
+Saite, 24 glatte Testfelder, exakte Moden&1,54\,\%&Trainingsmittel 101,98\,\%\\
+CP2-Dreieck, 501 Knoten, 5 s, d’Alembert&3,00\,\%&Newmark 0,37\,\%\\
+CP2-Dreieck, 501 Knoten, 8 s, d’Alembert&0,88\,\%&Newmark 0,15\,\%\\
+Kavität, 24 Testfelder, D2Q9&11,98\,\%&Trainingsmittel 14,91\,\%\\
+Kavität, einheitliche Dichte, D2Q9&11,59\,\%&17 mal 17, 16 Schritte\\\bottomrule
+\end{tabularx}\par}
+\subt{Welche Schlussfolgerung trägt der Gitterversuch?}
+Beim CP2-Dreieck nach fünf Sekunden ergibt das grobe Gitter mit 65 Knoten für Newmark \(2{,}50\,\%\), für das FNO \(3{,}00\,\%\). Auf 501 Knoten sinkt der gemessene Newmark-Fehler auf \(0{,}37\,\%\). Das auf 65 Knoten trainierte Netz lässt sich mit denselben Gewichten auswerten und bleibt bei ungefähr \(3\,\%\). Einen Datensatz auf mehr Punkten auszugeben und eine numerische Näherung systematisch zu verfeinern sind verschiedene Operationen.
+\subt{Welche Genauigkeit reicht für den Auftrag?}
+Bei einem Grenzwert von \(1\,\%\) erreicht das Netz die geforderte Saitengenauigkeit auf dem feinen Gitter bei acht Sekunden. Bei fünf Sekunden verfehlt es das Ziel. Für die Kavität ist der Vergleich ein Nachweis der Annäherung an den vorhandenen LBM-Code. Eine unabhängige Strömungsmessung wäre eine zusätzliche Prüfung der physikalischen Güte. Trainingszeit, Erzeugung der Referenzen und Auswertung mit festen Gewichten sind getrennte Kosten.
+\srcs{\cpcode{docs/evidence/cp2-operators.json}{Einzelmessungen, Zeiten und Umgebung} · Seed 2027, 80 Epochen, ein CPU-Thread, PyTorch 2.8.0+cpu und NeuralOperator 2.0.0.}
+
+\werkblatt{13}{Selbst prüfen}{ueb13}{Den Versuch auf dem eigenen Rechner prüfen}
+\subt{Mit gespeicherten Feldern beginnen}
+Entpacken Sie das Rechenlabor. Im Ordner \texttt{cp2\_feldlabor} prüft \texttt{python auswerten.py} die Fehlerwerte mit NumPy. Die PDF-Anlage \texttt{CP2\_Feldlabor.zip} enthält dieselben CP2-Daten. Wer trainieren oder neue Felder vorhersagen möchte, verwendet den verlinkten Projektstand und installiert im Checkout die Option \texttt{operators}.
+{\footnotesize\begin{verbatim}
+python -m pip install -e '.[operators]'
+lab=argesim_benchmarks.experiments.cp2_operators
+python -m "$lab" train rope --out saite
+python -m "$lab" train cavity --out kavitaet
+python -m "$lab" predict saite/rope-weights.npz \
+    saite/rope-501-input.npy neues_profil.npy
+\end{verbatim}}
+Die Befehle verwenden eine POSIX-Shell. Die Gewichte im Begleitmaterial können Sie direkt an \texttt{predict} übergeben. Die Saite erwartet ausgelenkte Höhen in Metern einschließlich zweier fester Enden, die Kavität ein positives \(17\times17\)-Dichtefeld bei Anfangsruhe.
+\subt{A · Einen Callback kontrollieren}
+Welche Rückgabe erwarten Sie für \texttt{heizstab(0.0, (0.0,))} und für \texttt{heizstab(60.0, (40.0,))}? Warum wäre das Fortschalten einer globalen Modelluhr bei jedem Aufruf mit der Tabelle auf S.\,\pagelink{pyregler} unvereinbar?
+\subt{B · Eine unwirksame Gegenprobe erkennen}
+Ein Student misst nur die Deckelzeile und erhält dort exakt denselben Wert wie D2Q9. Erklären Sie das Ergebnis. Wählen Sie einen Vergleich, der das Feld im Inneren wirklich prüft.
+\subt{C · Den technischen Auftrag entscheiden}
+Die relative räumliche Abweichung darf an beiden Ausgabeterminen der Saite höchstens \(1\,\%\) betragen. Welche der drei Rechnungen auf 501 Knoten erfüllen diesen Auftrag? Was müsste für einen Auftrag über alle Zeiten zusätzlich geprüft werden?
+\srcs{\see{kap13}{Kapitelanfang} · \see{loesweg13}{Lösungswege} · \cpcode{docs/CP2_NEURAL_OPERATORS.md}{Python-Praktikum mit startfähigen Befehlen}.}
+
+\werkblatt{13}{Lösungswege}{loesweg13}{Von einem Messwert zur Aussage}
+\subt{A · Eine Funktion beschreibt die Änderung}
+Zu Beginn ist der Verlust null. \(10/120=1/12\) ergibt das Tupel \((0{,}083333\ldots,)\) in K/s. Bei \(40\unitm K\) gleichen sich die \(10\unitm W\) Heizleistung und \(40/4=10\unitm W\) Verlust aus. Die Rückgabe ist \((0,)\). RK45 benötigt für die eine betrachtete Minute 31 Aufrufe, speichert aber nur drei angenommene Schritte. Die Zeit im Callback stammt daher aus seinem Argument. Eine Zählung der Aufrufe ist eine Rechendiagnose.
+\subt{B · Einen vorgeschriebenen Rand erkennen}
+Für die Deckelzeile setzt die Python-Implementierung \(|\mathbf u|/u_\mathrm{Deckel}=1\) bei Referenz und Netzausgabe. Eine Nullabweichung kann dort ein falsch vorhergesagtes Wirbelzentrum verdecken. Der relative Feldfehler von \(11{,}59\,\%\) bezieht sich auf das Innere. Die Karten auf S.\,\pagelink{pylbm} zeigen, wo die größten absoluten Unterschiede liegen. Aus einem Geschwindigkeitsbetrag allein lassen sich weder die Richtung des Vektors noch die neun Populationen rekonstruieren.
+\subt{C · Jede vereinbarte Bedingung einzeln prüfen}
+Newmark und Störmer--Verlet erfüllen auf 501 Knoten das Ziel beim CP2-Dreieck für fünf und acht Sekunden (S.\,\pagelink{cpverlet}). Der FNO besteht nur den Vergleich bei acht Sekunden. Beide Punktprüfungen lassen andere Zeiten frei. Für eine empirische Erweiterung würden wir viele zusätzliche Zeitpunkte ausgeben und getrennt testen. Der hier trainierte FNO gibt genau zwei Zeiten aus. Für eine garantierte Schranke über das ganze Intervall wäre außerdem eine mathematische Abschätzung zwischen den Prüfzeitpunkten nötig.
+\notebox{Eine kleine Programmierprobe}{Rufen Sie \texttt{python kapitelproben.py 13} im Rechenlabor auf. Die Standardbibliothek genügt für die Heizrate, die Summe der neun Ruhegewichte und das Vorzeichen einer reflektierten Welle.}
+\srcs{\see{ueb13}{Zurück zum Aufgabenblatt} · \see{pyvergleich}{Vergleichstabelle} · \see{schluss13}{Forschung und Beweisfragen}.}
+
+\lektion{Was ist beim Methodenvergleich noch offen?}{forschungsmethoden}{Forschung}{Methodenvergleich · November 2026}
+\subt{Klassische Diskretisierung und Lattice-Boltzmann}
+Am Transportbeispiel lassen sich Erhaltung, Positivität und Genauigkeit einzeln testen. Für die CP2-Saite ist die Schrittgrenze der expliziten Diskretisierung herleitbar. Für den Knick bleibt im Praktikum der Fehlerverlauf zwischen den beiden Ausgabeterminen zu bestimmen. Dazu vergleicht man auf mehreren Gittern das Maximum des Fehlers über ein Zeitintervall mit der exakten Verschiebungslösung.
+
+Eine Untersuchung von LBM-Randregeln aus dem Jahr 2024 vergleicht Varianten an laminaren Strömungen mit bekannten Referenzen. Das ist für CP2 wichtig, weil unser Deckel seine Geschwindigkeit vorschreibt. Für die stationäre Kavität publizierten Ghia, Ghia und Shin Vergleichsdaten. Eine offene Aufgabe im Projekt ist, beide Geschwindigkeits\emph{komponenten} bis zum stationären Zustand zu verfolgen, die Mittellinienprofile mit diesen Daten zu vergleichen und den Einfluss der Gitterweite zu messen. Der vorliegende Kurzlauf gibt den frühen Geschwindigkeitsbetrag aus.
+\subt{Was zeigt die Forschung zu gelernten Operatoren?}
+Herde u.\,a. untersuchten 2024 mit Poseidon ein vortrainiertes Modell an 15 nachgelagerten PDE-Aufgaben. Park u.\,a. verglichen 2026 in einem Preprint kurze und lange Vorhersagefolgen mehrerer Modelle. In ihrer Untersuchung wuchs der Fehler bei vielen längeren Folgen. Beide Studien betreffen andere Daten und Architekturen als unser CP2-Praktikum.
+\subt{Welche Prüfungen wären am eigenen Netz aussagekräftig?}
+Für die Saite kann man auch außerhalb der Mitte zupfen und absolute sowie relative Fehler je Ausgabe berichten. Für sehr kleine Referenznormen ist der absolute Fehler besonders wichtig. Für die Kavität kann man Deckelgeschwindigkeit, Gitterweite und Auswertezeit variieren und jede Vorhersage mit einer passenden Referenz prüfen. Für solche Familien müsste der derzeitige Ein- und Ausgabevertrag erweitert und das Netz neu trainiert werden. Eine gleichmäßige Fehlerschranke für alle Anfangsformen einer festgelegten Klasse bleibt eine eigene Beweisfrage.
+\srcs{\href{https://doi.org/10.1016/j.camwa.2024.08.009}{LBM-Randbedingungen (2024)} · \href{https://doi.org/10.1016/0021-9991(82)90058-4}{Ghia u.\,a. (1982)} · \href{https://proceedings.nips.cc/paper_files/paper/2024/hash/84e1b1ec17bb11c57234e96433022a9a-Abstract-Conference.html}{Herde u.\,a. (NeurIPS 2024)} · \href{https://arxiv.org/abs/2610.31935}{Park u.\,a. (Preprint, Oktober 2026)}.}
+
+\kapschluss{13}{Welche Aussage kann ein Beweis liefern?}{schluss13}
+\subt{Eine exakte Invariante beim lokalen Kollisionsschritt}
+Sind die Gleichgewichtspopulationen so normiert, dass \(\sum_i f_i^{\mathrm{eq}}=\sum_i f_i=\rho\), bleibt die Dichte bei der lokalen BGK-Kollision erhalten.
+\proofpart{Summation der Kollisionsformel ergibt \(\sum_i f_i^*=\sum_i f_i+\omega(\sum_i f_i^{\mathrm{eq}}-\sum_i f_i)=\rho\).}
+Der Schritt beweist eine lokale Eigenschaft im Inneren. Für eine globale Massenbilanz müssen auch Transport und Ränder erfasst werden. Beim reduzierten Kavitätslauf meldete das Programm eine Änderung von \(-0{,}00746\) bei anfänglicher Gittermasse 289. Das FNO gibt hier nur den Geschwindigkeitsbetrag aus und hat keinen entsprechenden Massenmesswert.
+\subt{Weshalb ist jede Trainingsmode der Saite überprüfbar?}
+Setzen Sie \(u(x,t)=a(t)\sin(k\pi x/L)\) in die Wellengleichung ein. Dann folgt \(a''=-(ck\pi/L)^2a\). Bei Anfangsruhe ist \(a(t)=a(0)\cos(ck\pi t/L)\). Linearität erlaubt die Summe der acht Moden und liefert die Referenzen für den Glatttest. Der Knick des CP2-Dreiecks enthält weitere Frequenzen.
+\subt{Stand der Forschung und offene Beweisfrage}
+Li und Mitautoren zeigen FNOs an parametrisierten PDE-Familien. Kovachki und Mitautoren untersuchen die Approximation kontinuierlicher Operatoren unter mathematischen Voraussetzungen. Für die hier gelernten Gewichte bleibt offen, wie groß der maximale Fehler über eine ganze Klasse von Anfangsformen ist. Eine mögliche Abschlussarbeit legt zuerst eine Schranke für die räumliche Glattheit und die Norm der Eingaben fest. Dann untersucht sie die Fehlerbeiträge abgeschnittener Moden, des Netzes und der Gitterauswertung getrennt.
+\srcs{\href{https://www.jmlr.org/papers/v24/21-1524.html}{Kovachki u.\,a. (2023), Neural Operator} · \cpcode{tests/test_cp2_operators.py}{Ausführbare Gegenproben} · \see{forschungsmethoden}{Forschungsfragen} · \see{finalII}{Abschluss des Praktikums}.}

@@ -1,0 +1,67 @@
+name: Studienbuch
+on:
+  pull_request:
+    paths:
+      - 'docs/lehrbuch/studienbuch/**'
+      - 'docs/ARGESIM_*'
+      - 'docs/evidence/cp2-operators.json'
+      - 'scripts/build_studienbuch.py'
+      - '.github/workflows/studienbuch.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/lehrbuch/studienbuch/**'
+      - 'docs/ARGESIM_*'
+      - 'docs/evidence/cp2-operators.json'
+      - 'scripts/build_studienbuch.py'
+      - '.github/workflows/studienbuch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  book:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify published PDF, lab and their inputs
+        run: python scripts/build_studienbuch.py --check
+      - name: Rebuild with the Debian 13 typesetting toolchain
+        run: |
+          docker run --rm -i --volume "$GITHUB_WORKSPACE:/work:ro" --workdir /work debian:trixie-slim sh -se <<'BUILD'
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get -qq update
+          apt-get install -y --no-install-recommends python3-venv ca-certificates texlive-xetex texlive-latex-extra texlive-lang-german texlive-fonts-recommended fonts-noto-core fonts-noto-extra fonts-dejavu-core fonts-lmodern
+          python3 -m venv /tmp/python
+          /tmp/python/bin/pip -q install PyMuPDF==1.26.6
+          if ! /tmp/python/bin/python scripts/build_studienbuch.py --output-dir /tmp/studienbuch; then
+            /tmp/python/bin/python - <<'DIAGNOSE'
+          from pathlib import Path
+          import pymupdf
+          from scripts.build_studienbuch import typeset
+          output = Path('/tmp/diagnose')
+          output.mkdir()
+          typeset(output)
+          with pymupdf.open(output / 'text.pdf') as book:
+              marks = {page for _, _, page in book.get_toc()}
+              print(len(book), 'pages,', len(marks), 'distinct bookmark destinations')
+              for index, page in enumerate(book, start=1):
+                  if index not in marks:
+                      print('Unmarked page', index, repr(page.get_text()[:500]))
+          DIAGNOSE
+            exit 1
+          fi
+          BUILD
+      - name: Attach the verified repository edition
+        uses: actions/upload-artifact@v4
+        with:
+          name: ARGESIM-Studienbuch
+          path: |
+            docs/ARGESIM_SOLVER_STUDY.pdf
+            docs/ARGESIM_Bachelor_Rechenlabor.zip
+            docs/ARGESIM_Buchstand.json
+          if-no-files-found: error

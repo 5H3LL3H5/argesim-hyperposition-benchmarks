@@ -2,7 +2,33 @@
 
 **Autor** · Christian Stenzel
 
-**Ein deutschsprachiges Lehrbuch für Studierende der Ingenieurwissenschaften, Informatik und angewandten Mathematik.** Ein abkühlender Fühler führt von der analytischen Lösung zu Euler, Runge–Kutta und QSS. Die ARGESIM-Fälle behandeln schnelle Schaltvorgänge, elastische Kontakte, eine algebraische Diodengleichung und die getrennte Verfeinerung von Raum und Zeit. [Gesamtes Lehrbuch als PDF](../ARGESIM_SOLVER_STUDY.pdf)
+**Deutsche Bachelor-Ausgabe.** 13 Kapitel führen von Modellbildung und Systemtheorie über ODE, DAE, PDE und Solvertechnik zu ausführbaren ARGESIM-Versuchen. Zu jedem Kapitel gehören Aufgaben, Lösungswege, Forschungsstand, Beweise und offene Fragen. [Aktuelles Lehrbuch (PDF)](../ARGESIM_SOLVER_STUDY.pdf) · [Python-Rechenlabor mit CP2-Gewichten (ZIP)](../ARGESIM_Bachelor_Rechenlabor.zip)
+
+## Drei Einstiege in die Methodenwahl
+
+| Frage | Rechnung im Buch |
+|---|---|
+| Wie wird ein Feld zu einem Zeitproblem? | Kapitel 6 führt die Linienmethode (MOL) am Wärmestab ein. Raumverfahren, Zeitintegrator und algebraische Randbedingungen lassen sich am selben Modell wechseln. Im Vier-Zellen-Versuch werden Erhaltung und Positivität getrennt geprüft. |
+| Was bewegt sich im Lattice-Boltzmann-Modell? | Kapitel 13 verfolgt die Kollision und den Transport aus einer einzigen D2Q9-Zelle bis zur CP2-Deckelströmung. |
+| Was lernt das Netz? | Ein Gradientenschritt von Hand führt zu FNO, PINN und DeepONet. An der CP2-Saite lassen sich die gemessenen FNO-, Newmark- und Verlet-Fehler gegen die exakte Lösung vergleichen. |
+
+Im entpackten Rechenlabor startet `python methodenlabor.py` die Handrechnungen und die Störmer–Verlet-Studie ohne Zusatzpakete. `python cp2_feldlabor/auswerten.py` benötigt NumPy und vergleicht die archivierten Felder. [CP2-Versuchsanleitung](../CP2_NEURAL_OPERATORS.md)
+
+## Ausgabe aktualisieren
+
+Die Fassung auf `main` ist unter demselben PDF- und ZIP-Link erreichbar. Die Buchquellen, Abbildungen und Begleitdateien liegen gemeinsam unter [studienbuch](studienbuch/). Für den Satz werden XeLaTeX mit deutscher Silbentrennung, `xdvipdfmx`, die Schriften Noto Serif, Noto Sans Display, DejaVu Sans Mono und Latin Modern Math sowie PyMuPDF benötigt. Unter Debian und Ubuntu liefert `texlive-fonts-recommended` die von Hyperref verwendeten Schriftmetriken. Für die Prüfung des eingecheckten Buchstands genügt Python ab 3.10.
+
+```sh
+python -m pip install PyMuPDF==1.26.6
+python scripts/build_studienbuch.py
+python scripts/build_studienbuch.py --check
+```
+
+Der Bau schreibt PDF, ZIP und `docs/ARGESIM_Buchstand.json`. Alle drei gehören zusammen mit den geänderten Quellen in denselben Commit. Bei Pull Requests und Pushes auf `main` vergleicht die Testsuite die SHA-256-Werte der Quellen, der Messdateien und beider Ausgaben. Ein altes PDF oder Labor lässt diese Prüfung fehlschlagen.
+
+## Kompaktfassung zum Nachschlagen
+
+Die folgenden Markdown-Kapitel bilden die frühere Kurzfassung. Die vollständige Bachelor-Ausgabe steht oben.
 
 | Kapitel | Leitfrage |
 |---|---|
@@ -18,15 +44,6 @@
 | [10 · Lösungen und Glossar](10-loesungen.md) | Welche Zahlen, Einheiten und Gegenproben sichern die Rechnung ab? |
 | [Bibliographie und Quellenverzeichnis](literatur.md) | Welche Arbeiten begründen die Methode und welche Messdaten tragen den Vergleich? |
 
-Die vier englischen Fachkapitel der vorangegangenen Studie sind im selben PDF als Anhang enthalten. [DEVS und QSS](../QSS_DEVS_HISTORY.md) · [Solverwahl](../SOLVER_SELECTION.md) · [Methodenkatalog](../SOLVER_METHODS.md) · [Acht ARGESIM-Fälle](../SOLVER_COMPARISON.md)
+Die historischen Fachkapitel sind als separate Quellen und über den eingebetteten Studienanhang zugänglich. [DEVS und QSS](../QSS_DEVS_HISTORY.md) · [Solverwahl](../SOLVER_SELECTION.md) · [Methodenkatalog](../SOLVER_METHODS.md) · [Acht ARGESIM-Fälle](../SOLVER_COMPARISON.md)
 
-## Abbildungen und PDF erstellen
-
-Der Satz verwendet Pandoc, WeasyPrint, lxml und Matplotlib. Das Abbildungsskript benötigt auch NumPy. Die SVG-Dateien gehören zum Repository und können direkt für den PDF-Bau verwendet werden. Für die vorliegende Ausgabe wurden WeasyPrint 68.1 und Matplotlib 3.10.8 verwendet.
-
-```sh
-python scripts/lehrbuch_abbildungen.py
-python scripts/build_solver_study.py --revision "$(git rev-parse HEAD)" --output lehrbuch.pdf
-```
-
-Das Argument `--revision` bestimmt das Ziel der Repository-Links im PDF. Für eine Ausgabe mit festem Quellenstand ist der Commit mit den zugehörigen Markdown-Dateien, Messdaten und Lehrbuchabbildungen anzugeben.
+Für den historischen Markdown-Satz mit Pandoc, WeasyPrint, lxml und Matplotlib dient `python scripts/build_solver_study.py --revision <Commit-SHA> --output kurzfassung.pdf`.
