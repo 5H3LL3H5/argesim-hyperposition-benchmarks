@@ -294,20 +294,20 @@ Ein Tank erhält \(3\unitm{L/s}\) und gibt \(1\unitm{L/s}\) ab. In fünf Sekunde
 \notebox{Einheitenprobe}{In einer Summe müssen alle Summanden dieselbe physikalische Dimension haben. Im Tank steht auf beiden Seiten Volumen pro Zeit. Eine Formel \(\dot V=Q_\mathrm{ein}-V\) braucht vor \(V\) einen Faktor mit der Einheit \(1/\mathrm s\).}
 
 \lektion{Braucht diese Aufgabe einen Zeitschritt?}{methodenwahl}{Kernweg}{Dynamische Systeme}
-Ein Tank enthält 20 Liter Wasser. In jeder Sekunde fließen drei Liter hinein und ein Liter hinaus. Wie viel Wasser enthält er nach fünf Sekunden? Solange die Raten gleich bleiben und der Tank weder leer wird noch überläuft, gilt für jeden Zeitpunkt \(t\) in Sekunden
+Ein Tank enthält 20 Liter. Pro Sekunde fließen drei Liter hinein und einer hinaus. Wie viel Wasser ist nach fünf Sekunden im Tank? Bei konstanten Raten gilt bis zum Überlauf für die Zeit \(t\) in Sekunden
 \[
  V(t)=(20+2t)\unitm L .
 \]
-Die Formel liefert \(30\unitm L\) nach fünf Sekunden. Sie beantwortet auch die Umkehrfrage: 40 Liter sind nach zehn Sekunden erreicht. Wer die fünf Sekunden in hundert Schritte zerlegt, gewinnt hier keine zusätzliche Information.
+Nach fünf Sekunden sind es \(30\unitm L\). Umgekehrt folgt aus \(20+2t=40\), dass die 40-Liter-Marke nach zehn Sekunden erreicht ist.
 \subt{Was ändert sich bei einem geregelten Ventil?}
-Nun zeichnet ein Sensor den Zufluss auf. Der Abfluss hängt vom Wasserstand ab, und bei einem Grenzstand schaltet der Regler das Ventil. Innerhalb eines kurzen Zeitstücks lässt sich aus dem augenblicklichen Stand und den Flüssen eine Änderung berechnen. Der neue Stand bestimmt den nächsten Abfluss. Ein numerisches Verfahren wiederholt diese Rechnung und sucht den Zeitpunkt des Schaltens. Dafür braucht es auch eine Annahme darüber, wie sich der gemessene Zufluss zwischen zwei Messwerten verändert.
+Nun misst ein Sensor den Zufluss. Der Abfluss hängt vom Wasserstand ab. Bei einem Grenzstand schaltet der Regler das Ventil. Für jeden Schritt berechnen wir aus den Flüssen den neuen Stand und daraus den nächsten Abfluss. Überschreitet der Stand die Schwelle, suchen wir die Schaltzeit innerhalb des Schritts. Dafür müssen wir auch festlegen, wie wir den Zufluss zwischen zwei Messwerten annähern.
 \subt{Zwei Entscheidungen vor der Rechnung}
 {\tblstart\begin{tabularx}{\linewidth}{@{}P{30mm}YY@{}}\toprule
 \hd{Modell}&\hd{Analytisch lösen}&\hd{Numerisch lösen}\\\midrule
 Ursprüngliche Gleichungen&Formel, Erhaltungssatz oder Integral für die gesuchte Größe herleiten.&Aus dem gegebenen Gesetz einzelne Werte oder eine ganze Bahn berechnen.\\
 Am Arbeitspunkt linearisiertes Modell&Eine Formel beschreibt die Reaktion auf kleine Störungen.&Die linearen Gleichungen etwa mit einem aufgezeichneten, zeitlich wechselnden Eingang integrieren.\\\bottomrule\end{tabularx}\par}
-Eine handhabbare Formel für die gesuchte Größe ist bei gekoppelten Gleichungen, Messkurven als Eingang oder vielen Schaltvorgängen oft schwer zu finden. Auch ein lineares Wärmemodell mit tausend Temperaturwerten lässt sich sinnvoll numerisch auswerten.
-\notebox{Entscheidung für den Versuch}{Für den Füllstand nach fünf Sekunden reicht die erste Formel. Für kleine Schwankungen um einen konstanten Betriebszustand prüfen wir die Linearisierung. Für die erste Schaltzeit bei aufgezeichnetem Zufluss benötigen wir auch Eingangsdaten und Schaltregel. Wie genau die Zeit sein muss, entscheidet über den Rechenaufwand.}
+Gekoppelte Gleichungen, gemessene Eingänge und viele Schaltvorgänge erschweren eine geschlossene Lösung. Auch ein lineares Wärmemodell mit tausend Temperaturen lässt sich sinnvoll numerisch auswerten.
+\notebox{Entscheidung für den Versuch}{Den Füllstand bei konstanten Raten liefert die Formel. Für kleine Schwankungen um einen stationären Stand prüfen wir die Linearisierung. Für die erste Schaltzeit brauchen wir den gemessenen Zufluss, die Schaltregel und eine geforderte Zeitgenauigkeit.}
 \srcs{\see{arbeitspunkt}{Arbeitspunkt und Tangente} · \see{periodentest}{Ein Fehlerziel am Pendel} · \see{c07modell}{Ereigniszeiten im ARGESIM-Versuch}.}
 
 \lektion{Vektoren, Matrizen und ein Maß für Fehler}{vektor}{Kernweg}{Dynamische Systeme}
