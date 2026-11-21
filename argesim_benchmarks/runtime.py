@@ -7,6 +7,7 @@ from collections.abc import Mapping, Sequence
 
 from .ivp import InitialValueProblem, IntegrationResult, SolverStats
 from .solvers import (
+    bqss1,
     cheqss1,
     cheqss2,
     cheqss3,
@@ -38,14 +39,15 @@ _ALLOWED_OPTIONS: dict[str, frozenset[str]] = {
     "rk45": frozenset(
         {"initial_step", "rtol", "atol", "min_step", "max_step", "max_steps"}
     ),
-    "qss1": frozenset({"quantum", "max_events", "simultaneous_tolerance"}),
-    "qss2": frozenset({"quantum", "max_events", "simultaneous_tolerance"}),
+    "qss1": frozenset({"quantum", "relative_quantum", "max_events", "simultaneous_tolerance"}),
+    "qss2": frozenset({"quantum", "relative_quantum", "max_events", "simultaneous_tolerance"}),
     "qss3": frozenset(
         {"quantum", "max_events", "simultaneous_tolerance", "derivative_step"}
     ),
     "qss4": frozenset(
         {"quantum", "max_events", "simultaneous_tolerance", "derivative_step"}
     ),
+    "bqss1": frozenset({"quantum", "max_events", "simultaneous_tolerance"}),
     "cqss1": frozenset({"quantum", "max_events", "simultaneous_tolerance"}),
 }
 
@@ -96,6 +98,7 @@ _ALLOWED_OPTIONS["liqss-bdf"] = frozenset(
 )
 
 _ALIASES = {
+    "bqss": "bqss1",
     "cqss": "cqss1",
     "liqss": "liqss1",
     "mliqss": "mliqss1",
@@ -114,6 +117,7 @@ _QUANTISED_SOLVERS = {
     "qss2": qss2,
     "qss3": qss3,
     "qss4": qss4,
+    "bqss1": bqss1,
     "cqss1": cqss1,
     "eliqss1": eliqss1,
     "eliqss2": eliqss2,

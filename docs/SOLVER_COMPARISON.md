@@ -1,6 +1,8 @@
 # Quantized solvers on switched, constrained and sampled ARGESIM models
 
-**Repository technical report · 21 November 2026**
+**Original eight-case study · 21 November 2026**
+
+The subsequent [selection study](SOLVER_SELECTION.md) adds backward QSS, logarithmic quanta and implicit C05 comparisons. All tables and counts below refer to the original grid.
 
 Can a higher-order quantizer take fewer steps and still detect every physical event? On the C21 bouncing ball, QSS3 and QSS4 recover both analytic impact times once the event detector searches within a step. The wider comparison gives a different answer for each model. All 18 named quantized methods meet the target on at least one setting for the sampled tank, the short robot transient and the elastic contact chain. None meets the declared targets for the stiff C05 switch or the linear C13 crane within the tested grid and budgets. For the diode circuit, a separate residual-form solver agrees with both explicit reductions through all 149 switches.
 

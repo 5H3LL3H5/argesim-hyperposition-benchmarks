@@ -14,12 +14,24 @@ A Quantized State System (QSS) solver keeps two descriptions of each state. For 
 | `qss4` | Adds a cubic term to the quantized path and a fourth-degree term to the continuous path. | Each update needs more derivative information. Smooth sections can repay that cost, while frequent resets shorten them. |
 | `cqss1` / `cqss` | Supplies the centre of the cell containing the continuous state. Crossing a cell edge selects the adjacent centre immediately. | This memoryless rule has geometric applications to suitable Hamiltonian systems. Repeated reversals at an edge can cause a zero-time cycle. |
 
+### Logarithmic quantization on QSS1 and QSS2
+
+With a state that falls from 100 to 0.03, a fixed absolute quantum fine enough for the tail can be expensive near the peak. Set `relative_quantum` to a non-negative fraction (scalar or one per state). At each of its own updates the component sets its new width to the larger of `quantum[i]` and `relative_quantum[i] * abs(x[i])`. The width stays fixed until that component updates again. Zero selects a fixed width for that component. The `qss1-log` and `qss2-log` labels in the CSV mean this option on the ordinary public functions.
+
+```python
+from argesim_benchmarks import InitialValueProblem, solve_ivp
+
+decay = InitialValueProblem(lambda t, x: (-x[0],), 0, (100,), 8, autonomous=True)
+log_result = solve_ivp(decay, "qss2", options={"quantum": 0.001, "relative_quantum": 0.001})
+```
+
 ### Methods for stiff feedback
 
 In a stiff system a fast relaxation can force many small updates while the observable of interest changes slowly. LIQSS estimates how each state's derivative changes with its own value, using the diagonal of the Jacobian. The modified family (mLIQSS) can also update a pair of states together when they feed back strongly on one another.
 
 | Runtime name | What changes at an update |
 |---|---|
+| `bqss1` / `bqss` | Backward QSS chooses a nearby grid value ahead of the moving component. A component waits when its computed slope points away from its target. Try it for fast relaxation toward a slowly changing equilibrium, and check for event-time bias as you refine the quantum. It requires no Jacobian. |
 | `liqss1` / `liqss` | Chooses a constant quantized value using local feedback. If the scalar equilibrium lies within the quantum band, the fast component can settle there until its forcing changes. |
 | `liqss2` | Chooses both value and slope using diagonal feedback. The straight quantized path can track a drifting equilibrium. |
 | `liqss3` | Adds curvature to the quantized path so that the local feedback model can follow smoothly changing forcing over a longer section. |
@@ -63,7 +75,7 @@ All quantized methods use `quantum`, scalar or one value per state.
 The quantizer accumulates elapsed time from the start of each solve.
 Result timestamps, RHS evaluations, Jacobians and hybrid guards use the problem's absolute clock. The time-origin regressions compare work counts and state values for the same autonomous problem at zero and at a large offset. [Clock tests](tests/test_runtime.py)
 
-The [comparison study](docs/SOLVER_COMPARISON.md) reports accuracy and cost by case. The [methods appendix](docs/SOLVER_METHODS.md) also describes the optional residual-form IDAS interface.
+The [selection study](docs/SOLVER_SELECTION.md) compares stiff and nonstiff cases at matched output tolerances and measures implicit Radau and BDF. The [earlier eight-case comparison](docs/SOLVER_COMPARISON.md) reports the original 456 configurations. The [methods appendix](docs/SOLVER_METHODS.md) also describes the optional residual-form IDAS interface.
 
 ## Jacobian contract
 

@@ -25,6 +25,7 @@ from .advanced_qss import (
     qss3,
     qss4,
 )
+from .backward_qss import bqss1
 from .explicit import euler, rk4, rk45
 from .mixed_qss import liqss_bdf, liqssbdf
 from .qss import cqss, cqss1, qss1, qss2
@@ -32,6 +33,7 @@ from .roots import brentq
 
 __all__ = [
     "Jacobian",
+    "bqss1",
     "brentq",
     "cheqss",
     "cheqss1",

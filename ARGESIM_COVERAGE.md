@@ -79,10 +79,12 @@ come from the runner registry. Each evidence note identifies the measured case.
 | RK4 | explicit ODE and MOL systems | implemented and tested |
 | RK45 | non-stiff explicit ODE and hybrid segments | implemented and tested |
 | QSS1/QSS2 | autonomous explicit ODE/MOL and hybrid continuous modes | separate implementations, tested |
-| Hybrid runtime | guards at accepted steps, cubic-Hermite localization or endpoint switching, dimension-changing resets | classical and QSS backends |
+| Hybrid runtime | guards at accepted steps, cubic-Hermite localization, affine BQSS1 flights or endpoint switching, dimension-changing resets | classical and QSS backends |
 | DES/NSA-DEVS | exact integer/rational macro time, microsteps, priority and FIFO ties | reusable scheduler plus adapters |
 | Parallel runtime | ordered reusable thread/process workers and timing parity | CP1/CP2 |
 | QSS3/QSS4 | higher-order smooth autonomous ODE/MOL sections | implemented and tested |
+| BQSS1 | autonomous ODE with a backward quantized target and hysteresis | published stiff example, independent analytical and hybrid tests |
+| Logarithmic QSS1/QSS2 | relative width with an absolute floor at each state update | [accuracy and cost across a decaying transient](docs/SOLVER_SELECTION.md) |
 | CQSS1 | centered first-order quantization for suitable Hamiltonian systems | implemented and tested |
 | LIQSS1/2/3 | linearly implicit quantized integration for stiff autonomous ODEs | implemented and tested |
 | mLIQSS1/2 | coupled stiff state pairs | implemented and tested |

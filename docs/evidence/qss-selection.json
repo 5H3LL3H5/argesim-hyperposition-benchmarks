@@ -1,0 +1,28 @@
+{
+  "source_sha256": "56a4bd7b2d3072db402418c29fc0ea7a23fa18e65fdddadc8bcf6c19c4f56b25",
+  "csv_sha256": "5382bd21885b4715c3d117f5a58933c41df27c22c69a807ada3b94c18e698857",
+  "configurations": 520,
+  "seed": 72,
+  "warmups": 1,
+  "repetitions": 3,
+  "timeout_seconds": 2.0,
+  "environment": {
+    "python": "3.12.14",
+    "implementation": "CPython",
+    "os": "Linux",
+    "kernel": "6.18.57",
+    "machine": "x86_64",
+    "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+    "logical_cpus": 9,
+    "cpu_affinity": [
+      0
+    ],
+    "cpu_governors": null
+  },
+  "numpy": "2.3.5",
+  "scipy": "1.17.0",
+  "threads": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  }
+}

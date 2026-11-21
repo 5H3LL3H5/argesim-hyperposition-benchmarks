@@ -417,12 +417,12 @@ def timeout_handler(signum, frame):
     raise TimeoutError("per-integration time limit")
 
 
-def measure(case, method, factor, args):
+def measure(case, method, factor, args, configure=options):
     row = {"case": case.name, "method": method, "quantum_factor": factor}
     elapsed = []
     try:
         for i in range(args.repeat + 1):
-            opts = options(case, method, factor)
+            opts = configure(case, method, factor)
             signal.setitimer(signal.ITIMER_REAL, args.timeout)
             try:
                 start = time.perf_counter_ns()
@@ -440,18 +440,19 @@ def measure(case, method, factor, args):
                     rejected=stats.rejected_steps,
                     rhs=stats.rhs_evaluations,
                 )
+                if hasattr(stats, "lu_factorizations"):
+                    row["lu"] = stats.lu_factorizations
                 if len(values) != len(case.expected):
                     row.update(
                         status="event_mismatch",
                         detail=f"{len(values)} of {len(case.expected)} observables",
                     )
                 else:
-                    ratio = max(
-                        abs(x - y) / tol
-                        for x, y, tol in zip(values, case.expected, case.tolerances)
-                    )
-                    if not math.isfinite(ratio):
+                    ratios = [abs(x - y) / tol for x, y, tol in
+                              zip(values, case.expected, case.tolerances, strict=True)]
+                    if not all(math.isfinite(error) for error in ratios):
                         raise IntegrationError("nonfinite accuracy ratio")
+                    ratio = max(ratios)
                     row.update(
                         status="pass" if ratio <= 1 else "accuracy_miss",
                         error_over_limit=ratio,
