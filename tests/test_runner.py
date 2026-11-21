@@ -62,6 +62,27 @@ class UnifiedRunnerTests(unittest.TestCase):
         self.assertEqual(set(result), {"bombardment", "no-bombardment"})
         self.assertEqual(len(result["bombardment"]), 3)
 
+    def test_c17r_cli_accepts_a_json_intervention_object(self) -> None:
+        for task, extra, event_field in (
+            ("ode", {"t_bound": 2}, "events"),
+            ("ca", {"steps": 2}, "interventions"),
+        ):
+            with self.subTest(task=task):
+                kwargs = {"intervention": {"threshold_fraction": 0.04, "soft_factor": 0.5}}
+                output = StringIO()
+                with redirect_stdout(output):
+                    self.assertEqual(
+                        main(["run", "C17R", task, "--kwargs-json", json.dumps(kwargs | extra)]),
+                        0,
+                    )
+                self.assertEqual(len(json.loads(output.getvalue())[event_field]), 1)
+
+        with self.assertRaisesRegex(SystemExit, "invalid C17R intervention"):
+            main([
+                "run", "C17R", "ode", "--kwargs-json",
+                '{"intervention":{"threshold":0.04,"soft_factor":0.5}}',
+            ])
+
     def test_suite_covers_every_registered_task_and_records_required_inputs(self) -> None:
         import inspect
 

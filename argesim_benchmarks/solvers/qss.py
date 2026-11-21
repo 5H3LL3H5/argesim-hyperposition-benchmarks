@@ -150,8 +150,7 @@ def qss1(
                 method="qss1",
             )
             t = problem.t_bound
-            times.append(t)
-            states.append(tuple(x))
+            problem._record_step(times, states, t, tuple(x))
             break
 
         x = _finite_state(
@@ -175,8 +174,8 @@ def qss1(
             x[index] = q[index]
         q = _finite_state(q, method="qss1 quantizer")
         events += len(due)
-        times.append(t)
-        states.append(tuple(x))
+        if problem._record_step(times, states, t, tuple(x)):
+            break
 
     return IntegrationResult(
         method="qss1",
@@ -270,8 +269,7 @@ def cqss1(
                 method="cqss1",
             )
             t = problem.t_bound
-            times.append(t)
-            states.append(tuple(x))
+            problem._record_step(times, states, t, tuple(x))
             break
 
         x = _finite_state(
@@ -317,8 +315,8 @@ def cqss1(
             zero_time_signatures = {tuple(cells)}
 
         events += len(due)
-        times.append(t)
-        states.append(tuple(x))
+        if problem._record_step(times, states, t, tuple(x)):
+            break
 
     return IntegrationResult(
         method="cqss1",
@@ -432,8 +430,7 @@ def qss2(
                 method="qss2",
             )
             t = problem.t_bound
-            times.append(t)
-            states.append(tuple(x))
+            problem._record_step(times, states, t, tuple(x))
             break
 
         x = _finite_state(
@@ -461,6 +458,9 @@ def qss2(
         if events + len(due) > event_limit:
             raise IntegrationError("qss2 exceeded max_events")
 
+        events += len(due)
+        if problem._record_step(times, states, t, tuple(x)):
+            break
         for index in due:
             q[index] = x[index]
 
@@ -469,10 +469,6 @@ def qss2(
 
         for index in due:
             q_slope[index] = new_derivative[index]
-
-        events += len(due)
-        times.append(t)
-        states.append(tuple(x))
 
     return IntegrationResult(
         method="qss2",

@@ -190,6 +190,33 @@ class C17Tests(unittest.TestCase):
         self.assertEqual(result.events[0].name, "threshold-intervention")
         self.assertAlmostEqual(sum(result.final_state), 10000.0, delta=1.0e-8)
 
+    def test_ode_recovery_ramp_has_analytic_reference_and_rejects_qss(self) -> None:
+        settings = C17Intervention(
+            0.01, soft_factor=0.0, soft_parameter=C17SoftParameter.RECOVERY, duration=10,
+        )
+        parameters = C17Parameters(alpha=0.0)
+        # With no transfers into I, integrate log(0.9 + 0.01*t) on [0, 10].
+        expected = 500 * math.exp(100 * (-0.1 - 0.9 * math.log(0.9)))
+        result = simulate_c17_ode_intervention(
+            settings, parameters=parameters, t_bound=20,
+            options={"rtol": 1e-11, "atol": 1e-12, "max_step": 0.1},
+        )
+        self.assertAlmostEqual(result.final_state[1], expected, delta=1e-8)
+        for method in ("qss1", "qss2", "qss3", "liqss2", "eliqss2"):
+            with self.subTest(method=method), self.assertRaisesRegex(ValueError, "autonomous"):
+                simulate_c17_ode_intervention(
+                    settings, parameters=parameters, t_bound=20, method=method,
+                )
+
+    def test_constant_ode_intervention_still_supports_qss2(self) -> None:
+        result = simulate_c17_ode_intervention(
+            C17Intervention(0.01, soft_factor=0.0, duration=10, profile="constant"),
+            method="qss2", t_bound=2,
+        )
+        self.assertEqual(result.final_time, 2.0)
+        self.assertEqual(len(result.events), 1)
+        self.assertAlmostEqual(result.final_state[0], 9500.0, delta=1e-8)
+
     def test_task1_parameter_study_accepts_initial_infection_sweeps(self) -> None:
         cases = c17_task1_parameter_study(
             cases=(("I0-test", C17Parameters(), (9900, 100, 0)),),

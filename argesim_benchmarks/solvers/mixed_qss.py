@@ -940,10 +940,10 @@ def liqss_bdf(
             quantizer_state = high_quantizer_state
             previous = old_state
             previous_step = time - old_time
-            times.append(time)
-            states.append(state)
             accepted += 1
             accepted_qss_events += qss_events
+            if problem._record_step(times, states, time, state):
+                break
             initial_derivative = problem.evaluate(time, state)
             evaluations += 1
             factor = 2.0 if error == 0.0 else min(2.0, 0.9 * error**-0.5)

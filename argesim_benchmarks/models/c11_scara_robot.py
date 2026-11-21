@@ -8,10 +8,15 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
-from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
-from ..runtime import solve_ivp
+from ..ivp import InitialValueProblem, IntegrationError, IntegrationResult, Rhs, Vector
+from ..runtime import (
+    merge_integration_results,
+    merge_solver_options,
+    normalise_solver_name,
+    solve_ivp,
+)
 
 
 @dataclass(frozen=True)
@@ -125,6 +130,16 @@ def c11_inertia_terms(
     theta3 = (parameters.m2 / 3.0 + m3) * parameters.L2**2
     return theta1, theta2, theta3
 
+
+def _armature_current_limits(p: C11Parameters) -> tuple[float, float, float]:
+    # The specified maximum motor torque is before gearing.
+    return (
+        p.T1_max / (p.phase_factor * p.kT1),
+        p.T2_max / (p.phase_factor * p.kT2),
+        p.T3_max / (p.phase_factor * p.kT3),
+    )
+
+
 def c11_rhs(
     parameters: C11Parameters = _C11_DEFAULT_PARAMETERS,
     task: str = "b"
@@ -135,10 +150,7 @@ def c11_rhs(
 
     Theta1, Theta2, Theta3 = c11_inertia_terms(p)
 
-    # The specified Tmax is motor torque before gearing: Tmax = (3/2)*kT*Imax.
-    I1_max = p.T1_max / (p.phase_factor * p.kT1)
-    I2_max = p.T2_max / (p.phase_factor * p.kT2)
-    I3_max = p.T3_max / (p.phase_factor * p.kT3)
+    I1_max, I2_max, I3_max = _armature_current_limits(p)
 
     def rhs(_time: float, state: Sequence[float]) -> Vector:
         q1, q2, q3, dq1, dq2, dq3, I1, I2, I3 = state
@@ -181,10 +193,8 @@ def c11_rhs(
         dI2 = (U2 - p.kT2 * p.u2 * dq2 - p.Ra2 * I2_clamped) / p.La2
         dI3 = (U3 - p.kT3 * p.u3 * dq3 - p.Ra3 * I3_clamped) / p.La3
 
-        # Explicitly clip current derivatives when at boundaries.
-        # Note: This hard discontinuity introduces numerical stiffness for RK45
-        # but prevents integration beyond the physical current limits in a purely
-        # explicit formulation without a proper root-finding zero-crossing event handler.
+        # At saturation only inward derivatives can change the current.
+        # The integration loop also projects accepted states onto the limits.
         if I1 >= I1_max and dI1 > 0: dI1 = 0.0
         if I1 <= -I1_max and dI1 < 0: dI1 = 0.0
 
@@ -229,12 +239,12 @@ def c11_problem(
     t_bound: float = 1.0,
     task: str = "b",
 ) -> InitialValueProblem:
-    """Build the C11 initial-value problem."""
+    """Build the C11 equations. Use solve_c11 for bounded integration."""
 
     if task not in {"a", "b", "c"}:
         raise ValueError("C11 task must be 'a', 'b', or 'c'")
 
-    return InitialValueProblem(
+    problem = InitialValueProblem(
         c11_rhs(parameters, task=task),
         0.0,
         initial_state,
@@ -242,6 +252,9 @@ def c11_problem(
         name=f"ARGESIM-C11-scara-robot-{task}",
         autonomous=True,
     )
+    if problem.dimension != 9:
+        raise ValueError("C11 initial_state must contain nine state variables")
+    return problem
 
 
 def solve_c11(
@@ -253,7 +266,7 @@ def solve_c11(
     task: str = "b",
     options: Mapping[str, object] | None = None,
 ) -> IntegrationResult:
-    """Solve C11 with an explicitly selected, auditable backend."""
+    """Solve C11 and enforce armature current limits at accepted samples."""
 
     problem = c11_problem(
         parameters=parameters,
@@ -279,7 +292,50 @@ def solve_c11(
         "qss1": {"quantum": default_quantum},
         "qss2": {"quantum": default_quantum},
     }
-    return solve_ivp(problem, method, options=options, defaults=defaults)
+    method = normalise_solver_name(method)
+    controls = merge_solver_options(options)
+    limits = _armature_current_limits(parameters)
+
+    def project_currents(state: Vector) -> Vector:
+        return state[:6] + tuple(
+            max(-limit, min(limit, current))
+            for current, limit in zip(state[6:], limits)
+        )
+
+    def exceeds_current_limit(
+        _start: float, _before: Vector, _time: float, state: Vector,
+    ) -> bool:
+        return any(abs(current) > limit for current, limit in zip(state[6:], limits))
+
+    segments = []
+    start, state = problem.t0, project_currents(problem.y0)
+    timed_steps = method in {"euler", "rk4", "rk45", "liqss-bdf"}
+    while start < problem.t_bound:
+        segment = solve_ivp(
+            replace(problem, t0=start, y0=state, _stop_after_step=exceeds_current_limit),
+            method,
+            options=controls,
+            defaults=defaults,
+        )
+        start, state = segment.final_time, project_currents(segment.final_state)
+        if state != segment.final_state:
+            # Discard the quantizer/adaptive history of the unbounded endpoint.
+            # The projected state initializes the very next accepted step.
+            segment = replace(segment, states=(*segment.states[:-1], state))
+        segments.append(segment)
+        if start == problem.t_bound:
+            break
+
+        time_steps = len(segment.times) - 1 if timed_steps else 0
+        for option, used in (
+            ("max_steps", time_steps + segment.stats.rejected_steps),
+            ("max_events", segment.stats.accepted_steps - time_steps),
+        ):
+            if used:
+                controls[option] = controls.get(option, 1_000_000) - used
+                if controls[option] <= 0:
+                    raise IntegrationError(f"{method} exceeded {option}")
+    return merge_integration_results(segments)
 
 def c11_task_a(
     parameters: C11Parameters = _C11_DEFAULT_PARAMETERS,

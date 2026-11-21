@@ -192,6 +192,17 @@ class C17Intervention:
             raise ValueError("an intervention needs a soft or hard measure")
 
 
+def _c17_intervention(
+    value: C17Intervention | Mapping[str, object],
+) -> C17Intervention:
+    if isinstance(value, C17Intervention):
+        return value
+    try:
+        return C17Intervention(**value)
+    except TypeError as exc:
+        raise ValueError(f"invalid C17R intervention: {exc}") from exc
+
+
 @dataclass(frozen=True)
 class C17InterventionEvent:
     step: int
@@ -320,7 +331,7 @@ def _c17_continuous_soft_scale(
 
 
 def simulate_c17_ode_intervention(
-    intervention: C17Intervention,
+    intervention: C17Intervention | Mapping[str, object],
     *,
     parameters: C17Parameters = _C17_DEFAULT_PARAMETERS,
     initial_state: Sequence[float] = C17_INITIAL_STATE,
@@ -328,8 +339,16 @@ def simulate_c17_ode_intervention(
     method: str = "rk45",
     options: Mapping[str, object] | None = None,
 ) -> HybridResult:
-    """Run Task 2 on the cumulative ODE model with shared event semantics."""
+    """Run Task 2 on the cumulative ODE model with shared event semantics.
 
+    Time-dependent soft profiles require a backend for non-autonomous ODEs.
+    """
+    intervention = _c17_intervention(intervention)
+    autonomous = (
+        intervention.soft_factor in (None, 1.0)
+        or intervention.duration == 0
+        or intervention.profile == "constant"
+    )
     state0 = tuple(float(value) for value in initial_state)
     # Reuse the benchmark's complete state and time validation.
     c17_problem(
@@ -366,9 +385,6 @@ def simulate_c17_ode_intervention(
     threshold = intervention.threshold_fraction * parameters.n
 
     def guard(_time: float, state: Sequence[float]) -> float:
-        return state[1] - threshold
-
-    def below_guard(_time: float, state: Sequence[float]) -> float:
         return state[1] - threshold
 
     def apply_threshold(time_value: float, state: Sequence[float]) -> HybridReset:
@@ -409,15 +425,15 @@ def simulate_c17_ode_intervention(
     )
     rearm_event = StateEvent(
         "threshold-rearm",
-        below_guard,
+        guard,
         rearm,
         "armed",
         direction=-1,
     )
     modes = {
-        "armed": HybridMode("armed", controlled_rhs, (threshold_event,)),
-        "controlled": HybridMode("controlled", controlled_rhs),
-        "wait-below": HybridMode("wait-below", controlled_rhs, (rearm_event,)),
+        "armed": HybridMode("armed", controlled_rhs, (threshold_event,), autonomous),
+        "controlled": HybridMode("controlled", controlled_rhs, autonomous=autonomous),
+        "wait-below": HybridMode("wait-below", controlled_rhs, (rearm_event,), autonomous),
     }
     defaults = {
         "euler": {"step": 0.1},
@@ -471,10 +487,12 @@ def simulate_c17_ca(
     steps: int = 100,
     seed: int = 17,
     movement: C17Movement | str = C17Movement.FHP_I,
-    intervention: C17Intervention | None = None,
+    intervention: C17Intervention | Mapping[str, object] | None = None,
 ) -> C17CAResult:
     """Run the official synchronous SIR cellular automaton."""
 
+    if intervention is not None:
+        intervention = _c17_intervention(intervention)
     if not isinstance(steps, int) or isinstance(steps, bool) or steps < 0:
         raise ValueError("steps must be a non-negative integer")
     if not isinstance(seed, int) or isinstance(seed, bool):
