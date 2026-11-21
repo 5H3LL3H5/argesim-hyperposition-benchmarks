@@ -23,7 +23,8 @@ Use the [coverage table](../ARGESIM_COVERAGE.md) to find a family, its registere
 ## Runtime and verification
 
 - [From DEVS to QSS](QSS_DEVS_HISTORY.md) traces the origins, works through an interrupted quantizer and compares explicit RK23 and stiff ESDIRK32 with reference solutions.
-- [Solver selection](SOLVER_SELECTION.md) compares QSS and classical solvers by problem structure and common accuracy targets. The [PDF](ARGESIM_SOLVER_STUDY.pdf) includes the history, selection study, foundations and eight-case report.
+- [Numerische Simulation dynamischer Systeme](lehrbuch/README.md) teaches the numerical foundations in German through worked examples, ARGESIM comparisons and exercises with solutions. The [complete textbook PDF](ARGESIM_SOLVER_STUDY.pdf) includes the four English study chapters in its technical appendix.
+- [Solver selection](SOLVER_SELECTION.md) compares QSS and classical solvers by problem structure and common accuracy targets.
 - [Earlier solver comparison](SOLVER_COMPARISON.md) reports 456 configurations, the C21 event repair and the independent diode results. The [methods appendix](SOLVER_METHODS.md) explains each solver.
 - [Methodology](../METHODOLOGY.md) covers execution evidence, diagnostic timing, superdense event ordering and independent validation.
 - [Solver guide](../QSS_SOLVERS.md) gives runtime names, model assumptions, Jacobian options and examples. The [QSS method comparison](../QSS_STATE_OF_THE_ART.md) includes an event-count experiment.
