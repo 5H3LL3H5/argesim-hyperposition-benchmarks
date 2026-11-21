@@ -9,6 +9,7 @@ import base64
 import io
 import re
 import subprocess
+from html import escape
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -19,9 +20,9 @@ from matplotlib.mathtext import math_to_image
 from weasyprint import HTML
 
 if __package__:
-    from .lehrbuch_layout import CSS_BOOK, LESSONS, TITLE, anchor, front_matter
+    from .lehrbuch_layout import AUTHOR, CSS_BOOK, LESSONS, TITLE, anchor, front_matter
 else:
-    from lehrbuch_layout import CSS_BOOK, LESSONS, TITLE, anchor, front_matter
+    from lehrbuch_layout import AUTHOR, CSS_BOOK, LESSONS, TITLE, anchor, front_matter
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
@@ -216,6 +217,7 @@ def main():
     contents = front_matter() + "".join(chapter(name, args.revision) for name in BOOK)
     page = (
         f"<html lang='de'><head><meta charset='UTF-8'><title>{TITLE} · ARGESIM</title>"
+        f'<meta name="author" content="{escape(AUTHOR)}">'
         f"<style>{(CSS + CSS_BOOK).replace('REVISION', args.revision[:10])}</style></head>"
         f"<body>{contents}</body></html>"
     )
