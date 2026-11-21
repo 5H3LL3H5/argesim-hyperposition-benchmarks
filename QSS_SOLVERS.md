@@ -28,6 +28,8 @@ All quantized methods use `quantum`, scalar or one value per state.
 `max_events` and `simultaneous_tolerance` have the same meaning across the
 family. QSS3/QSS4 and the implicit variants also accept an absolute
 `derivative_step` override for their right-hand-side Taylor stencil.
+The quantizer accumulates elapsed time from the start of each solve.
+Result timestamps and model callbacks use the problem's absolute clock.
 
 ## Jacobian contract
 

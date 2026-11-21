@@ -21,6 +21,7 @@ from ..ivp import (
     IntegrationResult,
     SolverStats,
 )
+from ._clock import _on_elapsed_clock
 from ._polynomial import (
     evaluate_polynomial,
     first_positive_root,
@@ -720,6 +721,7 @@ def _error_norm(
     return result
 
 
+@_on_elapsed_clock
 def liqss_bdf(
     problem: InitialValueProblem,
     quantum: float | Sequence[float],

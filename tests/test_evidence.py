@@ -1,5 +1,9 @@
 import json
+import shutil
+import subprocess
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
 from argesim_benchmarks import evidence
@@ -15,16 +19,53 @@ from argesim_benchmarks.evidence import (
 class EvidenceTests(unittest.TestCase):
     @patch("argesim_benchmarks.evidence.subprocess.run")
     def test_git_sha_is_resolved_from_package_repository(self, run) -> None:
-        run.side_effect = [Mock(stdout="abc123\n"), Mock(stdout="")]
+        root = Path(evidence.__file__).resolve().parents[1]
+        run.side_effect = [
+            Mock(stdout=f"{root}\n"), Mock(stdout="# branch.oid abc123\n"),
+            Mock(stdout=""),
+        ]
         self.assertEqual(evidence._git_sha(), "abc123")
         command = run.call_args_list[0].args[0]
         self.assertEqual(command[:2], ("git", "-C"))
-        self.assertEqual(command[-2:], ("rev-parse", "HEAD"))
+        self.assertEqual(command[-2:], ("rev-parse", "--show-toplevel"))
+        self.assertEqual(run.call_args.args[0][-3:],
+                         ("cat-file", "-e", "abc123:argesim_benchmarks/evidence.py"))
 
     @patch("argesim_benchmarks.evidence.subprocess.run")
     def test_dirty_checkout_has_no_implementation_sha(self, run) -> None:
-        run.side_effect = [Mock(stdout="abc123\n"), Mock(stdout=" M runner.py\n")]
+        root = Path(evidence.__file__).resolve().parents[1]
+        run.side_effect = [
+            Mock(stdout=f"{root}\n"),
+            Mock(stdout="# branch.oid abc123\n1 .M N... runner.py\n"),
+        ]
         self.assertIsNone(evidence._git_sha())
+
+    @unittest.skipUnless(shutil.which("git"), "Git unavailable")
+    @patch.dict("os.environ", {"ARGESIM_GIT_SHA": ""})
+    def test_nested_or_ignored_install_never_claims_the_host_commit(self) -> None:
+        with TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            (root / ".gitignore").write_text("deps/\nargesim_benchmarks/\n")
+
+            def git(*args):
+                return subprocess.check_output(
+                    ["git", "-C", str(root), *args], text=True,
+                ).strip()
+
+            git("init", "-q")
+            git("add", ".gitignore")
+            git("-c", "user.name=Test fixture", "-c", "user.email=evidence@example.invalid",
+                "commit", "-qm", "Host project")
+            host_sha = git("rev-parse", "HEAD")
+            for install_root in (root, root / "deps"):
+                installed_source = install_root / "argesim_benchmarks" / "evidence.py"
+                installed_source.parent.mkdir(parents=True)
+                installed_source.write_text("# installed source\n")
+                with self.subTest(install_root=install_root), patch.object(
+                    evidence, "__file__", str(installed_source),
+                ):
+                    self.assertEqual(git("rev-parse", "HEAD"), host_sha)
+                    self.assertIsNone(evidence._git_sha())
 
     def test_timing_summary_keeps_raw_samples(self) -> None:
         timing = TimingEvidence.from_samples((3.0, 1.0, 2.0), warmup=2)

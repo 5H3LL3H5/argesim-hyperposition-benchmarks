@@ -1,5 +1,6 @@
 import itertools
 import unittest
+from fractions import Fraction
 
 from nsa_devs import DesEvent, DesScheduler, HyperTime
 
@@ -62,6 +63,32 @@ class DesSchedulerTests(unittest.TestCase):
                     self.assertEqual(event.priority, priority)
                 scheduler.run_until_idle()
                 self.assertEqual(trace, ["earlier", "later"])
+
+    def test_exact_horizon_includes_all_microsteps_at_a_fraction(self) -> None:
+        macro = Fraction(1, 3)
+        scheduler = DesScheduler()
+        trace = []
+
+        def at_horizon() -> None:
+            trace.append("horizon")
+            scheduler.schedule(0, "child", trace.append, "child")
+
+        scheduler.schedule_at(HyperTime.at(macro), "horizon", at_horizon)
+        later = scheduler.schedule_at(HyperTime.at(macro + Fraction(1, 10**18)),
+                                      "later", trace.append, "later")
+        self.assertEqual(scheduler.run(macro), 2)
+        self.assertEqual(trace, ["horizon", "child"])
+        self.assertEqual(scheduler.time, HyperTime.at(macro, 1))
+        self.assertEqual(scheduler.events, [later])
+
+    def test_relative_scheduling_keeps_fractional_and_large_integer_times(self) -> None:
+        for delay in (Fraction(1, 3), 2**53 + 1):
+            with self.subTest(delay=delay):
+                scheduler = DesScheduler()
+                event = scheduler.schedule(delay, "exact delay", lambda: None)
+                self.assertEqual(event.time, HyperTime.at(delay))
+                self.assertEqual(scheduler.run(delay), 1)
+                self.assertEqual(scheduler.time, event.time)
 
     def test_equal_priority_retains_fifo_order(self) -> None:
         for priority in (-2, 0, 2):

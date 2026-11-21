@@ -13,6 +13,7 @@ import sys
 from collections.abc import Callable, Sequence
 
 from ..ivp import InitialValueProblem, IntegrationError, IntegrationResult, SolverStats
+from ._clock import _on_elapsed_clock
 from ._polynomial import (
     evaluate_polynomial,
     first_positive_root,
@@ -163,6 +164,7 @@ def _boundary_time(
     )
 
 
+@_on_elapsed_clock
 def _qss_high_order(
     problem: InitialValueProblem,
     quantum: float | Sequence[float],
@@ -881,6 +883,7 @@ def _apply_modified_pairs(
     return candidates, updated
 
 
+@_on_elapsed_clock
 def _liqss_family(
     problem: InitialValueProblem,
     quantum: float | Sequence[float],
@@ -1085,6 +1088,7 @@ def _liqss_family(
     )
 
 
+@_on_elapsed_clock
 def _generalised_liqss_family(
     problem: InitialValueProblem,
     quantum: float | Sequence[float],
