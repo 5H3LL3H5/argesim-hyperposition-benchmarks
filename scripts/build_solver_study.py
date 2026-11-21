@@ -13,9 +13,15 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from lxml import etree, html
+from matplotlib import rc_context
 from matplotlib.font_manager import FontProperties
 from matplotlib.mathtext import math_to_image
 from weasyprint import HTML
+
+if __package__:
+    from .lehrbuch_layout import CSS_BOOK, LESSONS, TITLE, anchor, front_matter
+else:
+    from lehrbuch_layout import CSS_BOOK, LESSONS, TITLE, anchor, front_matter
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
@@ -25,6 +31,13 @@ CHAPTERS = {
     "SOLVER_SELECTION.md": ("selection", "Solver selection"),
     "SOLVER_METHODS.md": ("methods", "Method foundations"),
     "SOLVER_COMPARISON.md": ("archive", "Original eight-case study"),
+}
+BOOK = {
+    **{
+        "lehrbuch/" + name: (anchor(name), labels[0])
+        for name, labels in LESSONS.items()
+    },
+    **CHAPTERS,
 }
 
 CSS = """
@@ -84,13 +97,15 @@ def typeset_math(node):
     tex = tex.replace(r"\lVert", r"\Vert").replace(r"\rVert", r"\Vert")
     out = io.BytesIO()
     in_table = any(ancestor.tag == "table" for ancestor in node.iterancestors())
-    depth = math_to_image(
-        "$" + tex + "$",
-        out,
-        prop=FontProperties(size=8.8 if in_table else 10),
-        format="svg",
-        color="#202c34",
-    )
+    in_header = any(ancestor.tag == "th" for ancestor in node.iterancestors())
+    with rc_context({"savefig.transparent": True, "svg.hashsalt": "argesim-formeln"}):
+        depth = math_to_image(
+            "$" + tex + "$",
+            out,
+            prop=FontProperties(size=8.8 if in_table else 10),
+            format="svg",
+            color="white" if in_header else "#202c34",
+        )
     encoded = base64.b64encode(out.getvalue()).decode("ascii")
     replacement = html.Element(
         "img",
@@ -103,8 +118,9 @@ def typeset_math(node):
 
 
 def chapter(filename, revision):
-    prefix, title = CHAPTERS[filename]
+    prefix, title = BOOK[filename]
     source = DOCS / filename
+    student = filename.startswith("lehrbuch/")
     output = subprocess.check_output(
         [
             "pandoc",
@@ -113,6 +129,7 @@ def chapter(filename, revision):
             "-t",
             "html5",
             "--mathml",
+            "--fail-if-warnings",
             "--no-highlight",
             "--wrap=none",
             str(source),
@@ -121,10 +138,33 @@ def chapter(filename, revision):
     )
     book = html.fragment_fromstring(output, create_parent="article")
     book.set("id", prefix)
+    book.set("lang", "de" if student else "en")
     for node in book.xpath(".//*[@id]"):
         node.set("id", prefix + "-" + node.get("id"))
     heading = book.find("h1")
     heading.set("data-chapter", title)
+    if student:
+        book.set("class", "lesson")
+        label = html.Element("div", attrib={"class": "section-number"})
+        label.text = (
+            "KAPITEL " + source.name[:2] if source.name[:2].isdigit() else "QUELLEN"
+        )
+        heading.addprevious(label)
+        for img in book.xpath(".//img"):
+            path = (source.parent / img.get("src")).resolve()
+            if not path.is_file():
+                raise FileNotFoundError(path)
+            img.set("src", path.relative_to(DOCS).as_posix())
+            paragraph = img.getparent()
+            if paragraph.tag == "p" and len(paragraph) == 1:
+                paragraph.tag = "figure"
+                caption = etree.SubElement(paragraph, "figcaption")
+                number, separator, description = img.get("alt", "").partition(" · ")
+                if separator:
+                    etree.SubElement(caption, "strong").text = number
+                    caption[0].tail = "  " + description
+                else:
+                    caption.text = number
     if prefix == "history":
         nav = html.Element("nav")
         for chapter_id, label in CHAPTERS.values():
@@ -133,6 +173,8 @@ def chapter(filename, revision):
             nav.append(link)
         heading.addnext(nav)
     for node in book.xpath(".//math"):
+        if student and node.get("display") == "block" and node.getparent().tag == "p":
+            node.getparent().set("class", "equation")
         typeset_math(node)
     for link in book.xpath(".//a[@href]"):
         href = urlsplit(link.get("href"))
@@ -143,10 +185,11 @@ def chapter(filename, revision):
         dest = (source.parent / href.path).resolve() if href.path else source
         if not dest.is_file():
             raise FileNotFoundError(dest)
+        key = dest.relative_to(DOCS).as_posix() if dest.is_relative_to(DOCS) else None
         if dest == DOCS / "ARGESIM_SOLVER_STUDY.pdf":
-            target = "#history"
-        elif dest.parent == DOCS and dest.name in CHAPTERS:
-            target = "#" + CHAPTERS[dest.name][0]
+            target = "#inhalt"
+        elif key in BOOK:
+            target = "#" + BOOK[key][0]
             if href.fragment:
                 target += "-" + href.fragment
         else:
@@ -170,12 +213,19 @@ def main():
     args = parser.parse_args()
     if not re.fullmatch(r"[a-f0-9]{40}", args.revision):
         parser.error("specify a full Git commit SHA")
-    contents = "".join(chapter(name, args.revision) for name in CHAPTERS)
+    contents = front_matter() + "".join(chapter(name, args.revision) for name in BOOK)
     page = (
-        f"<html lang='en'><head><meta charset='UTF-8'><title>From DEVS to QSS and "
-        f"Runge–Kutta · ARGESIM solver study</title><style>"
-        f"{CSS.replace('REVISION', args.revision[:10])}</style></head><body>{contents}</body></html>"
+        f"<html lang='de'><head><meta charset='UTF-8'><title>{TITLE} · ARGESIM</title>"
+        f"<style>{(CSS + CSS_BOOK).replace('REVISION', args.revision[:10])}</style></head>"
+        f"<body>{contents}</body></html>"
     )
+    document = html.fromstring(page)
+    ids = document.xpath("//@id")
+    if len(set(ids)) != len(ids):
+        raise ValueError("Duplicate book destination")
+    for href in document.xpath("//a[starts-with(@href, '#')]/@href"):
+        if href[1:] not in ids:
+            raise ValueError(f"Missing book destination: {href}")
     # Base URL resolves the local scientific figures without network requests.
     HTML(string=page, base_url=DOCS.as_uri() + "/").write_pdf(args.output)
 
