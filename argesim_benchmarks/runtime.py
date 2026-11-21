@@ -15,6 +15,7 @@ from .solvers import (
     eliqss1,
     eliqss2,
     eliqss3,
+    esdirk32,
     euler,
     liqss1,
     liqss2,
@@ -28,17 +29,22 @@ from .solvers import (
     qss3,
     qss4,
     rk4,
+    rk23,
     rk45,
 )
 
 SolverOptions = Mapping[str, object]
 
+_ADAPTIVE_RK = {"rk23": rk23, "rk45": rk45, "esdirk32": esdirk32}
+TIME_STEPPERS = frozenset({"euler", "rk4", *_ADAPTIVE_RK})
+_RK_OPTIONS = frozenset({"initial_step", "rtol", "atol", "min_step", "max_step", "max_steps"})
+
 _ALLOWED_OPTIONS: dict[str, frozenset[str]] = {
     "euler": frozenset({"step", "max_steps"}),
     "rk4": frozenset({"step", "max_steps"}),
-    "rk45": frozenset(
-        {"initial_step", "rtol", "atol", "min_step", "max_step", "max_steps"}
-    ),
+    "rk45": _RK_OPTIONS,
+    "rk23": _RK_OPTIONS,
+    "esdirk32": _RK_OPTIONS | {"jacobian", "jacobian_step", "max_newton_iterations"},
     "qss1": frozenset({"quantum", "relative_quantum", "max_events", "simultaneous_tolerance"}),
     "qss2": frozenset({"quantum", "relative_quantum", "max_events", "simultaneous_tolerance"}),
     "qss3": frozenset(
@@ -111,7 +117,7 @@ _ALIASES = {
     "liqss_bdf": "liqss-bdf",
     "liqssbdf": "liqss-bdf",
 }
-_QUANTISED_METHODS = frozenset(_ALLOWED_OPTIONS) - {"euler", "rk4", "rk45"}
+_QUANTISED_METHODS = frozenset(_ALLOWED_OPTIONS) - TIME_STEPPERS
 _QUANTISED_SOLVERS = {
     "qss1": qss1,
     "qss2": qss2,
@@ -158,6 +164,8 @@ def _configured_options(
         inherited = defaults.get(method)
         if inherited is None and method in _QUANTISED_METHODS:
             inherited = defaults.get("qss2", defaults.get("qss1", {}))
+        if inherited is None and method in _ADAPTIVE_RK:
+            inherited = defaults.get("rk45")
         configured.update(inherited or {})
     if options is not None:
         if not isinstance(options, Mapping):
@@ -195,8 +203,8 @@ def solve_ivp(
         step = configured.pop("step")
         solver = euler if name == "euler" else rk4
         return solver(problem, step, **configured)  # type: ignore[arg-type]
-    if name == "rk45":
-        return rk45(problem, **configured)  # type: ignore[arg-type]
+    if name in _ADAPTIVE_RK:
+        return _ADAPTIVE_RK[name](problem, **configured)  # type: ignore[arg-type]
 
     if "quantum" not in configured:
         raise ValueError(f"{name} requires a quantum option")
@@ -264,6 +272,7 @@ def merge_integration_results(
 
 
 __all__ = [
+    "TIME_STEPPERS",
     "SolverOptions",
     "merge_integration_results",
     "merge_solver_options",

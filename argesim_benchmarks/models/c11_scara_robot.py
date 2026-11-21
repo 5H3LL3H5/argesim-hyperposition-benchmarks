@@ -12,6 +12,7 @@ from dataclasses import dataclass, replace
 
 from ..ivp import InitialValueProblem, IntegrationError, IntegrationResult, Rhs, Vector
 from ..runtime import (
+    TIME_STEPPERS,
     merge_integration_results,
     merge_solver_options,
     normalise_solver_name,
@@ -309,7 +310,7 @@ def solve_c11(
 
     segments = []
     start, state = problem.t0, project_currents(problem.y0)
-    timed_steps = method in {"euler", "rk4", "rk45", "liqss-bdf"}
+    timed_steps = method in TIME_STEPPERS or method == "liqss-bdf"
     while start < problem.t_bound:
         segment = solve_ivp(
             replace(problem, t0=start, y0=state, _stop_after_step=exceeds_current_limit),

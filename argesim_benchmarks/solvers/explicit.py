@@ -117,43 +117,15 @@ def rk4(
     return _fixed_step(problem, step, "rk4", _rk4_step, max_steps=max_steps)
 
 
-def _rms_error(
-    error: Sequence[float],
-    old: Sequence[float],
-    new: Sequence[float],
-    atol: Sequence[float],
-    rtol: float,
-) -> float:
-    scaled = [
-        component / (absolute + rtol * max(abs(before), abs(after)))
-        for component, before, after, absolute in zip(error, old, new, atol)
-    ]
-    root_dimension = math.sqrt(len(scaled))
-    norm = math.hypot(*(value / root_dimension for value in scaled))
-    if not math.isfinite(norm):
-        raise IntegrationError("rk45 produced a non-finite error estimate")
-    return norm
-
-
-def rk45(
+def _adaptive_controls(
     problem: InitialValueProblem,
-    *,
-    initial_step: float | None = None,
-    rtol: float = 1e-6,
-    atol: float | Sequence[float] = 1e-9,
-    min_step: float = 1e-14,
-    max_step: float = math.inf,
-    max_steps: int = 1_000_000,
-) -> IntegrationResult:
-    """Adaptive Dormand-Prince 5(4) integration with local error control.
-
-    ``atol`` is positive and finite, scalar or one value per state component.
-    The initial step is clipped to the configured step bounds. Only the final
-    interval may be shorter than ``min_step``; it still must pass error control.
-    The RHS must be deterministic for the same (time, state): FSAL reuses the
-    accepted endpoint derivative, and retries reuse the unchanged start value.
-    """
-
+    initial_step: float | None,
+    rtol: float,
+    atol: float | Sequence[float],
+    min_step: float,
+    max_step: float,
+    max_steps: int,
+):
     relative_tolerance = _positive_finite(rtol, name="rtol")
     if isinstance(atol, Sequence) and not isinstance(atol, (str, bytes)):
         absolute_tolerance = tuple(
@@ -180,6 +152,64 @@ def rk45(
         else _positive_finite(initial_step, name="initial_step")
     )
     h = min(max(h, minimum_step), maximum_step, span)
+    return (
+        absolute_tolerance,
+        relative_tolerance,
+        minimum_step,
+        maximum_step,
+        step_limit,
+        h,
+    )
+
+
+def _rms_error(
+    error: Sequence[float],
+    old: Sequence[float],
+    new: Sequence[float],
+    atol: Sequence[float],
+    rtol: float,
+    method: str = "rk45",
+) -> float:
+    scaled = [
+        component / (absolute + rtol * max(abs(before), abs(after)))
+        for component, before, after, absolute in zip(error, old, new, atol)
+    ]
+    root_dimension = math.sqrt(len(scaled))
+    norm = math.hypot(*(value / root_dimension for value in scaled))
+    if not math.isfinite(norm):
+        raise IntegrationError(f"{method} produced a non-finite error estimate")
+    return norm
+
+
+def rk45(
+    problem: InitialValueProblem,
+    *,
+    initial_step: float | None = None,
+    rtol: float = 1e-6,
+    atol: float | Sequence[float] = 1e-9,
+    min_step: float = 1e-14,
+    max_step: float = math.inf,
+    max_steps: int = 1_000_000,
+) -> IntegrationResult:
+    """Adaptive Dormand-Prince 5(4) integration with local error control.
+
+    ``atol`` is positive and finite, scalar or one value per state component.
+    The initial step is clipped to the configured step bounds. Only the final
+    interval may be shorter than ``min_step``; it still must pass error control.
+    The RHS must be deterministic for the same (time, state): FSAL reuses the
+    accepted endpoint derivative, and retries reuse the unchanged start value.
+    """
+
+    (
+        absolute_tolerance,
+        relative_tolerance,
+        minimum_step,
+        maximum_step,
+        step_limit,
+        h,
+    ) = _adaptive_controls(
+        problem, initial_step, rtol, atol, min_step, max_step, max_steps
+    )
     t = problem.t0
     y = tuple(problem.y0)
     times = [t]

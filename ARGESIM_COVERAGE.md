@@ -77,6 +77,8 @@ come from the runner registry. Each evidence note identifies the measured case.
 |---|---|---|
 | Euler | explicit ODE and MOL systems; reference baseline | implemented and tested |
 | RK4 | explicit ODE and MOL systems | implemented and tested |
+| RK23 | explicit Bogacki–Shampine 3(2) for nonstiff ODEs and hybrid segments | [order tests and measured comparison](docs/QSS_DEVS_HISTORY.md#two-embedded-rk-pairs-for-comparison) |
+| ESDIRK32 | implicit Kværnø 3/2a for stiff ODEs and hybrid segments | [stability, three C05 switches and terminal states](docs/QSS_DEVS_HISTORY.md#evidence-at-the-same-physical-target) |
 | RK45 | non-stiff explicit ODE and hybrid segments | implemented and tested |
 | QSS1/QSS2 | autonomous explicit ODE/MOL and hybrid continuous modes | separate implementations, tested |
 | Hybrid runtime | guards at accepted steps, cubic-Hermite localization, affine BQSS1 flights or endpoint switching, dimension-changing resets | classical and QSS backends |

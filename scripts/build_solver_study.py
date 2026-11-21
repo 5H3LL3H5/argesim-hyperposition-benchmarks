@@ -1,4 +1,4 @@
-"""Typeset the three Markdown chapters as one linked PDF.
+"""Typeset the Markdown chapters as one linked PDF.
 
 Requires Pandoc, WeasyPrint, lxml and Matplotlib. Repository links outside
 the book point to the supplied source revision. No network assets are used.
@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 GITHUB = "https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks"
 CHAPTERS = {
+    "QSS_DEVS_HISTORY.md": ("history", "DEVS and QSS"),
     "SOLVER_SELECTION.md": ("selection", "Solver selection"),
     "SOLVER_METHODS.md": ("methods", "Method foundations"),
     "SOLVER_COMPARISON.md": ("archive", "Original eight-case study"),
@@ -67,6 +68,8 @@ img:not(.math) { max-height: 76mm; object-fit: contain; }
 #methods img:not(.math) { max-height: 48mm; }
 #selection-passing-settings-by-method + p + table td,
 #selection-the-eight-argesim-repeats + p + table td { padding-top: .88mm; padding-bottom: .88mm; }
+#history-a-quantizer-receives-an-external-event, #history-two-embedded-rk-pairs-for-comparison,
+#history-evidence-at-the-same-physical-target,
 #selection-measured-results, #selection-passing-settings-by-method,
 #selection-interpreting-a-solver-choice, #selection-reproduction-and-scope,
 #methods-coupled-and-mixed-methods, #methods-idas-for-a-residual-form-dae,
@@ -122,7 +125,7 @@ def chapter(filename, revision):
         node.set("id", prefix + "-" + node.get("id"))
     heading = book.find("h1")
     heading.set("data-chapter", title)
-    if prefix == "selection":
+    if prefix == "history":
         nav = html.Element("nav")
         for chapter_id, label in CHAPTERS.values():
             link = html.Element("a", href="#" + chapter_id)
@@ -141,7 +144,7 @@ def chapter(filename, revision):
         if not dest.is_file():
             raise FileNotFoundError(dest)
         if dest == DOCS / "ARGESIM_SOLVER_STUDY.pdf":
-            target = "#selection"
+            target = "#history"
         elif dest.parent == DOCS and dest.name in CHAPTERS:
             target = "#" + CHAPTERS[dest.name][0]
             if href.fragment:
@@ -169,7 +172,7 @@ def main():
         parser.error("specify a full Git commit SHA")
     contents = "".join(chapter(name, args.revision) for name in CHAPTERS)
     page = (
-        f"<html lang='en'><head><meta charset='UTF-8'><title>Choosing between QSS and "
+        f"<html lang='en'><head><meta charset='UTF-8'><title>From DEVS to QSS and "
         f"Runge–Kutta · ARGESIM solver study</title><style>"
         f"{CSS.replace('REVISION', args.revision[:10])}</style></head><body>{contents}</body></html>"
     )

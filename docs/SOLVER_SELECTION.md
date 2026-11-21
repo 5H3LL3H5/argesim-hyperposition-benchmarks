@@ -2,7 +2,7 @@
 
 **ARGESIM solver selection study · 21 November 2026**
 
-Choose a solver by the observable you must reproduce. A contact time, an oscillation's phase and the concentration left after a transient can require very different settings on the same equations. The [method foundations](SOLVER_METHODS.md) explain every quantizer. The [earlier eight-case study](SOLVER_COMPARISON.md) gives the original 456 configurations. This follow-up adds backward QSS, logarithmic QSS1/QSS2 and implicit classical competitors. [Printable edition](ARGESIM_SOLVER_STUDY.pdf)
+The [history of QSS in DEVS](QSS_DEVS_HISTORY.md) explains the event semantics and reports the subsequent explicit and stiff RK 3(2) trials. Choose a solver by the observable you must reproduce. A contact time, an oscillation's phase and the concentration left after a transient can require very different settings on the same equations. The [method foundations](SOLVER_METHODS.md) explain every quantizer. The [earlier eight-case study](SOLVER_COMPARISON.md) gives the original 456 configurations. This follow-up adds backward QSS, logarithmic QSS1/QSS2 and implicit classical competitors. [Printable edition](ARGESIM_SOLVER_STUDY.pdf)
 
 Two cases illustrate the choice. In C12, QSS2 predicted all three sphere contacts during constant-velocity flights with 36 right-hand-side (RHS) evaluations. RK45 used 148. In C05, the requirement was to reproduce three switches and both terminal states of a stiff two-state model. Radau met it at all three tolerances. Four BQSS1 runs finished outside tolerance, and the two finest trials exhausted the event budget.
 
@@ -123,7 +123,7 @@ BQSS1 and each fixed/logarithmic QSS column have three primary settings. RK4 and
 
 ## Reproduction and scope
 
-From the repository root, use a separate output path for a fresh run. The archived job used CPython 3.12.14, NumPy 2.3.5 and SciPy 1.17.0 on Linux x86-64. It used one CPU affinity slot and one BLAS thread. A seeded shuffle interleaves configurations. Each successful row reports three individual solve times after one warm-up; observables and work counters must repeat exactly within that run. Reference construction and scoring are outside the timer.
+To reproduce this 520-row archive with its original software, check out the [measured source revision](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/tree/6593588733c98be1c935c00e446ad471c41b15ec) and use a separate output path. The archived job used CPython 3.12.14, NumPy 2.3.5 and SciPy 1.17.0 on Linux x86-64. It used one CPU affinity slot and one BLAS thread. A seeded shuffle interleaves configurations. Each successful row reports three individual solve times after one warm-up; observables and work counters must repeat exactly within that run. Reference construction and scoring are outside the timer.
 
 ```sh
 python -m pip install numpy==2.3.5 scipy==1.17.0
@@ -136,4 +136,4 @@ Each repetition has a two-second wall-clock budget, including all four solves fo
 
 The eight-case archive, its 399-configuration historical predecessor and this targeted follow-up use different grids. Their pass fractions have different denominators. The source digest in the new manifest covers the two benchmark scripts and the Python packages that implement the solvers and models. [Raw selection CSV](evidence/qss-selection.csv) · [Environment and hashes](evidence/qss-selection.json) · [Algorithm regressions](../tests/test_backward_and_log_qss.py) · [Reference checks](../tests/test_solver_selection.py)
 
-To rebuild the tables and figures from the checked-in measurements, run `python scripts/render_solver_selection.py` with Matplotlib and NumPy installed. To typeset all three chapters, install Pandoc, lxml, Matplotlib and WeasyPrint 68.1. Run `python scripts/build_solver_study.py --revision SOURCE_SHA --output study.pdf`, replacing `SOURCE_SHA` with the full commit containing the Markdown and evidence. The PDF embeds that revision in its links.
+To rebuild the tables and figures from the checked-in measurements, run `python scripts/render_solver_selection.py` with Matplotlib and NumPy installed. To typeset all chapters, install Pandoc, lxml, Matplotlib and WeasyPrint 68.1. Run `python scripts/build_solver_study.py --revision SOURCE_SHA --output study.pdf`, replacing `SOURCE_SHA` with the full commit containing the Markdown and evidence. The PDF embeds that revision in its links.

@@ -211,10 +211,12 @@ def argesim_case(case):
 
 
 def configure(case, method, level):
-    if method in IMPLICIT or (method == "rk45" and level is not None):
+    if method in IMPLICIT or (
+        method in ("rk23", "esdirk32", "rk45") and level is not None
+    ):
         rtol = RTOLS[level]
         opts = {"rtol": rtol, "atol": tuple(s * rtol * 0.01 for s in case.scales)}
-        if method == "rk45":
+        if method not in IMPLICIT:
             opts["max_steps"] = 40000
         return opts
     if method == "rk4" and level is not None:
@@ -259,6 +261,21 @@ def schedule():
     return rows
 
 
+def rk23_schedule():
+    """Same-host comparisons at identical observable targets and three refinements."""
+    methods = ("rk23", "esdirk32", "rk45", *IMPLICIT, "qss2", "eliqss2")
+    cases = (*analytic_cases(), argesim_case(study.switches()))
+    rows = [(case, m, level) for case in cases for m in methods for level in range(3)]
+    contacts = study.spheres()
+    rows.extend(
+        (contacts, m, level)
+        for m in ("rk23", "esdirk32", "rk45", "qss2")
+        for level in range(3)
+    )
+    random.Random(73).shuffle(rows)
+    return rows
+
+
 def source_digest():
     """Hash the Python sources actually used, also in a checkout without Git."""
     root = Path(__file__).resolve().parents[1]
@@ -278,6 +295,7 @@ def source_digest():
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--output", type=Path, required=True)
+    p.add_argument("--profile", choices=("selection", "rk23"), default="selection")
     p.add_argument("--repeat", type=int, default=3)
     p.add_argument(
         "--timeout", type=float, default=2.0, help="seconds per timed solve bundle"
@@ -303,13 +321,16 @@ def main():
     if args.output.suffix != ".csv":
         p.error("output must be a .csv file (the companion .json records provenance)")
     sources = source_digest()
-    rows = schedule()
+    rows = rk23_schedule() if args.profile == "rk23" else schedule()
     with args.output.open("w", newline="", buffering=1) as f:
         writer = csv.DictWriter(f, fields, lineterminator="\n")
         writer.writeheader()
         for case, method, level in rows:
             row = study.measure(case, method, level, args, configure)
             row["level"] = row.pop("quantum_factor")
+            if method == "esdirk32" and row.get("status") in ("pass", "accuracy_miss"):
+                # This backend factors one stage matrix per attempted step, including rejected steps.
+                row["lu"] = row["accepted"] + row["rejected"]
             writer.writerow(row)
     if sources != source_digest():
         raise RuntimeError("experiment sources changed during measurement")
@@ -317,7 +338,8 @@ def main():
         "source_sha256": sources,
         "csv_sha256": hashlib.sha256(args.output.read_bytes()).hexdigest(),
         "configurations": len(rows),
-        "seed": 72,
+        "profile": args.profile,
+        "seed": 73 if args.profile == "rk23" else 72,
         "warmups": 1,
         "repetitions": args.repeat,
         "timeout_seconds": args.timeout,

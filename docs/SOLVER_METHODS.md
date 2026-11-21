@@ -1,6 +1,6 @@
 # How the solvers advance a model
 
-A solver choice starts with the equation supplied by the model. A right-hand side returns derivatives for known states. A DAE residual returns equation defects for a proposed state, derivative and algebraic variable. A discrete-event scheduler advances to the next queued event. These are different computational problems. The original eight-case study measured 18 quantized names. The selection experiment adds BQSS1 and two logarithmic-quantum configurations, and includes implicit classical solvers. A separate circuit experiment exercises the residual DAE interface. [Measurements and selection guide](SOLVER_SELECTION.md)
+The [DEVS history and worked event trace](QSS_DEVS_HISTORY.md) show how a continuous model produces numerical events. A solver choice starts with the equation supplied by the model. A right-hand side returns derivatives for known states. A DAE residual returns equation defects for a proposed state, derivative and algebraic variable. A discrete-event scheduler advances to the next queued event. These are different computational problems. The original eight-case study measured 18 quantized names. The selection experiment adds BQSS1 and two logarithmic-quantum configurations, and includes implicit classical solvers. A separate circuit experiment exercises the residual DAE interface. [Measurements and selection guide](SOLVER_SELECTION.md)
 
 ## Quantization, error and physical events
 
@@ -76,6 +76,8 @@ The coupled methods use a relative threshold to identify significant reciprocal 
 **Euler** advances every component by one fixed interval using the derivative at the start. Its first-order error and finite stability interval make a fixed step particularly consequential on C03 and C05. A step small enough for stability can exhaust the work budget.
 
 **RK4** evaluates four stages across each fixed step and combines their slopes. On smooth ODEs it has fourth-order global accuracy under the usual regularity assumptions. It has no embedded error estimate. Changes in forcing are supplied as segment boundaries, and event crossings use the hybrid layer.
+
+**RK23 and ESDIRK32** both advance order three with an embedded order-two check. RK23 is explicit. ESDIRK32 solves three implicit stages and damps strongly stable modes. The [tableaux, selection criteria and measured comparison](QSS_DEVS_HISTORY.md#two-embedded-rk-pairs-for-comparison) distinguish the two.
 
 **RK45** uses the Dormand–Prince 5(4) pair. Two approximations from shared stages estimate local error and determine whether to accept the step. Absolute component tolerances define a floor near zero and the relative tolerance scales with the state. Endpoint derivative reuse saves evaluations. Local error control does not remove the stability constraint of an explicit method on a stiff model. [Classical implementations](../argesim_benchmarks/solvers/explicit.py)
 
