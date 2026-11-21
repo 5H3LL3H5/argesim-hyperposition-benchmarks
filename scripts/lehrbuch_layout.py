@@ -44,6 +44,7 @@ def anchor(filename):
 
 
 TITLE = "Numerische Simulation dynamischer Systeme"
+AUTHOR = "Christian Stenzel"
 CSS_BOOK = """
 @page lehrbuch {
   size: A4; margin: 18mm 20mm 17mm;
@@ -64,6 +65,7 @@ CSS_BOOK = """
 .cover h1 { color: #f8f5ea; border: 0; margin: 24mm 0 7mm; padding: 0;
   font: bold 43pt/1.03 "DejaVu Serif",serif; letter-spacing: -1.8pt; bookmark-level: none; }
 .cover .subtitle { font: 16pt/1.45 "Open Sans",sans-serif; color: #d0dfdd; }
+.cover .byline { margin: 5mm 0 0; font: 600 14pt/1.3 "Open Sans",sans-serif; color: #f8f5ea; }
 .cover figure { margin: 12mm -2mm 10mm; }
 .cover img:not(.math) { width: 100%; max-height: none; }
 .cover .meta { margin-top: 9mm; border-top: .65pt solid #6a8791; padding-top: 4mm;
@@ -110,10 +112,11 @@ CSS_BOOK = """
 
 
 def front_matter():
-    cover = """<section class="cover" lang="de"><div class="imprint">ARGESIM · LEHRBUCH</div>
+    cover = f"""<section class="cover" lang="de"><div class="imprint">ARGESIM · LEHRBUCH</div>
 <h1>Numerische<br>Simulation<br>dynamischer Systeme</h1>
 <div class="subtitle">Von Runge–Kutta zur Zustandsquantisierung<br>
 mit durchgerechneten ARGESIM-Fallstudien</div>
+<p class="byline">Autor · {escape(AUTHOR)}</p>
 <figure><img src="lehrbuch/abbildungen/titel.svg"
 alt="Eine stetig fallende und wieder ansteigende Kurve, ihr stufiger Ausgang und die zugehörigen Meldungen"></figure>
 <div class="meta">Studienausgabe · November 2026<br>

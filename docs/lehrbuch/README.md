@@ -1,5 +1,7 @@
 # Numerische Simulation dynamischer Systeme
 
+**Autor** · Christian Stenzel
+
 **Ein deutschsprachiges Lehrbuch für Studierende der Ingenieurwissenschaften, Informatik und angewandten Mathematik.** Ein abkühlender Fühler führt von der analytischen Lösung zu Euler, Runge–Kutta und QSS. Die ARGESIM-Fälle behandeln schnelle Schaltvorgänge, elastische Kontakte, eine algebraische Diodengleichung und die getrennte Verfeinerung von Raum und Zeit. [Gesamtes Lehrbuch als PDF](../ARGESIM_SOLVER_STUDY.pdf)
 
 | Kapitel | Leitfrage |
