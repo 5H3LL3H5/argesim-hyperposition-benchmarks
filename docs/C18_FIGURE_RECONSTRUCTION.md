@@ -30,9 +30,13 @@ signals for each muscle have a separate combined signal hash in the CLI output.
 An independent check solved the cubic polynomials for the 4,712 interior
 sample abscissas on those curves. It compared all 8,000 ordinates against the
 packaged CSV. The maximum difference was 0.00000050, consistent with the
-CSV rounding. The older demo interpolated 101 anchors per channel and added
-an endpoint at 20 s. Reproduction of that historical demo remains available
-at commit `5082b9a1c27a07e4ce2cdd60689260346a3a6b73`.
+CSV rounding.
+
+For a supplied recording, the CSV must contain exactly `time_s`, `thickening`
+and `force`, in any column order, with finite values on a uniform 100 Hz
+grid. Both files are required. CLI results retain separate file and signal
+hashes for these inputs. Use `use_digitized` to select the packaged demo.
+[CSV loader](../argesim_benchmarks/models/c18_nonlinear_identification.py)
 
 ```sh
 python scripts/c18_digitize_definition.py C18-definition.pdf /tmp/c18_figure_traces.csv
@@ -66,7 +70,7 @@ outputs initialize the state and are excluded from the metrics.
 The classic MATLAB solution connects the output layer back to the hidden
 layer, gives both the output and input connections delays of one and two
 samples, and trains the connected sequence for up to 50 epochs. The Python
-fit now minimizes the free-running output error over the entire training
+fit minimizes the free-running output error over the entire training
 trajectory. Each predicted force feeds the following two steps. A damped
 Gauss–Newton update adjusts all 61 weights and biases of the ten-unit
 network. The sensitivity recurrence differentiates both feedback paths.
@@ -79,7 +83,7 @@ static parallel network retains its 400-epoch budget. Passing `epochs`
 sets the maximum for both fits. The CLI records the dynamic fitting method,
 epoch budget, per-seed scores and selection.
 
-The former one-step fitting method is available with `dynamic_fit="one-step"`.
+One-step fitting is available with `dynamic_fit="one-step"`.
 Using its default 400 epochs gives free-running correlations of 0.89965
 and 0.88609. Recurrent training recovers the published rounded training value
 of 0.99. The independent-muscle result of 0.92642 falls below the published 0.98.
@@ -94,6 +98,5 @@ papers. No original training/validation data pair was found in those links.
 - A. Belič, *Identification of Nonlinear Dynamics – Neural Networks versus Transfer Functions*, 2005. [Definition PDF](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-definition.pdf).
 - A. Belič, *A Classic MATLAB-based Solution of ARGESIM Benchmark C18*, SNE 17(3–4), pp. 77–78. [Publication](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_17_34/sne.17.34.pdf).
 - [ARGESIM catalog](https://www.argesim.org/benchmarks/c18) · [SNE definition and solutions](https://www.sne-journal.org/benchmarks/c18).
-
 
 The archived publisher definition page from October 2006 links to the definition PDF. Its solutions page links to two example PDFs. The published Excel solution has no embedded workbook, data files or download links. These searches yielded no original measurement pair. [Archived definition](https://web.archive.org/web/20061009001632/http://www.argesim.org/comparisons/c18/definition/c18def.html) · [Archived solutions](https://web.archive.org/web/20061009003608/http://www.argesim.org/comparisons/c18/solutions/c18sol.html) · [Excel solution](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-solution-Excel.pdf)

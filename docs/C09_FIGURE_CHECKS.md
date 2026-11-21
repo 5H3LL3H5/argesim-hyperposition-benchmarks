@@ -51,7 +51,7 @@ scales would allow a like-for-like comparison of the valve command itself.
 
 ## Reproduction
 
-The normal validation command reports each measurement, tolerance and outcome.
+C09 is `implemented`. The normal validation command reports each measurement, tolerance and outcome.
 Strict mode exits unsuccessfully when any figure check is outside its band.
 The optional PDF probe uses PyMuPDF, Pillow and NumPy and verifies the source
 SHA-256 before reading the original pixels.

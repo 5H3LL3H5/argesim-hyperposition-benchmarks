@@ -1,12 +1,12 @@
 # Official ARGESIM coverage
 
-Inventory reviewed on 2026-11-21. See the [published numerical comparisons](docs/PUBLISHED_REFERENCE_CHECKS.md) and the primary catalog,
-[ARGESIM Benchmarks](https://www.argesim.org/benchmarks).
-
-The status is an evidence gate, not a code-size label. `implemented` means all
-required task types have an executable path and tests; `validated` additionally
-requires an external analytical or published numeric reference. Partial code stays
-`specified`; see the follow-up audit for C18 and its outstanding measurement data.
+The catalog and runner generate the status and CLI-task tables below. A family
+can reach `validated` for a specific observable. The reference report gives
+the applicable parameter set, comparison and tolerance. C18 has executable
+algorithms and a reproducible figure demo, while the official data pair
+remains outstanding. [Evidence gates](METHODOLOGY.md#evidence-gates) ·
+[Reference comparisons](docs/PUBLISHED_REFERENCE_CHECKS.md) ·
+[Official catalog](https://www.argesim.org/benchmarks)
 
 <!-- BEGIN GENERATED BENCHMARK STATUS -->
 | ID | Official benchmark | Model family | Status |
@@ -46,21 +46,21 @@ come from the runner registry. Each evidence note identifies the measured case.
 | ID | Registered CLI tasks | Scope and evidence |
 |---|---|---|
 | C01 | `A`, `B`, `C` | Five Task B trajectories against Radau and two stationary states against Dymola. [Results](docs/C01_RESULTS.md) |
-| C02 | `main`, `study` | Finite assembly plant and pallet study. Eleven CSIM loads pass under one convention. Default SimEvents gaps at 13, 14 and 25 pallets. [Clocks and comparison](C02_IMPLEMENTATION.md) |
-| C03 | `A`, `B`, `C` | Switch-state eigenvalues, half cycles and finite-ramp endpoints. [Results](C03_VALIDATION_REPORT.md) |
+| C02 | `main`, `study` | Finite assembly plant and pallet study. Eleven CSIM loads pass under one convention. Default SimEvents gaps at 13, 14 and 25 pallets. [Clocks and comparison](docs/C02_IMPLEMENTATION.md) |
+| C03 | `A`, `B`, `C` | Switch-state eigenvalues, half cycles and finite-ramp endpoints. [Results](docs/C03_VALIDATION_REPORT.md) |
 | C04 | `run`, `compare`, `refinements` | Fork conservation, cleaning, deterministic replay and deadlock checks. Published fairness distributions remain open. |
 | C05 | `simulate`, `validate`, `C`, `D` | Five default and 62 Task D switches, logarithmic crossing references and precision studies. |
 | C06 | `A`, `B`, `C` | Three service policies and 21 daily metrics compared with 100-replication STROBOSCOPE results. |
 | C07 | `A`, `B`, `C` | Nonlinear pin contact times and independent DOP853 trajectories for two initial conditions. |
-| C08 | `replication`, `C` | Five published deterministic datasets for lock policies, plus stochastic replication tests. [Results](C08_VALIDATION.md) |
+| C08 | `replication`, `C` | Five published deterministic datasets for lock policies, plus stochastic replication tests. [Results](docs/C08_VALIDATION.md) |
 | C09 | `run`, `validate` | Three fuzzy controllers. One of three Simulink figure measurements matches the definition-scale run. [Windows and control signal](docs/C09_FIGURE_CHECKS.md) |
 | C10 | `A`, `B` | Simultaneous-access priority, deadlock termination and 50-run study. Matched waiting-time distributions remain open. |
-| C11 | `A`, `B`, `C`, `main` | SCARA robot motion and sampled control. A matched independent DAE trajectory remains open. |
+| C11 | `A`, `B`, `C`, `main` | PD-controlled SCARA motion with bounded armature currents at accepted samples. A matched independent trajectory remains open. |
 | C12 | `A`, `B`, `C` | Inverse restitution and the Dymola distribution of terminal speeds. |
 | C13 | `A`, `B`, `C` | Linear Task A endpoints validated at three loads. B/C holding and emergency brake logic tested. [C13R evidence](docs/C13_REFERENCE_ANALYSIS.md) |
-| C14 | `A1`, `A2`, `B1`, `B2`, `C1`, `C2` | Supply chain demand at midnight, order delays and three-week trace. [Reference variants](C14_VALIDATION.md) |
+| C14 | `A1`, `A2`, `B1`, `B2`, `C1`, `C2` | D1 stock histories and 30-day cost and delivery studies. [Reference variants](docs/C14_VALIDATION.md) |
 | C15 | `A`, `B`, `C` | Three bolus masses, Task B fit and a 1,000-sample parameter experiment. |
-| C16 | `A`, `B`, `C` | Year-five restaurant count compared with two published studies. [Results](docs/C16_REFERENCE_RESULTS.json) |
+| C16 | `A`, `B`, `C` | Year-five restaurant count compared with two published studies. [Validation scope](docs/C16_VALIDATION.md) |
 | C17R | `task1`, `compare`, `ca`, `ode` | Default ODE trajectories validated. The spatial FHP-I comparison uses a published single-run statistic. [C17R results](docs/PUBLISHED_REFERENCE_CHECKS.md#c17r-default-ode-and-spatial-comparison) |
 | C18 | `all` | ARX, static and recurrent networks implemented. Figure reconstruction executable. Original training and validation recordings missing. [Provenance](docs/C18_FIGURE_RECONSTRUCTION.md) |
 | C19R | `A`, `B`, `C` | Groundwater profiles, continuous and scheduled treatment. The 1 m grid retains spatial error at breakthrough and near the disks. [Accuracy](docs/PUBLISHED_REFERENCE_CHECKS.md#c19r-spatial-and-time-accuracy) |
@@ -79,8 +79,8 @@ come from the runner registry. Each evidence note identifies the measured case.
 | RK4 | explicit ODE and MOL systems | implemented and tested |
 | RK45 | non-stiff explicit ODE and hybrid segments | implemented and tested |
 | QSS1/QSS2 | autonomous explicit ODE/MOL and hybrid continuous modes | separate implementations, tested |
-| Hybrid runtime | directed guards, cubic-Hermite localized transitions, optional fixed-step endpoint semantics, dimension-changing reset | classical and QSS backends |
-| DES/NSA-DEVS | deterministic callbacks and restricted superdense time | reusable scheduler plus adapters |
+| Hybrid runtime | guards at accepted steps, cubic-Hermite localization or endpoint switching, dimension-changing resets | classical and QSS backends |
+| DES/NSA-DEVS | exact integer/rational macro time, microsteps, priority and FIFO ties | reusable scheduler plus adapters |
 | Parallel runtime | ordered reusable thread/process workers and timing parity | CP1/CP2 |
 | QSS3/QSS4 | higher-order smooth autonomous ODE/MOL sections | implemented and tested |
 | CQSS1 | centered first-order quantization for suitable Hamiltonian systems | implemented and tested |
@@ -90,7 +90,7 @@ come from the runner registry. Each evidence note identifies the measured case.
 | eLIQSS1/2/3 | generalized linearly implicit quantized integration | implemented and tested |
 | CheQSS1/2/3 | Chebyshev generalized linearly implicit quantized integration | implemented and tested |
 | LIQSS2-BDF | mixed state/time integration with LIQSS2 and BDF1/2 | implemented and tested |
-| General implicit DAE | arbitrary high-index DAE | not implemented; C21 uses its specified index-1 reduction |
+| General implicit DAE | arbitrary high-index DAE | C21 supplies a model-specific index reduction |
 
 ## Evidence boundaries
 

@@ -1,219 +1,66 @@
 # Benchmark methodology
 
-## 0. Evidence gates
+## Evidence gates
 
-An official ARGESIM entry advances only through these ordered gates:
+| Catalog level | Evidence required |
+|---|---|
+| `cataloged` | Official identity, active revision and model family. |
+| `specified` | Definition, parameters, event rules, inputs, tasks and required outputs. |
+| `implemented` | Executable paths and tests for the required task types. |
+| `validated` | A named observable agrees with an independent analytical, numerical or published reference under a declared criterion. Read the case report for the scope. |
+| `benchmark-ready` | Validated results plus workload parity, recorded environment, warm-up, repeated measurements and retained raw results for a comparable experiment. |
 
-1. **cataloged** - official identity, active revision and model family checked;
-2. **specified** - equations, parameters, events, stochastic assumptions,
-   experiments and required outputs transcribed from the primary definition;
-3. **implemented** - executable model and every required task present;
-4. **validated** - independent analytical, tabulated or high-accuracy reference
-   values pass declared tolerances;
-5. **benchmark-ready** - workload parity, environment capture, warm-up,
-   repetitions and raw result retention are complete.
+The [coverage tables](ARGESIM_COVERAGE.md) are generated from the catalog and task registry. C18 illustrates the difference between an executable algorithm and a reproducible official workload. Its three identification methods run on supplied or reconstructed data, while the original training and validation recordings are missing. [C18 provenance](docs/C18_FIGURE_RECONSTRUCTION.md)
 
-A catalog entry or placeholder never counts as an implementation.
+## Execution evidence
 
-## 1. Research questions
+From the repository root, run a single task for its result, or run a suite for a JSON record of each attempt.
 
-1. Does the executable time encoding preserve the analytical order of a
-   finite NSA-DEVS causal chain?
-2. What overhead does the typed encoding introduce relative to a raw tuple
-   with identical semantics and work?
-3. Do finite Euler approximations converge toward the standard value predicted
-   by the corresponding NSA identity?
+```sh
+python -m argesim_benchmarks run C01 C
+python -m argesim_benchmarks run-suite --profile smoke --benchmark C01
+```
 
-## 2. Correctness before performance
+`run-suite` records the task entry point, supplied arguments, effective defaults when resolvable, scalar seed when available, UTC timestamps, elapsed time, environment and failure details. A single duration has no defined IQR. Fields without a measurement, such as per-task RSS or an independent validation metric, are null with a reason. Some tasks perform their own comparisons. The suite status itself reports whether the call completed. [Suite runner](argesim_benchmarks/runner.py)
 
-Every timed implementation must return an observable result. Candidate and
-baseline results are compared before any performance ratio is calculated.
-For the relay experiment the observables are:
+For suite and performance records, automatic Git provenance requires a clean worktree rooted at the package source with the evidence module tracked at HEAD. Dirty trees and ordinary installed copies return a null SHA. For a verified source export, the caller can supply its exact commit in `ARGESIM_GIT_SHA`. [Evidence implementation](argesim_benchmarks/evidence.py)
 
-- final payload;
-- number of processed components;
-- macro-time projection;
-- first and last microstep;
-- deterministic checksum of the trace.
+## Diagnostic timing and parallel comparisons
 
-## 3. Workload equivalence
+```sh
+python -m argesim_benchmarks run-performance --profile smoke --benchmark C01 --task C01:C \
+  --warmup 1 --repetitions 9 --output-dir benchmark-results/c01-diagnostic
+```
 
-The typed and raw-tuple relay implementations both perform:
+Choose a new or empty output directory for each invocation. The runner reserves it for exclusive use and starts a fresh worker per selected task. That worker fingerprints an untimed result, checks each warm-up and measured repetition for exact parity, then checks a separate allocation run. A successful task records the raw wall times, median and inclusive IQR. A failure retains available samples and error details. Results containing variable timing or random draws can fail the parity check. Each task JSON has a SHA-256 digest in the manifest. [Performance runner](argesim_benchmarks/performance.py)
 
-- one priority-queue pop per component;
-- one payload transformation per component;
-- one trace update per component;
-- one priority-queue push for every non-terminal component.
+The default profile is `definition`. Specify `smoke` for reduced workloads. The default is one warm-up, nine repetitions and a timeout of 3,600 s per task. Repetitions must be odd and at least nine. Peak Python allocation comes from an untimed `tracemalloc` probe. Peak RSS is the worker process high-water mark measured before that probe, including interpreter and imports. Child processes have separate memory use. Direct `IntegrationResult` outputs also supply accepted steps, rejections and RHS evaluations.
 
-The only intended difference is representation and dispatch overhead.
+For serial/parallel comparisons, give both paths the same ordered inputs, callable and workload. CP1 and CP2 use the shared executor where tasks are parallelized. Record backend, worker count, parity tolerance, error, warm-up, all repetitions and the environment before interpreting speedup or efficiency. A single benchmark timing is specific to its implementation and machine. [Ordered execution and timing](argesim_benchmarks/parallel.py)
 
-## 4. Timing protocol
+## Continuous, hybrid and spatial models
 
-- use the monotonic `time.perf_counter()`/`perf_counter_ns()` clock;
-- perform untimed warm-up runs;
-- record complete-run durations;
-- use an odd repetition count of at least  nine for exploratory results;
-- report median and interquartile range;
-- retain individual durations in JSON output;
-- never use `sleep()` as simulated work;
-- never substitute an analytical answer for candidate computation.
+Compare solvers using the same equations, initial state, interval and observable. Evaluate independent dense output at the candidate's stored times, or interpolate onto a specified common grid. Compare both sides of a reset consistently. Use component-wise tolerances or physically meaningful scales and keep solver work counts alongside elapsed time. The strict dispatcher accepts method-specific options. Piecewise-constant forcing can be split into autonomous segments. Smooth time-dependent forcing requires a compatible backend. [Solver guide](QSS_SOLVERS.md)
 
-For publication, record interpreter, OS, kernel, CPU, affinity and power
-management settings. Use a dedicated benchmark framework if sub-microsecond
-effects become relevant.
+The hybrid runtime compares directed guards at accepted step boundaries. At the first bracketing step it stops that solve. With localization enabled it finds a crossing on a cubic-Hermite interpolant using endpoint states and derivatives, chooses the earliest candidate, records the reset and continues in the selected mode. With localization disabled it switches at the accepted endpoint. A reset can change dimension or terminate integration. The outer `max_events` limits recorded transitions. A crossing hidden inside a step whose endpoint guards do not bracket it can be missed. [Hybrid runtime](argesim_benchmarks/hybrid.py) · [Event regressions](tests/test_hybrid_runtime.py)
 
-## 5. Accuracy protocol
+For a PDE, record the domain, spatial grid, source discretization, boundary conditions, time integrator and observation locations. Vary space and time independently. C19R's local mesh study demonstrates that reducing the time step alone leaves the dominant spatial error at the tested location. C21's diode reductions are model-specific. The repository supplies ODE solvers and those reductions. General high-index DAEs require a separate solver. [C19R study](docs/PUBLISHED_REFERENCE_CHECKS.md#c19r-spatial-and-time-accuracy) · [C21 model](argesim_benchmarks/models/c21_state_events.py)
 
-The finite Euler experiment evaluates
+## Independent numerical and statistical references
 
-\[
-x_n=(1-1/n)^n
-\]
+For C01 the weighted balance is $d(3r+2m+f)/dt=p-l_f f$. Compare all three components at every stored RK45 time for the five Task B loss rates with an independent Radau transcription. The maximum absolute tolerances are `2e-6` across a trajectory and `2e-7` at 10 s. The middle rate is the default Task A. Task C uses the two published Dymola equilibria. The timing script separately gates each method against a tighter RK45 endpoint. [C01 results](docs/C01_RESULTS.md)
 
-against \(e^{-1}\). It reports finite absolute error. The phrase "standard
-part" describes the non-standard limiting theorem; it is not used as a claim
-of zero error in a finite program.
+For a stochastic result, specify the seed policy, number of independent runs, time window, summary statistic and reference uncertainty. C06 uses rounded published daily means. C16 compares independent samples of 50 week-260 restaurant counts and combines the two variances for each test. C17R's spatial result compares a seeded ensemble against a single published statistic. For C20, pooling individual orders and summarizing per-run medians answer different questions. [Reference comparisons](docs/PUBLISHED_REFERENCE_CHECKS.md) · [C20 experiment](docs/ARGESIM_CLOSURE_20261120.md)
 
-## 6. Prohibited inferences
+For CP2's rope comparison the corrected reference uses `nu=0.06`, 500 spatial intervals, `dt=0.01` and a 0–10 s horizon. The implicit tridiagonal scheme is compared with a Fourier solution. The printed `nu=0.6` variant remains selectable. The cavity check uses the archived full-way D2Q9 implementation. [CP2 model](argesim_benchmarks/models/cp2_parallel_and_distributed.py) · [CP2 tests](tests/test_argesim_cp2.py)
 
-These experiments do not establish:
+## Discrete-event ordering and the NSA-DEVS experiments
 
-- physical infinitesimal computation;
-- superiority over a production DEVS simulator;
-- absence of data races or locks;
-- absence of Time Warp rollbacks;
-- parallel speedup;
-- benchmark readiness beyond the catalog's recorded evidence gate.
+`HyperTime` represents rational macro time and an integer microstep. `DesScheduler` orders pending callbacks by macro time, microstep, integer priority (lower first), then FIFO insertion order. Zero-delay relative scheduling advances the microstep. A finite horizon includes all microsteps at its macro time. Cancellation consumes no event budget. A callback can enqueue later work at its current time, so the model must define any simultaneous-event policy among pending callbacks. [Scheduler](nsa_devs/scheduler.py) · [Exact-time and priority tests](tests/test_des_scheduler.py)
 
-## 7. Solver comparisons
+The finite relay experiment compares final payload, event count and trace checksum before timing typed and raw-tuple implementations. The unit tests independently check the macro time and microstep sequence. Both timed paths perform one heap pop and payload update per component and one push per nonterminal component. The typed path retains event records and computes the checksum from the trace. The tuple path accumulates the checksum directly. The reported ratio includes both representation and trace handling. A separate Euler experiment reports the finite error of $(1-1/n)^n$ against $e^{-1}$. [Relay benchmark](benchmarks/benchmark_event_chain.py) · [Relay tests](tests/test_relay_chain.py)
 
-All solver candidates receive one immutable model definition, initial state,
-time interval and output grid. Accuracy is checked before runtime is compared.
-Adaptive and event-driven methods report accepted and rejected steps or events
-and right-hand-side evaluations in addition to wall time.
-
-Explicit methods are not presented as suitable stiff or DAE solvers merely
-because they can execute with a very small step. QSS2 has an actual
-piecewise-linear quantizer and scaled directional derivative approximation.
-QSS3/QSS4 use polynomial quantizers and isolate every real event root through
-degree four rather than sampling for a sign change. Their black-box right-hand
-side Taylor coefficients use symmetric polynomial stencils.
-
-LIQSS1/2/3 use a diagonal local linearization. mLIQSS1/2/3 additionally detect
-mutually influential pairs and solve a bounded two-state linearly implicit
-polynomial update. An exact model Jacobian may be supplied; the portable
-fallback evaluates a dense centered finite-difference Jacobian. Tests cover
-quantum convergence, a diagonal stiff system, pairwise stiff oscillation and
-exact-versus-numerical Jacobian parity. These are ODE solvers, not DAE solvers.
-
-CQSS1 uses the defining memoryless cell-center quantizer. Its Hamiltonian
-conservation test is kept separate from general IVP convergence tests, and an
-exact zero-time cell cycle is reported because the method intentionally has no
-hysteresis. No unpublished higher-order centered CQSS contract is inferred
-from similarly named experimental engine files.
-
-LIQSS-BDF is evaluated as a mixed state/time method, not a renamed quantizer.
-Tests cover the full-BDF stiff limit, tolerance convergence, a partitioned
-triangular system, persistent LIQSS events and strict partition validation.
-The implementation uses backward Euler startup and variable-step BDF2 rather
-than claiming to embed the paper prototype's CVODE backend.
-
-Continuous benchmark wrappers use one strict dispatcher while Euler, RK4,
-RK45 and every QSS/LIQSS order remain separate algorithms. Unknown option
-names are errors. Existing per-model QSS2 quanta are inherited by newer
-quantized methods unless a method-specific default is supplied. Piecewise
-inputs are represented as contiguous autonomous segments for QSS; a
-non-autonomous problem is never mislabeled autonomous merely to make a backend
-accept it.
-
-Hybrid models use one event layer for both classical and quantized continuous
-modes. Every event declares a guard, direction, reset and target mode. The
-runtime localizes a classical crossing against cubic-Hermite dense state
-output (or deliberately uses fixed-step endpoint semantics when localization
-is disabled), records its standard time plus a microstep, then continues from
-the post-event state. A maximum-event guard turns Zeno behavior into an
-explicit failure or a model-defined resting mode.
-
-Callback DES workloads share the deterministic `HyperTime` scheduler. A
-finite horizon includes all microsteps at its terminal macro time; idle drains,
-cancellation and maximum-event limits are part of the public contract.
-
-## 8. PDE and learned-operator protocol
-
-Time-dependent PDEs are spatially discretized first. Grid size, stencil,
-boundary treatment and spatial error are reported separately from temporal
-solver error. Neural-operator training cost, inference cost and data generation
-cost are reported separately. Evaluation requires held-out data, PDE residual,
-boundary-condition error and out-of-distribution tests.
-
-## 9. ARGESIM C01 protocol
-
-The C01 transcription is checked directly against the official definition:
-state order, five rate parameters, production term, initial state and tasks
-A-C are explicit in code. The weighted population balance
-
-\[
-\frac{d}{dt}(3r+2m+f)=p-l_f f
-\]
-
-provides a structural equation check. Before timing a Task A solver, compare its
-endpoint with a tighter run of the repository's RK45 using the method-specific
-threshold. For independent validation, integrate a separate transcription of
-the equations with SciPy Radau. Compare the default RK45 trajectory at every
-output time for each of the five Task B loss rates. The absolute tolerance is
-`2e-6` for each component across the trajectory and `2e-7` at 10 s. The
-middle loss rate also covers the default Task A trajectory. For Task C, check
-both stationary states against the published Dymola values. The catalog's
-`validated` status covers these numerical cases. Timing comparisons between
-tools still require equivalent workloads. [C01 results](docs/C01_RESULTS.md)
-
-## 10. Parallel and distributed workload protocol
-
-CP1 and CP2 use `argesim_benchmarks.parallel.OrderedExecutor`. Worker pools are
-constructed once and reused across time steps or Runge-Kutta stages. Serial and
-parallel paths receive the same ordered input tuple and callable. Every timing
-report retains all repeat samples and records the maximum result error before
-calculating speedup and efficiency. A measured speedup below one is a valid
-negative result, explicitly expected for the fine-grained CP1-B system.
-
-Official full sizes remain defaults in workload entry points. CI uses smaller
-parameter values to verify the same code path; it does not present reduced-run
-timings as official benchmark results.
-
-## 11. Completed-family reference protocol
-
-- C05 checks the published event counts and switch times for the default and
-  Task D cases. An independent high-precision calculation checks the decimal
-  precision study. [Reference comparisons](docs/PUBLISHED_REFERENCE_CHECKS.md)
-- C09 reports the I-FC2 peak and two P-FC plateaus in fixed windows with a
-  ±1 cm tolerance. The `change-level` interpretation and the printed error
-  difference are selectable. An independent valve-trace replay checks the
-  plant response. [C09 figures and disturbance](docs/C09_FIGURE_CHECKS.md)
-- C13R compares the three revised linear Task A load positions at 2000 s
-  with an independent Cartesian matrix exponential. The bound is 1e-5 m.
-  Task B and C have separate sampled brake tests. [C13R protocol](docs/C13_REFERENCE_ANALYSIS.md)
-- C16 compares the count of restaurants at week 260 across 50 replications
-  with the published AnyLogic and Java OO statistics. Report the time average
-  after week 260 separately. Use the sample and published variances to compute
-  the standard error of each difference of means. [C16 comparison](docs/PUBLISHED_REFERENCE_CHECKS.md)
-- C17R checks all three default ODE states at every stored time through 100
-  using a scalar first integral and independent integration. The FHP-I
-  statistic is compared separately with a published single realization.
-  [ODE limits and spatial comparison](docs/PUBLISHED_REFERENCE_CHECKS.md#c17r-default-ode-and-spatial-comparison)
-- C18 keeps data provenance in `C18DataSet`. Figure digitizations are not
-  labelled as recovered measurements. Synthetic ARX recovery tests algorithmic
-  correctness independently of those digitizations. Error trends and both
-  teacher-forced and free-running ANN predictions are retained separately.
-- C20 uses at least ten replications for official summary calls and reports
-  median, first/third quartiles and IQR. Reduced CI calls test scenario logic,
-  not performance or production statistics.
-- C21 checks published event-contact limits, pendulum stop/kick outputs and
-  dynamic-contact samples as well as the RLC algebraic residual for DAE,
-  interpolated and explicit index-reduced forms. Agreement does not imply a
-  general-purpose DAE solver.
-- CP2 uses the peer-reviewed correction `nu=0.06`, 500 spatial intervals,
-  `dt=0.01` and a 0-10 s horizon. Its implicit tridiagonal rope scheme is
-  checked against the independent Fourier series. The printed `nu=0.6`
-  variant remains explicit for provenance. LBM collision/streaming follows the
-  archived full-way bounce-back MATLAB implementation, including imposed lid
-  velocity in the reported output field.
+```sh
+python benchmarks/benchmark_event_chain.py --length 1000 --repeat 21
+python benchmarks/benchmark_euler_convergence.py
+```

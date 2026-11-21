@@ -1,8 +1,9 @@
-# QSS state of the art and implementation status
+# QSS numerical methods and implementation status
 
-This review is current as of 2026-08-17. It separates numerical algorithms,
-quantum policies and execution architectures: those layers are often combined
-under the label "QSS", but they are not interchangeable solver variants.
+The numerical methods below are compared with their cited publications.
+The implementation column and event counts describe the Python backends in
+this repository. For accepted option names and runnable examples, see the
+[solver guide](QSS_SOLVERS.md).
 
 ## Numerical families
 
@@ -19,7 +20,7 @@ under the label "QSS", but they are not interchangeable solver variants.
 | CQSS | 1 in the defining publication | geometric integration of suitable Hamiltonian systems | implemented with explicit no-hysteresis cycle detection |
 | LIQSS-BDF | LIQSS2 + BDF | mixed state/time discretization | implemented with persistent LIQSS2 and an independent BDF1/2 backend |
 
-The newest general LIQSS construction is the 2026 publication
+The generalized LIQSS construction is described in the 2026 publication
 [On General Linearly Implicit Quantized State System Methods](https://doi.org/10.1007/s40314-026-03858-3).
 It defines `eLIQSS1`-`eLIQSS3` and `CheQSS1`-`CheQSS3`. The former retains the
 LIQSS difference polynomial but waits until the full error boundary is reached;
@@ -28,7 +29,7 @@ admissible segment under the paper's assumptions. Both keep
 `abs(x_i - q_i) <= quantum_i` in the local model. CheQSS1 and eLIQSS1 are
 mathematically identical.
 
-The new methods are exposed under canonical runtime names `eliqss1` through
+These methods are exposed under canonical runtime names `eliqss1` through
 `eliqss3` and `cheqss1` through `cheqss3`. `eliqss`, `cheqss` and the CIFASIS
 spellings `eqss`, `eqss1`, `eqss2`, `eqss3` normalize to those canonical
 implementations; they are compatibility spellings, not duplicate algorithms.
@@ -68,13 +69,15 @@ Chebyshev extrema may touch the error boundary without leaving the admissible
 interval and must not be counted as self-events.
 
 The Jacobian callback and dense centered finite-difference fallback have the
-same contract as LIQSS/mLIQSS. Exact low-degree root isolation retains repeated
-roots. No source from the GPL-licensed CIFASIS project is copied or linked; its
-current engine is used only as an independent behavioral and feature oracle.
+same contract as LIQSS/mLIQSS. The polynomial root finder partitions at derivative roots and uses numerical
+tolerances to detect repeated roots. The native CIFASIS pilot exercises QSS1
+and QSS2 for scalar decay. The generalized methods in the comparison below
+use the Python implementations. [Root isolation](argesim_benchmarks/solvers/_polynomial.py) ·
+[Native pilot](docs/CIFASIS_ORACLE.md)
 
 ## Reproducible work comparison
 
-Run:
+From the repository root run the scalar work comparison.
 
 ```bash
 python benchmarks/benchmark_qss_variants.py --repeat 9 --warmup 1
@@ -109,7 +112,7 @@ which it was defined.
 | Execution | DEVS atomic models or a stand-alone priority scheduler | deterministic stand-alone Python event loop |
 | Hybrid behavior | zero crossings, external events and local resets | provided by the separate reusable hybrid runtime |
 | Mixed state/time | LIQSS2 partition coordinated with CVODE-BDF | persistent LIQSS2 plus independent BDF1/2, selected by `bdf_partition` |
-| Parallelism | partitioned/shared/distributed schedulers in production research engines | ordered process/thread utilities exist, but no false parallel-QSS claim |
+| Parallelism | partitioned/shared/distributed schedulers in production research engines | serial QSS event loops and separate ordered thread/process utilities for benchmark workloads |
 | Model frontend | symbolic/code-generated Modelica subset in CIFASIS | explicit Python `rhs(time, state)` and optional Jacobian |
 
 The structural gap is deliberate. Sparse code generation can dominate runtime

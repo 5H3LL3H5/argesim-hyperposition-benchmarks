@@ -196,8 +196,8 @@ the published 396 s. For seed 0 the independent time-balance residual is
 zero at both 14 and 25 pallets. The paper does not identify its initial
 positions. The matching 14-pallet result demonstrates a possible schedule.
 
-The PR #66 follow-up reran the three outstanding default rows and the same
-fixed alternative (service-only, seed 0) against both published quantities.
+The three outstanding default rows can be compared with a fixed alternative
+(service-only, seed 0) against both published quantities.
 The band is 6% per quantity for every row.
 
 | Pallets | Published jobs / mean s | Default jobs / mean s | Fixed alternative jobs / mean s |
@@ -258,7 +258,7 @@ pallets. Both models reach gridlock at 50.
 
 ## Reproduction
 
-The default study is [archived as CLI output](docs/C02_PALLET_STUDY_20261120.json).
+The default study is [archived as CLI output](C02_PALLET_STUDY_20261120.json).
 
 ```sh
 python -m argesim_benchmarks run C02 main --kwargs-json '{"num_pallets":60}'

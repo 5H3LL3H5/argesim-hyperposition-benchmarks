@@ -1,4 +1,4 @@
-# C13R Task A: published 2006 result and revised 2007 definition
+# C13R crane revisions, linear reference and braking
 
 ## Sources and exact comparison
 
@@ -26,11 +26,10 @@ PYTHONPATH=. python scripts/c13_reference_probe.py > c13-reference.json
 sha256sum c13-reference.json
 ```
 
-The archived JSON SHA-256 is
-`692e8bf3e33296c1308ba287fee09275085e5a382023f650ae069ca05b234115`;
-the probe script SHA-256 is
-`9b2bb9771327009ce5783ebf47536ef8bb4a6eb8b10840e848b02b72ae06239e`.
-These checksums identify repository artifacts, **not** the remotely hosted PDFs.
+The archived JSON has SHA-256
+`692e8bf3e33296c1308ba287fee09275085e5a382023f650ae069ca05b234115`.
+The archive records both damping values, the solver version and tolerances.
+[Probe source](../scripts/c13_reference_probe.py)
 
 ## Analytic and numerical checks
 
@@ -52,10 +51,9 @@ rounding in the old solution remain possible causes. The SciPy probe shares
 the implementation's equations, so it verifies numerical integration, not an
 independent derivation of the physics.
 
-**Classification:** the large ±294 versus ±299 m mismatch is a definition
+The large ±294 versus ±299 m mismatch is a definition
 revision mismatch, with a smaller unresolved difference to the old published
 solution. No implementation parameter was changed to fit the old table. The older shared-equation check alone cannot establish independent validation of the 2007 definition.
-
 
 ## Independent Task A reference and controlled braking
 

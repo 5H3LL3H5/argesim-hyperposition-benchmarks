@@ -1,9 +1,9 @@
-# Solver delta review: RK45, 2026-09-28
+# RK45 solver review, 2026-09-28
 
-Base: `5b7022af3eea47b645c9624eb32590c09c7db6c9` (PR #56).
-All tracked file contents in the isolated local snapshot were checked against
-GitHub tree `17af2a7eaf2968c68d80ca13df168c2548658497` before editing.
-The local Git history is a synthetic snapshot, not upstream history.
+This review records the RK45 changes developed from PR #56 at
+`5b7022af3eea47b645c9624eb32590c09c7db6c9` and the independent
+comparisons made at that time. The current options and examples are in the
+[solver guide](../QSS_SOLVERS.md#classical-adaptive-baseline).
 
 ## Scope and findings
 
@@ -24,7 +24,7 @@ The RHS must return the same derivative for the same time and state. Hidden
 mutable input switches require explicit integration segments; the cache does
 not survive calls. User exceptions and invalid derivatives remain errors.
 
-For A accepted steps and R rejected trials, completed integrations now perform
+For A accepted steps and R rejected trials, a completed RK45 solve performs
 `1 + 6 * (A + R)` RHS evaluations, versus the previous `7 * (A + R)`.
 This is an operation-count improvement, not a measured wall-time speedup.
 Scalar tolerances retain their contract; the more stable norm can cause
@@ -37,20 +37,6 @@ roundoff-level differences in adaptive time grids.
 - SciPy's official [RK45 documentation](https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.RK45.html)
   documents the 5(4) pair and component-wise absolute error tolerances.
   This change adds no SciPy runtime dependency or copied implementation.
-
-## Remaining solver milestones
-
-1. Add an optional pinned CIFASIS subprocess oracle for selected smooth and
-   stiff models; compare accuracy and event semantics before speed claims.
-2. Qualify QSS variant convergence independently on analytic coupled systems;
-   preserve the existing generalized-mLIQSS3 qualification caveat.
-3. Extend reproducible work/accuracy sweeps using measured RHS/event counts,
-   fixed parameters, solver options, provenance and checksummed artifacts.
-4. Assess dense recomputation costs before changing QSS scheduling or adding
-   sparsity metadata; such changes need their own focused correctness review.
-
-Successful local execution does not promote any benchmark's scientific
-evidence level. No claim of a complete fresh audit of every solver is made.
 
 ## Independent numerical spot checks
 

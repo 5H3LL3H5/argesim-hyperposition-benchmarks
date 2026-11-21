@@ -1,4 +1,4 @@
-# ARGESIM C03 Implementation Evidence
+# C03 Class-E amplifier validation
 
 ## Definition transcription
 
@@ -25,9 +25,8 @@ corrected the former `RL=38.6 Ω` transcription error.
 
 Task B integrates 0–100 µs from the zero state. Task C starts from Task B's final
 state and integrates 0–9 µs for 1 fs, 10 ps, 1 ns, and 100 ns rise/fall times.
-The implementation uses the repository's own event-aligned RK45 solver; it does
-not use SciPy.
+The default backend is the repository's event-aligned RK45. Euler and RK4 are also selectable. The candidate fixes the circuit throughout each ideal-switch segment.
 
 ## Evidence boundary
 
-Task A checks the published eigenvalues. An independent affine matrix exponential checks the ideal-switch trajectory at all 20 half-cycle boundaries. For Task C, an independent calculation uses Radau on every resistance ramp in normalized local time and a matrix exponential during each constant interval. Tests compare all four state components at 9 µs for 1 fs, 10 ps, 1 ns and 100 ns ramps, starting from the end of Task B. These controls qualify the listed cases for `validated`. [Numerical comparisons](docs/PUBLISHED_REFERENCE_CHECKS.md)
+Task A checks the published eigenvalues. An independent affine matrix exponential checks the ideal-switch trajectory at all 20 half-cycle boundaries. For Task C, an independent calculation uses Radau on every resistance ramp in normalized local time and a matrix exponential during each constant interval. Tests compare all four state components at 9 µs for 1 fs, 10 ps, 1 ns and 100 ns ramps, starting from the end of Task B. The finite-ramp regression allows `5e-5` absolute error per component. These checks qualify the listed cases for `validated`. [Reference probe](../scripts/benchmark_spec_probe.py) · [Regression tolerances](../tests/test_argesim_c03.py)
