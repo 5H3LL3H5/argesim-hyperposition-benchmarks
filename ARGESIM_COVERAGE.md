@@ -1,6 +1,6 @@
 # Official ARGESIM coverage
 
-Inventory reviewed on 2026-11-20. See the [published numerical comparisons](docs/PUBLISHED_REFERENCE_CHECKS.md) and the primary catalog,
+Inventory reviewed on 2026-11-21. See the [published numerical comparisons](docs/PUBLISHED_REFERENCE_CHECKS.md) and the primary catalog,
 [ARGESIM Benchmarks](https://www.argesim.org/benchmarks).
 
 The status is an evidence gate, not a code-size label. `implemented` means all
@@ -23,11 +23,11 @@ requires an external analytical or published numeric reference. Partial code sta
 | C10 | Dining Philosophers II | DES/concurrency | implemented |
 | C11 | SCARA Robot | DAE, hybrid control | implemented |
 | C12 | Collision Processes in Rows of Spheres | hybrid mechanics, stochastic study | validated |
-| C13 | Crane and Embedded Control | DAE, sampled control | implemented |
+| C13 | Crane and Embedded Control | DAE, sampled control | validated |
 | C14 | Supply Chain | discrete-time dynamics | implemented |
 | C15 | Clearance Identification | ODE identification | validated |
 | C16 | Restaurant Business Dynamics | agent-based stochastic dynamics | validated |
-| C17R | SIR-type Epidemic with Cellular Automata and ODEs | ODE, FHP-I CA, interventions | implemented |
+| C17R | SIR-type Epidemic with Cellular Automata and ODEs | ODE, FHP-I CA, interventions | validated |
 | C18 | Identification of Nonlinear Dynamics - Neural Networks versus Transfer Functions | ARX, static/dynamic ANN | specified |
 | C19R | Pollution in Groundwater Flow | PDE/distributed system | implemented |
 | C20 | Complex Production System | stochastic production DES | implemented |
@@ -39,18 +39,37 @@ requires an external analytical or published numeric reference. Partial code sta
 
 ## Available executable scope
 
-| ID | Executable scope | Verification evidence |
+Run a task with `python -m argesim_benchmarks run ID TASK`. Task names below
+come from the runner registry. Each evidence note identifies the measured case.
+
+<!-- BEGIN GENERATED EXECUTABLE SCOPE -->
+| ID | Registered CLI tasks | Scope and evidence |
 |---|---|---|
-| C02 | finite B1/B2 assembly plant, exclusive shifters, parameter study over 1–60 pallets | single-pallet cycle, FIFO/merge replay, deadlock wait sets and finite-window accounting. Three of 12 starting seeds match 11/12 SimEvents rows under service-only timing. [Reference comparisons](C02_IMPLEMENTATION.md) |
-| C04 | Atomic, unsafe, waiter, cleaning, neighbour-request and put-back policies; dirty-fork delays, request age priority, explicit hoarding/targeted-hold experiments | conservation of every individual horizon, deterministic replay, resource-cycle deadlock/progress tests |
-| C05 | sampled piecewise solution including fast transients, default/62-event Task D, decimal precision studies at the specified accuracies | published event checks; 80-digit reference, independently checked by 90-digit logarithmic event calculations; requested and attained precision reported separately |
-| C09 | I-FC1, I-FC2 and P-FC surfaces; nonlinear tanks; 1 s sampled 60,000 s scenario; reference `change-level` and literal printed difference modes | I-FC final errors below 0.02 mm, <0.06 mm setpoint overshoot and published qualitative disturbance/P-FC behaviour |
-| C17R | identified ODE, hexagonal FHP-I CA, homogeneous random movement, Task-1 sweeps and persistent soft/repeatable hard/spatial interventions | population conservation, lattice/contact equation, seeded replay and shared RK/QSS2 hybrid-event paths |
-| C18 | second-order ARX, static residual ANN and repeated dynamic ANN fitting to the full output-feedback trajectory | published ARX gives 0.95347/0.94231 on the two digitized curves. [Reconstruction and independent validation results](docs/C18_FIGURE_RECONSTRUCTION.md) |
-| C20 | 284-node/368-track causal layout, 90 buffer slots, 19 located machines, downstream blocking, source/sink/rework, setups, disruptions and Task A–D statistics | 360 runs of 5,000 orders across three generated books and 12 scenarios, with 36 full transport replays. External order-book parity is open. [Archived runs](docs/C20_EXPERIMENT_20261120.json) |
-| C21 | event/dynamic ball studies, pendulum basic/kick studies, and algebraic/interpolated/index-reduced Shockley RLC variants | published pendulum stop/kick values, event contact limits and dynamic-contact samples plus algebraic residual below 1e-8 |
-| CP1 | 1000-run RK4 study, five-pair ODE decomposition and 800-line rope MOL decomposition | serial/parallel bitwise parity; published task-B terminal table |
-| CP2 | two Monte Carlo distribution strategies, official full-way D2Q9 LBGK with output field, reusable row workers, corrected 499-unknown rope traces/profiles/surface and Fourier reference | exact serial/parallel LBM parity and reference boundary; corrected full rope errors below 5e-4/3e-4 |
+| C01 | `A`, `B`, `C` | Five Task B trajectories against Radau and two stationary states against Dymola. [Results](docs/C01_RESULTS.md) |
+| C02 | `main`, `study` | Finite assembly plant and pallet study. Eleven CSIM loads pass under one convention. Default SimEvents gaps at 13, 14 and 25 pallets. [Clocks and comparison](C02_IMPLEMENTATION.md) |
+| C03 | `A`, `B`, `C` | Switch-state eigenvalues, half cycles and finite-ramp endpoints. [Results](C03_VALIDATION_REPORT.md) |
+| C04 | `run`, `compare`, `refinements` | Fork conservation, cleaning, deterministic replay and deadlock checks. Published fairness distributions remain open. |
+| C05 | `simulate`, `validate`, `C`, `D` | Five default and 62 Task D switches, logarithmic crossing references and precision studies. |
+| C06 | `A`, `B`, `C` | Three service policies and 21 daily metrics compared with 100-replication STROBOSCOPE results. |
+| C07 | `A`, `B`, `C` | Nonlinear pin contact times and independent DOP853 trajectories for two initial conditions. |
+| C08 | `replication`, `C` | Five published deterministic datasets for lock policies, plus stochastic replication tests. [Results](C08_VALIDATION.md) |
+| C09 | `run`, `validate` | Three fuzzy controllers. One of three Simulink figure measurements matches the definition-scale run. [Windows and control signal](docs/C09_FIGURE_CHECKS.md) |
+| C10 | `A`, `B` | Simultaneous-access priority, deadlock termination and 50-run study. Matched waiting-time distributions remain open. |
+| C11 | `A`, `B`, `C`, `main` | SCARA robot motion and sampled control. A matched independent DAE trajectory remains open. |
+| C12 | `A`, `B`, `C` | Inverse restitution and the Dymola distribution of terminal speeds. |
+| C13 | `A`, `B`, `C` | Linear Task A endpoints validated at three loads. B/C holding and emergency brake logic tested. [C13R evidence](docs/C13_REFERENCE_ANALYSIS.md) |
+| C14 | `A1`, `A2`, `B1`, `B2`, `C1`, `C2` | Supply chain demand at midnight, order delays and three-week trace. [Reference variants](C14_VALIDATION.md) |
+| C15 | `A`, `B`, `C` | Three bolus masses, Task B fit and a 1,000-sample parameter experiment. |
+| C16 | `A`, `B`, `C` | Year-five restaurant count compared with two published studies. [Results](docs/C16_REFERENCE_RESULTS.json) |
+| C17R | `task1`, `compare`, `ca`, `ode` | Default ODE trajectories validated. The spatial FHP-I comparison uses a published single-run statistic. [C17R results](docs/PUBLISHED_REFERENCE_CHECKS.md#c17r-default-ode-and-spatial-comparison) |
+| C18 | `all` | ARX, static and recurrent networks implemented. Figure reconstruction executable. Original training and validation recordings missing. [Provenance](docs/C18_FIGURE_RECONSTRUCTION.md) |
+| C19R | `A`, `B`, `C` | Groundwater profiles, continuous and scheduled treatment. The 1 m grid retains spatial error at breakthrough and near the disks. [Accuracy](docs/PUBLISHED_REFERENCE_CHECKS.md#c19r-spatial-and-time-accuracy) |
+| C20 | `replication`, `experiment` | Layout, blocking, rework and disruptions. 360 runs on three generated order books, 36 transport replays. [Experiment](docs/C20_EXPERIMENT_20261120.json) |
+| C21 | `event-contact`, `dynamic-contact`, `pendulum-basic`, `pendulum-kick`, `rlc-diode` | Published contact and pendulum quantities, plus residual checks on three RLC realizations. |
+| C22 | `basic`, `jockeying`, `reneging`, `classing` | Published jockeying, abandonment and class waiting-time records. |
+| CP1 | `A`, `B`, `B-validate`, `C` | Serial/parallel RK4, pair and rope decompositions. Published ten-population endpoint for Task B. |
+| CP2 | `1`, `2`, `3` | Monte Carlo, full-way D2Q9 parity and the corrected 499-unknown rope/Fourier comparison. |
+<!-- END GENERATED EXECUTABLE SCOPE -->
 
 ## Solver applicability
 
@@ -79,9 +98,13 @@ requires an external analytical or published numeric reference. Partial code sta
   Figure reconstruction requires explicit selection; regular runs require both
   input datasets. CSV import checks sampling and retains hashes/provenance.
   Each published vector trace now has 2,000 reconstructed samples from 0.00 to 19.99 s.
-- C09 and C17R have internal/cross-form or qualitative published checks
-  but no archived independent numeric full-output reference, so they remain
-  `implemented`.
+- C09 records a passing pre-disturbance plateau and two open Simulink figure
+  discrepancies. C13's independent linear reference covers Task A. C17R's
+  deterministic reference covers the default ODE. Its spatial experiment
+  compares a distribution of seeded runs with one published scalar.
+- C19R requires spatial grid studies as well as a time integrator.
+  The implemented DAE reductions and quantized ODE methods cover specific
+  equation forms. General high-index DAEs still require a suitable solver.
 - C21 is `validated` against published event, pendulum and dynamic-contact
   values. CP2 is `validated` against the corrected peer-reviewed rope study,
   its analytical Fourier solution and the archived official LBM algorithm.

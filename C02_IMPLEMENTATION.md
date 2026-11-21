@@ -196,6 +196,22 @@ the published 396 s. For seed 0 the independent time-balance residual is
 zero at both 14 and 25 pallets. The paper does not identify its initial
 positions. The matching 14-pallet result demonstrates a possible schedule.
 
+The PR #66 follow-up reran the three outstanding default rows and the same
+fixed alternative (service-only, seed 0) against both published quantities.
+The band is 6% per quantity for every row.
+
+| Pallets | Published jobs / mean s | Default jobs / mean s | Fixed alternative jobs / mean s |
+|---:|---:|---:|---:|
+| 13 | 1298 / 273 | 1220 / 291.57 | 1257 / 282.83 |
+| 14 | 1439 / 265 | 1331 / 288.05 | 1440 / 265.00 |
+| 25 | 1439 / 396 | 1409 / 496.47 | 1441 / 485.68 |
+
+The fixed alternative meets both targets at 13 and 14 pallets. At 25 its
+count agrees and its mean exceeds the target by 89.68 s. Reconciliation
+requires the original `C2_FAS.mdl` and `evaluate_sim(d, et)`, or the
+per-pallet timer edges and window-boundary ages from that run.
+[SimEvents study, Table 2 and MATLAB listing](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_21_34/articles/sne.21.34.10101.bn02.OA.pdf)
+
 ## Independent 25-pallet time accounting
 
 The window-balance script integrates the number of active workpieces over

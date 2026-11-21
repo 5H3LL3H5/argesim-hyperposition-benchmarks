@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate generated status sections from the canonical catalog."""
+"""Regenerate the coverage tables from the catalog and task registry."""
 
 import sys
 from pathlib import Path

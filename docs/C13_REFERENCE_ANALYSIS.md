@@ -54,6 +54,41 @@ independent derivation of the physics.
 
 **Classification:** the large ±294 versus ±299 m mismatch is a definition
 revision mismatch, with a smaller unresolved difference to the old published
-solution. No implementation parameter was changed to fit the old table. C13
-remains `implemented`; this analysis alone cannot establish independent
-validation of the 2007 definition.
+solution. No implementation parameter was changed to fit the old table. The older shared-equation check alone cannot establish independent validation of the 2007 definition.
+
+
+## Independent Task A reference and controlled braking
+
+For the revised 2007 parameters, the independent linear reference evolves the
+absolute cart and load coordinates, their two velocities and motor force. The
+linearized cable acts as a horizontal spring of stiffness `k = m_load g / r`.
+Cart force is `k (x_load − x_cart) − d_cart v_cart + f_motor`, and load force
+is `−k (x_load − x_cart) − d_load v_load + f_disturbance`. A sixth, constant
+coordinate represents the forcing. Four SciPy matrix exponentials propagate
+the state across the switches at 4, 7 and 15 s. The comparison uses load
+position at 2000 s and an absolute tolerance of `1e-5 m`.
+
+| Disturbance (N) | Reference (m) | Absolute error (m) |
+|---:|---:|---:|
+| −750 | 299.3615227886 | 1.16e-8 |
+| −800 | −0.0057068688 | 2.51e-9 |
+| −850 | −299.3729365263 | 1.68e-8 |
+
+`python scripts/benchmark_spec_probe.py` regenerates these values. The unit
+suite checks the three endpoints without SciPy. The catalog's `validated`
+status applies to this linear Task A case.
+
+Task B and C both engage the holding brake after more than 3.0 continuous
+seconds below 0.01 N. At 0.1 s per sample, a stationary start leaves the brake
+open at 3.0 s and engages it at 3.1 s. The car damping then becomes
+100,000 kg/s and the applied force command becomes zero. A new demand can
+release the holding brake. Only Task C latches an emergency after crossing
+either position limit. Controlled-plant tests cover the switching instants and
+damping. Independent revised nonlinear and closed-loop reference trajectories
+remain outstanding. [C13R definition, pp. 50–52](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C13/C13-definition-2.pdf)
+
+In the prescribed 60 s Task B motion, the holding condition is never met.
+It records zero active samples out of 601 even after the fix. The stationary
+test exercises the condition directly and verifies the damping in the real
+plant. The nominal Task C trajectory records 524 samples with the latched
+emergency brake active.

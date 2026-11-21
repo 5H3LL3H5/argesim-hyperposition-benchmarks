@@ -207,7 +207,7 @@ class C13Controller:
         self.fc_desired = 0.0
         self.brake_active = False
         self.emergency_mode = False
-        self.time_fc_small = 0.0
+        self._small_force_cycles = 0
 
         self.V = 109.5
         self.ForceMax = 160.0
@@ -234,40 +234,34 @@ class C13Controller:
             for i in range(5)
         )
 
-    def step(self, pos_car: float, pos_desired: float) -> None:
-        if self.with_diagnosis:
-            if pos_car > self.MaxPos or pos_car < self.MinPos:
-                self.emergency_mode = True
+    @property
+    def time_fc_small(self) -> float:
+        return self._small_force_cycles * self.dt
 
-            if self.emergency_mode:
-                self.brake_active = True
-                self.fc_desired = 0.0
-            else:
-                if abs(self.fc_desired) < self.BrakeCondition:
-                    self.time_fc_small += self.dt
-                else:
-                    self.time_fc_small = 0.0
+    def step(self, pos_car: float, pos_desired: float, *, initial_sample: bool = False) -> None:
+        """Update after one cycle, or at t=0 before any interval has elapsed."""
+        if self.with_diagnosis and not self.MinPos <= pos_car <= self.MaxPos:
+            self.emergency_mode = True
+        if self.emergency_mode:
+            self.brake_active = True
+            self.fc_desired = 0.0
+            return
 
-                if self.time_fc_small > self.BrakeTimeout:
-                    self.brake_active = True
-                    self.fc_desired = 0.0
-                else:
-                    self.brake_active = False
-
-        if not (self.with_diagnosis and self.emergency_mode):
-            q_next = _vec_add(
-                _vec_add(
-                    _mat_vec(self.OBS_MAT, self.q), _scalar_mul(pos_car, self.POS_D)
-                ),
-                _scalar_mul(self.fc_desired, self.POS_B),
-            )
-            u_next = self.V * pos_desired - _dot_prod(self.POS_H, q_next)
-            fc_desired_new = max(min(u_next, self.ForceMax), -self.ForceMax)
-
-            self.q = q_next
-
-            if not self.brake_active:
-                self.fc_desired = fc_desired_new
+        self.q = _vec_add(
+            _vec_add(_mat_vec(self.OBS_MAT, self.q), _scalar_mul(pos_car, self.POS_D)),
+            _scalar_mul(self.fc_desired, self.POS_B),
+        )
+        request = self.V * pos_desired - _dot_prod(self.POS_H, self.q)
+        request = max(-self.ForceMax, min(request, self.ForceMax))
+        # Count completed low-force intervals. A fresh demand releases the
+        # holding brake even though the actuator was applying zero force.
+        if (not initial_sample and abs(self.fc_desired) < self.BrakeCondition
+                and abs(request) < self.BrakeCondition):
+            self._small_force_cycles += 1
+        else:
+            self._small_force_cycles = 0
+        self.brake_active = self.time_fc_small > self.BrakeTimeout
+        self.fc_desired = 0.0 if self.brake_active else request
 
 
 def solve_c13_task_b_c(
@@ -301,18 +295,19 @@ def c13_controlled_study(
     """Run Task B/C and retain the complete documented output surface."""
 
     controller = C13Controller(with_diagnosis=with_diagnosis)
-    t = 0.0
     t_end = 60.0
     dt = controller.dt
     state = C13_INITIAL_STATE
     times = [0.0]
     states = [state]
     xl_traj = [state[0] + _C13_DEFAULT_PARAMETERS.r * math.sin(state[2])]
-    brake_traj = [controller.brake_active]
-    emergency_traj = [controller.emergency_mode]
+    brake_traj = []
+    emergency_traj = []
     evals = accepted = rejected = 0
 
-    while t < t_end - 1.0e-9:
+    for cycle in range(round(t_end / dt)):
+        t = cycle * dt
+        next_t = (cycle + 1) * dt
         if t >= 36.0:
             pos_desired = 3.8
         elif t >= 16.0:
@@ -322,7 +317,9 @@ def c13_controlled_study(
 
         fd = _c13_disturbance_force(t, with_diagnosis=with_diagnosis)
 
-        controller.step(state[0], pos_desired)
+        controller.step(state[0], pos_desired, initial_sample=(cycle == 0))
+        brake_traj.append(controller.brake_active)
+        emergency_traj.append(controller.emergency_mode)
         dc_val = (
             _C13_DEFAULT_PARAMETERS.dcBrake
             if controller.brake_active
@@ -338,7 +335,7 @@ def c13_controlled_study(
             rhs,
             t,
             state,
-            t + dt,
+            next_t,
             name="ARGESIM-C13-controlled",
         )
         res = solve_ivp(
@@ -357,13 +354,13 @@ def c13_controlled_study(
         evals += res.stats.rhs_evaluations
         accepted += res.stats.accepted_steps
         rejected += res.stats.rejected_steps
-        t += dt
-        times.append(t)
+        times.append(next_t)
         states.append(state)
         xl_traj.append(state[0] + _C13_DEFAULT_PARAMETERS.r * math.sin(state[2]))
-        brake_traj.append(controller.brake_active)
-        emergency_traj.append(controller.emergency_mode)
 
+    # At the terminal observation the last actuator setting is still applied.
+    brake_traj.append(controller.brake_active)
+    emergency_traj.append(controller.emergency_mode)
     result = IntegrationResult(
         method="rk45-dormand-prince-5(4)",
         times=tuple(times),

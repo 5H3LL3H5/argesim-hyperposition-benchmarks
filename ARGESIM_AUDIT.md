@@ -3,7 +3,9 @@
 ## Current reference results
 
 The [reference comparison](docs/PUBLISHED_REFERENCE_CHECKS.md) records the current
-scope for all 24 families, including the remaining C02 and C18 differences. The
+scope for all 24 families. The current catalog includes the revised C13 linear
+Task A and C17R default ODE checks. C09 reports its two remaining curve discrepancies.
+C02 and C18 retain their published-reference and input-data limits. The
 full C20 experiment covers 360 runs on three generated books. Its independent
 transport replays cover 55,648,862 events. [C20 evidence](docs/ARGESIM_CLOSURE_20261120.md)
 
