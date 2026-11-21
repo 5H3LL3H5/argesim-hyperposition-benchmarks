@@ -31,5 +31,6 @@ The registry exposes 75 tasks across 24 families. Fifteen families have independ
 | Model reports, reproduction commands and dated studies | [Documentation index](docs/README.md) |
 | Outstanding reference discrepancies and input requirements | [Implementation audit](ARGESIM_AUDIT.md) |
 | Evidence gates, event ordering, performance measurements and provenance | [Benchmark methodology](METHODOLOGY.md) |
+| Quantized solver comparison, event repair and residual DAE results | [Study and raw measurements](docs/SOLVER_COMPARISON.md) · [Method explanations](docs/SOLVER_METHODS.md) |
 | Solver choices, options and examples | [ODE solver guide](QSS_SOLVERS.md) |
 | Optional native QSS1/QSS2 linear-decay comparison | [CIFASIS adapter](docs/CIFASIS_ORACLE.md) |

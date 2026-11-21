@@ -22,6 +22,7 @@ Use the [coverage table](../ARGESIM_COVERAGE.md) to find a family, its registere
 
 ## Runtime and verification
 
+- [Solver comparison](SOLVER_COMPARISON.md) reports all 456 new configurations, the C21 event repair and the independent diode results. The [methods appendix](SOLVER_METHODS.md) explains each solver.
 - [Methodology](../METHODOLOGY.md) covers execution evidence, diagnostic timing, superdense event ordering and independent validation.
 - [Solver guide](../QSS_SOLVERS.md) gives runtime names, model assumptions, Jacobian options and examples. The [QSS method comparison](../QSS_STATE_OF_THE_ART.md) includes an event-count experiment.
 - [CIFASIS adapter](CIFASIS_ORACLE.md) describes the optional native scalar-decay pilot, installation, output contract and pinned engine.

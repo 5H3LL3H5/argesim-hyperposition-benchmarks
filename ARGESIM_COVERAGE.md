@@ -90,7 +90,8 @@ come from the runner registry. Each evidence note identifies the measured case.
 | eLIQSS1/2/3 | generalized linearly implicit quantized integration | implemented and tested |
 | CheQSS1/2/3 | Chebyshev generalized linearly implicit quantized integration | implemented and tested |
 | LIQSS2-BDF | mixed state/time integration with LIQSS2 and BDF1/2 | implemented and tested |
-| General implicit DAE | arbitrary high-index DAE | C21 supplies a model-specific index reduction |
+| IDAS (optional) | regular index-one residual systems with consistent initialization | [C21 diode trajectories and both model-specific reductions](docs/SOLVER_COMPARISON.md#a-direct-dae-check-on-the-c21-diode) |
+| Higher-index DAE | requires a suitable reduced formulation | automatic index reduction is outside the runtime |
 
 ## Evidence boundaries
 
@@ -103,8 +104,8 @@ come from the runner registry. Each evidence note identifies the measured case.
   deterministic reference covers the default ODE. Its spatial experiment
   compares a distribution of seeded runs with one published scalar.
 - C19R requires spatial grid studies as well as a time integrator.
-  The implemented DAE reductions and quantized ODE methods cover specific
-  equation forms. General high-index DAEs still require a suitable solver.
+  The residual solver covers regular index-one DAEs. QSS operates on explicit
+  continuous equations. Higher-index DAEs require a suitable formulation.
 - C21 is `validated` against published event, pendulum and dynamic-contact
   values. CP2 is `validated` against the corrected peer-reviewed rope study,
   its analytical Fourier solution and the archived official LBM algorithm.

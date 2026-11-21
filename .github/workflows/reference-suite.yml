@@ -21,8 +21,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Compile
         run: python -m compileall -q .
+      - name: Install optional IDAS backend
+        if: matrix.python-version == '3.12'
+        run: python -m pip install ".[dae]"
       - name: Unit tests
         run: python -m unittest discover -s tests -v
+      - name: Independent diode trajectory comparison
+        if: matrix.python-version == '3.12'
+        run: python scripts/c21_dae_reference.py
       - name: Ruff
         if: matrix.python-version == '3.13'
         run: |

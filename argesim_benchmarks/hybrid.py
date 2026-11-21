@@ -11,6 +11,7 @@ from nsa_devs.hypertime import HyperTime
 from .ivp import InitialValueProblem, IntegrationError, SolverStats, Vector
 from .runtime import SolverOptions, normalise_solver_name, solve_ivp
 from .solvers import brentq
+from .solvers._polynomial import _unit_interval_roots
 
 
 @dataclass(frozen=True)
@@ -24,6 +25,21 @@ class HybridReset:
 
 Guard = Callable[[float, Sequence[float]], float]
 Reset = Callable[[float, Sequence[float]], Sequence[float] | HybridReset]
+
+
+@dataclass(frozen=True)
+class StateThreshold:
+    """Coordinate guard y[index] - level, searchable inside a Hermite step."""
+
+    index: int
+    level: float = 0.0
+
+    def __post_init__(self) -> None:
+        if type(self.index) is not int or self.index < 0 or not math.isfinite(self.level):
+            raise ValueError("invalid state threshold")
+
+    def __call__(self, time: float, state: Sequence[float]) -> float:
+        return state[self.index] - self.level
 
 
 @dataclass(frozen=True)
@@ -144,7 +160,7 @@ def _locate_event(
     t_right: float,
     state_right: Vector,
     tolerance: float,
-) -> tuple[float, Vector]:
+) -> tuple[float, Vector] | None:
     span = t_right - t_left
     left_derivative = tuple(float(value) for value in mode.rhs(t_left, state_left))
     right_derivative = tuple(float(value) for value in mode.rhs(t_right, state_right))
@@ -173,61 +189,73 @@ def _locate_event(
             raise IntegrationError(f"event {event.name!r} returned a non-finite guard")
         return value
 
-    left_value = interpolated_guard(0.0)
-    right_value = interpolated_guard(1.0)
-    if abs(left_value) <= tolerance:
-        fraction = 0.0
-    elif abs(right_value) <= tolerance:
-        fraction = 1.0
-    else:
-        fraction = brentq(
-            interpolated_guard,
-            0.0,
-            1.0,
-            tol=max(1.0e-14, tolerance),
+    # Between extrema a coordinate guard is monotone on the Hermite cubic.
+    # This also arms a guard which leaves its reset surface and returns within
+    # the same accepted step, without firing again at its left endpoint.
+    points = [0.0]
+    if isinstance(event.guard, StateThreshold):
+        i = event.guard.index
+        change = state_right[i] - state_left[i]
+        a = span * left_derivative[i]
+        b = span * right_derivative[i]
+        extrema = _unit_interval_roots(
+            [a, 2 * (3 * change - 2 * a - b), 3 * (a + b - 2 * change)],
+            1e-14,
         )
-    return t_left + fraction * span, _hermite_interpolate(
-        left_derivative,
-        state_left,
-        right_derivative,
-        state_right,
-        span,
-        fraction,
-    )
+        points.extend(s for s in extrema if 0 < s < 1 and abs(interpolated_guard(s)) > tolerance)
+    elif abs(interpolated_guard(0.0)) <= tolerance:
+        # A callback may combine coordinates or depend on time. On a return
+        # from its reset surface, search for a point on the armed side before
+        # applying the usual bracketed locator. An unobservably brief excursion
+        # requires segment_span or an explicit StateThreshold.
+        probe = 0.5
+        end_value = interpolated_guard(1.0)
+        while t_left + probe * span > t_left and probe >= 2.0**-48:
+            if _crosses(interpolated_guard(probe), end_value, event.direction, tolerance):
+                points.append(probe)
+                break
+            probe *= 0.5
+    points.append(1.0)
+    left = points[0]
+    before = interpolated_guard(left)
+    for right in points[1:]:
+        after = interpolated_guard(right)
+        if _crosses(before, after, event.direction, tolerance):
+            fraction = right if abs(after) <= tolerance else brentq(
+                interpolated_guard, left, right, tol=max(1e-14, tolerance),
+            )
+            return t_left + fraction * span, _hermite_interpolate(
+                left_derivative, state_left, right_derivative, state_right, span, fraction,
+            )
+        left, before = right, after
+    return None
 
 
 def _step_event(
-    mode: HybridMode,
-    t_left: float,
-    state_left: Vector,
-    t_right: float,
-    state_right: Vector,
-    tolerance: float,
-    localize_events: bool,
-) -> tuple[StateEvent, float, Vector, int] | None:
-    candidates: list[tuple[float, StateEvent, Vector]] = []
-    locator_evaluations = 0
+    mode: HybridMode, t_left: float, state_left: Vector, t_right: float,
+    state_right: Vector, tolerance: float, localize_events: bool,
+) -> tuple[tuple[StateEvent, float, Vector] | None, int]:
+    candidates = []
+    work = 0
     for event in mode.events:
         before = float(event.guard(t_left, state_left))
         after = float(event.guard(t_right, state_right))
         if not math.isfinite(before) or not math.isfinite(after):
-            raise IntegrationError(
-                f"event {event.name!r} returned a non-finite guard"
-            )
-        if not _crosses(before, after, event.direction, tolerance):
+            raise IntegrationError(f"event {event.name!r} returned a non-finite guard")
+        returning = abs(before) <= tolerance and abs(after) > tolerance and (
+            event.direction == 0 or event.direction * after > 0
+        )
+        interior = localize_events and (isinstance(event.guard, StateThreshold) or returning)
+        if not interior and not _crosses(before, after, event.direction, tolerance):
             continue
         if localize_events:
-            event_time, event_state = _locate_event(
-                mode, event, t_left, state_left, t_right, state_right, tolerance,
-            )
-            locator_evaluations += 2
+            found = _locate_event(mode, event, t_left, state_left, t_right, state_right, tolerance)
+            work += 2
+            if found is not None:
+                candidates.append((event, *found))
         else:
-            event_time, event_state = t_right, state_right
-        candidates.append((event_time, event, event_state))
-    if not candidates:
-        return None
-    event_time, event, event_state = min(candidates, key=lambda candidate: candidate[0])
-    return event, event_time, event_state, locator_evaluations
+            candidates.append((event, t_right, state_right))
+    return min(candidates, key=lambda hit: hit[1], default=None), work
 
 
 def simulate_hybrid(
@@ -316,11 +344,12 @@ def simulate_hybrid(
             t_left: float, state_left: Vector, t_right: float, state_right: Vector,
             *, active_mode: HybridMode = mode,
         ) -> bool:
-            nonlocal located
-            located = _step_event(
+            nonlocal located, evaluations
+            located, work = _step_event(
                 active_mode, t_left, state_left, t_right, state_right,
                 tolerance, localize_events,
             )
+            evaluations += work
             return located is not None
 
         problem = InitialValueProblem(
@@ -354,8 +383,7 @@ def simulate_hybrid(
 
         if len(records) >= max_events:
             raise IntegrationError("hybrid simulation exceeded max_events")
-        event, event_time, state_before, locator_evaluations = located
-        evaluations += locator_evaluations
+        event, event_time, state_before = located
         times.extend(segment.times[1:-1])
         states.extend(segment.states[1:-1])
         trajectory_modes.extend([current_mode] * (len(segment.times) - 2))

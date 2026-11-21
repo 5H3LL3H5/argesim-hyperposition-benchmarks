@@ -33,6 +33,8 @@ All quantized methods use `quantum`, scalar or one value per state.
 The quantizer accumulates elapsed time from the start of each solve.
 Result timestamps, RHS evaluations, Jacobians and hybrid guards use the problem's absolute clock. The time-origin regressions compare work counts and state values for the same autonomous problem at zero and at a large offset. [Clock tests](tests/test_runtime.py)
 
+The [comparison study](docs/SOLVER_COMPARISON.md) reports accuracy and cost by case. The [methods appendix](docs/SOLVER_METHODS.md) also describes the optional residual-form IDAS interface.
+
 ## Jacobian contract
 
 LIQSS, eLIQSS, CheQSS and mLIQSS accept a `jacobian(time, state)` callback returning a square matrix of numeric partial derivatives in state order.
