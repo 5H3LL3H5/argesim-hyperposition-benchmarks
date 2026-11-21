@@ -147,6 +147,7 @@ from .pde import heat_1d_ivp, heat_sine_exact, heat_sine_initial, wave_1d_ivp
 from .runtime import merge_integration_results, normalise_solver_name, solve_ivp
 from .solvers import (
     Jacobian,
+    bqss1,
     cheqss,
     cheqss1,
     cheqss2,
@@ -254,6 +255,7 @@ __all__ = [
     "ValidationEvidence",
     "WorkEvidence",
     "benchmark_ordered_map",
+    "bqss1",
     "c01_problem",
     "c01_rhs",
     "c01_steady_state",

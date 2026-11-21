@@ -160,30 +160,35 @@ def _locate_event(
     t_right: float,
     state_right: Vector,
     tolerance: float,
+    *, linear: bool,
 ) -> tuple[float, Vector] | None:
     span = t_right - t_left
-    left_derivative = tuple(float(value) for value in mode.rhs(t_left, state_left))
-    right_derivative = tuple(float(value) for value in mode.rhs(t_right, state_right))
-    if (
-        len(left_derivative) != len(state_left)
-        or len(right_derivative) != len(state_right)
-        or any(
-            not math.isfinite(value)
-            for values in (left_derivative, right_derivative)
-            for value in values
-        )
-    ):
-        raise IntegrationError("hybrid RHS returned an invalid event derivative")
+    if linear:
+        # BQSS can freeze a state even when f(x) is nonzero. Its accepted
+        # flight is affine, including in this equilibrium band.
+        def state_at(fraction: float) -> Vector:
+            return tuple(a + fraction * (b - a) for a, b in zip(state_left, state_right))
+    else:
+        left_derivative = tuple(float(value) for value in mode.rhs(t_left, state_left))
+        right_derivative = tuple(float(value) for value in mode.rhs(t_right, state_right))
+        if (
+            len(left_derivative) != len(state_left)
+            or len(right_derivative) != len(state_right)
+            or any(
+                not math.isfinite(value)
+                for values in (left_derivative, right_derivative)
+                for value in values
+            )
+        ):
+            raise IntegrationError("hybrid RHS returned an invalid event derivative")
+
+        def state_at(fraction: float) -> Vector:
+            return _hermite_interpolate(
+                left_derivative, state_left, right_derivative, state_right, span, fraction,
+            )
 
     def interpolated_guard(fraction: float) -> float:
-        state = _hermite_interpolate(
-            left_derivative,
-            state_left,
-            right_derivative,
-            state_right,
-            span,
-            fraction,
-        )
+        state = state_at(fraction)
         value = float(event.guard(t_left + fraction * span, state))
         if not math.isfinite(value):
             raise IntegrationError(f"event {event.name!r} returned a non-finite guard")
@@ -193,7 +198,7 @@ def _locate_event(
     # This also arms a guard which leaves its reset surface and returns within
     # the same accepted step, without firing again at its left endpoint.
     points = [0.0]
-    if isinstance(event.guard, StateThreshold):
+    if isinstance(event.guard, StateThreshold) and not linear:
         i = event.guard.index
         change = state_right[i] - state_left[i]
         a = span * left_derivative[i]
@@ -224,16 +229,14 @@ def _locate_event(
             fraction = right if abs(after) <= tolerance else brentq(
                 interpolated_guard, left, right, tol=max(1e-14, tolerance),
             )
-            return t_left + fraction * span, _hermite_interpolate(
-                left_derivative, state_left, right_derivative, state_right, span, fraction,
-            )
+            return t_left + fraction * span, state_at(fraction)
         left, before = right, after
     return None
 
 
 def _step_event(
     mode: HybridMode, t_left: float, state_left: Vector, t_right: float,
-    state_right: Vector, tolerance: float, localize_events: bool,
+    state_right: Vector, tolerance: float, localize_events: bool, *, linear: bool,
 ) -> tuple[tuple[StateEvent, float, Vector] | None, int]:
     candidates = []
     work = 0
@@ -245,12 +248,15 @@ def _step_event(
         returning = abs(before) <= tolerance and abs(after) > tolerance and (
             event.direction == 0 or event.direction * after > 0
         )
-        interior = localize_events and (isinstance(event.guard, StateThreshold) or returning)
+        interior = localize_events and (
+            (isinstance(event.guard, StateThreshold) and not linear)
+            or (returning and not isinstance(event.guard, StateThreshold))
+        )
         if not interior and not _crosses(before, after, event.direction, tolerance):
             continue
         if localize_events:
-            found = _locate_event(mode, event, t_left, state_left, t_right, state_right, tolerance)
-            work += 2
+            found = _locate_event(mode, event, t_left, state_left, t_right, state_right, tolerance, linear=linear)
+            work += 0 if linear else 2
             if found is not None:
                 candidates.append((event, *found))
         else:
@@ -347,7 +353,7 @@ def simulate_hybrid(
             nonlocal located, evaluations
             located, work = _step_event(
                 active_mode, t_left, state_left, t_right, state_right,
-                tolerance, localize_events,
+                tolerance, localize_events, linear=solver_name == "bqss1",
             )
             evaluations += work
             return located is not None

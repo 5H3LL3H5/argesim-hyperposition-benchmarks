@@ -18,6 +18,8 @@ from ._clock import _on_elapsed_clock
 def _quantum_vector(
     quantum: float | Sequence[float],
     dimension: int,
+    *,
+    allow_zero: bool = False,
 ) -> tuple[float, ...]:
     if isinstance(quantum, bool):
         raise TypeError("quantum must be a real number or numeric sequence")
@@ -30,9 +32,37 @@ def _quantum_vector(
         values = tuple(float(value) for value in raw_values)
         if len(values) != dimension:
             raise ValueError("quantum dimension does not match the problem")
-    if not all(math.isfinite(value) and value > 0.0 for value in values):
+    if allow_zero:
+        if not all(math.isfinite(value) and value >= 0.0 for value in values):
+            raise ValueError("relative_quantum must be non-negative and finite")
+    elif not all(math.isfinite(value) and value > 0.0 for value in values):
         raise ValueError("all quantum values must be positive and finite")
     return values
+
+
+def _local_quantum(floor: float, fraction: float, state: float) -> float:
+    width = max(floor, fraction * abs(state))
+    if not math.isfinite(width):
+        raise IntegrationError("relative quantization width overflowed")
+    return width
+
+
+def _initial_quanta(
+    problem: InitialValueProblem,
+    quantum: float | Sequence[float],
+    relative_quantum: float | Sequence[float] | None,
+) -> tuple[tuple[float, ...], tuple[float, ...] | None, list[float]]:
+    floors = _quantum_vector(quantum, problem.dimension)
+    relative = None if relative_quantum is None else _quantum_vector(
+        relative_quantum, problem.dimension, allow_zero=True,
+    )
+    if relative is not None and not any(relative):
+        relative = None
+    quanta = list(floors) if relative is None else [
+        _local_quantum(floor, fraction, value)
+        for floor, fraction, value in zip(floors, relative, problem.y0)
+    ]
+    return floors, relative, quanta
 
 
 def _positive_integer(value: int, *, name: str) -> int:
@@ -96,6 +126,7 @@ def qss1(
     problem: InitialValueProblem,
     quantum: float | Sequence[float],
     *,
+    relative_quantum: float | Sequence[float] | None = None,
     max_events: int = 1_000_000,
     simultaneous_tolerance: float = 1e-12,
 ) -> IntegrationResult:
@@ -105,6 +136,8 @@ def qss1(
     events. Every component of ``q`` changes only when ``|x_i-q_i|`` reaches
     its configured quantum. Non-autonomous systems need explicit input-event
     scheduling and are rejected by this reference implementation.
+    With relative_quantum, each component latches
+    max(quantum[i], relative_quantum[i] * abs(x[i])) at its own updates.
     """
 
     if not problem.autonomous:
@@ -116,7 +149,7 @@ def qss1(
     if not math.isfinite(tolerance) or tolerance < 0.0:
         raise ValueError("simultaneous_tolerance must be finite and non-negative")
 
-    quanta = _quantum_vector(quantum, problem.dimension)
+    floors, relative, quanta = _initial_quanta(problem, quantum, relative_quantum)
     t = problem.t0
     x = list(problem.y0)
     q = list(problem.y0)
@@ -159,6 +192,8 @@ def qss1(
             [value + slope * elapsed for value, slope in zip(x, derivative)],
             method="qss1",
         )
+        if relative is not None and t + elapsed == t:
+            raise IntegrationError("qss1 quantum cannot advance the clock")
         t += elapsed
         threshold = tolerance * max(1.0, abs(t), abs(elapsed))
         due = [
@@ -172,8 +207,12 @@ def qss1(
             raise IntegrationError("qss1 exceeded max_events")
         for index in due:
             direction = 1.0 if derivative[index] > 0.0 else -1.0
-            q[index] += direction * quanta[index]
-            x[index] = q[index]
+            if relative is not None and relative[index]:
+                q[index] = x[index]
+                quanta[index] = _local_quantum(floors[index], relative[index], x[index])
+            else:
+                q[index] += direction * quanta[index]
+                x[index] = q[index]
         q = _finite_state(q, method="qss1 quantizer")
         events += len(due)
         if problem._record_step(times, states, t, tuple(x)):
@@ -337,6 +376,7 @@ def qss2(
     problem: InitialValueProblem,
     quantum: float | Sequence[float],
     *,
+    relative_quantum: float | Sequence[float] | None = None,
     max_events: int = 1_000_000,
     simultaneous_tolerance: float = 1e-12,
 ) -> IntegrationResult:
@@ -350,6 +390,8 @@ def qss2(
 
     Since the problem defines a black-box RHS, the second derivative ``x_i''`` is
     estimated using forward finite differences with a scaled step size.
+    With relative_quantum, each component latches
+    max(quantum[i], relative_quantum[i] * abs(x[i])) at its own updates.
     """
 
     if not problem.autonomous:
@@ -361,7 +403,7 @@ def qss2(
     if not math.isfinite(tolerance) or tolerance < 0.0:
         raise ValueError("simultaneous_tolerance must be finite and non-negative")
 
-    quanta = _quantum_vector(quantum, problem.dimension)
+    floors, relative, quanta = _initial_quanta(problem, quantum, relative_quantum)
     t = problem.t0
     x = list(problem.y0)
     q = list(problem.y0)
@@ -467,6 +509,8 @@ def qss2(
             break
         for index in due:
             q[index] = x[index]
+            if relative is not None:
+                quanta[index] = _local_quantum(floors[index], relative[index], x[index])
 
         new_derivative = problem.evaluate(t, q)
         evaluations += 1

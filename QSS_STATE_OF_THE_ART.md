@@ -2,7 +2,7 @@
 
 The numerical methods below are compared with their cited publications.
 The implementation column and event counts describe the Python backends in
-this repository. For an introduction to each of the 18 quantized runtime names, start with the
+this repository. For an introduction to each of the 19 quantized runtime names, start with the
 [solver guide](QSS_SOLVERS.md#how-to-read-a-qss-method-name). The scalar experiment below counts quantizer updates. The [eight-case comparison](docs/SOLVER_COMPARISON.md) separately measures accuracy, physical events and cost on ARGESIM models.
 
 ## Numerical families
@@ -11,7 +11,7 @@ this repository. For an introduction to each of the 18 quantized runtime names, 
 |---|---:|---|---|
 | QSS | 1-3 | explicit asynchronous integration | implemented |
 | QSS4 | 4 | higher-order smooth polynomial sections | implemented as a reference extension |
-| BQSS | 1 | historical backward/stiff QSS precursor | documented; superseded by LIQSS |
+| BQSS | 1 | backward quantized targets for stiff relaxation | `bqss1` implements dense updates with hysteresis and equilibrium holds |
 | LIQSS | 1-3 | stiffness dominated by the Jacobian diagonal | implemented |
 | mLIQSS | 1-2 | mutually coupled stiff state pairs | implemented |
 | mLIQSS3 | 3 | engine-level higher-order pair extension | implemented, explicitly experimental |
@@ -51,6 +51,8 @@ steps, uses linear waveform relaxation at the interface and advances the time
 partition with backward Euler followed by variable-step BDF2. The paper's
 prototype uses LIQSS2 plus CVODE-BDF; this implementation deliberately uses an
 independent dense Python BDF backend and makes no CVODE equivalence claim.
+
+The [selection study](docs/SOLVER_SELECTION.md) compares these methods with fixed and adaptive RK, implicit Radau and BDF. It reports the two logarithmic policies separately from the 19 canonical quantized method names.
 
 ## Implementation details
 
@@ -107,7 +109,7 @@ which it was defined.
 
 | Layer | State of practice | Repository boundary |
 |---|---|---|
-| Error policy | absolute plus state-relative logarithmic quantum | fixed positive scalar/vector quantum; relative policy remains separate work |
+| Error policy | absolute plus state-relative logarithmic quantum | positive scalar/vector floor for all quantizers, optional per-component logarithmic policy on QSS1/QSS2 |
 | Dependency handling | generated incidence matrices and sparse affected-state updates | dense recomputation after every event for reference clarity |
 | Execution | DEVS atomic models or a stand-alone priority scheduler | deterministic stand-alone Python event loop |
 | Hybrid behavior | zero crossings, external events and local resets | provided by the separate reusable hybrid runtime |
