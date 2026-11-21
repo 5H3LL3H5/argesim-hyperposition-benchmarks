@@ -1,0 +1,66 @@
+{
+  "case": "rope",
+  "seed": 2027,
+  "train_validation_test_counts": [
+    96,
+    16,
+    24
+  ],
+  "epochs": 80,
+  "best_epoch": 76,
+  "validation_mean_relative_l2": 0.015169592574238777,
+  "test": {
+    "mean_relative_l2": 0.015376116149127483,
+    "max_relative_l2": 0.04736831411719322
+  },
+  "train_mean_baseline_test": {
+    "mean_relative_l2": 1.0198482275009155,
+    "max_relative_l2": 1.4563945531845093
+  },
+  "canonical": {
+    "65": [
+      {
+        "time_s": 5.0,
+        "fno_relative_l2": 0.030003232150637313,
+        "newmark_relative_l2": 0.025041377271899107,
+        "fno_max_abs_m": 0.0006065058521926327,
+        "newmark_max_abs_m": 0.0008257796086969683
+      },
+      {
+        "time_s": 8.0,
+        "fno_relative_l2": 0.008793057271942906,
+        "newmark_relative_l2": 0.00936691511975873,
+        "fno_max_abs_m": 0.0007834100127220162,
+        "newmark_max_abs_m": 0.0006998736443523876
+      }
+    ],
+    "501": [
+      {
+        "time_s": 5.0,
+        "fno_relative_l2": 0.030008761804051345,
+        "newmark_relative_l2": 0.0037447340366450507,
+        "fno_max_abs_m": 0.0007048577442765221,
+        "newmark_max_abs_m": 0.00021460830633270034
+      },
+      {
+        "time_s": 8.0,
+        "fno_relative_l2": 0.008815599978921899,
+        "newmark_relative_l2": 0.00151943041581138,
+        "fno_max_abs_m": 0.0007622689902782448,
+        "newmark_max_abs_m": 0.0002397061472256684
+      }
+    ]
+  },
+  "seconds": {
+    "data_generation": 0.001504335999925388,
+    "training": 3.3535064050001893,
+    "cpu_inference_test_batch": 0.004339088000051561
+  },
+  "versions": {
+    "python": "3.12.14",
+    "numpy": "2.3.5",
+    "torch": "2.8.0+cpu",
+    "neuraloperator": "2.0.0"
+  },
+  "cpu_threads": 1
+}

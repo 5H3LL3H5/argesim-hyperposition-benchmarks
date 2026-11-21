@@ -1,0 +1,31 @@
+{
+  "casadi": "3.8.2",
+  "duration_s": 0.0005,
+  "samples": 75960,
+  "idas_events": 149,
+  "max_residual": 2.1920876225323127e-10,
+  "comparisons": [
+    {
+      "algebraic": "voltage",
+      "max_abs_i_uc_ud": [
+        9.758176363304505e-11,
+        1.8905091771562188e-10,
+        2.0899674733898532e-09
+      ],
+      "events": 149,
+      "max_switch_time_error_s": 9.822663312613646e-14,
+      "passed": true
+    },
+    {
+      "algebraic": "current",
+      "max_abs_i_uc_ud": [
+        9.758176363304505e-11,
+        1.8912504526867602e-10,
+        2.089692778192709e-09
+      ],
+      "events": 149,
+      "max_switch_time_error_s": 9.822663312613646e-14,
+      "passed": true
+    }
+  ]
+}

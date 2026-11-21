@@ -9,6 +9,7 @@ import base64
 import io
 import re
 import subprocess
+import sys
 from html import escape
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -214,6 +215,9 @@ def main():
     args = parser.parse_args()
     if not re.fullmatch(r"[a-f0-9]{40}", args.revision):
         parser.error("specify a full Git commit SHA")
+    if args.output.resolve() == (DOCS / "ARGESIM_SOLVER_STUDY.pdf").resolve():
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "build_studienbuch.py")], check=True)
+        return
     contents = front_matter() + "".join(chapter(name, args.revision) for name in BOOK)
     page = (
         f"<html lang='de'><head><meta charset='UTF-8'><title>{TITLE} · ARGESIM</title>"
@@ -234,3 +238,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
