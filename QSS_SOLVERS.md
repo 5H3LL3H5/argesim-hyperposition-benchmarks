@@ -1,7 +1,10 @@
 # QSS and LIQSS solver guide
 
-The repository contains independent, dependency-free reference backends for
-the following ODE methods:
+The single dispatcher exposes Euler, RK4 and adaptive RK45 for explicit
+ODEs. Euler and RK4 take a positive fixed `step`. RK45 accepts relative
+and component-wise absolute tolerances. For an autonomous system, the
+following quantized methods are also available. The full BDF partition
+accepts time-dependent inputs. [Dispatcher and accepted options](argesim_benchmarks/runtime.py)
 
 | Runtime name | Quantized polynomial | Intended use |
 |---|---:|---|
@@ -25,19 +28,14 @@ the following ODE methods:
 | `liqss-bdf` | LIQSS2 plus BDF1/2 | mixed state/time discretization with an explicit partition |
 
 All quantized methods use `quantum`, scalar or one value per state.
-`max_events` and `simultaneous_tolerance` have the same meaning across the
-family. QSS3/QSS4 and the implicit variants also accept an absolute
+`max_events` limits quantized updates and `simultaneous_tolerance` controls grouping of nearly simultaneous events. LIQSS-BDF also has a `max_steps` budget for its time-stepped partition. QSS3/QSS4 and the implicit variants also accept an absolute
 `derivative_step` override for their right-hand-side Taylor stencil.
 The quantizer accumulates elapsed time from the start of each solve.
-Result timestamps and model callbacks use the problem's absolute clock.
+Result timestamps, RHS evaluations, Jacobians and hybrid guards use the problem's absolute clock. The time-origin regressions compare work counts and state values for the same autonomous problem at zero and at a large offset. [Clock tests](tests/test_runtime.py)
 
 ## Jacobian contract
 
-LIQSS, eLIQSS, CheQSS and mLIQSS accept
-
-```python
-jacobian(time, state) -> square numeric matrix
-```
+LIQSS, eLIQSS, CheQSS and mLIQSS accept a `jacobian(time, state)` callback returning a square matrix of numeric partial derivatives in state order.
 
 If it is omitted, the solver constructs a dense centered finite-difference
 Jacobian. `jacobian_step` is the positive relative perturbation used by that
@@ -65,15 +63,13 @@ result = mliqss2(
 The dispatcher accepts the same methods. `eqss`, `eqss1`, `eqss2` and `eqss3`
 are compatibility spellings for the canonical `eliqss*` names used by the
 paper. `liqss_bdf` and `liqssbdf` normalize to `liqss-bdf`. When a model
-already supplies only a `qss2` default quantum, CQSS, QSS3/QSS4 and every
-LIQSS family inherit that quantum; an explicit method-specific default or user
-option still wins.
+has no method-specific defaults for a quantized backend, the dispatcher uses the model’s `qss2` defaults, or its `qss1` defaults if `qss2` is absent. Explicit user options take precedence.
 
 ## Numerical definition
 
 Polynomial coefficients are stored in Taylor form around the current event.
 QSS3 and QSS4 estimate the Taylor coefficients of `f(q(t))` with a symmetric
-polynomial stencil, integrate that polynomial once, and find the first exact
+polynomial stencil, integrate that polynomial once, and numerically locate the first positive
 real root of `x_i(t) - q_i(t) = +/- quantum_i`. Root isolation recursively
 partitions the interval at derivative roots, so tangential roots are retained.
 
@@ -148,41 +144,34 @@ result = liqss_bdf(
 )
 ```
 
-With `bdf_partition=None`, every state uses BDF. That is the only deterministic
-automatic choice available to a plain IVP with no event/dependency metadata,
-and it also permits a non-autonomous right-hand side. A partial partition
-requires `problem.autonomous=True`; known external switches belong in explicit
-segments. The implementation uses its own dense BDF1/2 reference backend,
-not CVODE. `rtol`, scalar/vector `atol`, step bounds, Newton controls and
-interface-iteration controls are all validated dispatcher options.
+With `bdf_partition=None`, every state uses BDF and the right-hand side can
+depend explicitly on time. Any quantized partition requires
+`problem.autonomous=True`. Use separate autonomous segments for known
+switches. The reference backend implements dense BDF1/2 with Newton
+iteration, adjustable step bounds, scalar/vector `atol` and relative
+tolerance. [Mixed-mode solver](argesim_benchmarks/solvers/mixed_qss.py)
 
 ## CIFASIS engine assessment
 
-[`CIFASIS/qss-solver`](https://github.com/CIFASIS/qss-solver/tree/qss-solver-dev)
-is useful as a standalone production engine and as an independent behavioral
-oracle. It includes generated model callbacks, dependency graphs, schedulers,
-event handlers and native QSS/LIQSS quantizers. It is not a drop-in replacement
-for this repository's Python `rhs(time, state)` contract: embedding its core
-would also require its generated-model ABI and a substantial native toolchain.
-
-The CIFASIS project is distributed under
-[`GPL-3.0-or-later`](https://github.com/CIFASIS/qss-solver/blob/qss-solver-dev/LICENSE).
-No CIFASIS source is copied or linked here. The implementation in this
-repository was derived from the published numerical definitions and retains a
-separate Python architecture. A future optional subprocess adapter can remain
-an explicit integration boundary if cross-engine validation is needed.
+The repository ships an optional subprocess adapter for the pinned CIFASIS
+engine. It translates a scalar linear-decay request into micro-Modelica and
+runs the native QSS1 or QSS2 method. The archived pilot checks the analytic
+solution at every emitted sample and reports endpoint coverage separately.
+The native pilot and the Python solver examples have different input
+contracts. [Installation and protocol](docs/CIFASIS_ORACLE.md) ·
+[Native results](docs/evidence/cifasis-linear-decay-20260928.json)
 
 Primary algorithm references:
 
 - G. Migoni et al., [Linearly implicit quantization-based integration methods
-  for stiff ordinary differential equations](https://people.inf.ethz.ch/cellier/Pubs/Sim/simpat_13b.pdf).
+  for stiff ordinary differential equations](https://people.inf.ethz.ch/fcellier/Pubs/Sim/simpat_13b.pdf).
 - F. Di Pietro et al., [Improving Linearly Implicit Quantized State System
   Methods](https://www.fceia.unr.edu.ar/~kofman/files/liqss_imp_v2.pdf).
 - M. Bergonzi et al., [On General Linearly Implicit Quantized State System
   Methods](https://doi.org/10.1007/s40314-026-03858-3) (2026).
-- M. Bortolotto et al., [Integration by Quantization in Hamiltonian Systems
-  (CQSS)](https://usuarios.fceia.unr.edu.ar/~kofman/files/CQSS.pdf).
-- M. Di Pietro et al., [Mixed-Mode State-Time Discretization in ODE Numerical
+- M. Bortolotto et al., [Métodos de integración por cuantificación en sistemas
+  hamiltonianos (CQSS)](https://usuarios.fceia.unr.edu.ar/~kofman/files/lsd0802.pdf).
+- F. Di Pietro et al., [Mixed-Mode State-Time Discretization in ODE Numerical
   Integration](https://fceia.unr.edu.ar/~kofman/files/mixed_mode_v5.pdf).
 
 See [QSS_STATE_OF_THE_ART.md](QSS_STATE_OF_THE_ART.md) for the dated variant
@@ -210,9 +199,12 @@ positive finite absolute tolerance per state component. `rtol` remains scalar.
 The same options work through `solve_ivp`:
 
 ```python
+from argesim_benchmarks import InitialValueProblem, solve_ivp
+
+problem = InitialValueProblem(lambda t, x: (-x[0], t - x[1]), 0.0, (1.0, 0.0), 1.0)
 result = solve_ivp(problem, "rk45", options={
     "rtol": 1e-8, "atol": (1e-6, 1e-12),
-})  # for a two-state problem
+})
 ```
 
 A clipped final step may be shorter than `min_step` and still undergoes local

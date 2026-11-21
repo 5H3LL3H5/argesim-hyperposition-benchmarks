@@ -1,34 +1,10 @@
-# C02, C18 and C20 corrective follow-up
+# C18 numerical verification and C20 production study, 2026-11-20
 
-This follow-up starts from merged main commit
-`be8746ef67380fe930c6896374bca8066c9b2b94`. It fixes additional reproducible
-implementation defects and expands the verification evidence. It does not
-declare the three benchmark families fully validated.
-
-## C02 routing and simultaneous arrivals
-
-Initially empty pallets now bypass assembly stations until A1 loads them.
-A2 is permitted only before or after the whole A3/A4/A5 group; it cannot
-interrupt a partially completed group. Admission now reserves a branch slot
-when the router makes its decision, before the next DEVS microstep delivers
-the message. Multiple arrivals therefore cannot all claim the same slot.
-
-These are corrections to the existing partial model. Finite B1 blocking,
-zero-storage shifter footprints, adjacent Sy/Sx handoffs and physical
-deadlock detection remain incomplete. The registered model continues to
-reject 50/60-pallet cases and reports `deadlock: null` for lower loads.
-The existing ten-pallet reference failure remains explicit; its 6% threshold
-has not been widened. The spatial research candidate remains unregistered.
-
-Reference comparisons also need a matched controller and timing convention.
-The 2011 SimEvents solution routes to the first eligible branch with room.
-The registered abstraction uses load balancing among A2 stations and an A6
-preference heuristic. The 2024 Warteschlangensimulator paper uses such
-heuristics but models B1 as unbounded delay stations and measures six hours
-after warm-up, whereas the original task measures eight hours after warm-up.
-Neither paper's aggregate table by itself certifies full physical conformance
-of this repository's abstraction. No travel time, processing time or reference
-tolerance was tuned to force a match.
+The November 20 follow-up to `be8746ef` recorded independent C18 estimator
+checks and a C20 production and transport replay study. Its C02 routing work
+used the earlier partial plant. The current finite-conveyor study covers loads
+1–60 and documents the three remaining default SimEvents discrepancies.
+[C02 reference and reproduction](C02_IMPLEMENTATION.md)
 
 ## C18 numerical identification
 
@@ -71,9 +47,7 @@ study runs several books, records their byte-identical input hashes across
 replications, and calculates Task B from pooled individual-order observations.
 Per-replication medians remain a separate statistic.
 
-The timing harness in `benchmarks/benchmark_argesim_c20.py` now calls the
-registered physical production model. It previously used the old five-second
-transport demonstration and an obsolete processing-time call signature.
+The timing harness uses the registered physical production model. [Timing script](../benchmarks/benchmark_argesim_c20.py)
 
 Transport now visits occupied/requested tracks instead of scanning the entire
 layout on every event. Layout order is retained for simultaneous events.
@@ -127,35 +101,21 @@ rush/due-date dispatch with a 30-part WIP bound. Its numerical table is
 therefore not an exact acceptance oracle for this controller.
 
 The study's recorded source hashes identify the code in commit
-`48dc0b2499ea2a6e45a9298999c1ee2c93063a39`. The subsequent checkpoint-runtime
-guard changes metadata and cache acceptance only; model, replay and statistical
-calculations are unchanged. Numerical result hashes can be reproduced with
-the current runner even though its report/checkpoint fingerprint changes.
+`48dc0b2499ea2a6e45a9298999c1ee2c93063a39`.
 
-## Repository verification
+## Reuse of the recorded evidence
 
-The Python 3.12.14 full suite completed 387 tests: 386 passed and the known C02
-ten-pallet comparison remained an expected failure. The additional checkpoint
-regression passed separately and covers reuse plus rejection after source,
-input or Python-version changes. All 74 smoke tasks passed; smoke is execution
-coverage, not an external scientific oracle. Compile, Ruff, generated status
-checks and whitespace checks also passed. The optional LAPACK probe passed
-6/6 cases with a maximum coefficient difference of `4.663e-15`.
+The November 20 LAPACK comparison checks the ARX estimator. The current C18
+demo uses 2,000 figure-derived samples per signal and output-feedback training.
+Its held-out results and missing official recordings are documented separately.
+[C18 figure study](C18_FIGURE_RECONSTRUCTION.md)
 
-[PR #62](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/pull/62)
-contains the Python 3.10–3.13 CI checks for the final proposed source.
-
-## Remaining completion criteria
-
-| Family | Remaining requirement |
-|---|---|
-| C02 | Complete finite transport and zero-storage shifter model; matched controller/initial-state experiments including 60 pallets. |
-| C18 | Recover both authentic measured data sets and run the identification/validation experiment on them. |
-| C20 | Independent verification of full geometry and workstation semantics, plus comparable external experiments with matched books and controller. |
-
-Catalog statuses remain unchanged: C02/C18 `specified`, C20 `implemented`.
-The numerical and trace checks do not promote whole families to `validated`
-or `benchmark-ready`.
+The C20 report pins the five production, layout, flow, model and replay source
+files plus the study driver. The five model/replay hashes match the reviewed
+implementation. The driver fingerprint differs after checkpoint validation
+was tightened. Compare protocol, per-run metrics and result hashes when
+reproducing the experiment. [Study driver](../scripts/c20_experiment.py) ·
+[Archived protocol and results](C20_EXPERIMENT_20261120.json)
 
 ## Primary references
 

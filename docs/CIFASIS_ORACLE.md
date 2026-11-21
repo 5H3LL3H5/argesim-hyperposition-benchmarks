@@ -1,9 +1,6 @@
 # Optional CIFASIS/qss-solver oracle boundary
 
-The CIFASIS integration is an optional, process-isolated cross-check.  It does
-not import, copy or link CIFASIS source code.  A successful run is an external
-execution observation; it is neither an independent validation by itself nor
-a reason to promote an ARGESIM evidence gate.
+The optional CIFASIS integration runs the external engine in a separate process. Its scalar-decay pilot compares emitted samples with the analytic solution. ARGESIM family validation uses the case-specific references in the [comparison report](PUBLISHED_REFERENCE_CHECKS.md).
 
 The initially qualified engine revision is the `qss-solver-dev` commit
 `4d53893958048273cb2dfd6fbd6e736f9dd0bbca`.  A different revision produces
@@ -15,7 +12,7 @@ recorded.
 
 `qss-solver` does not expose one stable generic command for arbitrary ARGESIM
 models.  Therefore the suite calls a separate adapter executable.  The
-repository now ships `argesim-cifasis-oracle`, a deliberately narrow native
+repository ships `argesim-cifasis-oracle`, a deliberately narrow native
 adapter for the analytic scalar linear-decay pilot.  It owns deterministic
 micro-Modelica generation and the native CIFASIS build/run details without
 copying, importing or linking CIFASIS code.  It must not be silently replaced
@@ -58,7 +55,7 @@ ADAPTER --argesim-oracle-run REQUEST.json --output DRIVER-RESULT.json
 
 `REQUEST.json` must be a finite canonicalizable JSON object containing at
 least `model` and `method`.  The adapter must create a JSON object at the exact
-output path and return zero.  The native pilot rejects unknown fields and raw
+output path and return zero for a successful execution.  The native pilot rejects unknown fields and raw
 model source.  Its accepted request is exemplified by
 `examples/cifasis-linear-decay-qss2.json`; model-specific schemas and
 numerical comparison tolerances for ARGESIM benchmarks belong to later,
@@ -75,7 +72,7 @@ Configure an adapter using `--executable`, or set
 `ARGESIM_CIFASIS_ORACLE` to an argv string.  If neither is configured, the
 suite looks for `argesim-cifasis-oracle` on `PATH`.
 
-The native adapter requires two separate locations:
+Install the suite with `python -m pip install -e .` from the repository root to place both console commands on the active environment’s PATH. The native adapter needs two locations.
 
 - `ARGESIM_CIFASIS_SOURCE`: a clean Git checkout used to establish the exact
   engine commit;
@@ -105,7 +102,7 @@ an Ubuntu 24.04-compatible x86_64 environment on 2026-09-28. Both pilot methods
 then completed through the public oracle boundary. QSS1 emitted 10,001 samples
 and had a maximum scaled analytic error of 0.499; QSS2 emitted 72 samples and
 had a maximum scaled error of 0.333. Both stayed within the requested tolerance
-at every emitted sample. QSS1 emitted the terminal point; QSS2's last emitted
+at every emitted sample. QSS1's last sample was within the terminal-time tolerance. QSS2's last emitted
 point was `0.9970234151851755`, leaving a terminal gap of about `0.00298`.
 These are integration and analytic pilot results, not ARGESIM benchmark
 qualification or performance claims. The concise machine-readable record is
@@ -175,20 +172,20 @@ those measurements is qualified.
 
 ## Artifacts and provenance
 
-A run is assembled in a private sibling directory and atomically renamed to a
-new output directory.  Existing output is never overwritten.  The bundle
-contains:
+An unavailable engine, wrong revision or unsupported method returns a status
+before creating an output directory. Once adapter execution begins, the runner
+assembles the bundle in a private sibling directory and publishes it to the
+requested new path. Each published bundle contains the canonical
+`request.json`, bounded `stdout.txt` and `stderr.txt`, normalized
+`oracle-result.json` and a `manifest.json` with SHA-256 digests of the other
+files. A successful driver supplies `driver-result.json`. A driver that
+exits early may leave diagnostics without that file. [Oracle runner](../argesim_benchmarks/oracles/cifasis.py)
 
-- `request.json`: canonical input;
-- `driver-result.json`: the adapter's unmodified JSON result;
-- `stdout.txt` and `stderr.txt`: bounded diagnostic streams;
-- `oracle-result.json`: normalized status, process evidence and provenance;
-- `manifest.json`: SHA-256 digest of every other artifact.
-
-Provenance includes the request and model hashes, the observed and expected
-CIFASIS commits, the ARGESIM commit when the tree is clean or explicitly
-verified through `ARGESIM_GIT_SHA`, and a secret-free Python/platform summary.
-No environment-variable dump is recorded.
+The provenance records the request and model hashes, the expected and observed
+engine commits when available, and a Python/platform summary. For the suite
+commit, this adapter accepts a caller-supplied 40-character lowercase hex
+`ARGESIM_GIT_SHA`, or tries Git from the package location. For installed
+copies, use the verified source commit when relying on this field.
 
 The configured adapter is executable code running with the current user's
 permissions. Process isolation is an integration and licensing boundary, not

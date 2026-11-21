@@ -1,13 +1,10 @@
-# Transport and data corrections, 2026-11-19
+# C20 transport and C18 input-data review, 2026-11-19
 
-C20 now uses a causal conveyor network transcribed from Figures 4–5 and the
-machine positions in Table 1. C18 no longer silently substitutes digitized
-figures for missing measurements. C02 has an isolated spatial candidate;
-its incomplete shifter semantics prevent promotion or replacing the registered
-model.
-
-The catalog contains **18 implemented, four narrowly validated and two
-specified families (C02 and C18)**. None is benchmark-ready.
+This record describes the conveyor layout, controller and input contract
+introduced in the November 19 review. Its hashes and numerical results
+identify that revision. The subsequent C20 study exercised all 12 scenarios
+with three order books. [November 19 evidence](BENCHMARK_TRANSPORT_DATA_20261119.json) ·
+[Full C20 study](ARGESIM_CLOSURE_20261120.md#c20-fixed-book-experiment-and-replay)
 
 ## C20 model and task corrections
 
@@ -71,15 +68,14 @@ All 12 OSc/PSc combinations completed 100 orders with seed 20. A full
 median order throughput was 178402.243297098 s. These are observations of
 the declared controller, not published reference values.
 
-The all-scenario experiment requires at least ten replications; smoke coverage
-exercises its 120 small runs. The full **12 x 10 x 5,000 experiment and an
-independent aggregate-output validation have not been performed**.
-C20 reaches `implemented`, not `validated`.
+The later study completed 360 definition-sized runs with three generated
+books. The physical model remains at `implemented` pending a comparison
+with matched external inputs and controller rules. [Study results](C20_EXPERIMENT_20261120.json)
 
 ## C18 explicit data contract
 
-`run_c18_tasks()` now fails for missing inputs. Supply both training and
-validation datasets or CSV paths, or explicitly select `use_digitized=True`.
+Supply both training and validation datasets or CSV paths to `run_c18_tasks`,
+or explicitly select `use_digitized=True`.
 A single supplied dataset is never combined with a default substitute.
 Sampling rates must match; digitized and supplied source kinds cannot be
 mixed. Data values are copied into immutable tuples.
@@ -91,8 +87,8 @@ both datasets' provenance, sample counts/rates, signal hashes and file hashes.
 Checksums establish identity, not original ARGESIM-data authenticity.
 
 ```sh
-argesim run C18 all --kwargs-json '{"training":"training.csv","validation":"validation.csv"}'
-argesim run C18 all --kwargs-json '{"use_digitized":true,"epochs":2}'
+python -m argesim_benchmarks run C18 all --kwargs-json '{"training":"training.csv","validation":"validation.csv"}'
+python -m argesim_benchmarks run C18 all --kwargs-json '{"use_digitized":true,"epochs":2}'
 ```
 
 Smoke explicitly uses the reconstruction demo. The definition profile reports
@@ -100,28 +96,12 @@ the missing-data error. The original 100 Hz training/validation files were
 not recovered from the checked active ARGESIM/SNE pages. That remains the
 blocker for the original experiment.
 
-## C02 research boundary
+## C02 prototype
 
-The spatial candidate adds finite queues and reserved transfers; six full
-runs include 50/60 pallets and preserve the asserted spacing/storage bounds.
-It still fails the full zero-storage shifter requirement and differs from the
-published results. It is isolated under `experiments`, unregistered and not
-promoted. [C02_IMPLEMENTATION.md](../C02_IMPLEMENTATION.md) replaces obsolete
-completeness/deadlock claims with the measured results and acceptance gaps.
-No reference tolerance was relaxed.
+The separate spatial C02 prototype and its six-run evidence belong to this
+dated snapshot. The registered C02 solver now uses finite storage, shifter
+reservations and physical deadlock detection. [Current C02 implementation](C02_IMPLEMENTATION.md)
 
-## Verification
-
-CPython 3.12.14 completed 361 unit tests: 360 passed and one existing expected
-C02 reference failure. All 74 smoke tasks across 24 families passed. Ruff
-0.17.5, compile, generated-status, whitespace and dependency-free checks passed.
-The C18 definition profile without measurements failed as intended.
-
-Final checks, individual scenario results and source/log SHA-256 hashes are
-recorded in [BENCHMARK_TRANSPORT_DATA_20261119.json](BENCHMARK_TRANSPORT_DATA_20261119.json).
-Earlier reports remain historical; this report supersedes their C20 transport
-status and C18 default-data behaviour.
-
-Sources: [C20 definition](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_21_34/articles/sne.21.34.10097.bn20.OA.pdf),
+[C20 definition](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_21_34/articles/sne.21.34.10097.bn20.OA.pdf),
 [C18 definition](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-definition.pdf),
 [C02 definition and clarifications](https://www.sne-journal.org/benchmarks/c02).
