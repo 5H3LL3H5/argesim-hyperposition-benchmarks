@@ -2,8 +2,8 @@
 
 The numerical methods below are compared with their cited publications.
 The implementation column and event counts describe the Python backends in
-this repository. For accepted option names and runnable examples, see the
-[solver guide](QSS_SOLVERS.md).
+this repository. For an introduction to each of the 18 quantized runtime names, start with the
+[solver guide](QSS_SOLVERS.md#how-to-read-a-qss-method-name). The scalar experiment below counts quantizer updates. The [eight-case comparison](docs/SOLVER_COMPARISON.md) separately measures accuracy, physical events and cost on ARGESIM models.
 
 ## Numerical families
 

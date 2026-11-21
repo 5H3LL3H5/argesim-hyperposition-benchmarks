@@ -97,7 +97,7 @@ Switch-time differences compare interpolated numerical outputs. The dense sampli
 
 The earlier 399 configurations at commit `8332be4d` cover C01-A, C15-A, C17R-ODE, C21-ball, damped and undamped CP1 oscillators, and a three-node CP2 rope. Its eight-second budget and denser trajectory checks differ from this extension. The two datasets together cover **13 distinct families**. C21 appears in both. C19R still needs an experiment that varies the spatial grid separately from the time solver. C02, C04, C06, C08, C10, C14, C16, C18, C20 and C22 primarily involve discrete events, sampled recurrences, agents or identification. Their registered main tasks have no common continuous integrator to exchange. All 24 families have a status in the [coverage catalog](../ARGESIM_COVERAGE.md).
 
-To reproduce the extension on POSIX, run from the repository root. The recorded environment used CPython 3.12.14, NumPy 2.3.5, SciPy 1.17.0 and CasADi 3.8.2 on a Linux x86-64 Xeon Platinum 8573C. Set one BLAS thread. Compare scores, event counts and work counters before wall times.
+The [archived study revision](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/tree/9cded884d121c8cb78a55f332ba7bf61a66875ec) contains the solver code, executable protocol and measured CSV together. To reproduce the extension on POSIX, check out that revision and run from the repository root. The recorded environment used CPython 3.12.14, NumPy 2.3.5, SciPy 1.17.0 and CasADi 3.8.2 on a Linux x86-64 Xeon Platinum 8573C. Set one BLAS thread. Compare scores, event counts and work counters before wall times.
 
 ```sh
 python -m pip install '.[dae]' numpy scipy

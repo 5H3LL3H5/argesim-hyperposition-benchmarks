@@ -1,31 +1,61 @@
 # QSS and LIQSS solver guide
 
-The single dispatcher exposes Euler, RK4 and adaptive RK45 for explicit
-ODEs. Euler and RK4 take a positive fixed `step`. RK45 accepts relative
-and component-wise absolute tolerances. For an autonomous system, the
-following quantized methods are also available. The full BDF partition
-accepts time-dependent inputs. [Dispatcher and accepted options](argesim_benchmarks/runtime.py)
+## How to read a QSS method name
 
-| Runtime name | Quantized polynomial | Intended use |
-|---|---:|---|
-| `qss1` | constant | first-order asynchronous baseline |
-| `qss2` | linear | second-order black-box QSS |
-| `qss3` | quadratic | smooth problems with fewer events |
-| `qss4` | cubic | smooth problems where fourth-order event sections help |
-| `cqss` / `cqss1` | centered constant | suitable Hamiltonian systems; published order one only |
-| `liqss` / `liqss1` | constant | stiffness dominated by Jacobian diagonal entries |
-| `liqss2` | linear | second-order linearly implicit QSS |
-| `liqss3` | quadratic | third-order linearly implicit QSS |
-| `eliqss` / `eliqss1` | constant | extended first-order LIQSS; identical to CheQSS1 |
-| `eliqss2` | linear | extended second-order full-boundary update |
-| `eliqss3` | quadratic | extended third-order full-boundary update |
-| `cheqss` / `cheqss1` | constant | first-order Chebyshev LIQSS; identical to eLIQSS1 |
-| `cheqss2` | linear | second-order minimax difference polynomial |
-| `cheqss3` | quadratic | third-order minimax difference polynomial |
-| `mliqss` / `mliqss1` | constant | mutually coupled stiff state pairs |
-| `mliqss2` | linear | second-order coupled implicit update |
-| `mliqss3` | quadratic | third-order coupled implicit update |
-| `liqss-bdf` | LIQSS2 plus BDF1/2 | mixed state/time discretization with an explicit partition |
+A Quantized State System (QSS) solver keeps two descriptions of each state. For a tank, `x` is the continuously estimated water level and `q` is the level supplied to the flow equation. With QSS1, `q` stays fixed while `x` rises or falls. A change of one quantum triggers an update. A second tank can update at a different time. Higher orders let `q` follow a slope or a curve between updates. A physical event, such as a ball striking the floor, has its own guard and reset. The quantum controls the local state approximation. Accuracy of a predicted impact time needs a separate check.
+
+### Explicit and centered methods
+
+| Runtime name | What the method does | Where the distinction matters |
+|---|---|---|
+| `qss1` | Holds each quantized value constant and advances the continuous state along a straight line. | A tank filling at a constant rate still triggers an update for each quantum of rise. |
+| `qss2` | Carries a value and a slope in the quantized state. A directional derivative estimate gives the continuous path its curvature. | A constant-velocity flight segment can reach the next contact without an intervening quantizer update, as in C12. |
+| `qss3` | Fits a quadratic quantized path and integrates a cubic continuous path. It predicts the next update from the first quantum-boundary root. | A smooth flight can span both ascent and descent in one step. C21 tests that the guard still finds the return to the floor. |
+| `qss4` | Adds a cubic term to the quantized path and a fourth-degree term to the continuous path. | Each update needs more derivative information. Smooth sections can repay that cost, while frequent resets shorten them. |
+| `cqss1` / `cqss` | Supplies the centre of the cell containing the continuous state. Crossing a cell edge selects the adjacent centre immediately. | This memoryless rule has geometric applications to suitable Hamiltonian systems. Repeated reversals at an edge can cause a zero-time cycle. |
+
+### Methods for stiff feedback
+
+In a stiff system a fast relaxation can force many small updates while the observable of interest changes slowly. LIQSS estimates how each state's derivative changes with its own value, using the diagonal of the Jacobian. The modified family (mLIQSS) can also update a pair of states together when they feed back strongly on one another.
+
+| Runtime name | What changes at an update |
+|---|---|
+| `liqss1` / `liqss` | Chooses a constant quantized value using local feedback. If the scalar equilibrium lies within the quantum band, the fast component can settle there until its forcing changes. |
+| `liqss2` | Chooses both value and slope using diagonal feedback. The straight quantized path can track a drifting equilibrium. |
+| `liqss3` | Adds curvature to the quantized path so that the local feedback model can follow smoothly changing forcing over a longer section. |
+| `mliqss1` / `mliqss` | For a selected pair, solves for two constant quantized values together. Each value accounts for the other state's effect at a common future time. |
+| `mliqss2` | Matches future values and slopes for a selected pair. Its four unknowns describe two straight quantized paths. |
+| `mliqss3` | Also matches both curvatures, giving six unknowns for a selected pair. This third-order construction is an experimental repository extension of the published first- and second-order methods. |
+
+### Methods that shape the quantization error
+
+The difference `x − q` can vary across a smooth section while staying inside its local error band. Extended LIQSS (eLIQSS) uses the full predicted interval allowed by its difference polynomial. CheQSS chooses a shifted Chebyshev polynomial to distribute the error across that interval. A change in another component can invalidate either prediction early.
+
+| Runtime name | What changes at an update |
+|---|---|
+| `eliqss1` / `eliqss` | Selects a constant quantized value and allows the linear difference to travel across the band before the next scheduled update. |
+| `eliqss2` | Selects a straight quantized path. Its quadratic difference can reach zero inside the section and return to the boundary at the scheduled update. |
+| `eliqss3` | Selects a quadratic quantized path. Its cubic difference can cross zero inside the section and reach the opposite boundary at the end. |
+| `cheqss1` / `cheqss` | The first-degree Chebyshev difference gives the same constant quantized value and update time as eLIQSS1. The study lists both runtime names. |
+| `cheqss2` | Uses a quadratic Chebyshev difference with a straight quantized path. The error can touch a bound inside the section and turn back without triggering an update. |
+| `cheqss3` | Uses a cubic Chebyshev difference with a quadratic quantized path. Two interior extrema distribute the local error before the planned update. |
+
+### Mixed state and time stepping
+
+**`liqss-bdf`** splits the equations by state index. LIQSS2 advances one group asynchronously. The other takes implicit time steps, starting with backward Euler and continuing with variable-step BDF2. The two groups exchange predicted values and slopes and iterate to agree at their interface. This is useful when a known stiff subsystem can be assigned to the BDF group. With every state in that group the solver also accepts time-dependent inputs. [Partition options and example](#liqss-bdf-mixed-mode)
+
+### Classical and DAE comparisons
+
+| Entry point | How it advances the model |
+|---|---|
+| `euler` | Uses the slope at the start of each fixed time step for all states. The caller chooses a positive step small enough for the dynamics. |
+| `rk4` | Combines four slope evaluations per fixed step. On smooth sections this gives fourth-order accuracy. The caller sets the step size. |
+| `rk45` | Uses two Dormand–Prince approximations from shared stages to estimate error, reject a step if needed and choose the next step size. |
+| `solve_dae` (IDAS) | Accepts a residual linking states, derivatives and algebraic unknowns. Starting from consistent values, IDAS uses implicit BDF steps to satisfy the equations together. The study uses this optional API separately on the regular index-one C21 diode model. |
+
+## Options and interfaces
+
+Pass an autonomous `InitialValueProblem` directly to a quantized method or select its runtime name through `solve_ivp`. The functions can be used independently of the benchmark runner. [Dispatcher and accepted options](argesim_benchmarks/runtime.py)
 
 All quantized methods use `quantum`, scalar or one value per state.
 `max_events` limits quantized updates and `simultaneous_tolerance` controls grouping of nearly simultaneous events. LIQSS-BDF also has a `max_steps` budget for its time-stepped partition. QSS3/QSS4 and the implicit variants also accept an absolute

@@ -1,6 +1,6 @@
 # ARGESIM and NSA-DEVS reference suite
 
-Run the ARGESIM benchmarks, compare selected results with independent references, or study event ordering with the restricted NSA-DEVS scheduler. The Python package includes the model definitions, continuous solvers, discrete-event runtime and experiment runners. Python 3.10 or later is required. The core and its unit tests use the standard library.
+Run the ARGESIM benchmarks, compare selected results with independent references, or study event ordering with the restricted NSA-DEVS scheduler. The Python package includes the model definitions, continuous solvers, discrete-event runtime and experiment runners. Python 3.10 or later is required. The core uses the standard library. Install the optional DAE backend to exercise the IDAS tests.
 
 ## Run from a checkout
 
@@ -32,5 +32,5 @@ The registry exposes 75 tasks across 24 families. Fifteen families have independ
 | Outstanding reference discrepancies and input requirements | [Implementation audit](ARGESIM_AUDIT.md) |
 | Evidence gates, event ordering, performance measurements and provenance | [Benchmark methodology](METHODOLOGY.md) |
 | Quantized solver comparison, event repair and residual DAE results | [Study and raw measurements](docs/SOLVER_COMPARISON.md) · [Method explanations](docs/SOLVER_METHODS.md) |
-| Solver choices, options and examples | [ODE solver guide](QSS_SOLVERS.md) |
+| Introduction to each QSS method, classical baselines and the IDAS interface | [Start with the tank example and method guide](QSS_SOLVERS.md#how-to-read-a-qss-method-name) |
 | Optional native QSS1/QSS2 linear-decay comparison | [CIFASIS adapter](docs/CIFASIS_ORACLE.md) |
