@@ -1,5 +1,7 @@
 # QSS numerical methods and implementation status
 
+The [DEVS history and worked example](docs/QSS_DEVS_HISTORY.md) traces the original formalism, the stand-alone numerical method and the comparison with explicit and implicit RK.
+
 The numerical methods below are compared with their cited publications.
 The implementation column and event counts describe the Python backends in
 this repository. For an introduction to each of the 19 quantized runtime names, start with the

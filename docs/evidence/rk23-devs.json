@@ -1,0 +1,29 @@
+{
+  "source_sha256": "1cfd34742d724c6b2f5685bc369ce6effe0e11d5b78998fe95d36f5557b95cdf",
+  "csv_sha256": "e1df9a6b12ff9404f5ae6aa49082303e076b7262531e8312f68f3736f2150464",
+  "configurations": 138,
+  "profile": "rk23",
+  "seed": 73,
+  "warmups": 1,
+  "repetitions": 3,
+  "timeout_seconds": 2.0,
+  "environment": {
+    "python": "3.12.14",
+    "implementation": "CPython",
+    "os": "Linux",
+    "kernel": "6.18.57",
+    "machine": "x86_64",
+    "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "logical_cpus": 9,
+    "cpu_affinity": [
+      0
+    ],
+    "cpu_governors": null
+  },
+  "numpy": "2.3.5",
+  "scipy": "1.17.0",
+  "threads": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  }
+}

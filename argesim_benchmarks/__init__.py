@@ -162,6 +162,7 @@ from .solvers import (
     eqss1,
     eqss2,
     eqss3,
+    esdirk32,
     euler,
     liqss,
     liqss1,
@@ -178,6 +179,7 @@ from .solvers import (
     qss3,
     qss4,
     rk4,
+    rk23,
     rk45,
 )
 from .solvers.dae import DAEResult, solve_dae
@@ -325,6 +327,7 @@ __all__ = [
     "eqss1",
     "eqss2",
     "eqss3",
+    "esdirk32",
     "euler",
     "heat_1d_ivp",
     "heat_sine_exact",
@@ -350,6 +353,7 @@ __all__ = [
     "render_task_b1_svg",
     "render_task_b2_svg",
     "rk4",
+    "rk23",
     "rk45",
     "run_c04",
     "run_c08_replication",

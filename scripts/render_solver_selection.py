@@ -207,6 +207,109 @@ def decay_figure():
     finish_figure(fig, "qss-decay.svg")
 
 
+def devs_trace_figure():
+    p = InitialValueProblem(
+        lambda t, y: (1.0, 1.0 if y[0] < 0.125 else -0.5),
+        0,
+        (0.0, 0.0),
+        1.4,
+        autonomous=True,
+    )
+    trace = qss1(p, (0.125, 0.25))
+    fig, ax = plt.subplots(figsize=(6.8, 2.55), layout="constrained")
+    ax.plot(
+        trace.times,
+        [s[1] for s in trace.states],
+        color=COLORS[0],
+        label="Continuous state x",
+    )
+    ax.step(
+        [0, 7 / 8, 11 / 8, 1.4],
+        [0, -0.25, -0.5, -0.5],
+        where="post",
+        color=COLORS[2],
+        label="Published value q",
+    )
+    ax.plot(
+        [1 / 8, 1 / 4],
+        [1 / 8, 1 / 4],
+        ls="--",
+        color=COLORS[1],
+        label="Withdrawn forecast",
+    )
+    ax.scatter([1 / 8], [1 / 8], marker="v", color=COLORS[1], s=24)
+    ax.annotate(
+        "Input at 1/8",
+        xy=(1 / 8, 1 / 8),
+        xytext=(0.28, 0.16),
+        arrowprops={"arrowstyle": "-", "color": COLORS[1]},
+        fontsize=8,
+    )
+    ax.scatter([7 / 8, 11 / 8], [-0.25, -0.5], color=COLORS[2], s=22, zorder=4)
+    ax.set(
+        xlabel="Time",
+        ylabel="State or published value",
+        xlim=(0, 1.42),
+        ylim=(-0.57, 0.3),
+    )
+    ax.set_xticks([0, 1 / 8, 3 / 8, 7 / 8, 11 / 8], ["0", "1/8", "3/8", "7/8", "11/8"])
+    ax.legend(loc="upper right", frameon=False, fontsize=8)
+    finish_figure(fig, "qss-devs-trace.svg")
+
+
+def rk23_results():
+    data = DOCS / "evidence/rk23-devs.csv"
+    manifest = json.loads(data.with_suffix(".json").read_text())
+    if hashlib.sha256(data.read_bytes()).hexdigest() != manifest["csv_sha256"]:
+        raise ValueError("RK23 CSV differs from its manifest")
+    with data.open(newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    methods = ("rk23", "esdirk32", "rk45", "Radau", "BDF", "qss2", "eliqss2")
+    cases = (*ANALYTIC, "C05", "C12")
+    keys = {(r["case"], r["method"], r["level"]) for r in rows}
+    expected = {
+        (c, m, str(i))
+        for c in cases
+        for m in methods
+        for i in range(3)
+        if c != "C12" or m in ("rk23", "esdirk32", "rk45", "qss2")
+    }
+    if (
+        keys != expected
+        or len(rows) != len(keys)
+        or manifest["configurations"] != len(rows)
+    ):
+        raise ValueError("incomplete or duplicated RK23 grid")
+    counts = Counter(r["status"] for r in rows)
+    passed = Counter((r["case"], r["method"]) for r in rows if r["status"] == "pass")
+    matrix = table(
+        ("Case", *methods),
+        (
+            (
+                c.title(),
+                *(passed[c, m] if (c, m, "0") in keys else "—" for m in methods),
+            )
+            for c in cases
+        ),
+    )
+    return (
+        f"Of {len(rows)} settings, {counts['pass']} met the target, "
+        f"{counts['accuracy_miss']} finished outside tolerance, "
+        f"{counts['event_mismatch']} returned the wrong event count, "
+        f"{counts['timeout']} reached the time limit and {counts['solver_error']} stopped "
+        "on a solver error or work budget. Cells count passes out of three. A dash means the "
+        "method was outside this case’s grid.\n\n" + matrix
+    )
+
+
+def replace_results(filename, label, replacement):
+    p = DOCS / filename
+    start, end = f"<!-- BEGIN {label} RESULTS -->", f"<!-- END {label} RESULTS -->"
+    before, rest = p.read_text().split(start)
+    _, after = rest.split(end)
+    p.write_text(before + start + "\n" + replacement + "\n" + end + after)
+
+
 def cost_figure(rows):
     fig, ax = plt.subplots(figsize=(6.8, 2.8), layout="constrained")
     for offset, (label, methods), color, marker in zip(
@@ -235,12 +338,8 @@ def cost_figure(rows):
 
 def main():
     rows = rows_and_manifest()
-    p = DOCS / "SOLVER_SELECTION.md"
-    start = "<!-- BEGIN SELECTION RESULTS -->"
-    end = "<!-- END SELECTION RESULTS -->"
-    before, rest = p.read_text().split(start)
-    _, after = rest.split(end)
-    p.write_text(before + start + "\n" + results(rows) + "\n" + end + after)
+    replace_results("SOLVER_SELECTION.md", "SELECTION", results(rows))
+    replace_results("QSS_DEVS_HISTORY.md", "RK23", rk23_results())
     matplotlib.rcParams.update(
         {
             "svg.hashsalt": "argesim-selection",
@@ -252,6 +351,7 @@ def main():
     )
     (DOCS / "figures").mkdir(exist_ok=True)
     decay_figure()
+    devs_trace_figure()
     cost_figure(rows)
 
 

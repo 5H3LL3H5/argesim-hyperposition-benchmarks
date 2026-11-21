@@ -9,6 +9,7 @@ from dataclasses import dataclass, replace
 
 from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
 from ..runtime import (
+    TIME_STEPPERS,
     merge_integration_results,
     normalise_solver_name,
     solve_ivp,
@@ -198,7 +199,7 @@ def solve_c03(
 ) -> IntegrationResult:
     """Solve C03 with event-aligned segments at every switch boundary."""
     normalised = normalise_solver_name(method)
-    if parameters.trf and normalised not in {"euler", "rk4", "rk45"}:
+    if parameters.trf and normalised not in TIME_STEPPERS:
         raise ValueError(f"unsupported C03 solver: {method}")
     if not math.isfinite(t_bound) or t_bound <= 0.0:
         raise ValueError("t_bound must be positive and finite")

@@ -14,6 +14,7 @@ from dataclasses import dataclass
 
 from ..ivp import InitialValueProblem, IntegrationError, IntegrationResult, Rhs
 from ..runtime import (
+    TIME_STEPPERS,
     merge_integration_results,
     merge_solver_options,
     normalise_solver_name,
@@ -398,7 +399,7 @@ def solve_c19(
     )
     defaults = {"rk45": {"max_step": max_step_value}}
     method = normalise_solver_name(method)
-    if facility_mode != "schedule" or method not in {"rk45", "rk4", "euler"}:
+    if facility_mode != "schedule" or method not in TIME_STEPPERS:
         return solve_ivp(problem, method, options=options, defaults=defaults)
 
     # Freeze the forcing on each side so even RK stages at a switch use the

@@ -43,6 +43,21 @@ class SelectionProtocolTests(unittest.TestCase):
                 ):
                     self.assertLessEqual(abs(value - exact), limit)
 
+    def test_native_stiff_pair_recovers_three_c05_switches_and_terminal_states(self):
+        case = self.selection.study.switches()
+        for level in (1, 2):
+            opts = self.selection.configure(case, "esdirk32", level)
+            result, samples = case.run("esdirk32", opts)
+            self.assertEqual(result.final_time, 3.5)
+            self.assertEqual(len(samples), 5)
+            for v, ref, limit in zip(
+                samples, case.expected, case.tolerances, strict=True
+            ):
+                self.assertLessEqual(abs(v - ref), limit)
+        opts = self.selection.configure(case, "rk23", 1)
+        with self.assertRaisesRegex(self.selection.IntegrationError, "max_steps"):
+            case.run("rk23", {**opts, "max_steps": 250})
+
     def test_scoring_rejects_a_nonfinite_later_observable(self):
         base = self.selection.analytic_cases()[0]
 

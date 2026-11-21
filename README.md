@@ -32,6 +32,7 @@ The registry exposes 75 tasks across 24 families. Fifteen families have independ
 | Outstanding reference discrepancies and input requirements | [Implementation audit](ARGESIM_AUDIT.md) |
 | Evidence gates, event ordering, performance measurements and provenance | [Benchmark methodology](METHODOLOGY.md) |
 | When to use QSS, RK4/RK45 or an implicit stiff solver | [Selection guide and experimental results](docs/SOLVER_SELECTION.md) · [Printable report](docs/ARGESIM_SOLVER_STUDY.pdf) |
+| DEVS origins and low-order RK for stiff and nonstiff ODEs | [Event trace, new methods and comparison](docs/QSS_DEVS_HISTORY.md) |
 | Quantized solver comparison, event repair and residual DAE results | [Study and raw measurements](docs/SOLVER_COMPARISON.md) · [Method explanations](docs/SOLVER_METHODS.md) |
 | Introduction to each QSS method, classical baselines and the IDAS interface | [Start with the tank example and method guide](QSS_SOLVERS.md#how-to-read-a-qss-method-name) |
 | Optional native QSS1/QSS2 linear-decay comparison | [CIFASIS adapter](docs/CIFASIS_ORACLE.md) |

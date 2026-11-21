@@ -26,6 +26,7 @@ from .advanced_qss import (
     qss4,
 )
 from .backward_qss import bqss1
+from .embedded23 import esdirk32, rk23
 from .explicit import euler, rk4, rk45
 from .mixed_qss import liqss_bdf, liqssbdf
 from .qss import cqss, cqss1, qss1, qss2
@@ -49,6 +50,7 @@ __all__ = [
     "eqss1",
     "eqss2",
     "eqss3",
+    "esdirk32",
     "euler",
     "liqss",
     "liqss1",
@@ -65,5 +67,6 @@ __all__ = [
     "qss3",
     "qss4",
     "rk4",
+    "rk23",
     "rk45",
 ]

@@ -1,5 +1,7 @@
 # QSS and LIQSS solver guide
 
+The [DEVS history](docs/QSS_DEVS_HISTORY.md) connects state quantization to discrete-event simulation. Its [RK comparison](docs/QSS_DEVS_HISTORY.md#two-embedded-rk-pairs-for-comparison) explains the explicit and stiff 3(2) alternatives.
+
 ## How to read a QSS method name
 
 A Quantized State System (QSS) solver keeps two descriptions of each state. For a tank, `x` is the continuously estimated water level and `q` is the level supplied to the flow equation. With QSS1, `q` stays fixed while `x` rises or falls. A change of one quantum triggers an update. A second tank can update at a different time. Higher orders let `q` follow a slope or a curve between updates. A physical event, such as a ball striking the floor, has its own guard and reset. The quantum controls the local state approximation. Accuracy of a predicted impact time needs a separate check.
