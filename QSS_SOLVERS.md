@@ -164,14 +164,14 @@ contracts. [Installation and protocol](docs/CIFASIS_ORACLE.md) ·
 Primary algorithm references:
 
 - G. Migoni et al., [Linearly implicit quantization-based integration methods
-  for stiff ordinary differential equations](https://people.inf.ethz.ch/cellier/Pubs/Sim/simpat_13b.pdf).
+  for stiff ordinary differential equations](https://people.inf.ethz.ch/fcellier/Pubs/Sim/simpat_13b.pdf).
 - F. Di Pietro et al., [Improving Linearly Implicit Quantized State System
   Methods](https://www.fceia.unr.edu.ar/~kofman/files/liqss_imp_v2.pdf).
 - M. Bergonzi et al., [On General Linearly Implicit Quantized State System
   Methods](https://doi.org/10.1007/s40314-026-03858-3) (2026).
-- M. Bortolotto et al., [Integration by Quantization in Hamiltonian Systems
-  (CQSS)](https://usuarios.fceia.unr.edu.ar/~kofman/files/CQSS.pdf).
-- M. Di Pietro et al., [Mixed-Mode State-Time Discretization in ODE Numerical
+- M. Bortolotto et al., [Métodos de integración por cuantificación en sistemas
+  hamiltonianos (CQSS)](https://usuarios.fceia.unr.edu.ar/~kofman/files/lsd0802.pdf).
+- F. Di Pietro et al., [Mixed-Mode State-Time Discretization in ODE Numerical
   Integration](https://fceia.unr.edu.ar/~kofman/files/mixed_mode_v5.pdf).
 
 See [QSS_STATE_OF_THE_ART.md](QSS_STATE_OF_THE_ART.md) for the dated variant
