@@ -20,6 +20,10 @@
 
 Die vier englischen Fachkapitel der vorangegangenen Studie sind im selben PDF als Anhang enthalten. [DEVS und QSS](../QSS_DEVS_HISTORY.md) · [Solverwahl](../SOLVER_SELECTION.md) · [Methodenkatalog](../SOLVER_METHODS.md) · [Acht ARGESIM-Fälle](../SOLVER_COMPARISON.md)
 
+## Python-Werkstatt
+
+[Modellfunktionen, Lattice-Boltzmann und neuronale Operatoren an CP2](../CP2_NEURAL_OPERATORS.md) verbindet den Heizstab aus der Zeitintegration mit zwei ausführbaren Feldversuchen.
+
 ## Abbildungen und PDF erstellen
 
 Der Satz verwendet Pandoc, WeasyPrint, lxml und Matplotlib. Das Abbildungsskript benötigt auch NumPy. Die SVG-Dateien gehören zum Repository und können direkt für den PDF-Bau verwendet werden. Für die vorliegende Ausgabe wurden WeasyPrint 68.1 und Matplotlib 3.10.8 verwendet.
