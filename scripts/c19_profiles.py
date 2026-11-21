@@ -1,5 +1,6 @@
 """Print C19R task profiles as JSON and independently check homogeneous quadrature with SciPy."""
 
+import argparse
 import bisect
 import json
 import math
@@ -15,6 +16,7 @@ from argesim_benchmarks.models.c19_groundwater import (
     c19_task_a,
     c19_task_b,
     c19_task_c,
+    solve_c19,
 )
 
 DAY = 86400
@@ -48,7 +50,28 @@ def infinite_plane(x: float, y: float, time: float) -> float:
     return mass / (2*math.pi*alpha*thickness*porosity*velocity) * math.exp((x-r)/(2*alpha)) * integral
 
 
+def mesh_study() -> list[dict]:
+    """Compare the same Task A point and domain while varying space or time."""
+    end = 10 * DAY
+    reference = infinite_plane(5, 0, end)
+    rows = []
+    for spacing, step in ((1., 7200.), (.5, 7200.), (.25, 7200.), (.5, 3600.)):
+        nx, ny = round(16 / spacing) + 1, round(8 / spacing) + 1
+        run = solve_c19("rk4", nx=nx, ny=ny, dx=spacing, dy=spacing,
+                        x_offset=-4., y_offset=-4., t_bound=end, options={"step": step})
+        value = run.final_state[round(4 / spacing) * nx + round(9 / spacing)]
+        rows.append({"spacing_m": spacing, "step_s": step, "concentration": value,
+                         "infinite_plane": reference, "absolute_error": abs(value - reference)})
+    return rows
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mesh-study", action="store_true",
+                        help="compare three grids and a halved time step at (5 m, 0), day 10")
+    if parser.parse_args().mesh_study:
+        print(json.dumps(mesh_study(), indent=2, allow_nan=False))
+        return
     spread = c19_task_a(profiles=True)
     for row in spread:
         reference = infinite_plane(50, row["y_m"], row["day"] * DAY)

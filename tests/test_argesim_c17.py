@@ -1,3 +1,5 @@
+import itertools
+import math
 import unittest
 
 from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus
@@ -21,7 +23,45 @@ from argesim_benchmarks.models.c17_sir_epidemic import (
 class C17Tests(unittest.TestCase):
     def test_c17r_catalog_status(self) -> None:
         c17r = next(b for b in BENCHMARKS if b.identifier == "C17R")
-        self.assertEqual(c17r.status, BenchmarkStatus.IMPLEMENTED)
+        self.assertEqual(c17r.status, BenchmarkStatus.VALIDATED)
+
+    def test_default_ode_against_independent_scalar_reference(self):
+        # Eq. 3 gives S(R) = 9500 exp(-4 R / 10000). Only R is integrated
+        # here, with classical RK4 and steps of at most 0.025 time units.
+        def rate(r):
+            return -math.log1p(-0.1) * (10000 - 9500 * math.exp(-0.0004 * r) - r)
+
+        errors = []
+        for method, quantum, limit in (
+            ("rk45", None, 3e-5), ("qss2", 1.0, 1.0),
+            ("qss2", 0.1, 0.1), ("qss2", 0.01, 0.01),
+        ):
+            with self.subTest(method=method, quantum=quantum):
+                options = {} if quantum is None else {"quantum": (quantum,) * 3}
+                result = solve_c17(method, t_bound=100.0, options=options)
+                self.assertEqual((result.times[0], result.times[-1]), (0.0, 100.0))
+                self.assertEqual(len(result.times), len(result.states))
+                r = time = worst = 0.0
+                for target, state in zip(result.times, result.states):
+                    steps = max(1, math.ceil((target - time) / 0.025))
+                    h = (target - time) / steps
+                    for _ in range(steps):
+                        a = rate(r)
+                        b = rate(r + h * a / 2)
+                        c = rate(r + h * b / 2)
+                        d = rate(r + h * c)
+                        r += h * (a + 2 * b + 2 * c + d) / 6
+                    time = target
+                    s = 9500 * math.exp(-0.0004 * r)
+                    expected = (s, 10000 - s - r, r)
+                    self.assertEqual(len(state), 3)
+                    self.assertTrue(all(math.isfinite(v) for v in state))
+                    worst = max(worst, *(abs(v - ref) for v, ref in zip(state, expected)))
+                self.assertLess(worst, limit)
+                if quantum is not None:
+                    errors.append(worst)
+        for coarse, fine in itertools.pairwise(errors):
+            self.assertLess(fine, 0.15 * coarse)
 
     def test_c17_parameters_validation(self) -> None:
         with self.assertRaises(ValueError):

@@ -1,6 +1,6 @@
 # ARGESIM numerical reference checks
 
-The catalog has 24 families. Thirteen reach `validated` for the cases identified below. Ten reach `implemented`. C18 remains at `specified`. A smoke run checks executability. The scientific comparisons use separate published numbers, analytical solutions or independently integrated equations.
+The catalog has 24 families. Fifteen reach `validated` for the cases identified below. Eight reach `implemented`. C18 remains at `specified`. A smoke run checks executability. The scientific comparisons use separate published numbers, analytical solutions or independently integrated equations.
 
 ## Cases with numerical references
 
@@ -13,8 +13,10 @@ The catalog has 24 families. Thirteen reach `validated` for the cases identified
 | C07 | Eight Task A(i) nonlinear pin crossings match published MATLAB column F within 1 ms. An independent event-driven DOP853 calculation covers both Task A initial conditions. [Setinek et al., Table 3](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_31_4/articles/sne.31.4.10589.bne.OA.pdf) |
 | C08 | Five deterministic appendix datasets cover the canal/lock policies. Stochastic replication and interval tests are also present. [Case evidence](../C08_VALIDATION.md) |
 | C12 | The inverse solution gives restitution 0.58740105. For 10,000 samples, the fourth sphere's mean terminal speed is 0.42322 and its standard deviation is 0.04294. Both fall in the intervals published for the Dymola experiment. [Dymola, Task C](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C12/C12-solution-Dymola.pdf) |
+| C13 | Three 2007 linear Task A endpoints at 2000 s agree with independent Cartesian matrix exponentials within 1.68e-8 m. Nonlinear and controlled trajectories remain open. [C13R protocol](C13_REFERENCE_ANALYSIS.md) |
 | C15 | All three Task A numerical bolus masses agree within 0.01 with the Maxima/LISP publication at 1.5, 4 and 240 min. The Task B fit yields a squared residual of 260.80663. The published MATLAB value is 260.8067. Task C runs 1,000 perturbed fits. Different studies report different parameter dispersions. [Maxima/LISP](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C15/C15-solution-Maxima.pdf) · [MATLAB](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C15/C15-solution-MATLAB.pdf) |
 | C16 | The mean restaurant count at the end of year five meets the declared comparison criterion for two independent 50-replication studies. The simulated counts have lower variance. The economic studies use different observation windows. [C16 results](#c16-restaurant-count-and-economic-studies) |
+| C17R | All three default ODE states checked at every stored RK45 and QSS2 sample to time 100. The separate FHP-I comparison uses the published normalized integral. [Results](#c17r-default-ode-and-spatial-comparison) |
 | C21 | Published ball-contact and pendulum stop/kick cases, plus the RLC algebraic residual. [Coverage](../ARGESIM_COVERAGE.md) |
 | C22 | The ten published jockeying records, all four abandonments and the ten deterministic class waiting-time statistics match MatlabGPSS to printed precision. Only customers already waiting at a call can join that service group. Later arrivals wait for another call. STROBOSCOPE reports different class statistics under its queue-filter implementation. [MatlabGPSS, Tables 3, 5, 7](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_29_4/articles/sne.29.4.10496.bn22.OA.pdf) · [STROBOSCOPE, Table 8](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_35_4/articles/sne.35.4.10751.bn22.OA.pdf) |
 | CP1 | Published ten-population endpoint for Task B. Serial/parallel comparisons cover additional workloads. [Coverage](../ARGESIM_COVERAGE.md) |
@@ -40,12 +42,10 @@ Each policy runs 100 independent days of 250 patients, with seeds 0–99. The co
 |---|---|---|
 | C02 | One service-only configuration meets the existing 6% band for both metrics at all 11 CSIM loads. At 25 pallets the full-clock means are 500.68 s here and 499.33 s in CSIM. | The default fails the SimEvents comparisons at 13, 14 and 25 pallets. A fixed seeded variant matches 11 of 12. Its part clock still differs from the published 396 s at 25 pallets. The original SimEvents model and evaluation function were unavailable. [Both tables and clock definitions](../C02_IMPLEMENTATION.md) |
 | C04 | Fork ownership, cleaning, starvation/deadlock cases and seeded per-philosopher accounting. | A matched policy and timing distribution are needed to compare fairness statistics across implementations. |
-| C09 | Published control surfaces, units, disturbance direction and long closed-loop runs. | Output traces with a matched sampled-controller convention are needed for numerical trajectory validation. |
+| C09 | Both input memberships overlap near zero level change. A valve-input replay gives 63.13 cm for I-FC2. Using the independently inferred disturbance gives 42.00 cm for P-FC. | The definition-scale closed loop misses the published peak and post-disturbance plateau. Original FIS and input scaling remain open. [Figure comparisons](C09_FIGURE_CHECKS.md) |
 | C10 | Simultaneous access priority, deadlock termination and the 50-run experiment. | Published stochastic waiting/deadlock distributions have not been matched with the same event and randomization conventions. |
 | C11 | Robot dynamics, control tasks and numerical residual checks. | Published controller trajectories under matching gains, sampling and initial conditions are outstanding. |
-| C13 | Independent plant checks distinguish the 2006 and revised 2007 damping parameters. | Published Task B/C traces for the revised parameters remain outstanding. |
 | C14 | Midnight demand belongs to the new day. The reported sale-triggered Task A ordering rule is selectable alongside literal daily ordering. All three policies have 100-run comparisons. | Reference implementations disagree on Task A ordering and costs. The default and published variants are identified separately. [Results and sources](../C14_VALIDATION.md) |
-| C17R | Aggregate conservation and seeded numerical replay. | Independent matched numeric trajectories remain outstanding. |
 | C18 | Published linear model on the digitized training/validation curves gives 0.95347/0.94231. The recurrent model gives 0.99377/0.92642 on separate muscles. | Neither original recording was located in the publisher archives. The recovered figures support a separate reconstruction experiment. [Data provenance and searches](C18_FIGURE_RECONSTRUCTION.md) |
 | C19R | Table 1 parameters, finite-volume source and sink areas, weekday switching and numerical homogeneous profiles. | The 1 m grid retains measurable spatial error at breakthrough and near the treatment disks. See the numerical comparisons below. |
 | C20 | The archived 360 runs complete 1,800,000 orders. All five model/replay file hashes match the archived experiment. Its checkpoint wrapper subsequently changed. | The original three FlexSim order books and matching reservation controller are required for external production-output parity. [Full protocol and replay](ARGESIM_CLOSURE_20261120.md) |
@@ -98,6 +98,34 @@ is 10,569.96 at `k=0.5`. AnyLogic also selected 0.5 using a five-year revenue
 measure. Java selected 1.0 using weekly revenue. Differences in the revenue
 definition and horizon limit the monetary comparison. [AnyLogic](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C16/C16-solution-AnyLogic.pdf) · [Java](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C16/C16-solution-Java-OO.pdf)
 
+## C17R default ODE and spatial comparison
+
+For the default initial population (9500, 500, 0), the published equations
+give `S = 9500 exp(−0.0004 R)` and `I = 10000 − S − R`. The reference
+integrates only `R` using DOP853. The normal unit suite uses a separate scalar
+RK4 calculation. Both compare all three states at every output time to 100.
+[Definition, Eq. 3 and Tables 3 and 5](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_25_1/articles/sne.25.1.10283.bn17r.OA.pdf)
+
+| Method | State quantum | Stored times | Largest error (individuals) | Acceptance limit |
+|---|---:|---:|---:|---:|
+| RK45 | — | 117 | 2.54e-5 or less | 3e-5 |
+| QSS2 | 1 | 456 | 0.91615 or less | 1 |
+| QSS2 | 0.1 | 1,434 | 0.09288 or less | 0.1 |
+| QSS2 | 0.01 | 4,536 | 0.00920 or less | 0.01 |
+
+For the spatial FHP-I baseline, the same population, periodic boundaries
+and default parameters were run with seeds 0–31. Each run is compared with
+the independent ODE using the trapezoidal integral of the absolute infected-count
+difference divided by 10,000 on days 1–100. Across the 32 seeds the statistic
+ranges from 1.012 to 1.619, with median 1.355. The published MATLAB run gives
+1.4844. Twenty-seven local runs fall below that value and five above. The
+paper reports one stochastic realization. Its value provides a comparison
+for this observable only. Spatial fields and intervention scenarios require
+their own references. [Study, Sections 1–3 and Eq. 4](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_27_1/articles/sne.27.1.10368.bn17.OA.pdf)
+
+`python scripts/c17_reference.py --spatial-replications 32` regenerates the
+[per-state errors and per-seed norms](evidence/c17r-default-reference.json).
+
 ## C19R spatial and time accuracy
 
 
@@ -110,6 +138,15 @@ The Task A profile option also integrates the homogeneous point-source response 
 | Homogeneous infinite-plane numerical integral | 7.60657 | 14,269.43 | 14,269.43 |
 | Printed analytical approximation | 0.02650 | 14,272.99 | 14,272.99 |
 | 1 m finite-volume grid, A | 0.00152 | 14,613.39 | 14,613.39 |
+
+A separate homogeneous refinement study observes (5 m, 0 m) on day 10.
+All grids have centres spanning x = −4…12 m and y = −4…4 m. With RK4 and a
+7200 s step, the concentrations are 48,677.18, 48,251.10 and 45,440.70 mg/m³
+at grid spacings 1, 0.5 and 0.25 m. The independent infinite-plane integral
+gives 45,021.62 mg/m³. Halving only the time step on the 0.5 m grid changes
+the concentration by 0.00233 mg/m³. This comparison quantifies the spatial
+error at one interior point. The treatment disks and the breakthrough profile
+at 50 m are separate cases. Run `python scripts/c19_profiles.py --mesh-study`.
 
 COMSOL Figure 2 shows a day-50 peak near 7.6. Figure 6 shows roughly 5,200 mg/m³ for continuous treatment and a weekly oscillation around 7,300 mg/m³. The 1 m grid gives 5,564 mg/m³ for continuous treatment at day 100. The scheduled calculation spans 7,578–7,938 mg/m³ over the preceding week. Values read from the figures are approximate. [COMSOL study, p. 80](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C19/C19R-solution-COMSOL.pdf)
 

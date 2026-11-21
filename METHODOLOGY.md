@@ -185,16 +185,21 @@ timings as official benchmark results.
 - C05 checks the published event counts and switch times for the default and
   Task D cases. An independent high-precision calculation checks the decimal
   precision study. [Reference comparisons](docs/PUBLISHED_REFERENCE_CHECKS.md)
-- C09 implements the stable `change-level` FIS signal shown in the published
-  Simulink solution and retains the contradictory literal printed error
-  difference as an explicit alternative. The qualitative reference behaviour
-  is tested without inventing numeric curve samples.
+- C09 reports the I-FC2 peak and two P-FC plateaus in fixed windows with a
+  ±1 cm tolerance. The `change-level` interpretation and the printed error
+  difference are selectable. An independent valve-trace replay checks the
+  plant response. [C09 figures and disturbance](docs/C09_FIGURE_CHECKS.md)
+- C13R compares the three revised linear Task A load positions at 2000 s
+  with an independent Cartesian matrix exponential. The bound is 1e-5 m.
+  Task B and C have separate sampled brake tests. [C13R protocol](docs/C13_REFERENCE_ANALYSIS.md)
 - C16 compares the count of restaurants at week 260 across 50 replications
   with the published AnyLogic and Java OO statistics. Report the time average
   after week 260 separately. Use the sample and published variances to compute
   the standard error of each difference of means. [C16 comparison](docs/PUBLISHED_REFERENCE_CHECKS.md)
-- C17R checks the CA population invariant and the published lattice/contact
-  identification formula. Random seeds are local to each replication.
+- C17R checks all three default ODE states at every stored time through 100
+  using a scalar first integral and independent integration. The FHP-I
+  statistic is compared separately with a published single realization.
+  [ODE limits and spatial comparison](docs/PUBLISHED_REFERENCE_CHECKS.md#c17r-default-ode-and-spatial-comparison)
 - C18 keeps data provenance in `C18DataSet`. Figure digitizations are not
   labelled as recovered measurements. Synthetic ARX recovery tests algorithmic
   correctness independently of those digitizations. Error trends and both

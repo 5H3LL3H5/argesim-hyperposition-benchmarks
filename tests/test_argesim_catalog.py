@@ -1,10 +1,16 @@
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from argesim_benchmarks.catalog import BENCHMARKS, BenchmarkStatus, benchmark
+from argesim_benchmarks.runner import CONTRACTS, BenchmarkTask
 from argesim_benchmarks.status_docs import (
     COVERAGE_END,
     COVERAGE_START,
+    SCOPE_END,
+    SCOPE_START,
+    executable_scope_table,
+    render_coverage_document,
     replace_generated_section,
     verify_coverage_document,
 )
@@ -25,11 +31,11 @@ class ArgesimCatalogTests(unittest.TestCase):
         expected_groups = {
             BenchmarkStatus.SPECIFIED: {"C18"},
             BenchmarkStatus.IMPLEMENTED: {
-                "C02", "C04", "C09", "C10", "C11", "C13", "C14", "C17R", "C19R", "C20",
+                "C02", "C04", "C09", "C10", "C11", "C14", "C19R", "C20",
             },
             BenchmarkStatus.VALIDATED: {
                 "C01", "C03", "C05", "C06", "C07", "C08", "C12", "C15", "C16",
-                "C21", "C22", "CP1", "CP2",
+                "C13", "C17R", "C21", "C22", "CP1", "CP2",
             },
         }
         expected = {
@@ -53,6 +59,21 @@ class ArgesimCatalogTests(unittest.TestCase):
     def test_coverage_document_is_generated_from_catalog(self) -> None:
         root = Path(__file__).resolve().parents[1]
         verify_coverage_document(root / "ARGESIM_COVERAGE.md")
+
+    def test_scope_lists_every_registered_task_once_in_its_family(self):
+        rows = [line.split("|")[1:3] for line in executable_scope_table().splitlines()[2:]]
+        expected = [(identifier, ", ".join(f"`{task}`" for task in case.tasks))
+                    for identifier, case in CONTRACTS.items()]
+        self.assertEqual([(family.strip(), tasks.strip()) for family, tasks in rows], expected)
+        document = (Path(__file__).resolve().parents[1] / "ARGESIM_COVERAGE.md").read_text()
+        with patch.dict(CONTRACTS["C01"].tasks, {"new-task": BenchmarkTask("new-task", "")}):
+            updated = render_coverage_document(document)
+            self.assertNotEqual(updated, document)
+            self.assertIn("`new-task`", updated)
+            self.assertEqual(render_coverage_document(updated), updated)
+        for marker in (SCOPE_START, SCOPE_END):
+            with self.subTest(marker=marker), self.assertRaises(ValueError):
+                render_coverage_document(document.replace(marker, ""))
 
     def test_generated_section_rejects_bad_markers(self) -> None:
         valid = f"prefix\n{COVERAGE_START}\nold\n{COVERAGE_END}\nsuffix\n"

@@ -21,6 +21,7 @@ from argesim_benchmarks.models.c01_lithium_cluster import C01Parameters, solve_c
 from argesim_benchmarks.models.c03_amplifier import C03Parameters, solve_c03
 from argesim_benchmarks.models.c05_two_state import c05_task_c
 from argesim_benchmarks.models.c07_constrained_pendulum import C07Parameters, solve_c07
+from argesim_benchmarks.models.c13_crane import c13_task_a
 from argesim_benchmarks.models.c15_clearance import C15Bolus, solve_c15
 
 results = {
@@ -222,5 +223,26 @@ for task_d in (False, True):
             1e-60,
             f"90-digit logarithmic reference, all {len(expected_events)} event times and both final states",
         )
+
+# C13R (2007), Task A. Use absolute cart and load positions, independent
+# velocities, motor force and an affine coordinate fixed at 1. The cable
+# gives a horizontal spring of stiffness m_load * g / length.
+cart, load, stiffness = 10.0, 100.0, 100.0 * 9.81 / 5.0
+for disturbance, endpoint in c13_task_a().items():
+    generator = np.zeros((6, 6))
+    generator[0, 2] = generator[1, 3] = 1.0
+    generator[2, :5] = [-stiffness/cart, stiffness/cart, -0.5/cart, 0, 1/cart]
+    generator[3, :5] = [stiffness/load, -stiffness/load, 0, -0.001/load, 0]
+    generator[4, 4] = -4.0
+    state = np.array([0., 0., 0., 0., 0., 1.])
+    for duration, motor, external in (
+        (4., 160., 0.), (3., 160., disturbance), (8., 160., 0.), (1985., 0., 0.),
+    ):
+        generator[3, 5] = external / load
+        generator[4, 5] = 4 * motor
+        state = expm(duration * generator) @ state
+    record(f"C13 linear Task A {disturbance:g} N", abs(endpoint["linear"] - state[1]),
+           1e-5, "Cartesian matrix exponential, horizontal load position at 2000 s",
+           reference_endpoint=float(state[1]))
 
 assert all(row["passed"] for row in results["checks"]), "Independent reference mismatch"

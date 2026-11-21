@@ -149,7 +149,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         (ModelClass.DAE, ModelClass.HYBRID, ModelClass.DISCRETE_TIME),
         _source("c13"),
         "DAE, sampled control",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
         "C14",
@@ -186,7 +186,7 @@ BENCHMARKS: tuple[BenchmarkDefinition, ...] = (
         ),
         _source("c17r"),
         "ODE, FHP-I CA, interventions",
-        BenchmarkStatus.IMPLEMENTED,
+        BenchmarkStatus.VALIDATED,
     ),
     BenchmarkDefinition(
         "C18",

@@ -27,14 +27,12 @@ class C18Tests(unittest.TestCase):
         # Apply the published coefficients without fitting to these curves.
         published = C18LinearModel(*C18_PUBLISHED_TRANSFER)
         for data, reference, refitted in (
-            (training, 0.95, 0.9418),
-            (validation, 0.94, 0.9331),
+            (training, 0.95347, 0.9418),
+            (validation, 0.94231, 0.9331),
         ):
-            self.assertEqual(
-                round(
-                    c18_correlation(data.force, predict_c18_linear(published, data)), 2
-                ),
-                reference,
+            self.assertAlmostEqual(
+                c18_correlation(data.force, predict_c18_linear(published, data)),
+                reference, delta=0.000005,
             )
             self.assertAlmostEqual(
                 c18_correlation(data.force, predict_c18_linear(model, data)),
