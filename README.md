@@ -113,9 +113,9 @@ for unavailable fields. `scope` remains `execution only`: a successful task
 does not establish an independent oracle match or a performance result.
 The one elapsed time sample has no defined IQR. Per-task Python allocation
 and RSS peaks are not measured by this execution command; they remain null.
-An uncommitted source tree reports a null SHA rather than attributing the run
-to stale `HEAD`. Set `ARGESIM_GIT_SHA` only when the source export has been
-verified against that exact commit.
+Automatic Git provenance requires a clean checkout that tracks the imported
+source. Installed copies and dirty checkouts report a null SHA.
+Set `ARGESIM_GIT_SHA` for a source export verified against that exact commit.
 
 ## Repeated diagnostic timing
 
@@ -132,8 +132,9 @@ workloads. Repetitions must be odd and at least nine; warm-up is configurable.
 `--benchmark` and `--task BENCHMARK:TASK` can be repeated; `--fail-fast` stops
 after the first failure, while the default continues. `--timeout-s` defaults
 to 3600 per task. Each task produces an atomically written JSON record, and
-`manifest.json` records artifact paths, statuses and SHA-256 digests. The
-output directory must be empty; local `benchmark-results/` is ignored by Git.
+`manifest.json` records artifact paths, statuses and SHA-256 digests. Each run
+reserves its empty output directory for exclusive use. Git ignores the local
+`benchmark-results/` directory.
 
 The worker compares a complete JSON result fingerprint against an untimed
 reference before publishing a median or inclusive IQR. All raw durations are
@@ -216,6 +217,8 @@ events only: an event inserted by a callback cannot run before that callback,
 and late external arrivals cannot undo completed handlers. The scheduler does
 not provide network-arrival independence or automatic confluent transitions.
 
+Relative scheduling and finite run horizons preserve exact integer and
+rational times. A finite horizon includes all microsteps at its macro time.
 Both run methods count executed callbacks toward `max_events`; cancelled
 entries are discarded without consuming that budget or advancing time.
 

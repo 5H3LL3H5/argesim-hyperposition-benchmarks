@@ -4,11 +4,13 @@ import json
 import subprocess
 import sys
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import redirect_stdout
 from hashlib import sha256
 from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from threading import Event, current_thread, main_thread
 from unittest.mock import Mock, patch
 
 from argesim_benchmarks.cli import main
@@ -17,6 +19,40 @@ from argesim_benchmarks.runner import CONTRACTS
 
 
 class PerformanceTests(unittest.TestCase):
+    def test_parallel_runs_cannot_both_reserve_the_same_directory(self):
+        started, release = Event(), Event()
+
+        def simulated_worker(*_args, **_kwargs):
+            if current_thread() is not main_thread():
+                started.set()
+                self.assertTrue(release.wait(timeout=10))
+            return Mock(stdout=json.dumps({"status": "passed", "error": None}))
+
+        with TemporaryDirectory() as directory, patch(
+            "argesim_benchmarks.performance._git_sha", return_value="a" * 40,
+        ), patch(
+            "argesim_benchmarks.performance.subprocess.run", side_effect=simulated_worker,
+        ) as worker, ThreadPoolExecutor(max_workers=1) as pool:
+            path = Path(directory)
+            first = pool.submit(
+                run_performance, output_dir=path, profile="smoke",
+                benchmarks=("C01",), tasks=("C01:C",),
+            )
+            try:
+                self.assertTrue(started.wait(timeout=10))
+                with self.assertRaisesRegex(ValueError, "already reserved"):
+                    run_performance(
+                        output_dir=path, profile="smoke",
+                        benchmarks=("C05",), tasks=("C05:validate",),
+                    )
+            finally:
+                release.set()
+            report = first.result(timeout=10)
+            self.assertEqual(worker.call_count, 1)
+            self.assertEqual(json.loads((path / "manifest.json").read_text()), report)
+            self.assertEqual(sorted(file.name for file in path.iterdir()),
+                             ["C01-C.json", "manifest.json"])
+
     def test_repetitions_are_odd_and_at_least_nine(self):
         with TemporaryDirectory() as directory:
             for repetitions in (0, 8, 10):

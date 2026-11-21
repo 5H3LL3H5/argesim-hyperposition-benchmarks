@@ -12,6 +12,7 @@ from ..ivp import (
     IntegrationResult,
     SolverStats,
 )
+from ._clock import _on_elapsed_clock
 
 
 def _quantum_vector(
@@ -90,6 +91,7 @@ def _smallest_nonnegative_root(
     return min(eligible, default=math.inf)
 
 
+@_on_elapsed_clock
 def qss1(
     problem: InitialValueProblem,
     quantum: float | Sequence[float],
@@ -185,6 +187,7 @@ def qss1(
     )
 
 
+@_on_elapsed_clock
 def cqss1(
     problem: InitialValueProblem,
     quantum: float | Sequence[float],
@@ -329,6 +332,7 @@ def cqss1(
 cqss = cqss1
 
 
+@_on_elapsed_clock
 def qss2(
     problem: InitialValueProblem,
     quantum: float | Sequence[float],

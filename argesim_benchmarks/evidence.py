@@ -22,28 +22,35 @@ def _git_sha() -> str | None:
     explicit_sha = os.environ.get("ARGESIM_GIT_SHA")
     if explicit_sha:
         return explicit_sha
+
+    source = Path(__file__).resolve()
+    repository_root = source.parents[1]
+
+    def git(*args: str) -> str:
+        return subprocess.run(
+            ("git", "-C", str(repository_root), *args),
+            check=True, capture_output=True, text=True, timeout=2,
+        ).stdout
+
     try:
-        repository_root = Path(__file__).resolve().parents[1]
-        completed = subprocess.run(
-            ("git", "-C", str(repository_root), "rev-parse", "HEAD"),
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=2,
-        )
-        status = subprocess.run(
-            ("git", "-C", str(repository_root), "status", "--porcelain"),
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=2,
-        )
+        worktree = git("rev-parse", "--show-toplevel").rstrip("\n")
+        if not worktree or Path(worktree).resolve() != repository_root:
+            return None
+        status = git("status", "--porcelain=v2", "--branch", "--untracked-files=normal")
+        lines = status.splitlines()
+        if any(not line.startswith("# ") for line in lines):
+            return None
+        oid_prefix = "# branch.oid "
+        sha = next((line.removeprefix(oid_prefix)
+                    for line in lines if line.startswith(oid_prefix)), None)
+        if not sha or sha == "(initial)":
+            return None
+        # An ignored installation can sit at the worktree root as well.
+        path = source.relative_to(repository_root).as_posix()
+        git("cat-file", "-e", f"{sha}:{path}")
     except (OSError, subprocess.SubprocessError):
         return None
-    if status.stdout.strip():
-        return None
-    value = completed.stdout.strip()
-    return value or None
+    return sha
 
 
 def _cpu_model() -> str | None:

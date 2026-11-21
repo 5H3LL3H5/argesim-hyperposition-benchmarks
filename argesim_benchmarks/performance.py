@@ -209,8 +209,29 @@ def run_performance(
     if not selected:
         raise ValueError("no benchmark tasks selected")
     output_dir = Path(output_dir)
-    if output_dir.exists() and any(output_dir.iterdir()):
-        raise ValueError("output_dir must be empty to avoid replacing earlier evidence")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    lock = output_dir / ".performance-lock"
+    try:
+        lock.touch(mode=0o600, exist_ok=False)
+    except FileExistsError as exc:
+        raise ValueError("output_dir is already reserved for a performance run") from exc
+
+    try:
+        if any(path != lock for path in output_dir.iterdir()):
+            raise ValueError("output_dir must be empty to avoid replacing earlier evidence")
+        return _run_selected(
+            selected, output_dir=output_dir, profile=profile, warmup=warmup,
+            repetitions=repetitions, fail_fast=fail_fast, timeout_s=timeout_s,
+        )
+    finally:
+        lock.unlink()
+
+
+def _run_selected(
+    selected: list[tuple[str, str]],
+    *, output_dir: Path, profile: str, warmup: int, repetitions: int,
+    fail_fast: bool, timeout_s: float,
+) -> dict[str, Any]:
     manifest: dict[str, Any] = {
         "schema_version": PERFORMANCE_SCHEMA_VERSION,
         "profile": profile,

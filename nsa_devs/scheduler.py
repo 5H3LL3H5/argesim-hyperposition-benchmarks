@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import heapq
-import math
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from fractions import Fraction
 
-from .hypertime import HyperTime
+from .hypertime import HyperTime, Scalar, _as_fraction
 
 
 @dataclass(frozen=True)
@@ -71,7 +70,7 @@ class DesScheduler:
 
     def schedule(
         self,
-        delay_minutes: float,
+        delay_minutes: Scalar,
         name: str,
         handler: Callable[..., None],
         *args: object,
@@ -80,8 +79,11 @@ class DesScheduler:
     ) -> DesEvent:
         if isinstance(delay_minutes, bool):
             raise TypeError("delay must be a real number")
-        delay = float(delay_minutes)
-        if not math.isfinite(delay) or delay < 0.0:
+        try:
+            delay = _as_fraction(delay_minutes)
+        except (ValueError, ZeroDivisionError, OverflowError) as exc:
+            raise ValueError("delay must be finite and non-negative") from exc
+        if delay < 0:
             raise ValueError("delay must be finite and non-negative")
         if not isinstance(name, str) or not name:
             raise ValueError("name must be a non-empty string")
@@ -93,7 +95,7 @@ class DesScheduler:
             raise ValueError("microsteps must be positive")
         target_time = (
             self.time.after_epsilon(microsteps)
-            if delay == 0.0
+            if delay == 0
             else self.time.after_finite(delay)
         )
         return self.schedule_at(target_time, name, handler, *args, priority=priority)
@@ -150,12 +152,13 @@ class DesScheduler:
         while self.events and self.events[0].cancelled:
             heapq.heappop(self.events)
 
-    def run(self, until: float, *, max_events: int = 1_000_000) -> int:
+    def run(self, until: Scalar, *, max_events: int = 1_000_000) -> int:
         if isinstance(until, bool):
             raise TypeError("until must be a real number")
-        until_value = float(until)
-        if not math.isfinite(until_value):
-            raise ValueError("until must be finite")
+        try:
+            until_value = _as_fraction(until)
+        except (ValueError, ZeroDivisionError, OverflowError) as exc:
+            raise ValueError("until must be finite") from exc
         if not isinstance(max_events, int) or isinstance(max_events, bool):
             raise TypeError("max_events must be an integer")
         if max_events <= 0:
