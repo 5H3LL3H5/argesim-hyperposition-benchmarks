@@ -42,14 +42,24 @@ class QuantizerEventTrace(unittest.TestCase):
 
         # Drive the stand-alone solver from a second state with the same first
         # boundary. Subsequent updates of that clock leave x's derivative fixed.
+        published = []
+
+        def rhs(t, quantized):
+            if not published or published[-1][1] != quantized[1]:
+                published.append((t, quantized[1]))
+            return 1.0, 1.0 if quantized[0] < 0.125 else -0.5
+
         p = InitialValueProblem(
-            lambda t, y: (1.0, 1.0 if y[0] < 0.125 else -0.5),
+            rhs,
             0,
             (0.0, 0.0),
             1.4,
             autonomous=True,
         )
         result = qss1(p, (0.125, 0.25))
+        self.assertEqual(
+            published, [(0.0, 0.0)] + [(float(t), float(q)) for t, q in emitted]
+        )
         for t, target in emitted:
             self.assertEqual(
                 result.states[result.times.index(float(t))][1], float(target)
