@@ -4,9 +4,12 @@ from argesim_benchmarks.hybrid import (
     HybridMode,
     HybridReset,
     StateEvent,
+    StateThreshold,
     simulate_hybrid,
 )
 from argesim_benchmarks.models.c21_state_events import (
+    C21BouncingBallParameters,
+    c21_analytical_bounce_times,
     simulate_c21_bouncing_ball_event_contact,
     simulate_c21_rotating_pendulum,
 )
@@ -124,6 +127,69 @@ class HybridRuntimeTests(unittest.TestCase):
             self.assertEqual(event.state_after[0], 0.0)
             self.assertGreater(event.state_after[1], 0.0)
             self.assertEqual(event.time.micro, 1)
+
+    def test_high_order_return_to_reset_surface(self):
+        for method in ("qss3", "qss4"):
+            for factor in (0.005, 0.001, 0.0002):
+                with self.subTest(method=method, factor=factor):
+                    run = simulate_c21_bouncing_ball_event_contact(
+                        C21BouncingBallParameters(beta=0),
+                        t_bound=5,
+                        method=method,
+                        options={"quantum": (10 * factor, 14 * factor)},
+                    )
+                    self.assertEqual([e.name for e in run.events], ["bounce", "bounce"])
+                    for event, exact in zip(run.events, c21_analytical_bounce_times(2)):
+                        self.assertAlmostEqual(
+                            float(event.time.macro), exact, delta=1e-6
+                        )
+                        self.assertGreater(event.state_after[1], 0)
+                    self.assertGreater(run.final_state[0], 0)
+
+    def test_callable_guard_can_leave_and_recross_inside_one_step(self):
+        guard = StateEvent(
+            "ground",
+            lambda t, x: x[0],
+            lambda t, x: HybridReset(x, terminate=True),
+            "arc",
+            -1,
+        )
+        mode = HybridMode("arc", lambda t, x: (x[1], -2.0), (guard,))
+        result = simulate_hybrid(
+            {"arc": mode},
+            initial_mode="arc",
+            initial_state=(0.0, 1.0),
+            t_bound=20.0,
+            method="qss3",
+            solver_options={"quantum": 0.01},
+        )
+        self.assertEqual(len(result.events), 1)
+        self.assertAlmostEqual(result.final_time, 1.0, delta=1e-6)
+
+    def test_directed_coordinate_crossings_with_same_sign_endpoints(self):
+        # h=(t-1)(t-3) returns to its initial positive height at t=4.
+        for level, direction, hit in ((0, -1, 1), (0, 1, 3), (-1, -1, None)):
+            with self.subTest(level=level, direction=direction):
+                guard = StateEvent(
+                    "height",
+                    StateThreshold(0, level),
+                    lambda t, x: HybridReset(x, terminate=True),
+                    "arc",
+                    direction,
+                )
+                mode = HybridMode("arc", lambda t, x: (x[1], 2.0), (guard,))
+                result = simulate_hybrid(
+                    {"arc": mode},
+                    initial_mode="arc",
+                    initial_state=(3.0, -4.0),
+                    t_bound=4.0,
+                    method="rk4",
+                    solver_options={"step": 4.0},
+                )
+                self.assertEqual(len(result.events), int(hit is not None))
+                self.assertAlmostEqual(
+                    result.final_time, 4.0 if hit is None else hit, delta=1e-8
+                )
 
     def test_dimension_changing_transition_uses_the_same_runtime(self):
         result = simulate_c21_rotating_pendulum(t_bound=5.0, method="qss2")

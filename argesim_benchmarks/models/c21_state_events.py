@@ -18,6 +18,7 @@ from ..hybrid import (
     HybridReset,
     HybridResult,
     StateEvent,
+    StateThreshold,
     simulate_hybrid,
 )
 from ..ivp import IntegrationError, Rhs, Vector
@@ -430,8 +431,7 @@ def simulate_c21_bouncing_ball_event_contact(
     if len(state) != 2 or any(not math.isfinite(value) for value in state) or state[0] < 0.0:
         raise ValueError("initial_state must be a non-negative height and velocity")
 
-    def height(_time: float, values: Sequence[float]) -> float:
-        return float(values[0])
+    height = StateThreshold(0)
 
     def bounce(_time: float, values: Sequence[float]) -> Vector | HybridReset:
         rebound = -parameters.mu * float(values[1])

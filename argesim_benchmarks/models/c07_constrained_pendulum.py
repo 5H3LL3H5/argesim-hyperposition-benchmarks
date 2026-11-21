@@ -10,7 +10,7 @@ import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
-from ..hybrid import HybridMode, StateEvent, simulate_hybrid
+from ..hybrid import HybridMode, StateEvent, StateThreshold, simulate_hybrid
 from ..ivp import InitialValueProblem, IntegrationResult, Rhs, Vector
 
 
@@ -140,8 +140,7 @@ def solve_c07(
     if len(state) != 2:
         raise ValueError("C07 initial_state must contain phi and phi_dot")
 
-    def pin_guard(_time: float, values: Sequence[float]) -> float:
-        return float(values[0]) - parameters.phi_p
+    pin_guard = StateThreshold(0, parameters.phi_p)
 
     def hit_pin(_time: float, values: Sequence[float]) -> Vector:
         return (parameters.phi_p, float(values[1]) * parameters.l / parameters.l_s)

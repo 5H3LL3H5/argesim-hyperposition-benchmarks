@@ -198,7 +198,7 @@ def solve_c03(
 ) -> IntegrationResult:
     """Solve C03 with event-aligned segments at every switch boundary."""
     normalised = normalise_solver_name(method)
-    if normalised not in {"euler", "rk4", "rk45"}:
+    if parameters.trf and normalised not in {"euler", "rk4", "rk45"}:
         raise ValueError(f"unsupported C03 solver: {method}")
     if not math.isfinite(t_bound) or t_bound <= 0.0:
         raise ValueError("t_bound must be positive and finite")

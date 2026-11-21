@@ -8,6 +8,9 @@ version = "0.6.0"
 description = "Scientific ARGESIM rebuild with NSA-DEVS and numerical references"
 requires-python = ">=3.10"
 
+[project.optional-dependencies]
+dae = ["casadi>=3.6.7,<4"]
+
 [project.scripts]
 argesim = "argesim_benchmarks.cli:main"
 argesim-cifasis-oracle = "argesim_benchmarks.oracles.cifasis_adapter:main"

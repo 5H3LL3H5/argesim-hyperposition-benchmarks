@@ -14,6 +14,7 @@ from .hybrid import (
     HybridReset,
     HybridResult,
     StateEvent,
+    StateThreshold,
     simulate_hybrid,
 )
 from .ivp import InitialValueProblem, IntegrationError, IntegrationResult, SolverStats
@@ -178,6 +179,7 @@ from .solvers import (
     rk4,
     rk45,
 )
+from .solvers.dae import DAEResult, solve_dae
 
 __all__ = [
     "BENCHMARKS",
@@ -229,6 +231,7 @@ __all__ = [
     "CP2LBMResult",
     "CP2RopeStudy",
     "CanalAndLock",
+    "DAEResult",
     "Direction",
     "ExperimentRecord",
     "HybridEventRecord",
@@ -245,6 +248,7 @@ __all__ = [
     "RuntimeEnvironment",
     "SolverStats",
     "StateEvent",
+    "StateThreshold",
     "TimingEvidence",
     "TimingSummary",
     "ValidationEvidence",
@@ -362,6 +366,7 @@ __all__ = [
     "solve_c06_task_b",
     "solve_c06_task_c",
     "solve_c17",
+    "solve_dae",
     "solve_ivp",
     "wave_1d_ivp",
 ]
