@@ -124,7 +124,7 @@ def main(argv: list[str] | None = None) -> int:
         result = benchmark_contract.run(arguments.task, arguments.kwargs_json)
         print(json.dumps(to_jsonable(result), indent=2, sort_keys=True, allow_nan=False))
         return 0
-    except BenchmarkTaskError as exc:
+    except (BenchmarkTaskError, ValueError) as exc:
         raise SystemExit(str(exc)) from exc
 
 

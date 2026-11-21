@@ -5,10 +5,11 @@ from __future__ import annotations
 import itertools
 import math
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 Vector = tuple[float, ...]
 Rhs = Callable[[float, Sequence[float]], Sequence[float]]
+_StepStop = Callable[[float, Vector, float, Vector], bool]
 
 
 class IntegrationError(RuntimeError):
@@ -43,6 +44,9 @@ class InitialValueProblem:
     t_bound: float
     name: str = "unnamed"
     autonomous: bool = False
+    _stop_after_step: _StepStop | None = field(
+        default=None, kw_only=True, repr=False, compare=False
+    )
 
     def __post_init__(self) -> None:
         if not callable(self.rhs):
@@ -80,6 +84,16 @@ class InitialValueProblem:
         if not all(math.isfinite(value) for value in derivative):
             raise IntegrationError("rhs returned a non-finite derivative")
         return derivative
+
+    def _record_step(
+        self, times: list[float], states: list[Vector], time: float, state: Vector
+    ) -> bool:
+        """Retain an accepted sample and let its observer stop integration."""
+        times.append(time)
+        states.append(state)
+        return self._stop_after_step is not None and self._stop_after_step(
+            times[-2], states[-2], time, state
+        )
 
 
 @dataclass(frozen=True)

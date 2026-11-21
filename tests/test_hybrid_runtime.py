@@ -1,6 +1,11 @@
 import unittest
 
-from argesim_benchmarks.hybrid import HybridMode, simulate_hybrid
+from argesim_benchmarks.hybrid import (
+    HybridMode,
+    HybridReset,
+    StateEvent,
+    simulate_hybrid,
+)
 from argesim_benchmarks.models.c21_state_events import (
     simulate_c21_bouncing_ball_event_contact,
     simulate_c21_rotating_pendulum,
@@ -8,6 +13,73 @@ from argesim_benchmarks.models.c21_state_events import (
 
 
 class HybridRuntimeTests(unittest.TestCase):
+    def test_switch_precedes_the_old_modes_finite_time_singularity(self):
+        switch = StateEvent(
+            "limit", lambda _time, state: state[0] - 2.0,
+            lambda _time, _state: (2.0,), "hold", direction=1,
+        )
+        result = simulate_hybrid(
+            {
+                "grow": HybridMode("grow", lambda _time, state: (state[0] ** 2,), (switch,)),
+                "hold": HybridMode("hold", lambda _time, _state: (0.0,)),
+            },
+            initial_mode="grow", initial_state=(1.0,), t_bound=2.0,
+            solver_options={"rtol": 1e-9, "atol": 1e-11},
+        )
+        self.assertEqual([event.name for event in result.events], ["limit"])
+        self.assertAlmostEqual(float(result.events[0].time.macro), 0.5, delta=1e-7)
+        self.assertEqual(result.final_time, 2.0)
+        self.assertEqual(result.final_state, (2.0,))
+
+    def test_terminal_guard_is_seen_before_spending_the_remaining_step_budget(self):
+        event = StateEvent(
+            "stop", lambda _time, state: state[0] - 0.99,
+            lambda _time, state: HybridReset(state, terminate=True),
+            "decay", direction=-1,
+        )
+        modes = {"decay": HybridMode("decay", lambda _time, state: (-state[0],), (event,))}
+        for method, options in (
+            ("euler", {"step": 0.1, "max_steps": 1}),
+            ("rk4", {"step": 0.1, "max_steps": 1}),
+            ("rk45", {"initial_step": 0.1, "max_steps": 1}),
+            ("qss1", {"quantum": 0.1, "max_events": 1}),
+            ("cqss1", {"quantum": 0.3, "max_events": 1}),
+            ("qss2", {"quantum": 0.1, "max_events": 1}),
+            ("qss3", {"quantum": 0.1, "max_events": 1}),
+            ("liqss2", {"quantum": 0.1, "max_events": 1}),
+            ("eliqss2", {"quantum": 0.1, "max_events": 1}),
+            ("liqss-bdf", {"quantum": 0.1, "max_steps": 1,
+                           "initial_step": 0.05, "rtol": 0.01}),
+        ):
+            with self.subTest(method=method):
+                result = simulate_hybrid(
+                    modes, initial_mode="decay", initial_state=(1.0,), t_bound=2.0,
+                    method=method, solver_options=options,
+                )
+                self.assertEqual([hit.name for hit in result.events], ["stop"])
+                self.assertLess(result.final_time, 0.1)
+                self.assertAlmostEqual(result.final_state[0], 0.99, delta=1e-8)
+
+    def test_guard_can_trigger_at_the_last_sample(self):
+        event = StateEvent(
+            "end", lambda time, _state: time - 0.1,
+            lambda _time, _state: (2.0,), "fixed", direction=1,
+        )
+        modes = {"fixed": HybridMode("fixed", lambda _time, _state: (0.0,), (event,))}
+        for method, options in (
+            ("rk4", {"step": 0.1}),
+            ("qss1", {"quantum": 0.1}),
+            ("qss2", {"quantum": 0.1}),
+        ):
+            with self.subTest(method=method):
+                result = simulate_hybrid(
+                    modes, initial_mode="fixed", initial_state=(1.0,), t_bound=0.1,
+                    method=method, solver_options=options,
+                )
+                self.assertEqual([hit.name for hit in result.events], ["end"])
+                self.assertEqual(result.final_time, 0.1)
+                self.assertEqual(result.final_state, (2.0,))
+
     def test_bounded_segments_preserve_continuous_result(self):
         mode = HybridMode("decay", lambda _time, state: (-state[0],))
         whole = simulate_hybrid(

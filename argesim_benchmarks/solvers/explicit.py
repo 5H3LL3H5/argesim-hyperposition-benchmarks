@@ -69,8 +69,8 @@ def _fixed_step(
         y, used = advance(problem, t, y, h)
         evaluations += used
         t = min(problem.t_bound, t + h)
-        times.append(t)
-        states.append(y)
+        if problem._record_step(times, states, t, y):
+            break
 
     return IntegrationResult(
         method=method,
@@ -270,10 +270,10 @@ def rk45(
         if error_norm <= 1.0:
             t = min(problem.t_bound, t + h)
             y = y5
-            k1 = k7
-            times.append(t)
-            states.append(y)
             accepted += 1
+            if problem._record_step(times, states, t, y):
+                break
+            k1 = k7
             factor = 10.0 if error_norm == 0.0 else min(10.0, 0.9 * error_norm**-0.2)
             h *= max(0.2, factor)
         else:

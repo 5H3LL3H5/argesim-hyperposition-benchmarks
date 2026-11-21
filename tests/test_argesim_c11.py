@@ -2,6 +2,7 @@
 
 import unittest
 
+from argesim_benchmarks.ivp import IntegrationError
 from argesim_benchmarks.models.c11_scara_robot import (
     C11_TARGET_STATE,
     C11Parameters,
@@ -76,6 +77,31 @@ class C11Tests(unittest.TestCase):
                 result = solve_c11(method, t_bound=1.0e-5)
                 self.assertEqual(result.final_time, 1.0e-5)
 
+    def test_sampled_euler_feeds_the_bounded_current_back_into_the_model(self) -> None:
+        p = C11Parameters()
+        limits = (p.T1_max / (1.5 * p.kT1), p.T2_max / (1.5 * p.kT2),
+                  p.T3_max / (1.5 * p.kT3))
+        result = c11_task_c("euler", t_bound=0.1, options={"step": 0.001}).result
+        rhs = c11_rhs(p, task="c")
+        state = (0.0,) * 9
+        self.assertEqual(result.states[0], state)
+        for i, actual in enumerate(result.states[1:], start=1):
+            t = result.times[i - 1]
+            h = result.times[i] - t
+            updated = tuple(x + h * dx for x, dx in zip(state, rhs(t, state)))
+            state = updated[:6] + tuple(
+                max(-limit, min(limit, x)) for x, limit in zip(updated[6:], limits)
+            )
+            for expected, observed in zip(state, actual):
+                self.assertAlmostEqual(observed, expected, delta=1e-9)
+        self.assertEqual(result.states[1][6], limits[0])
+
+    def test_saturation_does_not_reset_the_step_budget(self) -> None:
+        options = {"step": 0.001, "max_steps": 1}
+        with self.assertRaisesRegex(IntegrationError, "euler exceeded max_steps"):
+            solve_c11("euler", t_bound=0.002, options=options)
+        self.assertEqual(options["max_steps"], 1)
+
     def test_task_c_collision_avoidance(self) -> None:
         study = c11_task_c("rk45", t_bound=2.0)
         result = study.result
@@ -88,6 +114,12 @@ class C11Tests(unittest.TestCase):
         )
         for state, clearance in zip(result.states, study.vertical_clearance):
             self.assertAlmostEqual(clearance, state[2] - C11Parameters().h_obs)
+
+        p = C11Parameters()
+        limits = (p.T1_max / (1.5 * p.kT1), p.T2_max / (1.5 * p.kT2),
+                  p.T3_max / (1.5 * p.kT3))
+        for axle, limit in enumerate(limits, start=6):
+            self.assertLessEqual(max(abs(state[axle]) for state in result.states), limit)
 
         q1, q2, q3, _dq1, _dq2, _dq3, _i1, _i2, _i3 = result.states[-1]
         self.assertAlmostEqual(q1, C11_TARGET_STATE[0], places=1)

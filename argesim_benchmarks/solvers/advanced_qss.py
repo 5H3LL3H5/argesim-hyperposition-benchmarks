@@ -207,8 +207,7 @@ def _qss_high_order(
                 method=method,
             )
             time = problem.t_bound
-            times.append(time)
-            states.append(tuple(final_state))
+            problem._record_step(times, states, time, tuple(final_state))
             break
 
         x = [shift_polynomial(polynomial, elapsed) for polynomial in x]
@@ -226,6 +225,9 @@ def _qss_high_order(
             )
         if events + len(due) > event_limit:
             raise IntegrationError(f"{method} exceeded max_events")
+        events += len(due)
+        if problem._record_step(times, states, time, tuple(poly[0] for poly in x)):
+            break
         for index in due:
             q[index][:] = x[index][:order]
 
@@ -236,10 +238,6 @@ def _qss_high_order(
         x = _state_polynomials(
             [polynomial[0] for polynomial in x], rhs_coefficients, order
         )
-        events += len(due)
-        times.append(time)
-        states.append(tuple(polynomial[0] for polynomial in x))
-
     return IntegrationResult(
         method,
         tuple(times),
@@ -1006,8 +1004,7 @@ def _liqss_family(
                 method=method,
             )
             time = problem.t_bound
-            times.append(time)
-            states.append(tuple(final_state))
+            problem._record_step(times, states, time, tuple(final_state))
             break
 
         x = [shift_polynomial(polynomial, elapsed) for polynomial in x]
@@ -1077,8 +1074,8 @@ def _liqss_family(
         )
         evaluations += used
         events += len(updated)
-        times.append(time)
-        states.append(tuple(current_values))
+        if problem._record_step(times, states, time, tuple(current_values)):
+            break
 
     return IntegrationResult(
         method,
@@ -1192,8 +1189,7 @@ def _generalised_liqss_family(
                 method=method,
             )
             time = problem.t_bound
-            times.append(time)
-            states.append(tuple(final_state))
+            problem._record_step(times, states, time, tuple(final_state))
             break
 
         x = [shift_polynomial(polynomial, elapsed) for polynomial in x]
@@ -1254,8 +1250,8 @@ def _generalised_liqss_family(
         )
         evaluations += used
         events += len(due)
-        times.append(time)
-        states.append(tuple(current_values))
+        if problem._record_step(times, states, time, tuple(current_values)):
+            break
 
     return IntegrationResult(
         method,
