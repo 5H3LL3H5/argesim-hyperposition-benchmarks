@@ -2,7 +2,7 @@ CP2 · Genauigkeit von Fourier-Operatoren
 Im entpackten Rechenlabor: python cp2_genauigkeit/auswerten.py
 Benötigt wird NumPy. Der Aufruf berechnet die beiden Saitenprofile aus den Gewichten und prüft die Saitenreferenz unabhängig mit d’Alembert und kontrolliert die gedruckten Fehler. Zusätzlich berechnet der Aufruf die Kavitäts- und Literaturvergleiche.
 
-Die NPY/NPZ-Dateien bestehen aus numerischen Feldern, Gewichten und kurzen Spaltennamen. Sie werden mit allow_pickle=False geöffnet. saite_zeitreihen.npz enthält 2 376 Einzelmessungen. NaN in der letzten Spalte bedeutet, dass die Referenz praktisch null ist. kavitaet_stationaer.json dokumentiert auch die Massenänderung. kapitel.json, gegenproben.json und transport.json enthalten die Nachweise der Kapitel 1–12.
+Die NPY/NPZ-Dateien bestehen aus numerischen Feldern, Gewichten und kurzen Spaltennamen. Sie werden mit allow_pickle=False geöffnet. saite_zeitreihen.npz enthält 2 376 Einzelmessungen. NaN in der letzten Spalte bedeutet, dass die Referenz praktisch null ist. kavitaet_stationaer.json dokumentiert auch die Massenänderung. kapitel.json, gegenproben.json und transport.json enthalten die Nachweise zu Temperatur, Ereignissen, Diodenast, räumlichem Transport und Solverwahl.
 
 saite_spiegelung.json protokolliert den Spiegeltest mit drei unveränderten Operatoren. transport_feste_raender.json enthält die C19R-Verfeinerung mit festen Außenflächen.
 

@@ -54,7 +54,7 @@ Studienanhang_Archiv.pdf  Technische Berichte der Vorauflage, Originalpaginierun
 Die in den Kapiteln ausdrücklich als Übungsdaten bezeichneten Tabellen sind
 konstruierte Beispiele. Herkunft, Referenzen und Geltungsbereich der
 ARGESIM-Messungen stehen im Quellen- und Datenteil des Buchs.
-Kapitel 13 · Python-Werkstatt und CP2
+Kapitel 16 · CP2-Feldlabor (Aufgabenblatt 13)
 
 Starten Sie im entpackten Rechenlabor mit
 
