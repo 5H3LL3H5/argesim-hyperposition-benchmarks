@@ -68,6 +68,23 @@ class FieldTests(unittest.TestCase):
 
 @unittest.skipUnless(NEURAL, "requires the operators extra")
 class CheckpointTests(unittest.TestCase):
+    def test_fine_tuning_preserves_original_rope_checkpoint_contract(self):
+        import numpy as np
+        import torch
+
+        from argesim_benchmarks.experiments import cp2_operators as old
+
+        torch.set_num_threads(1)
+        case, net = old.load_weights(MAT / "saite_fno_nachtrainiert.npz")
+        self.assertEqual(case, "rope")
+        with np.load(MAT / "saite_beispiel.npz", allow_pickle=False) as data:
+            x, truth = data["x"], data["ref"]
+            initial = 0.1 * np.minimum(x / 0.5, 1 - x / 0.5)
+            pred = old.predict_array(case, net, initial)
+            before = np.linalg.norm(data["old"] - truth, axis=1)
+        self.assertEqual(pred.shape, (2, 501))
+        self.assertTrue(np.all(np.linalg.norm(pred - truth, axis=1) < before))
+
     def test_fixed_checkpoint_beats_affine_on_archived_field(self):
         import numpy as np
         import torch

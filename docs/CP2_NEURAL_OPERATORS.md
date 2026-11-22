@@ -85,6 +85,8 @@ Das feste Vergleichsprotokoll, fünf Abbildungen, die Operatorgrenze und die vol
 
 Die Saitenschicht ist ein für die lineare Wellengleichung spezialisierter Fourier-Operator. Sinusmoden berücksichtigen die festen Enden. Die modalen Faktoren wurden auf 96 synthetischen Profilen für 192 Moden und 321 Zeiten gelernt. Eine Auswertung mit der Spektralschicht von NeuralOperator prüft die Übereinstimmung. Für die Kavität stammen die 96/16/24 Dichtefelder des festen Vergleichs aus denselben Zufallsfolgen wie in der Erststudie. Das neue Modell lernt zwei vorzeichenbehaftete Geschwindigkeitskomponenten. Seine affine Regression und die restliche neuronale Korrektur werden getrennt bewertet. Die Kavitätsprognosen geben die Geschwindigkeiten in Einheiten der Deckelgeschwindigkeit aus.
 
+Beim Nachtraining des ursprünglichen nichtlinearen Saiten-FNO bleiben Architektur und Ausgabekanäle unverändert. Zusätzliche 48 glatte und 48 dreieckige Trainingsprofile und wechselnde Auflösungen reduzieren den relativen Fehler auf 501 Knoten beim mittigen Dreieck auf 2,1815 % und 0,6218 %. Die 24 glatten Testfelder erreichen im Mittel 0,9538 %. Drei Mischfolgen sowie alle Zupfpositionen sind in den Messdaten enthalten. Der ursprüngliche Befehl für Vorhersagen lädt auch den neuen Checkpoint.
+
 ### Eine neue Eingabe auswerten
 
 Die Befehle laufen im Wurzelverzeichnis des Repositorys. Für die Prüfung der gespeicherten Saitenprofile und Strömungsdaten genügt NumPy. Die Modellbefehle verwenden Python mit dem optionalen Paketumfang für Operatoren.
@@ -93,6 +95,7 @@ Die Befehle laufen im Wurzelverzeichnis des Repositorys. Für die Prüfung der g
 python -m pip install -e '.[operators]'
 material=docs/lehrbuch/studienbuch/material
 python "$material/cp2_genauigkeit/auswerten.py"
+python -m argesim_benchmarks.experiments.cp2_operators predict "$material/cp2_genauigkeit/saite_fno_nachtrainiert.npz" "$material/cp2_feldlabor/rope/rope-501-input.npy" /tmp/saite_fno.npy
 python -m argesim_benchmarks.experiments.cp2_operators predict-refined "$material/cp2_genauigkeit/saite.npz" "$material/cp2_feldlabor/rope/rope-501-input.npy" /tmp/saite.npy --times 2.5 5 8
 python -m argesim_benchmarks.experiments.cp2_operators predict-refined "$material/cp2_genauigkeit/kavitaet.npz" "$material/cp2_feldlabor/cavity/cavity-input.npy" /tmp/geschwindigkeit.npy
 python -m argesim_benchmarks.experiments.cp2_operators predict-refined "$material/cp2_genauigkeit/kavitaet_familie.npz" "$material/cp2_feldlabor/cavity/cavity-input.npy" /tmp/familie.npy --lid 0.0875 --step 12
@@ -105,6 +108,7 @@ Für die Saite ist die Ausgabe ein Array mit einer Zeile je Zeitpunkt und einer 
 ```sh
 python -m pip install matplotlib mpmath
 python scripts/cp2_accuracy/rope_study.py
+python scripts/cp2_accuracy/rope_finetune.py
 python scripts/cp2_accuracy/cavity_study.py
 python scripts/cp2_accuracy/conditioned_cavity.py
 python scripts/cp2_accuracy/target_calibration.py
