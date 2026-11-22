@@ -143,6 +143,8 @@ Dormand--Prince RK45 kombiniert die Ordnungen 5 und 4 für glatte, nichtsteife P
 Ein Strom nahe null und eine Spannung von zehn Volt benötigen unterschiedliche absolute Fehlerbudgets. Mit \(s_i=\mathrm{atol}_i+\mathrm{rtol}\max(|y_i|,|y_i^+|)\) werden die Differenzen \(d_i\) dimensionslos. Ein verbreitetes Kriterium ist \(E=\sqrt{\sum_i(d_i/s_i)^2/n}\). Ein Maximaltest schützt jede Komponente einzeln. Die gewählte Norm gehört zur Beschreibung des Versuchs.
 \hypertarget{punkt2-3-2}{}\subt{2.3.2\enspace I-, PI- und PID-Regelung}
 Skaliert der Schätzer wie \(h^r\), folgt aus \(E(h_{neu}/h)^r\approx1\) der I-Vorschlag \(h_{neu}=\eta h E^{-1/r}\). Ein PI-Regler verbindet aktuellen und letzten akzeptierten Fehler, etwa \(h_{neu}/h=\eta E_n^{-0.7/r}E_{n-1}^{0.4/r}\). PID-Varianten nutzen weitere Fehlerhistorie. Nach einem Reset beginnt die Historie neu. Die Koeffizienten sind ein Reglerentwurf und müssen zur Schätzformel passen.
+
+In Logarithmen wird die Wirkung der Historie lesbar. Setzen wir \(e_n=\log E_n\) für positive Fehler. Ein verbreiteter Aufbau kombiniert \(-\beta_1 e_n+\beta_2e_{n-1}-\beta_3e_{n-2}\) mit \(\log\eta\) zu \(\log(h_{n+1}/h_n)\). Exponenzieren liefert drei Fehlerfaktoren. Für den hier verwendeten PI-Fall ist \(\beta_3=0\). Ein PID-Entwurf kann zusätzlich auf eine Änderung des Fehlertrends reagieren. Die Auswahl der Koeffizienten hängt von Verfahren, Fehlerordnung und gewünschter Reglerdämpfung ab.
 \hypertarget{punkt2-3-3}{}\subt{2.3.3\enspace Akzeptanz, Verwerfung und Grenzen}
 Für \(E\le1\) werden die Kandidatenzeit und der Zustand übernommen. Bei Verwerfung bleiben Zeit, Zustand und akzeptierte Historie erhalten. Der nächste Versuch benutzt einen beschränkten kleineren Schritt. Bei \(E=0\) begrenzt ein Wachstumsfaktor die Vergrößerung. Liegt der notwendige Schritt unter der darstellbaren Zeitauflösung, endet der Lauf mit einer Diagnose. Ein fester Ausgabezeitpunkt ist kein Grund, den lokalen Fehlertest zu umgehen.
 \hypertarget{punkt2-3-4}{}\subt{2.3.4\enspace Hermite- und Kollokationspolynome}
@@ -247,19 +249,37 @@ BDF&\(5{,}44\cdot10^{-4}\)&\(1{,}10\cdot10^{-6}\)\\\bottomrule\end{tabularx}\par
 Die groben Läufe überschreiten das Ziel \(10^{-4}\) bereits an einzelnen Prüfstellen. Für die drei feinen Läufe liegen die oberen Schranken auf dem gesamten Intervall von 0 bis 2 s unter dem Ziel. Die Aussage bezieht sich auf die reellen Polynome aus den gespeicherten Binärkoeffizienten von SciPy 1.17.0. Die erneute Gleitkommaauswertung an einem Gerät kann zusätzlich runden.
 \notebox{Übertragen}{Eine garantierte obere Grenze oberhalb des Ziels allein beweist keinen Fehlschlag. Welcher Befund genügt? Ein einziger nachweislich zu großer Punktfehler. Die Datei enthält zu jedem Lauf beide Grenzen.}
 \srcs{\see{tracking}{Ursprünglicher Vergleich} · \texttt{kapitel.json}, Abschnitt \texttt{dense}.}
+\lektion{Wie ein Regler nach einem Fehlversuch weiterrechnet}{pruefung2}{Herleitung und Gegenprobe}{Kapitel 2}
+Eine steile Flanke tritt zwischen zwei geplanten Ausgaben auf. Ein eingebettetes RK-Paar liefert zwei Endwerte aus denselben Stufen. Ihre Differenz \(d\) misst, wie stark sich die beiden Näherungen bei der gewählten Schrittweite trennen. Für die folgende Handrechnung skaliere der Schätzer wie \(h^3\), wie bei einem üblichen 3(2)-Paar in einem glatten Bereich.
+
+Nehmen wir \(E=8\) beim ersten Versuch mit \(h=0{,}1\unitm s\) an. Ein I-Regler mit Sicherheitsfaktor \(0{,}9\) schlägt \(h_{\rm neu}=0{,}1\cdot0{,}9/8^{1/3}=0{,}045\unitm s\) vor. Die neue Schätzung lautet bei gleichbleibendem Fehlerkoeffizienten \(8(0{,}045/0{,}1)^3=0{,}729\). Erst die neu berechneten Stufen entscheiden, ob diese Vorhersage zutrifft. Nach der Annahme darf der Regler \(0{,}729\) als Gedächtniswert verwenden. Die abgewiesene Acht würde den nächsten PI-Vorschlag verfälschen.
+
+Wozu braucht man eine Norm? Für vier Komponenten mögen die bereits durch ihre physikalisch passenden Skalen geteilten Differenzen \((1{,}8,0,0,0)\) betragen. Das quadratische Mittel liefert \(\sqrt{1{,}8^2/4}=0{,}9\), der Maximalwert beträgt \(1{,}8\). Die Entscheidung hängt also auch davon ab, ob jede Komponente einzeln geschützt werden soll. Eine Schaltzeit mit eigenem Budget prüft man anschließend in Sekunden.
+
+\notebox{Achtung, Falle}{Die RMS-Skalierung im Projektmodul \texttt{embedded23.py} gehört dort zu einem I-Regler mit Exponent \(-1/3\). Das PI-Schema auf der folgenden Werkstattseite ist eine alternative Implementierung mit denselben lokalen Fehlerdaten. Am festen Ausgaberaster darf man die Anzahl der verworfenen Versuche nicht ablesen.}
+\srcs{\repocurrent{argesim_benchmarks/solvers/embedded23.py}{RK- und ESDIRK-3(2) im Projekt} · \see{alg2}{Regler mit Initialisierung und Wiederholung}.}
+
 \lektion{Ein adaptiver Schritt als Entscheidung}{alg2}{Werkstatt}{Kapitel 2}
-Bei einem verworfenen Versuch darf der Zustand des letzten akzeptierten Schritts erhalten bleiben. Der Pseudocode verwendet die höhere Formel des Paares und eine RMS-Fehlernorm. Der Faktor darf nach einer Verwerfung höchstens eins werden.
+Der folgende Regler übernimmt den höherwertigen Kandidaten, sobald sein skalierter lokaler Fehler zulässig ist. \(r\) bezeichnet den Exponenten des Fehlerschätzers. Zu Beginn und nach jedem Modellwechsel ist \texttt{vorher} leer. \texttt{clip} beschränkt seinen ersten Wert auf das angegebene Intervall.
 {\small\begin{verbatim}
-(k, hoch, tief) = eingebettetes_paar(t, y, h)
-E = rms((hoch - tief) / skala(y, hoch))
-wenn E <= 1:
+solange t < ziel:
+    h = min(h, h_max, ziel - t)
+    wenn t + h <= t: melde fehlenden Zeitfortschritt
+    hoch, tief = eingebettetes_paar(t, y, h)
+    E = rms((hoch - tief) / skala(y, hoch))
+    wenn E nicht endlich oder E > 1:
+        wenn h <= h_min: beende mit Toleranzdiagnose
+        f = 0.2 falls E nicht endlich sonst 0.9 * E**(-1/r)
+        h = max(h_min, h * clip(f, 0.2, 0.9))
+        wiederhole ohne Aenderung von t, y und vorher
+    f = 5 falls E == 0 sonst 0.9 * E**(-1/r)
+    wenn E > 0 und vorher vorhanden:
+        f = 0.9 * E**(-0.7/r) * vorher**(0.4/r)
     t, y = t + h, hoch
-    faktor = PI(E, letzter_akzeptierter_Fehler)
-    letzter_akzeptierter_Fehler = max(E, kleine_Zahl)
-sonst:
-    faktor = begrenze(I(E), unten, 1)
-h = begrenze(h * faktor, h_min, h_max)
+    vorher = max(E, sehr_kleine_positive_Zahl)
+    h = max(h_min, h * clip(f, 0.2, 5))
 \end{verbatim}}
+Der erfolgreiche Schlussversuch darf kürzer als \(h_{\min}\) sein. Für die RMS-Skala benötigen alle Komponenten positive Nenner. Bei einer verworfenen Stufe gehören auch neue Ausgaben und Ereignisse weiter zum vorläufigen Versuch.
 \subt{Selbst rechnen}
 Ein Paar mit quadratisch skalierendem Schätzer meldet E=4. Welche Änderung verlangt der reine I-Regler bei Sicherheitsfaktor 0,9?
 \notebox{Lösung}{Der Versuch wird verworfen. Der neue Schritt beträgt 0,9 mal vier hoch minus ein Halb, also 0,45 des alten. Bei vergleichbarer Krümmung erwartet man nun einen normierten Fehler von etwa 0,81. Ein weiterer Fehlertest entscheidet über die Annahme.}

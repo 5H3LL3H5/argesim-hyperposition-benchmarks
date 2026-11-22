@@ -26,6 +26,11 @@ class TextbookTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'changed'):
                 book.check(out)
 
+    def test_worked_examples_cover_each_chapter_and_match_lab_data(self):
+        checks = run_path(str(book.MATERIAL / 'kapitelvergleich.py'))
+        results = [*checks['theorie'](), *checks['benchmark']()]
+        self.assertEqual([number for number, _ in results], list(range(1, 18)))
+
     def test_transport_and_collision_invariants(self):
         upwind, lax_wendroff = LAB['transport']()
         self.assertEqual(upwind, [0, 0.5, 1, 0.5])

@@ -115,6 +115,19 @@ Entscheidend ist das Residuum des \emph{wahren} Wächters an der gemeldeten Zeit
 \subt{Ergebnis der Nachuntersuchung}
 Bei \(b(t)=(t-t_*)^2\) erzeugt eine Störung \(-\varepsilon\) zwei Nullstellen im Abstand \(\sqrt{\varepsilon}\) von \(t_*\). Eine Störung \(+\varepsilon\) entfernt sie. Für einen Detektor mit endlich vielen Punktabfragen zeigt die Nachrechnung außerdem, warum ohne zusätzliche Signalannahmen Ereignisse verborgen bleiben können.
 \srcs{\see{befundereignis}{Nachweis und Ergebnis} · \refbk{qrev}{Castro u.\,a. (2024), QSS-Übersicht} · \href{https://arxiv.org/abs/2306.06862}{Kong u.\,a. (2024), Saltation Matrices}.}
+\lektion{Warum eine verschobene Stoßzeit die Ableitung verändert}{pruefung5}{Herleitung und Gegenprobe}{Kapitel 5}
+Zwei nahezu gleiche Bälle nähern sich dem Boden. Zur Trefferzeit der ersten Bahn ist die zweite noch ein kleines Stück darüber. Wer beide Geschwindigkeiten zur gleichen Uhrzeit vergleichen will, muss die zweite Bahn erst zu ihrem eigenen Stoß und anschließend wieder zur Vergleichszeit transportieren. Genau dieser Zeitversatz steckt in der Saltationsmatrix.
+
+Sei \(g(t,x)=0\) der Wächter und \(\delta x^-\) die Abweichung am nominellen Stoßzeitpunkt vor dem Reset. Am veränderten Stoßzeitpunkt kommt \(f^-\delta t\) zur Zustandsabweichung hinzu. Die lineare Änderung der Wächtergleichung lautet daher
+\[
+ 0=g_x\delta x^-+(g_t+g_xf^-)\delta t.
+\]
+Bei transversal durchquerter Fläche ist der Klammerausdruck ungleich null. Division liefert \(\delta t=-g_x\delta x^-/(g_t+g_xf^-)\). Am verschobenen Ereignis verändert der Reset \(R(t,x)\) den Zustand um \(R_x\delta x^-+(R_t+R_xf^-)\delta t\). Um beide Bahnen nach dem Stoß zur selben Uhrzeit auszuwerten, ziehen wir \(f^+\delta t\) ab. Einsetzen von \(\delta t\) ergibt die Matrix aus Abschnitt 5.3.
+
+Sei \(g=q\), die Geschwindigkeit beim Aufprall \(-2\unitm{m/s}\) und die kleine Höhenabweichung \(+1\unitm{mm}\). Damit folgt \(\delta t=+0{,}0005\unitm s\). Der höher liegende Ball erreicht den Boden später. Ist die Normalgeschwindigkeit dagegen fast null, kann derselbe Höhenfehler eine große Zeitverschiebung bewirken.
+\notebox{Diagnose am Integrator}{Protokollieren Sie neben der letzten Nullstellenklammer auch \(g_t+g_xf^-\). Eine schmale Klammer lokalisiert die Nullstelle der interpolierten Bahn. Die Umrechnung eines Bahnfehlers in einen Zeitfehler benötigt zusätzlich eine untere Schranke für die Durchtrittsgeschwindigkeit.}
+\srcs{\see{abs5-3}{Vollständige Saltationsmatrix} · \see{befundereignis}{Transversaler Durchgang und Berührung}.}
+
 \lektion{Eine Ereigniszeit halbieren}{alg5}{Werkstatt}{Kapitel 5}
 Für einen kontinuierlichen Wächter mit entgegengesetzten Vorzeichen an den Intervallgrenzen bleibt in jeder Runde mindestens eine Wurzel in der Klammer. Vor der Schleife werden Nullstellen genau an den Endpunkten mit der gewünschten Richtungsregel behandelt.
 {\small\begin{verbatim}

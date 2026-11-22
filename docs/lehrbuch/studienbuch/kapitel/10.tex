@@ -6,6 +6,12 @@ Zwei Programme liefern zum Versuchsende dieselbe Kugelgeschwindigkeit. Im ersten
 \hyperlink{abs10-2}{10.2 · Toleranzvertrag, Modellhärte und Methodenvergleich} & \pagelink{abs10-2}\\[2pt]
 \hyperlink{abs10-3}{10.3 · Aufgaben ausführen und Ergebnisse diagnostizieren} & \pagelink{abs10-3}\\[2pt]
 \bottomrule\end{tabularx}\par}
+\par\textsf{\bfseries\color{sea}Phänomen und Leitfrage.} Ein richtiges Endtempo bei verspätetem Stoß zeigt, warum der Beobachter auch die Kontaktzeit braucht.
+\par\textsf{\bfseries\color{sea}Modellbildung.} Für den Vergleich halten wir Anfangslage, freie Bewegung und Stoßgesetz fest. Derselbe Beobachter liest aus jeder Lösung dieselben Größen aus.
+\par\textsf{\bfseries\color{sea}Numerischer Härtefall.} Ein Schritt kann zwei Kontakte umfassen. Die Zahl und die Kennungen der erkannten Übergänge gehören deshalb zur Auswertung.
+\par\textsf{\bfseries\color{sea}Methodenvergleich.} Für die Kugelreihe nehmen wir die analytischen Flugphasen als Referenz und messen für RK und QSS die Kosten bis zur geforderten Genauigkeit.
+\par\textsf{\bfseries\color{sea}Aufgaben und Akzeptanz.} C12 fordert auch unelastische und stochastische Versuche. Das elastische Studienfenster hat drei Kontaktzeiten und vier Endgeschwindigkeiten mit jeweils eigenem Budget.
+\par\textsf{\bfseries\color{sea}Diagnose.} Bei einer Abweichung wird zuerst der beteiligte Kontakt identifiziert. Danach vergleichen wir Uhrzeit, Geschwindigkeitssprung und den Beitrag dieser Messgröße zum Score.
 \seite{}{Benchmark-Methodik}\anchorpage{2}{abs10-1}{10.1 · Phänomen und Prüfaufgabe}\ey{ABSCHNITT 10.1}\ptitle{Phänomen und Prüfaufgabe}
 \subt{10.1.1\enspace Aus der Leitfrage wird eine beobachtbare Größe}
 Ein Prüfstand braucht dieselbe Aufgabe für jede Kandidatin. Die offizielle ARGESIM-Definition bestimmt Modell, Parameter und Aufgaben. Die Projektstudie kann ein kleineres Problemfenster wählen, etwa vier gleiche Kugeln statt einer vollständigen stochastischen Stoßkette. Dann muss das Ergebnis gerade dieses Fenster nennen.
@@ -96,3 +102,19 @@ python benchmarks/benchmark_solver_selection.py \
 \end{verbatim}}
 Beide Versuchsreihen verwenden dieselbe Definition des Scores. Das Manifest nennt CPU, Versionen, Seed und Wiederholungen. Prüfen Sie zuerst Ereignisse, Fehlerstatus und Zähler. Lokale Laufzeiten streuen.
 \srcs{\href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/tree/1824c9104152674b82de6cd84d53b0b4f68dca37}{Publikationsstand 1824c91041} · \repo{benchmarks/benchmark_solver_extension.py}{Acht-Fälle-Protokoll} · \repo{benchmarks/benchmark_solver_selection.py}{Auswahlprotokoll}.}
+\lektion{Aus Rohgrößen eine überprüfbare Entscheidung gewinnen}{pruefung10}{Messwerte nachrechnen}{Kapitel 10}
+Der Prüfstand beobachtet zwei unterschiedliche Uhren. Die erste läuft in der simulierten Anlage und bestimmt, wann ein Kontakt eintritt. Die zweite misst, wie lange der Computer für den Versuch braucht. Ein später Kontakt in der Modellzeit kann auch auf einem schnellen Rechner falsch sein. Welche Information muss man aufbewahren, damit ein anderer den Versuch nachprüfen kann?
+
+Beginnen wir mit dem C12-Fenster aus Kapitel 12. Die Referenz besteht in dieser Reihenfolge aus drei Kontaktzeiten \(1,2,3\unitm s\) und vier Endgeschwindigkeiten \(0,0,0,1\unitm{m/s}\). Jedes Zeitbudget beträgt \(0{,}001\unitm s\), jedes Geschwindigkeitsbudget \(0{,}001\unitm{m/s}\). Spielen wir als Gegenprobe nur den dritten Kontakt um \(0{,}0012\unitm s\) zu spät ein. Nach Division durch das zugehörige Budget ist sein Beitrag \(1{,}2\). Alle anderen Beiträge verschwinden. Das Maximum \(S=1{,}2\) verwirft diesen konstruierten Lauf. Entfernen wir dagegen den mittleren Kontakt, fehlt die Zuordnung. Die noch vorhandenen Zeitwerte gehören jetzt zu anderen Paaren.
+
+{\small\begin{verbatim}
+wenn Lauf abgebrochen: Grund und letzte Modellzeit sichern
+sonst wenn Kontaktkennungen ungleich Referenz: Ereignisfehler
+sonst:
+    fuer jede verlangte Messgroesse j:
+        pruefe endlichen Wert, passende Einheit und Budget > 0
+        e[j] = abs(Messwert[j] - Referenz[j]) / Budget[j]
+    speichere max(e), Index des Maximums und alle Einzelwerte
+\end{verbatim}}
+\notebox{Für die eigene Versuchsakte}{Halten Sie zusätzlich Modellversion, Startdaten, Reihenfolge der Ereignisse, Rechner, gezählten Arbeitsumfang und Wiederholungen fest. Die Grenzwerte und dieser Maximalscore gehören zur Vergleichsstudie im Buch. Maßgeblich für die offiziellen Aufgaben bleiben die jeweiligen ARGESIM-Definitionen. Im entpackten Labor führt \texttt{python kapitelvergleich.py} die 17 Gegenproben des Buchs aus.}
+\srcs{\repocurrent{benchmarks/benchmark_solver_extension.py}{Ausführbares Protokoll mit acht Fällen} · \see{refC12}{Aufgaben der Kugelreihe}.}

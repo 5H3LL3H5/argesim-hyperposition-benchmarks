@@ -134,6 +134,8 @@ Die zweimal abgeleitete Bedingung \(g''=0\) lässt \(g(t)=a+bt\) zu. Ein kleiner
 Ersetzt man die Beschleunigungsbedingung durch \(g''+2\alpha g'+\beta^2g=0\), dämpfen positive Parameter einen Bindungsfehler. Bei \(\alpha=\beta\) besitzt das Fehlerpolynom die doppelte Wurzel \(-\alpha\). Sehr große Werte verkürzen die künstliche Zeitkonstante und können ihrerseits die Schrittweite begrenzen. Die Koeffizienten tragen die Einheit \(\mathrm{s}^{-1}\).
 \hypertarget{punkt4-3-3}{}\subt{4.3.3\enspace SHAKE, RATTLE und eine einfache Gegenprobe}
 Für festen Radius bringt \(r\leftarrow\ell r/\|r\|\) den Ort zurück auf den Kreis. Danach entfernt \(v\leftarrow v-r(r\cdot v)/\ell^2\) den radialen Geschwindigkeitsanteil. Diese einfache Kontrolle erklärt die beiden Defekte. SHAKE und RATTLE bestimmen ihre Korrekturen innerhalb eines konsistenten Zwangsschritts mit Multiplikatoren. Die symplektische Eigenschaft gilt unter den üblichen glatten Hamilton-Annahmen und ausreichend genau gelösten Zwangsgleichungen. Die zwei Kontrollen für das Stiftpendel stehen bei \see{befundrattle}{C07}.
+
+Bei RATTLE für ein separables mechanisches System mit konstanter positiver Massenmatrix \(M\) und regulärer holonomer Bindung \(g(q)=0\) geht der erste Impuls von der alten Lage aus. Man wählt seinen Multiplikator so, dass die mit dem Halbzeitimpuls fortgeschriebene Lage \(q_{n+1}=q_n+hM^{-1}p_{n+1/2}\) die Gleichung \(g(q_{n+1})=0\) erfüllt. In der zweiten Impulshälfte wirkt die Zwangskraft in der Normalenrichtung der neuen Lage. Ihr Multiplikator erzwingt \(g_q(q_{n+1})M^{-1}p_{n+1}=0\). Ein Protokoll mit beiden Defekten deckt auch den Fall auf, dass die Länge stimmt, der Impuls aber noch aus der Tangentialebene zeigt.
 \seite{}{DAEs und Bindungen}\anchorpage{2}{abs4-4}{4.4 · Direkte DAE-Integration}\ey{ABSCHNITT 4.4}\ptitle{Direkte DAE-Integration}
 \hypertarget{punkt4-4-1}{}\subt{4.4.1\enspace Radau IIA an regulären Bindungen}
 Ein Kollokationsschritt sucht Stufenableitungen \(K_i\) mit \(F(t_n+c_i h,Y_i,K_i)=0\) und \(Y_i=y_n+h\sum_j a_{ij}K_j\). Die letzte Stufe liefert den Endzustand. Beim Index eins sichert eine lokal eindeutig lösbare algebraische Gleichung den Ast. Bei Hessenberg-DAEs vom Index zwei sind weitere Rangbedingungen und konsistente Startwerte nötig. Die Fehlerordnung kann für algebraische Größen geringer ausfallen. Kritisch wird ein Schritt, wenn die erforderliche Matrix am Ast singulär wird.
@@ -178,6 +180,20 @@ Bei \(g(t,x,z)=0\) und invertierbarem \(g_z\) existiert lokal ein stetig differe
 Die Niedrigstromlösung der C21-Diode lässt sich für die Schaltungsparameter des Versuchs auf beiden Seiten der Schaltfläche fortsetzen. Der Nachweis beruht auf einer zeitlich gleichmäßigen Spannungsgrenze und einer unteren Schranke für die algebraische Ableitung.
 \notebox{Beim Lesen von Indexangaben}{Fragen Sie nach dem Indexbegriff, der Formulierung und dem betrachteten Gebiet. Dieselbe Bewegung hat im Winkelmodell eine ODE und in kartesischen Ortskoordinaten eine höherindizierte DAE.}
 \srcs{\see{befunddiode}{Nachweis und Ergebnis} · \href{https://doi.org/10.4171/ETB/28}{Kunkel und Mehrmann (2024), Differential-Algebraic Equations} · \href{https://doi.org/10.1007/s10915-026-03385-7}{Bolten und Wimmer (2026), Spectral Deferred Corrections for DAEs of Index One}.}
+\lektion{Welche Matrix der Residualsolver wirklich löst}{pruefung4}{Herleitung und Gegenprobe}{Kapitel 4}
+Am RC-Kreis stellen wir \(R=3000\,\Omega\), \(C=0{,}002\unitm F\) und \(U_s=6\unitm V\) ein. Zu Beginn sei \(u_0=3\unitm V\). Die Masche verlangt \(i_0=(6-3)/3000=1\unitm{mA}\). Wie zwingt ein Zeitschritt die künftige Spannung und den künftigen Strom wieder auf dieselbe Masche?
+
+Wir ordnen die Unbekannten als \(y=(u,i)\) und verwenden die Residuen \(F_1=C\dot u-i\), \(F_2=u+Ri-U_s\). Bei rückwärts Euler ist \(\dot u_1=(u_1-u_0)/h\). Eine Korrektur \(\delta u\) ändert gleichzeitig diesen Differenzenquotienten um \(\delta u/h\). Die Kettenregel liefert für das Newton-System
+\[
+ F_y+h^{-1}F_{\dot y}=
+ \begin{pmatrix}C/h&-1\\1&R\end{pmatrix}.
+\]
+In der ersten Zeile wird in Ampere, in der zweiten in Volt bilanziert. Für \(h=1\unitm s\) gilt \(i_1=0{,}002(u_1-3)\) bei Zahlenwerten in SI-Einheiten. Setzen wir das in \(u_1+3000i_1=6\) ein, folgt \(7u_1=24\). Daher sind \(u_1=24/7\unitm V\) und \(i_1=6/7\unitm{mA}\). Einsetzen in beide Originalzeilen ergibt null. Das lineare Modell benötigt bei exakter Arithmetik nur eine Newton-Korrektur mit dieser Matrix.
+
+Für eine BDF ersetzt der Koeffizient der aktuellen Unbekannten im Ableitungsansatz den Faktor \(1/h\). Genau diesen Koeffizienten muss die Jacobi-Routine des Residualsolvers berücksichtigen. Die Matrix ist hier wegen \(1+RC/h>0\) für \(h>0\) regulär.
+\notebox{Achtung, Falle}{Ein gemeinsames absolutes Abbruchkriterium für Zahlenwerte in Ampere und Volt verändert seine Bedeutung beim Wechsel zu Milliampere. Skalieren Sie die beiden Gleichungen mit benannten Bezugsgrößen und kontrollieren Sie die physikalischen Residuen zusätzlich in Originaleinheiten.}
+\srcs{\see{abs4-4}{IDA und konsistente Anfangsdaten} · \see{alg4}{Bindung vor und nach einem Schritt}.}
+
 \lektion{Zwei Gegenproben für einen Bindungsschritt}{alg4}{Werkstatt}{Kapitel 4}
 Ein Programm meldet eine exakte Fadenlänge. Im nächsten Schritt wächst sie dennoch wieder. Wie prüfen wir, ob bereits die Geschwindigkeit nach außen zeigt? Der Lehralgorithmus illustriert die Diagnose für einen Kreis mit festem Radius.
 {\small\begin{verbatim}

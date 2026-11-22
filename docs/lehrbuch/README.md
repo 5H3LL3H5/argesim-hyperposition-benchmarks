@@ -6,7 +6,7 @@
 
 ## Gliederung und Quellen
 
-[Inhalt, Lesewege und Drucksatz](studienbuch/kurs.tex) · [Hauptkapitel und Anhänge](studienbuch/kapitel) · [Abnahme der PR-77-Befunde mit aktualisierten PDF-Seiten](../ARGESIM_Review_PR77_Abnahme.md)
+[Fachlich-didaktische Kapitelprüfung mit PDF-Fundstellen](../ARGESIM_Kapitelpruefung.md) · [Inhalt, Lesewege und Drucksatz](studienbuch/kurs.tex) · [Hauptkapitel und Anhänge](studienbuch/kapitel) · [Abnahme der PR-77-Befunde mit aktualisierten PDF-Seiten](../ARGESIM_Review_PR77_Abnahme.md)
 
 | Teil | Inhalt |
 |---|---|

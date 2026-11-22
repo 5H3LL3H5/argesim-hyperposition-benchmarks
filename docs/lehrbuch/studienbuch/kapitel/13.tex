@@ -182,6 +182,15 @@ Sei \(v\le v_{\min}\) die gerade erreichte \emph{Abflug}geschwindigkeit, \(g>0\)
 Ein zweiter Integrator führt Ort und Geschwindigkeit mit der aus der Bindung abgeleiteten Beschleunigung. Beim Stiftwechsel versetzt er den Drehpunkt und übernimmt die physische Geschwindigkeit. Über zehn Sekunden wurden alle acht Wechsel geprüft. Längenfehler blieben unter \(1{,}18\cdot10^{-12}\unitm m\), \(|(r-p)\cdot v|\) unter \(5{,}33\cdot10^{-12}\unitm{m^2/s}\). Die größte Zeitabweichung von der Winkelrechnung betrug \(3{,}77\cdot10^{-11}\unitm s\). Der Impulssprung ist beim verwendeten Reset konstruktiv null.
 \srcs{\texttt{kapitel.json}, Abschnitte \texttt{thresholds} und \texttt{cartesian} · \see{befunddiode}{C21-Astbeweis}.}
 
+\lektion{C07 und C21 · Wie man den falschen Ast erkennt}{pruefung13}{Messwerte nachrechnen}{Kapitel 13}
+Das Pendel trifft den Stift. Seine Tangentialgeschwindigkeit bleibt im idealen Übergang erhalten, der Abstand zum neuen Drehpunkt wird kleiner. Wer die Winkelgeschwindigkeit unverändert übernimmt, macht das Pendel unbemerkt langsamer. In der Diode kann ein anderer Fehler dieselbe Art von Täuschung erzeugen. Zwei algebraische Zustände können die Gleichung gleichermaßen gut erfüllen, obwohl nur einer zur Vorgeschichte der Schaltung passt.
+
+Beim Stift prüft man \(L^-\omega^-=L^+\omega^+\). Im ursprünglichen C07-Fenster sind die Endbudgets \(0{,}001\unitm{rad}\) und \(0{,}004\unitm{rad/s}\). Für jeden Stiftzeitpunkt kommen \(0{,}001\unitm s\) hinzu. QSS2 mit Quantenfaktor \(10^{-3}\) erreicht in zwei Sekunden \(S\approx1{,}583\) bei 910 Funktionsaufrufen. RK45 erreicht \(S\approx3{,}25\cdot10^{-6}\) bei 1611 Aufrufen. Die archivierte Zeile nennt das Maximum. Ohne die einzelnen Rohfehler kann man daraus weder das verantwortliche Ereignis noch die verantwortliche Zustandskomponente zurückrechnen.
+
+Bei der C21-Diode legen wir die Ereignisse beider Lösungen in zeitlicher Reihenfolge nebeneinander. Das IDAS-Archiv enthält 149 Übergänge in \(500\,\mu\mathrm s\). Für die explizite Spannungsreduktion ist der größte zugehörige Zeitunterschied rund \(9{,}82\cdot10^{-14}\unitm s\). Zusätzlich misst die Residualrechnung einen maximalen algebraischen Defekt von rund \(2{,}19\cdot10^{-10}\) in der Modellskalierung. Zeitzuordnung, Bindungsfehler und Trajektorienabweichung prüfen unterschiedliche Eigenschaften.
+\notebox{Diagnose}{Speichern Sie beim Pendel den aktiven Radius links und rechts des Ereignisses. Speichern Sie bei der Diode die algebraische Variable und den Ast zu jedem Wechsel. Ein zu kleiner Rang der linearisierten Bindung stellt die lokale Fortsetzbarkeit infrage, selbst wenn der momentane Defekt sehr klein ist.}
+\srcs{\see{refC07}{Offizielle Pendelaufgaben} · \repocurrent{docs/evidence/c21-idas.json}{Residualrechnung und explizite Gegenrechnungen}.}
+
 \werkblatt{13}{Selbst prüfen}{ueb10}{Sprungregel und Lösungszweig}
 
 \merke{Ein Wechsel kann eine Koordinate sprunghaft ändern, während der beobachtete physikalische Zustand stetig bleibt. In einem algebraischen Teilmodell entscheidet zusätzlich der gültige Lösungszweig.}

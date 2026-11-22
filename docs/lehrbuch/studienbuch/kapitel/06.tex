@@ -36,6 +36,7 @@ Sei \(y'=-ay+u,\ x'=-aq+u,\ a>0\) und überall \(|q-x|\le\Delta\). Mit \(e=x-y\)
  = e^{-at}|e(0)|+(1-e^{-at})\Delta .
 \]
 Die Schranke gilt für alle Zeiten des glatten Abschnitts. Sie beschreibt die gedämpfte Fehlerantwort. Zusätzliche numerische Ableitungs- und Resetfehler müssen separat eingehen.
+\notebox{Merksatz}{Für einen stabilen linearen Vektorspeicher mit \(\|e^{At}\|\le M e^{-\gamma t}\), \(\gamma>0\), gilt bei \(\|q-x\|\le\Delta\) und \(e=x-y\) die Gleichung \(e'=Ae+A(q-x)\). Variation der Konstanten und Integration von \(e^{-\gamma(t-s)}\) ergeben \(\|e(t)\|\le M e^{-\gamma t}\|e(0)\|+M\|A\|\Delta(1-e^{-\gamma t})/\gamma\). Für gekoppelte Speicher kann der Verstärkungsfaktor größer als eins sein.}
 \lektion{Wie der Quantisierungsfehler die Lösung stört}{qfehler}{Vertiefung}{Hybride Systeme}
 Die diskrete Meldung \(q\) verändert die rechte Seite. Das Quantum hat die Einheit des zugehörigen Zustands. Ein Quantum von einem Millimeter bei der Position und eines von einem Ampere beim Strom sind ohne getrennte Skalierung unvergleichbar.
 \subt{Satz · Fehlergrenze für einen stabilen skalaren Speicher}
@@ -65,6 +66,8 @@ Für \(x'=-q\) und \(x(0)=100\) frieren wir die Meldung jeweils bis zum ersten T
 \seite{}{QSS und DEVS}\anchorpage{2}{abs6-3}{6.3 · Steifigkeit und Chattering bei QSS}\ey{ABSCHNITT 6.3}\ptitle{Steifigkeit und Chattering bei QSS}
 \hypertarget{punkt6-3-1}{}\subt{6.3.1\enspace Wenn ein schnelles Rückstellglied zu viele Meldungen erzeugt}
 Liegt das Gleichgewicht einer stark gedämpften Komponente mitten im Band, kann die eingefrorene Steigung den Zustand darüber hinaustragen. Beim Melden wechselt das Vorzeichen. Der Speicher pendelt numerisch, obwohl das physikalische System rasch in Ruhe käme. Ein typischer Diagnoseversuch zeichnet \(x_i,q_i\) und die Meldedichte zusammen auf und verkleinert dann das Quantum. Numerische Meldungen und physikalische Schaltungen sind getrennte Zähler.
+
+Rechnen Sie einen solchen Umlauf selbst. Für \(x'=-a q\), \(a>0\), verwendet QSS1 die Aktualisierung \(q\leftarrow x\), sobald \(|x-q|=\Delta\). Starten wir mit \(q=x=\Delta/2\). Die Steigung beträgt \(-a\Delta/2\). Um bis \(-\Delta/2\) zu reisen, muss \(x\) die Strecke \(\Delta\) zurücklegen. Das dauert \(\Delta/(a\Delta/2)=2/a\). Jetzt kehrt die Steigung ihr Vorzeichen um. Nach weiteren \(2/a\) ist der Ausgangswert wieder erreicht. Bei diesem gewählten Start halbiert ein halb so großes Band samt halbiertem Startwert die Schwingungsamplitude. Die Periodendauer \(4/a\) bleibt gleich. Die exakte Lösung \((\Delta/2)e^{-at}\) fällt dagegen fortlaufend.
 \seite{}{QSS und DEVS}\anchorpage{2}{abs6-4}{6.4 · LIQSS und partitionierte Verfahren}\ey{ABSCHNITT 6.4}\ptitle{LIQSS und partitionierte Verfahren}
 \hypertarget{punkt6-4-1}{}\subt{6.4.1\enspace Lokale implizite Rückkopplung}
 LIQSS nähert die eigene Abhängigkeit als \(x_i'\simeq a_{ii}x_i+u_i\) an. Im Dämpfungsfall \(a_{ii}<0\) gibt \(-u_i/a_{ii}\) das lokale Gleichgewicht an. Die Quantisierungsentscheidung berücksichtigt es und kann die unphysikalische Banddurchquerung vermeiden. Bei zwei stark rückgekoppelten Zuständen enthält die Diagonale nur einen Teil der Dynamik. Eine Paarbehandlung oder ein Blocksolve kann angemessener sein.
@@ -87,6 +90,15 @@ LIQSS-BDF&Teilt Zustände in eine quantisierte und eine implizit zeitintegrierte
 \end{tabularx}\par}
 Die Acht-Fälle-Matrix enthält damit 18 registrierte QSS-Namen. Die spätere Auswahlstudie ergänzt BQSS1, das vorwärts liegende Gitterwerte anhand der Bewegungsrichtung auswählt, sowie QSS1/2 mit logarithmischer Quantisierung. Dabei wird die Breite bei einem eigenen Update aus \(\max(\Delta_\mathrm{abs},\Delta_\mathrm{rel}|x_i|)\) bestimmt. Relative Quanten helfen bei großen Dynamikbereichen. Die absolute Untergrenze ist nahe null entscheidend.
 \srcs{\repo{QSS_SOLVERS.md}{Methodenkatalog des Projekts} · \refbk{liq}{Migoni u.\,a., LIQSS} · \see{matrix}{alle 18 Namen und ihre Trefferzahlen} · \see{qzahl}{Drei Quantenregeln und der erste QSS2-Termin}.}
+\lektion{Zwei Quantisierer melden gleichzeitig}{pruefung6}{Herleitung und Gegenprobe}{Kapitel 6}
+Zwei Speicher werden mit der gleichen konstanten Rate geladen. Beide melden nach \(0{,}2\unitm s\) einen Banddurchgang. Ein dritter Baustein erhält die Differenz \(q_1-q_2\). In der richtigen Trajektorie ist diese Differenz null. Wenn das Programm die erste Meldung schon wirksam macht und erst später die zweite einsammelt, erzeugt es eine künstliche Zwischenstufe. Wie legt man fest, was „gleichzeitig“ im Rechner bedeutet?
+
+Für diesen Lehrversuch sei \(x'_1=x'_2=1\), \(x'_3=q_1-q_2\) und \(x(0)=q(0)=0\) bei einheitlich skalierten Zuständen. QSS1 hält \(q_1,q_2\) zwischen ihren Meldungen konstant. Das Quantum sei jeweils \(0{,}2\). Bei \(t=0{,}2\) sind die kontinuierlichen Zustände \(x_1=x_2=0{,}2\). Beide quantisierten Ausgänge wechseln im gleichen Ereigniszeitpunkt auf \(0{,}2\). Für das anschließende offene Zeitintervall ist also \(x'_3=0\). Bei \(t=0{,}4\) wiederholt sich die Rechnung. Wer nach der ersten Meldung \(x'_3=0{,}2\) findet, muss beim zweiten Eingang am gleichen Zeitpunkt die Prognose erneut bilden. Für das Fortschreiben von \(x_3\) ist dabei null physikalische Zeit vergangen.
+
+Der Koordinator sammelt alle für denselben Termin gültigen internen Ausgaben aus dem alten Zustand, verteilt sie als Eingabemenge und führt erst dann die Zustandsübergänge aus. Treffen interne und externe Termine eines Bausteins zusammen, legt seine konfluente Übergangsfunktion die gemeinsame Verarbeitung fest. Zeitstempel mit einem zusätzlichen Mikroindex ordnen Folgereaktionen bei derselben physikalischen Zeit.
+\notebox{Achtung, Falle}{Das willkürliche Zusammenziehen numerisch naher, tatsächlich verschiedener Zeiten kann die Ereignisfolge ändern. Im Versuch lassen sich die gemeinsamen Termine über denselben ganzzahligen Taktindex erzeugen. Prüfen Sie die dritte Trajektorie noch einmal bei umgekehrter Einfügereihenfolge der Meldungen.}
+\srcs{\see{alg6}{Veraltete Termine im Kalender} · \see{qfehler}{Vom Quantenband zur globalen Fehlerschranke}.}
+
 \lektion{Eine überholte QSS-Meldung erkennen}{alg6}{Werkstatt}{Kapitel 6}
 Eine alte Prognose kann beim Eintreffen einer Nachricht noch in der Prioritätswarteschlange liegen. Verwaltet jeder Speicher eine fortlaufende Versionsnummer, erkennt der Koordinator veraltete Einträge, bevor sie den Zustand verändern.
 {\small\begin{verbatim}
@@ -94,7 +106,10 @@ Eine alte Prognose kann beim Eintreffen einer Nachricht noch in der Prioritätsw
 wenn version != aktuell[i]: ueberspringe_Eintrag
 sammle_alle_gueltigen_Meldungen_zur_selben_Zeit(t)
 fuehre_Polynome_bis(t)
-fuehre_konfluenten_Uebergang_aus()
+sende interne Ausgaben aus den Zustaenden vor dem Wechsel
+sammle fuer jedes Modell alle eintreffenden Eingaben
+intern und extern: verwende die konfluente Modellregel
+sonst: verwende den internen oder externen Uebergang
 fuer jede betroffene Komponente j:
     aktuell[j] += 1
     plane(neuen_Banddurchgang(j), j, aktuell[j])

@@ -1,0 +1,78 @@
+# Kapitelprüfung · Numerische Simulation dynamischer Systeme
+
+**Geprüfte Fassung vom 22. November 2026.** Das Protokoll bezieht sich auf den gesetzten Volltext und das zugehörige Rechenlabor. Die verlinkten Seiten zeigen für jedes Kapitel eine konkrete Nachrechnung. Die Theorieprüfung folgt dem Weg vom beobachtbaren Vorgang über die Herleitung zum Rechenverfahren. Bei den Anwendungen gehören Aufgabe, Modell, Verfahrenswahl, Akzeptanz und Diagnose zusammen.
+
+## Kapitel 1 bis 9
+
+| Kapitel und Fundstelle | Physikalischer Ausgangspunkt | Herleitung und Solver | Nachrechenbare Beobachtung |
+|---|---|---|---|
+| 1 · [S. 65](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=65) | Zwei Temperaturfühler laufen nach einer Anfangsstörung zusammen. | Integralungleichung und integrierender Faktor liefern die exponentielle Schranke. | Nach 1 s bleiben 0,01353 K Abstand. Die allgemeine Normschranke erlaubt 0,739 K. |
+| 2 · [S. 83](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=83) | Eine Flanke erzwingt die Wiederholung eines Schritts. | Schätzerordnung, RMS-Skala und PI-Historie. Initialisierung, Nullfehler, Verwerfung und fehlender Zeitfortschritt sind im Pseudocode sichtbar. | Aus 0,1 s und E = 8 folgen 0,045 s und eine Vorhersage von 0,729. RMS und Maximum entscheiden im Vier-Komponenten-Beispiel unterschiedlich. |
+| 3 · [S. 94](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=94) | Die schnelle Temperaturmode klingt nach dem Schalten ab. | Vom linearen Stufensystem zur rationalen Stabilitätsfunktion. Modifiziertes Newton prüft die berechnete Korrektur und den neuen Defekt. | Bei z = −10 bleiben 3/58. Im nichtlinearen Beispiel ergibt die feste Matrix 17/27 als zweiten korrigierten Wert. |
+| 4 · [S. 110](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=110) | Spannung und Strom müssen zur selben Masche passen. | Kettenregel für den Residual-Jacobi, konsistente Initialisierung und getrennte Residuen in Ampere und Volt. RATTLE erläutert beide Multiplikatoren. | Der RC-Schritt liefert 24/7 V und 6/7 mA. Beide Originalgleichungen schließen. Beim Pendel werden Lage und Tangentialgeschwindigkeit geprüft. |
+| 5 · [S. 123](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=123) | Zwei leicht versetzte Bälle erreichen den Boden zu verschiedenen Zeiten. | Ereigniszeitvariation aus der Wächtergleichung und Rücktransport auf dieselbe Uhrzeit. Klammer und Transversalitätsannahme sind ausgewiesen. | Bei −2 m/s ergibt sich die Empfindlichkeit 0,5 s/m. Für die Berührung mit verschwindender Normalgeschwindigkeit gilt die Abschätzung nicht. |
+| 6 · [S. 134](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=134) | Zwei Speicher melden gleichzeitig einen Banddurchgang. | DEVS-Ausgaben, Eingabemenge, konfluenter Übergang, veraltete Termine und Gegenbeispiel zum Verkleinern des Quantums. | Beide Einfügereihenfolgen halten den Differenzspeicher bei null. Im skalar gedämpften Lehrfall beträgt die künstliche Periode 4/a. |
+| 7 · [S. 160](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=160) | Eine Transportfront bildet einen Gipfel, den die Rekonstruktion überschießen kann. | Minmod aus Zellmitteln, Teleskopieren der Flüsse. Das einzelne finite Element liefert beide Matrizen durch Integration. | Rechte Flächenwerte 1,5 und 1. Massenerhaltung und TVD-Eigenschaft des vollständigen Zeitschritts haben eigene Voraussetzungen. |
+| 8 · [S. 168](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=168) | Am bewegten Deckel gelangt Impuls in die Flüssigkeit. | Von der Boltzmann-Gleichung zur Massenbilanz, Gleichgewichtsmomente, Puffertausch und konkrete Rekonstruktion der drei unbekannten Südkanäle. | Dichte 1 und Impuls (0,1; 0) aus neun Populationen. Die Abbildung verfolgt den Ostkanal. Die tatsächlich verwendete CP2-Randregel steht daneben. |
+| 9 · [S. 180](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=180) | Eine Saite enthält Grundschwingung und feine Struktur. | Normierte DFT, Frequenzpaare, Abschneiden und Rücktransformation. Der Volltext erläutert den lokalen Zweig der FNO-Schicht und die Rolle der Anfangsbedingung beim PINN. | Auf 8 und 16 Punkten ist der relative Testfehler 1/√17. Fourier-Koeffizienten und Ausgangsfeld sind abgebildet. |
+
+## Kapitel 10 bis 17
+
+Die sechsteilige Einführung jedes Kapitels benennt Leitfrage, Modell, Härtefall, Verfahrensvergleich, Aufgabe mit Akzeptanzkriterium und Diagnose. Bei Kapitel 10 und 17 ist die gemeinsame Studie Gegenstand der sechs Fragen.
+
+| Kapitel und Fundstelle | Fall | Modell und Prüfaufgabe | Ergebnis und Reichweite |
+|---|---|---|---|
+| 10 · [S. 192](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=192) | Prüfmethodik | Drei Zeiten, vier Endgeschwindigkeiten, passende Einheiten und vorab festgelegte Budgets. | Dritter Kontakt um 1,2 ms verspätet ergibt S = 1,2. Falsche Kontaktkennung ergibt einen kategorialen Fehler. |
+| 11 · [S. 197](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=197) | C05 | Hysterese, analytischer Phasenfluss und steife Rückkopplung. Drei Zeitbudgets und zwei Endbudgets im Lehrversuch. | Radau erreicht S ≈ 0,00295 und BDF 0,233 bei den engen Lehrbudgets. Standardfolge, Aufgabe D und historisches Raster haben andere Versuchsbedingungen. |
+| 12 · [S. 206](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=206) | C12 und C21-Ball | Spaltweite, Geschwindigkeit, Resetfolge, Rückprall, Zeno-Grenzwert sowie inverse und statistische Stoßaufgaben. | C12 benötigt im geprüften QSS2-Lauf 36 RHS-Aufrufe bei drei korrekten Kontakten und null internen Updates. RK45 benötigt 148. |
+| 13 · [S. 222](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=222) | C07 und C21-Diode | Wechsel des Pendelradius, Tangentialgeschwindigkeit und DAE-Ast. Die Prüfungen erfassen Zeit, Winkel und Residuen. | C07-QSS2 verfehlt das Budget mit S ≈ 1,583. Für die Diode sind 149 Übergänge und ein maximaler algebraischer Defekt von 2,19 · 10⁻¹⁰ archiviert. |
+| 14 · [S. 233](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=233) | C09 und C13 | Abtastung, Halteglied und Eingangsseiten, affine Kranphasen und Pulsgrenzen. | Im kurzen C09-Fenster beträgt der größte QSS2-Pegelfehler rund 0,00584 mm. Ein getrenntes publiziertes Plateau weicht um 11,669 cm ab. |
+| 15 · [S. 242](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=242) | C19R | Advektion und Dispersion, Quellverteilung, Brunnenort, Außenflächen und integrierter Randfluss. | Die feste Geometrie ergibt 8,12, 7,88 und 1,97 für das Ein-Prozent-Ziel. Die frühere Reihe hat andere Außenflächen. |
+| 16 · [S. 258](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=258) | CP2 | Parallelaufgaben, D2Q9-Kavität, Saite mit festen Enden, Newmark, Fourier-Feld und analytische Kontrolle. | Bei einem Prozent Feldbudget über 5 und 8 s ergibt sich maximal 3,0009 für den ursprünglichen FNO und 0,04303 für die modale Erweiterung. |
+| 17 · [S. 269](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=269) | Synthese | Vollständige Beobachtungen, Fehlschläge, Ereignisfehler und Zeitlimits mit ausgewiesenem Nenner. | 222/456 = 48,7 % aller Einstellungen und 222/373 = 59,5 % der vollständig bewerteten Einstellungen. Diese Anteile gelten für die acht untersuchten Modellfenster. |
+
+## Anhang A
+
+Alle 24 Blätter enthalten die sechs Abschnitte sowie eine fallspezifische Gegenprobe. Für Zahlenvergleiche nennt das Buch das jeweilige Budget, soweit eines vorliegt. Erhaltung, Ereignisreihenfolge, fehlende Vergleichsdaten und stochastische Kennzahlen erfordern jeweils einen eigenen Nachweis. Die Modellnummern folgen dem offiziellen Katalog. [ARGESIM-Definitionen](https://www.argesim.org/benchmarks)
+
+| Referenzblatt | Aufgabe | Entscheidende Gegenprobe oder Evidenzgrenze |
+|---|---|---|
+| A.1 · CP1 · [S. 276](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=276) | Serielle und parallele Federreihen, gekoppelte Populationen, angeregte Saite | Endvektor der zehn Populationen bei t = 100 und gleiche Zeitmessgrenzen. |
+| A.2 · C01 · [S. 277](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=277) | Trajektorien, fünf Verlustparameter, zwei stationäre Zustände | Drei Bilanzdefekte, transiente Radau- und stationäre Dymola-Referenzen. |
+| A.3 · C03 · [S. 278](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=278) | Eigenwerte, Idealschalter, endliche Schaltflanken | Start von C aus dem Ende von B. Eigene Referenz je Flankenmodell. |
+| A.4 · C05 · [S. 279](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=279) | Standardfolge, Präzisionsvariation und häufige Wechsel | Fünf beziehungsweise 62 Wechsel in den vollen Fällen und drei im Matrixfenster. |
+| A.5 · C07 · [S. 280](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=280) | Zwei Startfälle, Linearisierung, inverse Anfangsgeschwindigkeit | Umkehrlage und Winkelgeschwindigkeit für das inverse Ziel. |
+| A.6 · C09 · [S. 281](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=281) | Fuzzy-Regelung, Abtastung und Figurenfenster | Drei Ablesebeiträge bei 1 cm Budget und 32 Pegelbeobachtungen in der Kurzstudie. |
+| A.7 · C11 · [S. 282](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=282) | Modellform, Punktfahrt und Kollisionsvermeidung | Neun Kurzfenster-Zustände. Eine vollständige unabhängige strombegrenzte Vergleichsbahn bleibt offen. |
+| A.8 · C12 · [S. 283](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=283) | Wege, Stoßzahlvariation, inverser und stochastischer Versuch | Kontaktkennungen und sieben analytische Kurzfensterwerte. |
+| A.9 · C13 · [S. 284](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=284) | Offene Fahrt mit Puls, geregelte Fahrt, Notbremsdiagnose | Fünf Zustände an drei Beobachtungszeiten und Bremsprotokolle für B/C. |
+| A.10 · C15 · [S. 285](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=285) | Feste Eingangsmenge, drei Dauern, Parameterschätzung und Wiederholungen | Die Eingangsfläche beträgt in allen drei Fällen 2500. Die generierte Projektübersicht ist entsprechend korrigiert. |
+| A.11 · C17R · [S. 286](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=286) | Gruppenmodell und räumlicher Automat | Gesamtpopulation, Standard-ODE-Referenz und Reichweite eines einzelnen räumlichen Laufs. |
+| A.12 · C19R · [S. 287](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=287) | Profil, kontinuierliche und geschaltete Behandlung | Brunnenwert bei festen Rändern, Sensorort und Quellenbilanz. |
+| A.13 · C21 · [S. 288](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=288) | Ereignis- und dynamischer Kontakt, Pendel und RLC-Diode | Zwei Ballstöße im Raster. Ast, Residuum und 149 Wechsel im Schaltungsversuch. |
+| A.14 · CP2 · [S. 289](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=289) | Monte Carlo, Kavität, Saite und Parallelisierung | Feldnormen und Effizienzmessung haben eigene Bezugsgrößen. |
+| A.15 · C02 · [S. 290](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=290) | Montageanlage unter verschiedenen Palettenlasten | Bestand und Übergaben, drei dokumentierte Abweichungen zum SimEvents-Standard. |
+| A.16 · C04 · [S. 291](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=291) | Gemeinsam genutzte Gabeln, Reinigung, Fairness | Besitzinvariante. Vergleichbare veröffentlichte Fairnessverteilungen fehlen. |
+| A.17 · C06 · [S. 292](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=292) | Notaufnahme mit drei Bedienpolitiken | Tagesbilanz und 21 Kennzahlen zur publizierten Studie mit 100 Replikationen. |
+| A.18 · C08 · [S. 293](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=293) | Schiffe und Schleusenbetrieb | Schiffskennungen und fünf deterministische Referenzdatensätze. |
+| A.19 · C10 · [S. 294](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=294) | Simultane Zugriffe und Verklemmung | Eigentumsregel, eigener Status bei Verklemmung sowie Wartezeitstatistik. |
+| A.20 · C14 · [S. 295](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=295) | Tagesbestände, Kosten und Lieferfristen | Wareneingang, offene Bestellung und Transitmenge je Lager. |
+| A.21 · C16 · [S. 296](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=296) | Bestandsentwicklung, Steueraufkommen und Standortwahl | 50 Läufe für den Mittelwert nach fünf Jahren. Eigene Zielgrößen für B/C. |
+| A.22 · C18 · [S. 297](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=297) | Identifikation und freie Vorhersage | Einschritt- und Simulationsfehler. Ohne Originalmessreihen bleibt der numerische Vergleich mit diesen Reihen offen. |
+| A.23 · C20 · [S. 298](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=298) | Anlage, Nacharbeit und Störungen | Identität bei Nacharbeit, 360 Läufe und 36 Replays mit erzeugten Auftragsbüchern. |
+| A.24 · C22 · [S. 299](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=299) | Schlangenwechsel, Abbruch und Klassen | Identität und kumulierte Wartezeit über Wechsel hinweg sowie eindeutige Grundgesamtheit. |
+
+## Anhang B
+
+| Fundstelle | Handrechnung und Prüfung |
+|---|---|
+| B.1 · [S. 301](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=301) | Alle 456 Archivzeilen und ihre acht gedruckten Spalten mit der CSV in Druckpräzision abgeglichen. Fehlender Score, Nullwert und Timeout sind verschieden. |
+| B.2 · [S. 326](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=326) | Existenz aus Vorzeichenwechsel und Stetigkeit, Eindeutigkeit aus strikter Monotonie. Die DAE-Astfortsetzung nennt die Regularitätsvoraussetzungen. |
+| B.3 · [S. 327](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=327) | Intervall-Horner und Ableitung am quadratischen Beispiel. Für die wirkliche Bahn kommt eine Defektabschätzung hinzu. |
+| B.4 · [S. 328](ARGESIM_SOLVER_STUDY.pdf?raw=true#page=328) | Python-RK4 gegen exp(−2) ausgeführt. C++20-Modellsignatur an y = 0,5 kompiliert und auf die Rate −1 sowie unveränderte Eingabe geprüft. Für implizite Systeme gilt der gesonderte Residualvertrag. |
+
+## Lokale Nachweise
+
+Im entpackten Rechenlabor führt `python kapitelvergleich.py` die 17 Kapitelproben aus. Die Theoriebeispiele verwenden die Python-Standardbibliothek. Bei den Benchmarks gleicht das Skript Handrechnungen mit den mitgelieferten CSV- und JSON-Daten ab. Die historische Kampagne umfasst 456 archivierte Konfigurationen. Sie und das FNO-Training wurden für diese Textrevision nicht erneut ausgeführt.
+
+PDF und Lesezeichen umfassen 343 Seiten. Alle 87 nummerierten Theorieunterpunkte, die 24 Referenzblätter, die 24 Einzelmessungstabellen sowie die internen Aufgaben- und Lösungsverweise wurden am PDF geprüft. PDF und Labor gehören zum selben SHA-256-Ausgabestand. [Rechenlabor](ARGESIM_Bachelor_Rechenlabor.zip) · [Ausgabestand](ARGESIM_Buchstand.json) · [Seitenzuordnung der PR-77-Befunde](ARGESIM_Review_PR77_Abnahme.md)

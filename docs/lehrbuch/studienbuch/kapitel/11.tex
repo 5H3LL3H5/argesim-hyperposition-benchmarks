@@ -22,11 +22,11 @@ Die Parameter und Schaltregeln des offiziellen Modells folgen auf der nächsten 
 
 \lektion{C05 · Zwei Zeitskalen und drei Schaltungen}{arg}{Labor}{C05}
 \vorhersage{8}{Wie schnell klingt eine Störung mit der Rate \(2{,}7\cdot10^6\unitm{s^{-1}}\) um den Faktor \(e\) ab?}{kontrolleB}
-Nun gilt das vollständige C05-Modell. Es ist durch Gleichungen vorgegeben. Die schnelle Größe \(y_1\) läuft dem momentanen Ziel \(y_2+c_2\) nach, die langsamere Größe \(y_2\) dem Ziel \(c_4\). Die rechte Seite verbindet jeweils die Abweichung vom Ziel mit dem Faktor für die Zeitskala.
+Nun gilt das vollständige C05-Modell. Es ist durch Gleichungen vorgegeben. Die schnelle Größe \(y_1\) läuft dem momentanen Ziel \(y_2+c_2\) nach, die langsamere Größe \(y_2\) dem Ziel \(c_4\). Mit den Raten \(a,b\) ergeben sich die beiden Bilanzen
 \[
  \dot y_1=a(y_2+c_2-y_1),\qquad \dot y_2=b(c_4-y_2)
 \]
-modelliert. Die Raten sind \(a=2{,}7\cdot10^6\unitm{s^{-1}}\) und \(b=3{,}5651205\unitm{s^{-1}}\), der Start ist \((4{,}2;\,0{,}3)\). Zuerst gilt \((c_2,c_4)=(0{,}4;\,5{,}5)\). Steigt \(y_1\) auf \(5{,}8\), wird \((-0{,}3;\,2{,}73)\) aktiv. Beim Absinken auf \(2{,}5\) wird zurückgeschaltet. Beide Zustände sind beim Umschalten stetig, ihre Ableitungen können springen.
+Die Raten sind \(a=2{,}7\cdot10^6\unitm{s^{-1}}\) und \(b=3{,}5651205\unitm{s^{-1}}\), der Start ist \((4{,}2;\,0{,}3)\). Zuerst gilt \((c_2,c_4)=(0{,}4;\,5{,}5)\). Steigt \(y_1\) auf \(5{,}8\), wird \((-0{,}3;\,2{,}73)\) aktiv. Beim Absinken auf \(2{,}5\) wird zurückgeschaltet. Beide Zustände sind beim Umschalten stetig, ihre Ableitungen können springen.
 \subt{Referenz innerhalb einer Phase}
 Seien \((y_{10},y_{20})\) der Phasenstart und \(s\) die lokale Zeit. Für \(d=y_{20}-c_4,\ B=ad/(a-b)\) gilt durch Lösung der zweiten Gleichung und Einsetzen in die erste
 \[
@@ -50,6 +50,15 @@ Beide Verfahren liefern alle drei Übergänge und erfüllen beide Ziele. Am Zeit
 \subt{Gegenversuch}
 Verwenden Sie gedanklich Vorwärts Euler. Für die schnelle reelle Mode verlangt \(|1-ha|\le1\) bereits \(h\le 2/a=0{,}740740\ldots\,\mu\mathrm s\). Selbst an der Stabilitätsgrenze bräuchte ein gleichmäßiges Gitter über 3,5 Sekunden mindestens 4\,725\,000 Schritte. Bei \(0{,}740\,\mu\mathrm s\) ist \(R=-0{,}998\), bei \(0{,}741\,\mu\mathrm s\) schon \(R=-1{,}0007\). Für eine stabile Proberechnung eignet sich von diesen Werten nur der erste. Die Rechnung erklärt, warum ein naiver expliziter Vergleich hier teuer ist.
 \srcs{Neu gerechnet mit \texttt{python labor.py c05}, SciPy 1.17.0. \repo{argesim_benchmarks/models/c05_two_state.py}{Referenz für die Modellparameter}.}
+
+\lektion{C05 · Welche Messgröße den Vergleich entscheidet}{pruefung11}{Messwerte nachrechnen}{Kapitel 11}
+Der Regler schaltet dreimal. Eine Berechnung kann jeden Schaltaugenblick fast genau treffen und am Ende trotzdem den schlechteren Zustandswert liefern. Das wird sichtbar, wenn man die Zeitfehler und die Endzustandsfehler vor dem Maximum getrennt normiert. Wir verwenden hier ausdrücklich die engen Grenzen des C05-Lehrversuchs auf S.\,\pagelink{c05labor}.
+
+Dort betragen die Budgets \(10\,\mu\mathrm{s}\) je Schaltung und \(10^{-5}\) je Zustandskomponente. Für Radau ergeben die größten Abweichungen \(0{,}0152\,\mu\mathrm{s}/(10\,\mu\mathrm{s})=0{,}00152\) und \(2{,}95\cdot10^{-8}/10^{-5}=0{,}00295\). Für BDF erhält man \(1{,}13/10=0{,}113\) sowie \(2{,}33\cdot10^{-6}/10^{-5}=0{,}233\). Mit den gedruckten, gerundeten Werten ist also \(S_{\rm Radau}\approx0{,}00295\) und \(S_{\rm BDF}\approx0{,}233\). In beiden Fällen stammt das Maximum aus dem Endzustand. BDF benötigt im selben Versuch 169 LU-Zerlegungen, Radau 256. Genauigkeit und Faktorisierungsaufwand beantworten verschiedene Fragen.
+
+Die ursprüngliche Matrix verwendet andere Budgets und andere Verfahrenseinstellungen. Dort meldet etwa QSS2 mit Quantenfaktor \(10^{-3}\) einen Timeout. Für diesen Eintrag fehlt der vollständige Beobachtungsvektor. Eine freie Zahl wie „unendlicher Fehler“ würde eine nicht gemessene Größe vortäuschen. Die Standardaufgabe mit fünf Wechseln und der D-Versuch mit 62 Wechseln besitzen wiederum einen anderen Beobachtungshorizont.
+\notebox{Erster Schritt bei abweichendem Befund}{Vergleichen Sie den aktiven Schalter, den Zeitpunkt seiner Aktivierung und die gerichtete Schwellenüberschreitung mit der analytischen Lösung des aktuellen Modus. Erst wenn alle drei Ereignisse zugeordnet sind, haben die zwei Endwertfehler dieselbe physikalische Bedeutung.}
+\srcs{\see{c05labor}{Fehler und Aufwandszähler} · \see{refC05}{ARGESIM-Aufgaben} · \repocurrent{docs/evidence/qss-extension.csv}{Ursprüngliches Raster}.}
 
 \werkblatt{11}{Selbst prüfen}{ueb8}{Zeitbudgets bei C05}
 
