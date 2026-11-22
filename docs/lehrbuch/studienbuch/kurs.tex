@@ -505,11 +505,11 @@ Zwei Ortsmessungen haben Fehlerbeträge höchstens \(\varepsilon\), die wahre Be
  \frac{M h}{2}+\frac{2\varepsilon}{h}.
 \]
 Der erste Anteil folgt aus der Taylorformel für den exakten Ort. Beim Subtrahieren der zwei Messwerte addieren sich ihre Fehlerbeträge im ungünstigsten Fall zu \(2\varepsilon\). Division durch \(h\) gibt den zweiten Anteil. Damit ist die Schranke bewiesen. Für \(M,\varepsilon>0\) wird ihre rechte Seite bei \(h=2\sqrt{\varepsilon/M}\) minimal.
-\subt{Offene Frage und fehlender Nachweis}
+\subt{Sensorgrenzen und die Messung am Bauteil}
 Kann ein einzelner Wegsensor bei unbekannter Reibung Ort und Geschwindigkeit mit vorgegebenem Fehler trennen? Der Beweis setzt \(M\) und \(\varepsilon\) voraus. Für einen realen Versuch fehlen deren Kalibrierung und ein Nachweis, dass die gewählte Bewegung hinreichend informativ ist. Eine eigens reservierte Testbahn würde die Vorhersage an anderen Anfangswerten prüfen.
 \subt{Wie weit reicht die am Pendel bewiesene Fehleraussage?}
 Aus der Energie folgt streng, dass die Periode mit der Amplitude wächst. Der berechnete Einprozent-Grenzwinkel gilt für ein freies, ungedämpftes Pendel. Ein eigener Nachweis wäre nötig, um bei Reibung oder beim Kontakt mit einem Stift denselben Zeitfehler zu garantieren.
-\srcs{\href{https://doi.org/10.1093/imanum/drae086}{Messenger und Bortz, Konsistenz der WSINDy-Identifikation} · \see{fluss}{Eindeutigkeit} · \see{periodentest}{Fehler der linearen Periode}.}
+\srcs{\see{befund123}{Nachweis und Ergebnis} · \href{https://doi.org/10.1093/imanum/drae086}{Messenger und Bortz, Konsistenz der WSINDy-Identifikation} · \see{fluss}{Eindeutigkeit} · \see{periodentest}{Fehler der linearen Periode}.}
 
 \seite{}{ODE und Solverform}\anchorpage{1}{kap2}{2 · ODE und Solverform}\ey{KAPITEL 2\enspace /\enspace ODE und Solverform}\ptitle{Was genau braucht der Solver von der Feder?}
 
@@ -652,10 +652,10 @@ Am Start ist \(u=3-1=2\). Damit folgt \(\dot x(0)=(0,-1,4)\). Einsetzen der letz
 Für eine nach der höchsten Ableitung aufgelöste ODE ist der Übergang zu einem äquivalenten System erster Ordnung bewiesen. In automatisch aus Bauteilgleichungen erzeugten Modellen ist vorher oft zu bestimmen, welche Ableitungen und Bindungen voneinander abhängen. Stocco und Bertolazzi entwickeln eine symbolische Matrixfaktorisierung zur Indexreduktion. Ihre Beispiele zeigen, wie sich Differential- und Algebraikanteile trennen lassen. Die Voraussetzungen eines konkreten Modells bleiben bei jeder automatischen Umformung zu prüfen.
 \subt{Bewiesen und widerlegt}
 Der Beweis auf S.\,\pagelink{ordnungssatz} enthält beide Richtungen der Ordnungsreduktion. Er erhält die Trajektorien sowie die Anfangsdaten. Für das implizite Gegenbeispiel \((w+y)^3=0\) genügt die Injektivität der reellen Kubikfunktion, um \(w=-y\) zu beweisen. Die Behauptung „singuläre Ableitungsmatrix bedeutet immer eine echte Zwangsbedingung“ ist damit widerlegt.
-\subt{Offene Beweisaufgabe mit Lösungskriterium}
-Untersuchen Sie \(q\,q''+q=0\). Auf jedem offenen Intervall mit \(q\ne0\) ist \(q''=-1\). Global darf man nicht durch \(q\) kürzen: Die konstante Nulllösung erfüllt die Ausgangsgleichung, aber nicht \(q''=-1\). Damit ist die globale Äquivalenz widerlegt. Offen für die eigene Ausarbeitung bleibt die vollständige Klassifikation aller zweimal stetig differenzierbaren Lösungen zu verschiedenen Startwerten; zu prüfen ist insbesondere das Verhalten an Endpunkten von Nullintervallen.
+\subt{Ergebnis der Nachuntersuchung}
+Für \(q(q^{\prime\prime}+1)=0\) ist eine Division durch \(q\) an seinen Nullstellen unzulässig. Die vollständige Klassifikation aller \(C^2\)-Lösungen und die Behandlung des Nullstarts stehen in der Nachrechnung.
 \notebox{Prüffrage für technische Modelle}{Nennen Sie vor jeder Division die Größe, die von null getrennt sein muss. Bei einer Massenmatrix wird aus derselben Frage eine Bedingung an ihren Rang auf dem gesamten verwendeten Zustandsgebiet.}
-\srcs{\href{https://doi.org/10.1016/j.cam.2024.115898}{Stocco und Bertolazzi (2024), Symbolic matrix factorization for differential-algebraic equations index reduction}\enspace·\enspace\refbk{ode}{Hairer u.\,a.}.}
+\srcs{\see{befund123}{Nachweis und Ergebnis} · \href{https://doi.org/10.1016/j.cam.2024.115898}{Stocco und Bertolazzi (2024), Symbolic matrix factorization for differential-algebraic equations index reduction}\enspace·\enspace\refbk{ode}{Hairer u.\,a.}.}
 
 \seite{}{Modell und System}\anchorpage{1}{kap3}{3 · Modell und System}\ey{KAPITEL 3\enspace /\enspace Modell und System}\ptitle{Was verraten zwei Heizversuche?}
 
@@ -833,9 +833,9 @@ Aus \(y=3\) folgt \(x_1+x_2=3\). Die negative Ausgangssteigung liefert \(x_1+2x_
 Die Rangtests für lineare, zeitinvariante Modelle sind klassische Systemtheorie. Bei verrauschten Messdaten ist zusätzlich entscheidend, wie weit ein messbarer Signalanteil über der Störung liegt. Coulson, van Waarde, Lygeros und Dörfler untersuchen für datenbasierte lineare Modelle quantitative Anregungsbedingungen. Dazu verwenden sie singuläre Werte, also Verstärkungsfaktoren einer Matrix entlang geeigneter zueinander senkrechter Richtungen.
 \subt{Beweis · Beinahe unsichtbar}
 Sei bei den zwei Wärmeblöcken der Sensor \(y_\delta=(\theta_1+\theta_2)/2+\delta(\theta_1-\theta_2)/2\). Für die reine Differenzmode \(x=D(1,-1)^\mathsf T\) folgt durch Einsetzen \(y_\delta=\delta D\). Bei \(\delta=0\) verschwindet die Information. Bei bekanntem \(\delta\ne0\) kann man für diese Mode \(D=y_\delta/\delta\) rekonstruieren. Ein Messfehler von höchstens \(\eta\) führt dann zu einer Unsicherheit von höchstens \(\eta/|\delta|\), und ein Fehler genau dieses Betrags kann auftreten. Eine formal mögliche Rekonstruktion kann also empfindlich sein.
-\subt{Offene Frage und Versuchsplan}
-Welcher Sensorort trennt die zwei thermischen Moden auch bei realen Störpegeln? Es fehlen ein gemessenes Rauschmodell und Unsicherheiten der Leitwerte. Eine überprüfbare Fortsetzung variiert Sensorort und Heizpuls und reserviert einen zweiten, andersartigen Puls zur Kontrolle. Für eine Garantie müsste die kleinste messbare Signalwirkung über den zulässigen Parameterbereich nach unten abgeschätzt werden.
-\srcs{\refbk{sy}{Åström und Murray, Feedback Systems} · \href{https://doi.org/10.1109/LCSYS.2022.3232303}{Coulson u.\,a. (2023), A Quantitative Notion of Persistency of Excitation and the Robust Fundamental Lemma}.}
+\subt{Ergebnis der Nachuntersuchung}
+Eine gewichtete Messung zweier thermischer Moden zeigt, wann der Sensor die Differenz vollständig verliert. Die Nachrechnung bestimmt günstige Orte unter gleichen Störpegeln. Für die Bewertung an einem realen Bauteil fehlen Messdaten.
+\srcs{\see{befund123}{Nachweis und Ergebnis} · \refbk{sy}{Åström und Murray, Feedback Systems} · \href{https://doi.org/10.1109/LCSYS.2022.3232303}{Coulson u.\,a. (2023), A Quantitative Notion of Persistency of Excitation and the Robust Fundamental Lemma}.}
 
 \seite{}{Zeitintegration}\anchorpage{1}{kap4}{4 · Zeitintegration}\ey{KAPITEL 4\enspace /\enspace Zeitintegration}\ptitle{Wie baut man aus Steigungen einen Zeitschritt?}
 
@@ -1080,13 +1080,9 @@ Beide Fehlerquotienten betragen vier. Aus \(2^p=4\) folgt die beobachtete Ordnun
 Ranocha und Giesselmann untersuchen explizite Runge--Kutta-Verfahren mit residuenbasierten Fehlerschätzern und Schrittweitenregelung. Sie leiten für die analysierten Kombinationen Stabilitätsaussagen über den Regler her und vergleichen sie mit eingebetteten Fehlerschätzern. Die Wahl der Integrationsformel allein legt das Verhalten des adaptiven Algorithmus damit noch nicht fest.
 \subt{Bewiesener Satz und Reichweite}
 Auf S.\,\pagelink{ordnung} wurde aus einem lokalen Defekt \(O(h^{p+1})\) und einer Stabilitätsabschätzung der globale Fehler \(O(h^p)\) auf einem festen Zeitintervall hergeleitet. Beim Übergang über einen Stoß ist die dort vorausgesetzte glatte Taylorentwicklung im Allgemeinen nicht über das Ereignis hinweg gültig. Deshalb werden die glatten Phasen und die Lage des Übergangs getrennt geprüft.
-\subt{Offene Beweisfrage zum konkreten Regler}
-Lässt sich für den steifen Folgeregler eine obere Schranke für den maximalen Fehler \emph{zwischen} allen ausgegebenen Zeitpunkten nachweisen? Die Tabellen messen nur ein endliches Gitter. Für den skalaren Test \(y'=-a(y-\cos t)-\sin t,\ a>0\) lässt sich ein nächster Schritt angeben. Für eine stetige, stückweise stetig differenzierbare Näherung \(Y\) definiere \(r=Y'-f(t,Y)\). Dann ergibt Ableiten von \(e=Y-y\) die Fehlergleichung \(e'=-ae+r\). Integration liefert für \(e(0)=0\)
-\[
- |e(t)|\le \frac{1-e^{-at}}{a}\sup_{0\le s\le t}|r(s)|.
-\]
-Damit ist die Übertragung vom Residuum zum Fehler bewiesen. Für die konkreten Tabellen fehlt noch eine geprüfte obere Schranke für das Residuum jedes Ausgabepolynoms auf seinem ganzen Intervall.
-\srcs{\href{https://doi.org/10.1007/s44207-024-00001-0}{Ranocha und Giesselmann (2024), Stability of step size control based on a posteriori error estimates}\enspace·\enspace\see{tracking}{Folgeregler}.}
+\subt{Ergebnis der Nachuntersuchung}
+Für den skalaren Regler mit Rate \(a\) und gleichem Startwert erfüllt der Fehler einer stetigen, stückweise differenzierbaren Näherung \(Y\) die Gleichung \(e^\prime=-ae+r\) mit \(r=Y^\prime-f(t,Y)\). Integration ergibt \(|e(t)|\le(1-e^{-at})\sup|r|/a\). Die Nachrechnung schließt den konkreten Fehler der sechs dichten Ausgabekurven auf ganzen Zeitintervallen ein.
+\srcs{\see{befund4}{Nachweis und Ergebnis} · \href{https://doi.org/10.1007/s44207-024-00001-0}{Ranocha und Giesselmann (2024), Stability of step size control based on a posteriori error estimates}\enspace·\enspace\see{tracking}{Folgeregler}.}
 
 \seite{}{DAE und Bindungen}\anchorpage{1}{kap5}{5 · DAE und Bindungen}\ey{KAPITEL 5\enspace /\enspace DAE und Bindungen}\ptitle{Wer legt den Anfangsstrom fest?}
 
@@ -1228,10 +1224,10 @@ Für \(x_0=2\) ist \(z_0=4\) und \(\dot x_0=-4\). Differenzieren der Bindung lie
 Kunkel und Mehrmann systematisieren die verschiedenen Regularitäts- und Indexbegriffe. Bolten und Wimmer analysieren 2026 eine spektrale Deferred-Correction-Methode für semi-explizite DAEs vom Index eins. Sie korrigieren Näherungen an mehreren Zeitknoten und erzwingen bei jeder Iteration die algebraischen Bindungen. Die untersuchte Problemklasse und ihre Regularität sind wesentliche Voraussetzungen für die Konvergenzaussage.
 \subt{Was ist bewiesen?}
 Bei \(g(t,x,z)=0\) und invertierbarem \(g_z\) existiert lokal ein glatter Ast \(z=\varphi(t,x)\) unter den Voraussetzungen auf S.\,\pagelink{indexeins}. Einsetzen dieses Asts ergibt eine kleinere ODE. Beim linearen RC-Kreis ergab eine direkte Elimination sogar identische Rückwärts-Euler-Schritte. Für das Pendel zeigt die abgeleitete Bedingung \(r^\mathsf Tv=0\), warum eine korrekte Länge allein noch keine zulässige Anfangsgeschwindigkeit garantiert.
-\subt{Eine tatsächlich offene Lücke im Lehrversuch}
-Für die stückweise leitende C21-Diode liegt ein numerischer Vergleich auf einem festgelegten Zeitfenster vor. Zu beweisen bliebe, dass die benutzte algebraische Lösung auf allen durchlaufenen Teilintervallen eindeutig fortsetzbar ist und gleichmäßig von einer Falte getrennt bleibt. Die notwendige Ableitung und ihre kritische Spannung stehen auf S.\,\pagelink{diodenast}. Ein Rechenweg zu einem Nachweis wären eingeschlossene Zustandsintervalle mit unteren Schranken für \(|g_z|\) sowie eine gesonderte Prüfung der Schaltfläche.
+\subt{Ergebnis der Nachuntersuchung}
+Die Niedrigstromlösung der C21-Diode lässt sich für die Schaltungsparameter des Versuchs auf beiden Seiten der Schaltfläche fortsetzen. Der Nachweis beruht auf einer zeitlich gleichmäßigen Spannungsgrenze und einer unteren Schranke für die algebraische Ableitung.
 \notebox{Beim Lesen von Indexangaben}{Fragen Sie nach dem Indexbegriff, der Formulierung und dem betrachteten Gebiet. Dieselbe Bewegung hat im Winkelmodell eine ODE und in kartesischen Ortskoordinaten eine höherindizierte DAE.}
-\srcs{\href{https://doi.org/10.4171/ETB/28}{Kunkel und Mehrmann (2024), Differential-Algebraic Equations} · \href{https://doi.org/10.1007/s10915-026-03385-7}{Bolten und Wimmer (2026), Spectral Deferred Corrections for DAEs of Index One}.}
+\srcs{\see{befunddiode}{Nachweis und Ergebnis} · \href{https://doi.org/10.4171/ETB/28}{Kunkel und Mehrmann (2024), Differential-Algebraic Equations} · \href{https://doi.org/10.1007/s10915-026-03385-7}{Bolten und Wimmer (2026), Spectral Deferred Corrections for DAEs of Index One}.}
 
 \seite{}{Felder und Linienmethode}\anchorpage{1}{kap6}{6 · Felder und Linienmethode}\ey{KAPITEL 6\enspace /\enspace Felder und Linienmethode}\ptitle{Was verraten drei Temperatursensoren?}
 
@@ -1509,9 +1505,9 @@ Die anfangs größere Wärmekapazität des wärmeren Körpers verschiebt die End
 Hochordentliche Raumverfahren sollen steile Profile scharf auflösen und zugleich physikalisch unmögliche Werte vermeiden. Die Facharbeit zu konservativen Differenzenverfahren für konvektionsdominierte Diffusion kombiniert hochordentliche Approximationen mit Maßnahmen zur Einhaltung eines Maximumprinzips. Eine andere Forschungslinie nutzt konvexe Begrenzung in Finite-Elemente-Verfahren. Beide untersuchen Eigenschaften des vollständigen Diskretisierungsschemas.
 \subt{Was aus den Rechnungen folgt}
 Bei der eindimensionalen Diffusion und Vorwärts Euler sind die neuen Gitterwerte für \(0\le r\le1/2\) konvexe Kombinationen alter Werte. Die Nichtnegativität der Koeffizienten und ihre Summe eins beweisen das diskrete Maximumprinzip. Der Energiebeweis auf S.\,\pagelink{waermebeweis} sichert dagegen Eindeutigkeit hinreichend glatter Lösungen der kontinuierlichen Aufgabe mit gekühltem Rand. Diese Aussagen betreffen verschiedene Objekte und haben eigene Voraussetzungen.
-\subt{Offene Beweisfrage für den Transfer nach C19R}
-Der verwendete Transportcode behandelt zwei Raumrichtungen, begrenzte Flüsse, eine Zellenquelle und einen expliziten Zeitintegrator. Aus dem eindimensionalen Euler-Beweis folgt keine automatische Positivitätsgarantie für diese Kombination. Ein nächster Beweisschritt wäre, für den konkreten Fluss unter angebbaren Schritt- und Randbedingungen zuerst Positivität eines Euler-Teilschritts nachzuweisen. Für den tatsächlich verwendeten RK4-Schritt bliebe eine eigene Analyse nötig. Zusätzlich müsste eine Punktquelle auf jedem Gitter dieselbe Gesamtmasse eintragen.
-\srcs{\href{https://doi.org/10.4208/nmtma.OA-2023-0165}{Maximum-Principle-Preserving High-Order Conservative Difference Schemes for Convection-Dominated Diffusion Equations} · \href{https://doi.org/10.1137/17M1149961}{Guermond u.\,a., konvexe Begrenzung für die Euler-Gleichungen}.}
+\subt{Ergebnis der Nachuntersuchung}
+Die Nachrechnung leitet eine Schrittbedingung für die Positivität des tatsächlichen Euler-Teilschritts her. Sie prüft die RK4-Stufen in acht Transportläufen und gibt ein Gegenbeispiel zur unbedingten Positivität an.
+\srcs{\see{befundtransport}{Nachweis und Ergebnis} · \href{https://doi.org/10.4208/nmtma.OA-2023-0165}{Maximum-Principle-Preserving High-Order Conservative Difference Schemes for Convection-Dominated Diffusion Equations} · \href{https://doi.org/10.1137/17M1149961}{Guermond u.\,a., konvexe Begrenzung für die Euler-Gleichungen}.}
 
 \seite{}{Hybride Systeme}\anchorpage{1}{kap7}{7 · Hybride Systeme}\ey{KAPITEL 7\enspace /\enspace Hybride Systeme}\ptitle{Kann eine Schaltung zwischen zwei Messungen verschwinden?}
 
@@ -1628,9 +1624,9 @@ Eine glatte Wächterfunktion \(b(t)\) habe die Nullstelle \(t_*\) und in einem I
  |\hat t-t_*|\le\varepsilon/m .
 \]
 Entscheidend ist das Residuum des \emph{wahren} Wächters an der gemeldeten Zeit. Liefert der Code nur einen interpolierten Wächter, gehört dessen Fehler ebenfalls in \(\varepsilon\).
-\subt{Offener Nachweis bei streifenden Kontakten}
-Für \(b(t)=(t-t_*)^2\) verschwindet die Steigung genau an der Nullstelle. Eine Störung \(-\varepsilon\) erzeugt zwei Nullstellen im Abstand \(\sqrt{\varepsilon}\) von \(t_*\), eine Störung \(+\varepsilon\) gar keine. Eine gleichförmige lineare Zeitfehlerschranke wie oben kann hier nicht gelten. Für einen projektweiten Detektorbeweis fehlen daher fallbezogene Aussagen zu Berührung, Richtung und mehreren Nullstellen pro Schritt.
-\srcs{\refbk{qrev}{Castro u.\,a. (2024), QSS-Übersicht} · \href{https://arxiv.org/abs/2306.06862}{Kong u.\,a. (2024), Saltation Matrices}.}
+\subt{Ergebnis der Nachuntersuchung}
+Bei \(b(t)=(t-t_*)^2\) erzeugt eine Störung \(-\varepsilon\) zwei Nullstellen im Abstand \(\sqrt{\varepsilon}\) von \(t_*\). Eine Störung \(+\varepsilon\) entfernt sie. Für einen Detektor mit endlich vielen Punktabfragen zeigt die Nachrechnung außerdem, warum ohne zusätzliche Signalannahmen Ereignisse verborgen bleiben können.
+\srcs{\see{befundereignis}{Nachweis und Ergebnis} · \refbk{qrev}{Castro u.\,a. (2024), QSS-Übersicht} · \href{https://arxiv.org/abs/2306.06862}{Kong u.\,a. (2024), Saltation Matrices}.}
 
 \teilende{I}{Von der Modellfrage zur zulässigen Solverform}{finalI}
 \subt{Stand der Forschung im Zusammenhang}
@@ -1752,9 +1748,9 @@ Die größten absoluten Zeitfehler sind \(0{,}9\) und \(1{,}4\,\mu\mathrm s\). B
 C05 gehört zu den frühen ARGESIM-Vergleichen für zustandsabhängiges Schalten. Die neuere Theorie hybrider Sensitivitäten erklärt, warum eine kleine Abweichung in einem kontinuierlichen Zustand den Zeitpunkt eines Wechsels verschieben kann. Untersuchungen zu adaptiven Reglern erklären außerdem, warum Schrittfolgen und Arbeitsaufwand vom implementierten Regler abhängen. Beide Fragen betreffen den vorliegenden Versuch.
 \subt{Beweis · Exakte Phasen trotz steifer Mode}
 In einem festen Modus ist \(y_2-c_4=d e^{-bs}\). Die erste Gleichung hat die Form \(\dot y_1+ay_1=a(c_4+c_2+d e^{-bs})\). Der Ansatz \(A+B e^{-bs}+C e^{-as}\) liefert durch Koeffizientenvergleich \(A=c_4+c_2,\ (a-b)B=ad\). Aus dem Anfangswert folgt \(C=y_{10}-A-B\). Damit ist die auf S.\,\pagelink{arg} verwendete Phasenreferenz für \(a\ne b\) bewiesen. Bei \(a=b\) benötigt der Resonanzterm stattdessen einen Faktor \(s e^{-as}\).
-\subt{Offene Frage des C05-Versuchs}
-Wie robust bleibt die Folge von drei Schaltungen, wenn beide Schwellen leicht verändert werden? Die Tabelle prüft einen einzelnen Parametersatz. Für eine Garantie in einem ganzen Schwellenintervall müsste man auf jeder Phase die erste zulässige Nullstelle eindeutig einklammern, ihre Steigung von null trennen und den so entstehenden Anfangszustandsbereich an die nächste Phase übergeben. Das numerische Erreichen eines Zeitfehlers unter einer Mikrosekunde in einer Einstellung erledigt diesen Beweis nicht.
-\srcs{\href{https://www.argesim.org/benchmarks/c05}{ARGESIM C05} · \href{https://arxiv.org/abs/2306.06862}{Kong u.\,a., Sensitivität an Ereignissen} · \href{https://doi.org/10.1007/s44207-024-00001-0}{Ranocha und Giesselmann, adaptive Schrittweitenkontrolle}.}
+\subt{Ergebnis der Nachuntersuchung}
+Für beide um bis zu \(0{,}005\) veränderten Schaltschwellen lassen sich die ersten vier Übergänge per Intervallarithmetik einklammern. Drei davon liegen sicher innerhalb des Lehrversuchs von \(3{,}5\unitm s\).
+\srcs{\see{befundereignis}{Nachweis und Ergebnis} · \href{https://www.argesim.org/benchmarks/c05}{ARGESIM C05} · \href{https://arxiv.org/abs/2306.06862}{Kong u.\,a., Sensitivität an Ereignissen} · \href{https://doi.org/10.1007/s44207-024-00001-0}{Ranocha und Giesselmann, adaptive Schrittweitenkontrolle}.}
 
 \seite{}{C12 und C21}\anchorpage{1}{kap9}{9 · C12 und C21}\ey{KAPITEL 9\enspace /\enspace C12 und C21}\ptitle{C12 · Wann stoßen die Kugeln zusammen?}
 
@@ -1852,9 +1848,9 @@ Beim idealen C21-Ball mit Rückprallfaktor \(0<e<1\) ist die Dauer nach dem erst
  T_*=t_1+\frac{2et_1}{1-e}.
 \]
 Für \(e=0{,}9\) ist \(T_*=19t_1\approx27{,}13\unitm s\). Das Zusammenlaufen unendlich vieler diskreter Ereignisse in endlicher Zeit heißt \emph{Zeno-Verhalten}. Die ersten zwei Stöße im kurzen Benchmarkfenster lassen sich unabhängig davon exakt prüfen.
-\subt{Offener Nachweis für eine erweiterte Aufgabe}
-Für \(t\ge T_*\) muss das Modell eine Fortsetzung definieren, etwa ruhenden Kontakt mit einer Normalkraft. Führt man schon bei einer kleinen Geschwindigkeitsgrenze einen Ruhemodus ein, ist das ein neues Übergangsgesetz. Zu beweisen wäre, wie groß der ausgelassene Rest der Flugzeit und die größte ausgelassene Sprunghöhe in Abhängigkeit von der Grenze sind. Die geometrische Reihe liefert dafür den ersten Rechenschritt.
-\srcs{\href{https://doi.org/10.1177/02783649241236860}{Halm und Posa (2024), Set-valued rigid-body dynamics for simultaneous, inelastic, frictional impacts} · \href{https://www.argesim.org/benchmarks/c21}{ARGESIM C21}.}
+\subt{Ergebnis der Nachuntersuchung}
+Wird der Flug durch ruhenden Kontakt ersetzt, sobald die Abfluggeschwindigkeit unter \(v_{\min}\) liegt, ergeben die geometrische Flugzeitenfolge und der höchste folgende Scheitelpunkt zwei explizite Fehlergrenzen.
+\srcs{\see{befundereignis}{Nachweis und Ergebnis} · \href{https://doi.org/10.1177/02783649241236860}{Halm und Posa (2024), Set-valued rigid-body dynamics for simultaneous, inelastic, frictional impacts} · \href{https://www.argesim.org/benchmarks/c21}{ARGESIM C21}.}
 
 \seite{}{C07 und C21}\anchorpage{1}{kap10}{10 · C07 und C21}\ey{KAPITEL 10\enspace /\enspace C07 und C21}\ptitle{C07 · Was springt am Stift?}
 
@@ -1963,7 +1959,7 @@ Setze im positiven Ast \(g'(z)=0\). Die Zahlen der Schaltung ergeben
 Hier versagt das lokale Invertierbarkeitskriterium in dieser Koordinate. Da \(g''(z)<0\) für \(z>0\), hat \(g\) dort ein striktes Maximum. Ob eine vorgegebene Wahl von \(u_C,i\) dort auch \(g=0\) erfüllt, ist eine zweite Bedingung. Schon die Formel zeigt, weshalb ein pauschaler Satz „die Spannung lässt sich überall eindeutig ausrechnen“ zu stark wäre.
 \subt{Vom Residuum zum Versuchsprotokoll}
 Setzen Sie \(i=u_C=z=0\) bei \(t=0\). Die sinusförmige Quelle und der Diodenstrom sind dort null. Die ersten beiden Gleichungen ergeben \(\dot i=\dot u_C=0\). Für jeden späteren Ausgabepunkt sind die Strombilanz in Ampere, die Maschenbilanz in Volt und der für \(z\) tatsächlich verwendete Zweig separat zu prüfen. Eine gemeinsame unskalierte Fehlersumme hätte keine klare Einheit.
-\notebox{Offener Nachweis im Projektversuch}{149 übereinstimmende Schaltungen sind ein Trajektorienvergleich. Für einen zertifizierten Abstand von der Falte bräuchte man auf dem gesamten Zeitfenster Einschließungen von \(z(t)\) und eine daraus folgende untere Schranke für \(|g'(z)|\) auf jedem glatten Ast. Der archivierte Tabellenvergleich liefert diese Schranke nicht.}
+\notebox{Nachweis für die Projektparameter}{Die 149 Schaltungen sind numerisch bestätigt. Eine unabhängige Schranke für die Diodenspannung sichert den Abstand von der Falte über das ganze Zeitfenster, siehe S.\,\pagelink{befunddiode}.}
 \srcs{\texttt{python labor.py c21} reproduziert die kritische Spannung. \repo{scripts/c21_dae_reference.py}{Vorzeichen, Skalierung und Residuen der Vergleichsrechnung}.}
 
 \lektion{C07 · Was die kartesische DAE zusätzlich enthält}{c07kart}{Vertiefung}{C07 und C21}
@@ -1976,7 +1972,7 @@ Dabei gilt die Dämpfung tangential, weil \(s^\mathsf Tv=0\) für die zulässige
 Setze \(e_r=(\sin\varphi,-\cos\varphi)^\mathsf T\), \(e_t=(\cos\varphi,\sin\varphi)^\mathsf T\). Dann gilt \(r=p+Le_r,\ v=L\omega e_t\) und \(\dot v=L\dot\omega e_t-L\omega^2e_r\). Skalarmultiplikation der Kraftgleichung mit \(e_t\) entfernt \(\lambda\), da \(e_t^\mathsf T e_r=0\). Es bleibt \(mL\dot\omega=-mg\sin\varphi-dL\omega\), die Winkelgleichung des Versuchs. Die radiale Projektion bestimmt umgekehrt \(\lambda=m(g\cos\varphi+L\omega^2)/L\). Für eine feste reguläre Phase heben sich Rekonstruktion und Projektion lokal auf.
 \subt{Eine Zahl als Prüfstein}
 Beim ersten Kontakt ist \(\omega^-=-1{,}248739\unitm{rad/s}\), danach \(\omega^+=-4{,}162463\unitm{rad/s}\). Das Produkt mit der jeweiligen Länge ergibt beidseits rund \(-1{,}248739\unitm{m/s}\). Im globalen Koordinatensystem bleibt \(v\) am Stift gleich. Die neue Bindung beschreibt einen Kreis um \(p_\mathrm{neu}=p_\mathrm{alt}+0{,}7e_r(\varphi_p)\). Beide Kreise haben am Berührungspunkt dieselbe Tangente.
-\notebox{Was der Vergleich prüft}{Die Äquivalenz ist für glatte Phasen analytisch hergeleitet. Die Zahlen auf S.\,\pagelink{c07labor} stammen aus der Winkel-ODE. Ein unabhängiger numerischer Test der vollständigen kartesischen Index-3-Form mit wechselndem Drehpunkt steht für diesen Lehrversuch noch aus.}
+\notebox{Was der Vergleich prüft}{Die Äquivalenz ist für glatte Phasen analytisch hergeleitet. Die Zahlen auf S.\,\pagelink{c07labor} stammen aus der Winkel-ODE. Der ergänzende RATTLE-Versuch löst die kartesischen Bindungen mit wechselndem Drehpunkt auf S.\,\pagelink{befundrattle}.}
 
 \werkblatt{10}{Selbst prüfen}{ueb10}{Sprungregel und Lösungszweig}
 
@@ -2012,9 +2008,9 @@ Grujic und Mitautoren vergleichen lineare und nichtlineare Pendelmodelle sowie v
 Für C07 folgt aus der Tangentialprojektion in einer festen Phase exakt die Winkel-ODE. Am Stift ist \(L^-\omega^-=L^+\omega^+\) eine Modellannahme über die Bahnkomponente. Sie erhält die kinetische Energie, denn \(m(L^-\omega^-)^2/2=m(L^+\omega^+)^2/2\). Die acht verglichenen Zahlen belegen, dass das gewählte Ereignisprotokoll die publizierten Zeiten im vorgegebenen Fenster trifft.
  
 Bei C21 zeigt \(g''(z)<0\) für \(z>0\), dass das gefundene stationäre \(z_*\) ein Maximum der algebraischen Funktion ist. Das ist eine analytische Aussage über die Formulierung. Die 149 Schaltungen der archivierten Studie sind dagegen gemessene Übereinstimmung auf einem einzigen Ablauf.
-\subt{Offene Beweise und ein nächster Versuch}
-Bei C07 wäre ein belastbarer Nachweis für eine kartesische Umsetzung die Kontrolle von Position, Tangentialität und Impuls vor und nach \emph{jedem} Moduswechsel. Er müsste die Verschiebung des Drehpunkts einschließen. Bei C21 wäre mit unabhängig gewählten Ausgabezeiten und eingeschlossenem Abstand zur Falte zu prüfen, wie weit der beobachtete Vergleich über die gespeicherte Bahn hinaus trägt. Das sind Nachweislücken der hier dargestellten Fälle.
-\srcs{\href{https://doi.org/10.11128/sne.31.bne07.10589}{Grujic u.\,a. (2021), C07 in MATLAB} · \href{https://doi.org/10.1016/j.cam.2024.115898}{Stocco und Bertolazzi (2024), symbolische Indexreduktion} · \refbk{ida}{IDA-Handbuch}.}
+\subt{Ergebnis der Nachuntersuchung}
+Für C07 wurden alle acht Wechsel in zwei kartesischen Rechnungen kontrolliert, darunter eine RATTLE-Rechnung mit beiden Bindungen. Die Fortsetzung der C21-Diode auf ihrem erreichten Ast ist in der Nachrechnung zur Schaltung bewiesen.
+\srcs{\see{befundereignis}{Nachweis und Ergebnis} · \href{https://doi.org/10.11128/sne.31.bne07.10589}{Grujic u.\,a. (2021), C07 in MATLAB} · \href{https://doi.org/10.1016/j.cam.2024.115898}{Stocco und Bertolazzi (2024), symbolische Indexreduktion} · \refbk{ida}{IDA-Handbuch}.}
 
 \seite{}{C19R}\anchorpage{1}{kap11}{11 · C19R}\ey{KAPITEL 11\enspace /\enspace C19R}\ptitle{C19R · Wann erreicht ein Stoff den Sensor?}
 
@@ -2128,9 +2124,9 @@ Für \(a>0\) ist \(K\) das Produkt zweier normierter Gaußdichten. Translation u
    =\dot m\int_0^t 1\dg a=\dot m t .
 \]
 Derselbe Kontrollwert kann für ein endliches Gebiet erst nach Addition des integrierten Nettoausflusses angewendet werden. Der Beweis für die unendliche Ebene klärt also, welcher Term im praktischen Gitterversuch zusätzlich gemessen werden muss.
-\subt{Offener Nachweis zur lokalen Genauigkeit}
-Ein kleiner Fehler der Gesamtmasse schließt eine lokal verschobene Fahne nicht aus. Für eine garantierte Fehlergrenze an einer Messstelle müsste man Quellenapproximation, Gitter- und Zeitfehler sowie die Abweichung des endlichen Gebiets abschätzen. Die drei archivierten Gitterweiten und die Quadratur bilden dazu Kontrollpunkte. Eine bewiesene Konvergenzrate für den vollständigen C19R-Versuch fehlt hier.
-\srcs{\href{https://www.argesim.org/benchmarks/c19}{Definition und C19R-Lösungen} · \href{https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C19/C19R-solution-COMSOL.pdf}{Publizierter FEM-Vergleich in COMSOL} · \href{https://doi.org/10.4208/nmtma.OA-2023-0165}{Konservative Verfahren mit Maximumprinzip}.}
+\subt{Ergebnis der Nachuntersuchung}
+An der festgelegten Messstelle ist der Fehler der gespeicherten Viertel- und Achtelmetergitter gegen die kontinuierliche Punktquellenlösung eingeschlossen. Änderungen von Zeitauflösung, Quellbreite und Außengrenzen sind einzeln nachgemessen. Eine allgemeine Konvergenzordnung für beliebige Messorte erfordert weitere Orts- und Regularitätsannahmen.
+\srcs{\see{befundtransport}{Nachweis und Ergebnis} · \href{https://www.argesim.org/benchmarks/c19}{Definition und C19R-Lösungen} · \href{https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C19/C19R-solution-COMSOL.pdf}{Publizierter FEM-Vergleich in COMSOL} · \href{https://doi.org/10.4208/nmtma.OA-2023-0165}{Konservative Verfahren mit Maximumprinzip}.}
 
 \seite{}{Solververgleich}\anchorpage{1}{kap12}{12 · Solververgleich}\ey{KAPITEL 12\enspace /\enspace Solververgleich}\ptitle{Welcher Solver erfüllt den Auftrag?}
 
@@ -2385,11 +2381,12 @@ Würde man beim Wechsel auf den kurzen Faden \(\omega\) beibehalten, sänke die 
 Dolan und Moré führen Leistungsprofile für Algorithmenvergleiche ein. Ein Profil beschreibt, auf welchem Anteil einer festgelegten Fallmenge ein Verfahren innerhalb eines vorgegebenen Faktors zum besten Ergebnis liegt. In der ODE-Praxis stellen Aufwand-Genauigkeits-Diagramme für jede Solverkonfiguration gemessenen Fehler und Rechenarbeit gegenüber. Beide Darstellungen brauchen klar definierte Referenzen und eine festgelegte Behandlung fehlerhafter Läufe.
 \subt{Beweis · Warum Trefferzahlen allein keine Rangfolge ergeben}
 Ein Solver liege in zwei gleich gewichteten Aufgaben um Faktoren \(1\) und \(3\) über den minimalen Kosten, ein anderer um \(2\) und \(1\). Beide erfüllen beide Genauigkeitsziele. Werden die Aufgaben mit Gewichten \(p\) und \(1-p\) versehen, sind die gemittelten Faktoren \(3-2p\) und \(1+p\). Der erste ist günstiger genau für \(p>2/3\), der zweite für \(p<2/3\). Bei identischer Erfolgszahl kann also schon das Gewicht der Anwendungsfälle die Entscheidung umkehren.
-\subt{Offene Frage der ARGESIM-Auswertung}
-Lässt sich ein Solver anhand von Steifheit, Kopplung, zulässigem Ausgabefehler und Ereignishäufigkeit auf einem \emph{zuvor ungesehenen} Modell wählen? Die acht archivierten Modellfenster messen die bekannten Fälle. Für eine unabhängige Prüfung müssten Modellfamilien vor der Auswahl als Testmenge zurückgehalten werden. Innerhalb jedes Falls wäre erneutes Abstimmen auf das Ergebnis der Testmenge auszuschließen. Ein Beweis einer allgemeingültigen Rangfolge folgt aus den Messungen nicht.
-\srcs{\href{https://doi.org/10.1007/s101070100263}{Dolan und Moré (2002), Benchmarking optimization software with performance profiles} · \href{https://docs.sciml.ai/SciMLBenchmarksOutput/stable/}{SciMLBenchmarks, reproduzierbare Aufwand-Genauigkeits-Vergleiche} · \see{matrix}{ARGESIM-Matrix}.}
+\subt{Ergebnis der Nachuntersuchung}
+Die Nachrechnung hält nacheinander jedes der acht Modelle von der Auswahl zurück und prüft die gewählte Methode anschließend an zwei zusätzlich definierten Gleichungssystemen. Die Auswahlregel, ihre Fehlwahl und die Rechenbudgets sind dokumentiert.
+\srcs{\see{befundwahl}{Nachweis und Ergebnis} · \href{https://doi.org/10.1007/s101070100263}{Dolan und Moré (2002), Benchmarking optimization software with performance profiles} · \href{https://docs.sciml.ai/SciMLBenchmarksOutput/stable/}{SciMLBenchmarks, reproduzierbare Aufwand-Genauigkeits-Vergleiche} · \see{matrix}{ARGESIM-Matrix}.}
 
 \input{pythonwerkstatt}
+\input{kapitelbefunde}
 
 \teilende{II}{Was wir aus den Benchmarks gelernt haben}{finalII}
 \subt{Stand der Forschung und der Messungen}
@@ -2640,7 +2637,7 @@ Die Acht-Fälle-Matrix und der RK-Vergleich beruhen auf den archivierten CSV-Zei
 \href{https://www.argesim.org/benchmarks}{Offizieller ARGESIM-Katalog}&Originalaufgaben und veröffentlichte Varianten.\\\bottomrule
 \end{tabularx}\par}
 \subt{Anlagen im PDF}
-Das \see{ueb13}{CP2-Feldlabor} enthält trainierte Gewichte, Ein- und Ausgabefelder sowie die NumPy-Auswertung. \texttt{kapitelproben.py} prüft kurze Rechnungen zu den 13 Kapiteln. \texttt{labor.py} enthält Versuche zu Pumpe, Prüfwagen, Pendel, RC-Kreis und ARGESIM. Mit \texttt{c09vergleich} prüfen Sie den ersten Reglertakt, mit \texttt{periode} und \texttt{c07linear} die Linearisierung. Ergänzende Lehrmodelle stehen in \texttt{nachrechnen.py}. Die beiden CSV-Dateien liefern die archivierten Einzelzeilen. \texttt{c21-idas.json} enthält den Diodenvergleich. Der englische Studienanhang bewahrt die technischen Berichte der Vorauflage mit ihrer ursprünglichen Paginierung 33--51.
+Die Anlage \texttt{CP2\_Genauigkeit.zip} ergänzt die \see{fnoprotokoll}{Genauigkeitsstudie}. Das \see{ueb13}{CP2-Feldlabor} enthält trainierte Gewichte, Ein- und Ausgabefelder sowie die NumPy-Auswertung. \texttt{kapitelproben.py} prüft kurze Rechnungen zu den 13 Kapiteln. \texttt{labor.py} enthält Versuche zu Pumpe, Prüfwagen, Pendel, RC-Kreis und ARGESIM. Mit \texttt{c09vergleich} prüfen Sie den ersten Reglertakt, mit \texttt{periode} und \texttt{c07linear} die Linearisierung. Ergänzende Lehrmodelle stehen in \texttt{nachrechnen.py}. Die beiden CSV-Dateien liefern die archivierten Einzelzeilen. \texttt{c21-idas.json} enthält den Diodenvergleich. Der englische Studienanhang bewahrt die technischen Berichte der Vorauflage mit ihrer ursprünglichen Paginierung 33--51.
 \srcs{Historische Vergleichsstudie\enspace \texttt{1824c9104152674b82de6cd84d53b0b4f68dca37}.}
 
 

@@ -1,0 +1,8 @@
+CP2 · Genauigkeit von Fourier-Operatoren
+Im entpackten Rechenlabor: python cp2_genauigkeit/auswerten.py
+Benötigt wird NumPy. Der Aufruf berechnet die beiden Saitenprofile aus den Gewichten und kontrolliert Feldfehler und Literaturvergleich.
+
+Die NPY/NPZ-Dateien bestehen aus numerischen Feldern, Gewichten und kurzen Spaltennamen. Sie werden mit allow_pickle=False geöffnet. saite_zeitreihen.npz enthält 2 376 Einzelmessungen. NaN in der letzten Spalte bedeutet, dass die Referenz praktisch null ist. kavitaet_stationaer.json dokumentiert auch die Massenänderung. kapitel.json, gegenproben.json und transport.json enthalten die Nachweise der Kapitel 1–12.
+
+Training, erneute LBM-Rechnung, Intervallschranken, neue Python-Vorhersagen und Abbildungen:
+https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/main/docs/CP2_NEURAL_OPERATORS.md

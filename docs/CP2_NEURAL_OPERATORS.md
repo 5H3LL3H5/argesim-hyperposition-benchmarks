@@ -70,3 +70,52 @@ Seed 2027, 80 Epochen, Adam mit Lernrate 0,003 und 16 Feldern je Batch, ein CPU-
 ## Störmer–Verlet als zweite klassische Rechnung
 
 Mit den gleichen festen Enden, dem CP2-Dreieck aus der Ruhe und Δt = 0,01 s ergibt die explizite Ortsform von Störmer–Verlet auf 501 Knoten 0,2313 % relativen Feldfehler nach 5 s und 0,0946 % nach 8 s. Auf 65 Knoten ergeben sich 2,4840 % und 0,9306 %. Der Vergleich verwendet die d’Alembert-Referenz und beide Ausgabetermine der Tabelle. Für 501 Knoten ist die Courant-Zahl 0,6. Bei 1001 Knoten wäre sie 1,2 und die implementierte Stabilitätsgrenze verletzt. Nachrechnen im ausgepackten Rechenlabor mit `python methodenlabor.py`. [Python-Quelltext](lehrbuch/studienbuch/material/methodenlabor.py) · [Bachelor-Lehrbuch](ARGESIM_SOLVER_STUDY.pdf)
+
+## Genauigkeitsstudie für Saite und Kavität
+
+Das feste Vergleichsprotokoll, fünf Abbildungen, die Operatorgrenze und die vollständige Kavitätsreferenz stehen im [Bachelor-Lehrbuch](ARGESIM_SOLVER_STUDY.pdf). Die Messdateien enthalten auch negative Transferergebnisse. [Felder, Gewichte und Ergebnisse](lehrbuch/studienbuch/material/cp2_genauigkeit/)
+
+| Fall und Fehlergröße | Bisher | Neue Rechnung |
+|---|---:|---:|
+| Mittige Saite, 501 Knoten, 5 s, relativ | 3,0009 % | 0,04303 % |
+| Dieselbe Saite nach 8 s | 0,8816 % | 0,01416 % |
+| Kavität 17², Schritt 16, mittlerer Betragsfehler der 24 Testfelder | 11,9756 % | 0,05074 % |
+| Dasselbe Feldensemble, affine Regression allein | | 0,1299 % |
+| Neue Parameter 21², U = 0,1, Schritt 16, mittlerer Vektorfehler | 40,48 % beim parameterbedingten Netz ohne Nachkalibrierung | 0,156 % nach 13 Referenzläufen |
+
+Die Saitenschicht ist ein für die lineare Wellengleichung spezialisierter Fourier-Operator. Sinusmoden berücksichtigen die festen Enden. Die modalen Faktoren wurden auf 96 synthetischen Profilen für 192 Moden und 321 Zeiten gelernt. Eine Auswertung mit der Spektralschicht von NeuralOperator prüft die Übereinstimmung. Für die Kavität stammen die 96/16/24 Dichtefelder des festen Vergleichs aus denselben Zufallsfolgen wie in der Erststudie. Das neue Modell lernt zwei vorzeichenbehaftete Geschwindigkeitskomponenten. Seine affine Regression und die restliche neuronale Korrektur werden getrennt bewertet. Die Kavitätsprognosen geben die Geschwindigkeiten in Einheiten der Deckelgeschwindigkeit aus.
+
+### Eine neue Eingabe auswerten
+
+Die Befehle laufen im Wurzelverzeichnis des Repositorys. Für die Prüfung der gespeicherten Saitenprofile und Strömungsdaten genügt NumPy. Die Modellbefehle verwenden Python mit dem optionalen Paketumfang für Operatoren.
+
+```sh
+python -m pip install -e '.[operators]'
+material=docs/lehrbuch/studienbuch/material
+python "$material/cp2_genauigkeit/auswerten.py"
+python -m argesim_benchmarks.experiments.cp2_operators predict-refined "$material/cp2_genauigkeit/saite.npz" "$material/cp2_feldlabor/rope/rope-501-input.npy" /tmp/saite.npy --times 2.5 5 8
+python -m argesim_benchmarks.experiments.cp2_operators predict-refined "$material/cp2_genauigkeit/kavitaet.npz" "$material/cp2_feldlabor/cavity/cavity-input.npy" /tmp/geschwindigkeit.npy
+python -m argesim_benchmarks.experiments.cp2_operators predict-refined "$material/cp2_genauigkeit/kavitaet_familie.npz" "$material/cp2_feldlabor/cavity/cavity-input.npy" /tmp/familie.npy --lid 0.0875 --step 12
+```
+
+Für die Saite ist die Ausgabe ein Array mit einer Zeile je Zeitpunkt und einer Spalte je Knoten. Die Kavität liefert ein Array mit Form (2, N, N), zuerst die horizontale und dann die vertikale Geschwindigkeit. Das feste Netz gilt für N = 17, U = 0,1 und Schritt 16. Das Familiennetz akzeptiert N von 17 bis 33, U von 0,075 bis 0,125 und Schritte 8 bis 24. Die gemessenen Fehler zwischen seinen Trainingskombinationen sind im Buch angegeben. Die dreizehn zusätzlichen Kalibrierläufe sind allein im dafür gekennzeichneten Vergleich enthalten.
+
+### Studien wiederholen
+
+```sh
+python -m pip install matplotlib mpmath
+python scripts/cp2_accuracy/rope_study.py
+python scripts/cp2_accuracy/cavity_study.py
+python scripts/cp2_accuracy/conditioned_cavity.py
+python scripts/cp2_accuracy/target_calibration.py
+python scripts/cp2_accuracy/steady_cavity.py
+python scripts/cp2_accuracy/operator_bounds.py
+python scripts/cp2_accuracy/chapter_checks.py
+python scripts/cp2_accuracy/constrained_pendulum.py
+python scripts/cp2_accuracy/transport_check.py
+python scripts/cp2_accuracy/unseen_systems.py
+python scripts/cp2_accuracy/figures.py
+python scripts/build_studienbuch.py
+```
+
+Die Versuche verwenden CPU, NeuralOperator 2.0.0, PyTorch 2.8 und SciPy 1.17.0. Die drei Trainingsläufe des festen Netzes ändern nur die Initialisierung und die Mischfolge der Trainingsbeispiele. Das Familiennetz verwendet separate Trainings- und Validierungsfelder. Der lange D2Q9-Lauf benötigt einen C++17-Compiler mit OpenMP-SIMD-Unterstützung. Das Skript kompiliert die Referenz, vergleicht ihren Kleingitterlauf mit dem skalaren Python-Kern und prüft beide Komponenten an je sechs Innenpunkten der publizierten Mittellinien. Jede Gittergröße endet bei derselben konvektiven Zeit. Die Profile, der Massenverlauf von Anfang zu Ende und die Unterschiede der letzten Zeitfenster sind archiviert. Der lange Lauf erzeugt eine physikalische Referenz für die Strömung. Der größte trainierte Ausgabezeitpunkt des neuronalen Kavitätsmodells ist Schritt 24. [ARGESIM-Definition](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/CP/CP2-definition.pdf) · [Ghia, Ghia und Shin, 1982](https://doi.org/10.1016/0021-9991(82)90058-4)

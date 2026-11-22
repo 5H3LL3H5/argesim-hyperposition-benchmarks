@@ -30,6 +30,12 @@ def material_files():
 def source_digest(material):
     files = [Path(__file__).resolve(), EVIDENCE, *SOURCE.glob('*.tex'),
              *(SOURCE / 'abbildungen').glob('*.pdf'), *material]
+    studies = ROOT / 'scripts' / 'cp2_accuracy'
+    files.extend(p for p in studies.iterdir() if p.suffix in {'.py', '.cpp'})
+    experiments = ROOT / 'argesim_benchmarks' / 'experiments'
+    files.extend(experiments / name for name in (
+        'cp2_fields.py', 'cp2_operators.py', 'cp2_accuracy.py',
+        'cp2_residual_fno.py', 'cp2_parameter_fno.py'))
     digest = hashlib.sha256()
     for path in sorted(files):
         digest.update(path.relative_to(ROOT).as_posix().encode() + b'\0')
@@ -101,6 +107,8 @@ def build(out):
                        if p.parent == MATERIAL and p.name != 'START_HIER.txt'}
         fields = [p for p in material if 'cp2_feldlabor' in p.relative_to(MATERIAL).parts]
         attachments['CP2_Feldlabor.zip'] = zip_bytes(fields)
+        accuracy = [p for p in material if 'cp2_genauigkeit' in p.relative_to(MATERIAL).parts]
+        attachments['CP2_Genauigkeit.zip'] = zip_bytes(accuracy)
         with pymupdf.open(stage / 'text.pdf') as book:
             toc = book.get_toc()
             if sorted(page for _, _, page in toc) != list(range(1, len(book) + 1)):

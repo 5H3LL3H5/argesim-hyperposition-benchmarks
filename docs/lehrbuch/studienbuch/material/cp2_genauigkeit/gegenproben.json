@@ -1,0 +1,59 @@
+{
+  "solver": [
+    {
+      "case": "duffing",
+      "method": "RK45",
+      "error": 5.967442202603479e-07,
+      "nfev": 98,
+      "lu": 0,
+      "meets_budget": true
+    },
+    {
+      "case": "duffing",
+      "method": "Radau",
+      "error": 1.1683286871289056e-07,
+      "nfev": 208,
+      "lu": 12,
+      "meets_budget": true
+    },
+    {
+      "case": "duffing",
+      "method": "BDF",
+      "error": 1.8270157458166866e-06,
+      "nfev": 90,
+      "lu": 13,
+      "meets_budget": true
+    },
+    {
+      "case": "fast_coupled",
+      "method": "RK45",
+      "error": 1.5513372816355897e-06,
+      "nfev": 50300,
+      "lu": 0,
+      "meets_budget": false
+    },
+    {
+      "case": "fast_coupled",
+      "method": "Radau",
+      "error": 1.5741781556055656e-07,
+      "nfev": 148,
+      "lu": 8,
+      "meets_budget": true
+    },
+    {
+      "case": "fast_coupled",
+      "method": "BDF",
+      "error": 2.4513152938610006e-06,
+      "nfev": 89,
+      "lu": 13,
+      "meets_budget": true
+    }
+  ],
+  "transport_counterexample": {
+    "nodes": 9,
+    "spacing": 0.25,
+    "step": 200000.0,
+    "minimum": -12535.02720000001,
+    "initial": "checkerboard; source outside domain"
+  }
+}

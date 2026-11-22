@@ -1,0 +1,81 @@
+{
+  "implementation_max_difference": 3.3881317890172014e-21,
+  "reference_interval": [
+    45014.8412715477,
+    45028.40492601229
+  ],
+  "cases": [
+    {
+      "h": 1,
+      "dt": 7200,
+      "expanded": false,
+      "wide": false,
+      "minimum": 0.0,
+      "concentration": 48677.17695255051,
+      "mass_rate": 2.0
+    },
+    {
+      "h": 0.5,
+      "dt": 7200,
+      "expanded": false,
+      "wide": false,
+      "minimum": 0.0,
+      "concentration": 48251.10012016192,
+      "mass_rate": 2.0
+    },
+    {
+      "h": 0.25,
+      "dt": 7200,
+      "expanded": false,
+      "wide": false,
+      "minimum": 0.0,
+      "concentration": 45440.70087127008,
+      "mass_rate": 2.0
+    },
+    {
+      "h": 0.25,
+      "dt": 3600,
+      "expanded": false,
+      "wide": false,
+      "minimum": 0.0,
+      "concentration": 45440.69459016739,
+      "mass_rate": 2.0
+    },
+    {
+      "h": 0.25,
+      "dt": 3600,
+      "expanded": true,
+      "wide": false,
+      "minimum": 0.0,
+      "concentration": 45440.69459016739,
+      "mass_rate": 2.0
+    },
+    {
+      "h": 0.25,
+      "dt": 3600,
+      "expanded": true,
+      "wide": true,
+      "minimum": 0.0,
+      "concentration": 44212.6397194711,
+      "mass_rate": 2.0
+    },
+    {
+      "h": 0.125,
+      "dt": 1800,
+      "expanded": true,
+      "wide": false,
+      "minimum": 0.0,
+      "concentration": 45085.51835673646,
+      "mass_rate": 2.0
+    },
+    {
+      "h": 0.125,
+      "dt": 900,
+      "expanded": true,
+      "wide": false,
+      "minimum": 0.0,
+      "concentration": 45085.518436588885,
+      "mass_rate": 2.0
+    }
+  ]
+}

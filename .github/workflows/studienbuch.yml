@@ -6,6 +6,9 @@ on:
       - 'docs/ARGESIM_*'
       - 'docs/evidence/cp2-operators.json'
       - 'scripts/build_studienbuch.py'
+      - 'scripts/cp2_accuracy/**'
+      - 'argesim_benchmarks/experiments/cp2_*.py'
+      - 'tests/test_cp2_accuracy.py'
       - '.github/workflows/studienbuch.yml'
   push:
     branches: [main]
@@ -14,6 +17,9 @@ on:
       - 'docs/ARGESIM_*'
       - 'docs/evidence/cp2-operators.json'
       - 'scripts/build_studienbuch.py'
+      - 'scripts/cp2_accuracy/**'
+      - 'argesim_benchmarks/experiments/cp2_*.py'
+      - 'tests/test_cp2_accuracy.py'
       - '.github/workflows/studienbuch.yml'
   workflow_dispatch:
 
@@ -65,3 +71,17 @@ jobs:
             docs/ARGESIM_Bachelor_Rechenlabor.zip
             docs/ARGESIM_Buchstand.json
           if-no-files-found: error
+
+  operators:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install the CPU operator runtime
+        run: |
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.8.0
+          python -m pip install -e '.[operators]'
+      - name: Check signed velocities, operator weights and benchmark fields
+        run: python -m unittest tests.test_cp2_accuracy tests.test_cp2_operators

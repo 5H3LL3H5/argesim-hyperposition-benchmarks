@@ -276,9 +276,59 @@ def main():
     predict.add_argument("weights", type=Path)
     predict.add_argument("input", type=Path, help="physical initial field, .npy")
     predict.add_argument("output", type=Path, help="output profiles, .npy")
+    refined = commands.add_parser(
+        "predict-refined", help="predict with a CP2 accuracy-study checkpoint"
+    )
+    refined.add_argument("weights", type=Path)
+    refined.add_argument("input", type=Path, help="physical initial field, .npy")
+    refined.add_argument(
+        "output", type=Path, help="output profiles or signed velocity components, .npy"
+    )
+    refined.add_argument(
+        "--times", type=float, nargs="+", help="rope output times in seconds"
+    )
+    refined.add_argument("--lid", type=float, help="cavity lid speed in lattice units")
+    refined.add_argument("--step", type=int, help="cavity output step")
     args = parser.parse_args()
     torch.set_num_threads(1)
     torch.use_deterministic_algorithms(True)
+    if args.command == "predict-refined":
+        from . import cp2_accuracy, cp2_parameter_fno, cp2_residual_fno
+
+        source = np.load(args.input, allow_pickle=False)
+        with np.load(args.weights, allow_pickle=False) as checkpoint:
+            if "kernels" in checkpoint:
+                if args.lid is not None or args.step is not None:
+                    parser.error("rope accepts --times in seconds")
+                result = cp2_accuracy.rope_predict(
+                    source,
+                    args.times or [5.0, 8.0],
+                    checkpoint["times"],
+                    checkpoint["kernels"],
+                )
+            else:
+                if args.times is not None or source.ndim != 2:
+                    parser.error(
+                        "cavity expects a two-dimensional density and an integer output step"
+                    )
+                lid = 0.1 if args.lid is None else args.lid
+                step = 16 if args.step is None else args.step
+                if "coefficients" in checkpoint:
+                    if lid != 0.1 or step != 16:
+                        parser.error("fixed checkpoint requires lid=0.1 and step=16")
+                    net, coeff, scale = cp2_residual_fno.load(args.weights)
+                    result = cp2_residual_fno.predict(net, source[None], coeff, scale)[
+                        0
+                    ]
+                elif "coeff_0_0_0" in checkpoint:
+                    net, bank = cp2_parameter_fno.load(args.weights)
+                    result = cp2_parameter_fno.predict(
+                        net, bank, source[None], lid, step
+                    )[0][0]
+                else:
+                    parser.error("unrecognized accuracy-study checkpoint")
+        np.save(args.output, result, allow_pickle=False)
+        return
     if args.command == "train":
         print(
             json.dumps(run_study(args.case, args.out, args.seed, args.epochs), indent=2)

@@ -47,3 +47,7 @@ Die folgenden Markdown-Kapitel bilden die frühere Kurzfassung. Die vollständig
 Die historischen Fachkapitel sind als separate Quellen und über den eingebetteten Studienanhang zugänglich. [DEVS und QSS](../QSS_DEVS_HISTORY.md) · [Solverwahl](../SOLVER_SELECTION.md) · [Methodenkatalog](../SOLVER_METHODS.md) · [Acht ARGESIM-Fälle](../SOLVER_COMPARISON.md)
 
 Für den historischen Markdown-Satz mit Pandoc, WeasyPrint, lxml und Matplotlib dient `python scripts/build_solver_study.py --revision <Commit-SHA> --output kurzfassung.pdf`.
+
+## Was verbessert die Genauigkeit der Fourier-Operatoren?
+
+Der Zusatzversuch in Kapitel 13 untersucht sechs Zupfpositionen, vier Saitengitter, Zwischenzeiten und veränderte Kavitätsparameter. Fünf Grafiken zeigen die Ortsfehler, Modenzahl, neuronale Korrektur, Übertragung auf neue Bedingungen und den Vergleich der langen Kavitätsrechnung mit Literaturprofilen. Die Abschlussfragen aller 13 Kapitel verweisen auf Rechnung, Beweis, Gegenbeispiel oder die benötigten realen Messdaten. [Genauigkeitsstudie mit Python-Befehlen](../CP2_NEURAL_OPERATORS.md#genauigkeitsstudie-für-saite-und-kavität)

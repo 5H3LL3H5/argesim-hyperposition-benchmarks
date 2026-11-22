@@ -1,0 +1,5 @@
+{
+  "knot_error_upper": 1.3590009377700442e-13,
+  "old_lipschitz_upper": 24216.538099749232,
+  "dtype_interpretation": "fixed binary coefficients, real arithmetic; discrete sine grid for the reference"
+}
