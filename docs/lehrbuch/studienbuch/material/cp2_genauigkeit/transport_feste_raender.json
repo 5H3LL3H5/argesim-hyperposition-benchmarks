@@ -1,0 +1,63 @@
+{
+  "step_s": 7200,
+  "time_s": 864000,
+  "source_m": [
+    0,
+    0
+  ],
+  "well_m": [
+    5,
+    0
+  ],
+  "source_and_well_weights": "bilinear in cell centers",
+  "rows": [
+    {
+      "h_m": 1,
+      "shape_yx": [
+        9,
+        17
+      ],
+      "faces_west_east_south_north_m": [
+        -4.5,
+        12.5,
+        -4.5,
+        4.5
+      ],
+      "mass_rate_mg_s": 2.0,
+      "well_mg_m3": 48677.17695255051,
+      "minimum_mg_m3": 0.0
+    },
+    {
+      "h_m": 0.5,
+      "shape_yx": [
+        18,
+        34
+      ],
+      "faces_west_east_south_north_m": [
+        -4.5,
+        12.5,
+        -4.5,
+        4.5
+      ],
+      "mass_rate_mg_s": 2.0,
+      "well_mg_m3": 41471.80030841759,
+      "minimum_mg_m3": 0.0
+    },
+    {
+      "h_m": 0.25,
+      "shape_yx": [
+        36,
+        68
+      ],
+      "faces_west_east_south_north_m": [
+        -4.5,
+        12.5,
+        -4.5,
+        4.5
+      ],
+      "mass_rate_mg_s": 2.0,
+      "well_mg_m3": 44134.387356615895,
+      "minimum_mg_m3": 0.0
+    }
+  ]
+}

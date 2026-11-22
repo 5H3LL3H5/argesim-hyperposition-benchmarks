@@ -1,0 +1,181 @@
+\seite{}{Synthese und Solverwahl}\anchorpage{1}{neu17}{17 · Synthese und Entscheidungsmatrix der 456 Konfigurationen}\ey{KAPITEL 17}\ptitle{Synthese und Entscheidungsmatrix der 456 Konfigurationen}
+Die Kugelreihe und der schnelle Schalter reagieren beide sprunghaft. Auf dem einen Modell kommt QSS2 mit wenigen Auswertungen ans Ziel, auf dem anderen bleibt der gesamte ursprüngliche Rasterversuch ohne Treffer. Welches Merkmal hilft bei der nächsten Wahl mehr als der bloße Name „hybrid“?
+\par\textsf{\bfseries\color{sea}Phänomen und Leitfrage.} Zuerst steht die Messgröße fest. Bei einer Schaltung zählt die Zeit des Durchgangs, bei einem gebundenen Pendel zusätzlich der zulässige Zustand, bei einem Transportproblem die Konzentration am richtigen Ort.
+\par\textsf{\bfseries\color{sea}Modellbildung.} Die Matrix umfasst C03, C05, C07, C09, C11, C12, C13 und C21-Ball. Pro Fall liefern 18 quantisierte Verfahrensnamen mit je drei Quanten sowie drei klassische Einstellungen zusammen 57 Zeilen. Achtmal 57 ergibt 456. Zwei der erfassten erstordentlichen Quantisierer teilen dieselbe mathematische Aktualisierung.
+\par\textsf{\bfseries\color{sea}Numerischer Härtefall.} Ein Solverfehler, eine falsche Ereigniszahl und ein numerischer Wert außerhalb des Budgets sind verschiedene Befunde. Ein Timeout misst auch die verfügbare Rechenzeit auf der damaligen Maschine. Eine gemischte Rangliste könnte diese Ursachen verdecken.
+\par\textsf{\bfseries\color{sea}Methodenvergleich.} Für glatte ODEs beginnen wir mit einem expliziten adaptiven Paar. Begrenzen abklingende schnelle Moden die Schritte, kommt ein impliziter Vergleich hinzu. Isolierte freie Flüge rechtfertigen einen QSS-Versuch. Verbleibt eine algebraische Bindung, sind konsistente Startdaten und ein geeigneter Residualsolver zuerst zu klären. Anschließend entscheidet die gemessene Zielerfüllung.
+\par\textsf{\bfseries\color{sea}Aufgaben und Akzeptanz.} 222 Einstellungen bestehen, 151 verfehlen das Genauigkeitsziel, 46 erreichen das Zeitlimit, 20 haben eine abweichende Ereigniszahl und 17 enden mit Solverfehler. Die Bilanz umfasst genau 456 Zeilen. Die ergänzende Auswahlstudie mit Radau und BDF sowie die C21-Diode werden eigenständig ausgewertet.
+\par\textsf{\bfseries\color{sea}Diagnose.} Vergleichen Sie Laufzeiten nur innerhalb gleicher Aufgaben und erfolgreicher Genauigkeit. Bei C05 zeigt sich der Einfluss der Kandidatenmenge besonders deutlich. Die spätere Radau-Auswahl erfüllt Ziele, die im ersten Raster durchweg verfehlt wurden. Anhang B.1 nennt jede Einstellung samt Einzelergebnis.
+\seite{Rechenbeispiel}{Synthese und Solverwahl}\anchorpage{2}{kap12}{Welcher Solver erfüllt den Auftrag?}\ptitle{Welcher Solver erfüllt den Auftrag?}
+
+
+\lernziel{Sie können einen Vergleich vor dem Start festlegen, fehlerhafte Läufe einordnen und eine Methodenwahl mit einem nachrechenbaren Genauigkeits- und Aufwandsergebnis begründen.}
+Zwei Programme liefern dieselbe Endtemperatur. Das erste braucht nur die Hälfte der Rechenzeit. Sie sollen den schnelleren Solver für einen Regler auswählen, der zusätzlich drei Schaltvorgänge protokollieren muss. Welche Daten fehlen Ihnen vor einer Entscheidung?
+\subt{Machen Sie den Auftrag messbar}
+Wir verlangen in einem kleinen Lehrversuch drei Ereignisse in der richtigen Reihenfolge, höchstens \(2\unitm{ms}\) Zeitabweichung je Ereignis und höchstens \(0{,}10\unitm K\) Endfehler. Die Laufzeiten stammen in dieser Übung aus demselben angenommenen Versuchsaufbau.
+{\tblstart\begin{tabularx}{\linewidth}{@{}Yrrrr@{}}\toprule
+\hd{Lauf}&\hd{Ereignisse}&\hd{größter Zeitfehler}&\hd{Endfehler}&\hd{Laufzeit}\\\midrule
+A&2 von 3&offen&\(0{,}01\unitm K\)&\(4\unitm{ms}\)\\
+B&3 von 3&\(1{,}6\unitm{ms}\)&\(0{,}04\unitm K\)&\(8\unitm{ms}\)\\\bottomrule\end{tabularx}\par}
+Nur B erfüllt hier den Auftrag. Ein fehlendes Ereignis kann bei A auch durch eine noch so gute Endtemperatur nicht rekonstruiert werden. Die Daten sind konstruierte Lehrwerte. Die archivierten ARGESIM-Messungen folgen später mit ihren eigenen Grenzwerten.
+\notebox{Ändern Sie den Auftrag}{Fordert eine andere Anwendung ausschließlich die Endtemperatur mit derselben Toleranz, dann erfüllen A und B diese Anforderung. Für diesen Versuch benötigt A die kürzere gemessene Zeit. Eine Änderung der Messaufgabe kann eine vernünftige Wahl umkehren.}
+Übertragen Sie dieses Vorgehen auf die Acht-Fälle-Auswertung. Ein Methodenname allein legt weder die Schrittweite noch die Behandlung von Ereignissen oder das Fehlerziel fest.
+
+\srcs{\textbf{Kernweg}\enspace\see{c09takt}{Erster Reglertakt}\quad\textbf{Vertiefung}\enspace\see{matrix}{Acht-Fälle-Matrix}\quad\see{ueb12}{Selbst prüfen}.}
+
+\lektion{Eine Solverwahl begründen}{prakt}{Labor}{Solververgleich}
+\vorhersage{12}{Der schnellste Lauf trifft den Endwert, überspringt aber eine geforderte Schaltung. Wie ordnen Sie ihn im Vergleich ein?}{kontrolleB}
+Eine Modellgruppe fragt nach dem „besten Solver“. Formulieren Sie zuerst den Prüfauftrag. Welche Größe, zu welcher Zeit, in welcher Einheit und mit welchem Fehlerbudget soll stimmen? Die Tabelle verbindet eine solche Frage mit einem ersten Verfahren und einer Gegenprobe. Ihr Versuch entscheidet, ob die Wahl trägt.
+{\tblstart\begin{tabularx}{\linewidth}{@{}P{29mm}YY@{}}\toprule
+\hd{Modellmerkmal}&\hd{Erster sinnvoller Versuch}&\hd{Was entscheidet?}\\\midrule
+Glatte ODE ohne schnelle Abklingmode&RK45 für adaptive Schritte, RK4 als transparente Kontrolle auf festem Gitter.&Zustandsfehler und beobachtete Ordnung beim Verfeinern.\\
+Schnelle stabile Mode, langsames Ziel&Radau IIA, BDF oder ESDIRK. Explizites RK als Kostenvergleich.&Fehler in der Anfangsschicht und am verlangten Ausgang, \(f\)-Aufrufe und LU.\\
+Konservativer Oszillator&Störmer--Verlet bei separierbarer Mechanik. RK4 bei begrenztem Horizont mitmessen.&Phasenfehler und maximale Energiedrift über den relevanten Zeitraum.\\
+Ortsabhängiges Feld&FDM, FVM oder FEM nach Geometrie, Fluss und Glattheit. Danach passende Zeitintegration.&Raum und Zeit getrennt verfeinern. Flüsse und Randbedingungen prüfen.\\
+Algebraische Bindung&Bei regulärem Index 1 Elimination gegen IDA/IDAS vergleichen. Bei höherem Index Formulierung prüfen.&Konsistente Starts, skalierte Residuen, unabhängige Zustandsgrößen.\\
+Lokale oder schaltende Dynamik&QSS2 sowie einen klassischen Integrator unter identischem Wächter- und Resetvertrag erproben.&Ereignisfolge, Zeiten, Zahl betroffener Komponenten und Arbeit bei zulässigem Fehler.\\\bottomrule
+\end{tabularx}\par}
+\subt{Wie ein Vergleich fair wird}
+Bei einem Solverpaar sind dieselben ODE-Toleranzen nur eine Eingabe. Ein Quantum misst sogar eine andere Größe. Für jeden Kandidaten sucht man eine Einstellung, die das gleiche physikalische Ziel erreicht. Erst die qualifizierten Läufe werden nach Aufwand verglichen. Zeitüberschreitung, Solverfehler, falsche Ereignisfolge und reguläre Zielverfehlung bleiben als unterschiedliche Ergebnisse sichtbar.
+\srcs{\see{tracking}{Steifes Folgesystem} · \see{vergleich}{C05 und C12} · \see{raumfehler}{getrennte Fehlerbilanz}.}
+
+\lektion{C05 und C12 am gleichen Fehlerziel vergleichen}{vergleich}{Labor}{Solververgleich}
+Ein Lauf qualifiziert sich, wenn Ereigniszahl und Reihenfolge stimmen und jede Messgröße ihre eigene physikalische Schranke \(b_j>0\) einhält. Der dimensionslose Score ist \(S=\max_j|Q_j-Q_j^\star|/b_j\). Bei \(S\le1\) besteht der Lauf. Auf C05 sind die Schranken \(1\unitm{ms}\) je Schaltzeit und \(0{,}006\) je Endzustand. Auf C12 werden Kontaktzeiten und Endgeschwindigkeiten mit \(0{,}001\unitm s\) bzw. \(0{,}001\unitm{m/s}\) geprüft.
+{\tblstart\begin{tabularx}{\linewidth}{@{}Yrrr@{}}\toprule
+\hd{C05 · Score}&\hd{rtol \(10^{-3}\)}&\hd{rtol \(10^{-5}\)}&\hd{rtol \(10^{-7}\)}\\\midrule
+ESDIRK32&6,262&0,08890&0,000947\\
+Radau IIA&0,4168&0,006296&0,0000507\\
+BDF&16,93&0,1755&0,006925\\
+RK23&Budget&Budget&Budget\\\bottomrule
+\end{tabularx}\par}
+\capline{Archivierte Messwerte des 138er-Versuchs. „Budget“ bedeutet hier, dass RK23 das Limit von 40\,000 Versuchen pro Integratoraufruf ausschöpfte.}
+
+Radau trifft das Ziel auf allen drei Stufen. ESDIRK32 und BDF treffen es erst ab der mittleren Stufe. Die implizite Stufe erleichtert den Umgang mit dem schnellen Modus. Die geforderte Präzision der Schaltzeiten und Endwerte ergibt sich erst aus dem Vergleich mit der exakten Phasenlösung.
+{\tblstart\begin{tabularx}{\linewidth}{@{}Yrrrr@{}}\toprule
+\hd{C12 · erste Stufe}&\hd{QSS2}&\hd{RK23}&\hd{RK45}&\hd{ESDIRK32}\\\midrule
+Auswertungen der rechten Seite&36&139&148&414\\
+Einstellungen im Ziel (von 3)&3&3&3&3\\\bottomrule
+\end{tabularx}\par}
+Für die freie Kugelreihe reichen QSS2 wenige Auswertungen. Die nativen Zähler umfassen hier auch Ereignisarbeit und gegebenenfalls numerische Jacobi-Matrizen. Das Zählverfahren des jeweiligen Backends sowie die Kosten einer Faktorisierung sind bei einem Vergleich mit anderen Bibliotheken mitzulesen. Aus einem Zähler allein folgt keine allgemeine Laufzeitrangfolge.
+\task{6}{Ein C05-Lauf trifft die drei Schaltungen in Reihenfolge. Sein größter Zeitfehler beträgt \(0{,}4\unitm{ms}\), die Endfehler sind 0,0024 und 0,0072. Bestimmen Sie den Score. Was passiert bei einer zusätzlichen Schaltung?}
+\srcs{\repo{docs/evidence/rk23-devs.csv}{Archivierte Einzelwerte} · \repo{docs/evidence/rk23-devs.json}{Rechenumgebung und Prüfsumme}.}
+
+\lektion{Was die acht Anwendungsfälle tatsächlich prüfen}{faelle}{Labor}{Solververgleich}
+Lesen Sie die Kurzbezeichnung zusammen mit dem tatsächlich geprüften Ausschnitt. Ein Pendelversuch über zwei Sekunden und einer über zehn Sekunden können verschiedene Ereignisse enthalten. Jede Zeile nennt deshalb Modell, Zeitfenster oder Messgröße und Referenz.
+{\tblstart\begin{tabularx}{\linewidth}{@{}P{22mm}Y@{}}\toprule
+\hd{Fall}&\hd{Modellbildung, Vergleich und Reichweite}\\\midrule
+C03 · Verstärker&Idealer Schalter im Class-E-Verstärker. Vier Zustände bei 5 und 10\,\(\mu\mathrm s\) gegen separat aufgestellte affine Phasenmatrizen. Endliche Schaltflanken liegen außerhalb dieser Reihe.\\
+C05 · Schaltung&Zwei stabile Relaxationen, umgeschaltet an Zustandsgrenzen. Drei Schaltzeiten und zwei Endwerte bis 3,5 s gegen analytische Phasen.\\
+C07 · Pendel&Anschlagstift verändert die wirksame Pendelgeometrie. Stiftübergänge und Endwinkel/-geschwindigkeit in den ersten 2 s gegen separate Bewegungsgleichungen und DOP853.\\
+C09 · Tanks&Volumenbilanzen mit abgetastetem Fuzzy-Regler. 16 Reglertakte à 1 s. Beide Wasserstände gegen DOP853 bei gleicher Regelung, Grenze 0,5 mm.\\
+C11 · Roboter&Neun Zustände des SCARA-Antriebs nach 0,1 ms, noch vor der Strombegrenzung. Referenz ist Radau bei derselben rechten Seite.\\
+C12 · Kugeln&Vier gleiche Massen mit drei elastischen Kontakten. Analytische Impulsübertragung liefert Zeiten, Reihenfolge und Endgeschwindigkeiten.\\
+C13 · Kran&Lineares Zustandsmodell mit Lastpuls von \(-800\unitm N\). Fünf Zustände bei 4, 7 und 15 s gegen unabhängig übertragene affine Phasenmatrizen.\\
+C21 · Ball&Freier Fall, starrer Boden und Rückprall. Zwei analytische Aufprallzeiten innerhalb der ersten 5 s mit einer Schranke von je 1 ms.\\\bottomrule
+\end{tabularx}\par}
+Die acht Fälle ergeben 456 Konfigurationen. Die ältere 399er-Reihe umfasste unter anderem C01, C15, C17R, CP1 und ein auf drei innere Knoten reduziertes CP2-Seil. Die spätere 520er-Auswahlstudie verbindet analytische Prüfmodelle mit gezielten Wiederholungen. Die 138er-Reihe ergänzt insbesondere RK23 und ESDIRK32. Solche Reihen haben verschiedene Versuchsraster und Nenner.
+\srcs{\repo{docs/evidence/qss-extension.csv}{Acht-Fälle-Reihe} · \repo{docs/evidence/qss-baseline.csv}{399er-Reihe} · \repo{docs/evidence/qss-selection.csv}{520er-Auswahl} · \repo{ARGESIM_COVERAGE.md}{Katalogabdeckung}.}
+
+\lektion{Die vollständige Acht-Fälle-Matrix}{matrix}{Labor}{Solververgleich}
+Jede Zahl zählt bestandene Einstellungen. Für jeden QSS-Namen wurden drei Quantenfaktoren \(0{,}005,\ 0{,}001,\ 0{,}0002\) mal Komponentenskala geprüft. Euler, RK4 und RK45 haben hier je eine Einstellung pro Fall. Fettdruck bedeutet, dass alle geprüften Einstellungen dieser Zelle bestehen.
+{\sffamily\fontsize{9.3}{11.3}\selectfont\renewcommand{\arraystretch}{1.10}
+\par\noindent\begin{tabular*}{\linewidth}{@{}l@{\extracolsep{\fill}}*{8}{c}@{}}\toprule
+\hd{Verfahren}&\hd{C03}&\hd{C05}&\hd{C07}&\hd{C09}&\hd{C11}&\hd{C12}&\hd{C13}&\hd{C21}\\\midrule
+\texttt{qss1} & {\color{mute}0} & {\color{mute}0} & 1 & \textbf{\color{sea}3} & \textbf{\color{sea}3} & \textbf{\color{sea}3} & {\color{mute}0} & 1 \\
+\texttt{qss2} & {\color{mute}0} & {\color{mute}0} & 1 & \textbf{\color{sea}3} & \textbf{\color{sea}3} & \textbf{\color{sea}3} & {\color{mute}0} & \textbf{\color{sea}3} \\
+\texttt{qss3} & {\color{mute}0} & {\color{mute}0} & 1 & \textbf{\color{sea}3} & \textbf{\color{sea}3} & \textbf{\color{sea}3} & {\color{mute}0} & \textbf{\color{sea}3} \\
+\texttt{qss4} & {\color{mute}0} & {\color{mute}0} & 2 & \textbf{\color{sea}3} & \textbf{\color{sea}3} & \textbf{\color{sea}3} & {\color{mute}0} & \textbf{\color{sea}3} \\
+\texttt{cqss1} & {\color{mute}0} & {\color{mute}0} & \textbf{\color{sea}3} & \textbf{\color{sea}3} & \textbf{\color{sea}3} & \textbf{\color{sea}3} & {\color{mute}0} & \textbf{\color{sea}3} \\
+\addlinespace[2pt]
+\texttt{liqss1} & {\color{mute}0} & {\color{mute}0} & {\color{mute}0} & \textbf{\color{sea}3} & 2 & 2 & {\color{mute}0} & {\color{mute}0} \\
+\texttt{liqss2} & {\color{mute}0} & {\color{mute}0} & 1 & 2 & \textbf{\color{sea}3} & \textbf{\color{sea}3} & {\color{mute}0} & \textbf{\color{sea}3} \\
+\texttt{liqss3} & {\color{mute}0} & {\color{mute}0} & 1 & 2 & 2 & \textbf{\color{sea}3} & {\color{mute}0} & {\color{mute}0} \\
+\addlinespace[2pt]
+\texttt{mliqss1} & {\color{mute}0} & {\color{mute}0} & {\color{mute}0} & \textbf{\color{sea}3} & \textbf{\color{sea}3} & 2 & {\color{mute}0} & {\color{mute}0} \\
+\texttt{mliqss2} & {\color{mute}0} & {\color{mute}0} & 1 & 2 & \textbf{\color{sea}3} & \textbf{\color{sea}3} & {\color{mute}0} & \textbf{\color{sea}3} \\
+\texttt{mliqss3} & {\color{mute}0} & {\color{mute}0} & 1 & 2 & 2 & \textbf{\color{sea}3} & {\color{mute}0} & {\color{mute}0} \\
+\addlinespace[2pt]
+\texttt{eliqss1} & 1 & {\color{mute}0} & \textbf{\color{sea}3} & 2 & \textbf{\color{sea}3} & 2 & {\color{mute}0} & \textbf{\color{sea}3} \\
+\texttt{eliqss2} & {\color{mute}0} & {\color{mute}0} & 1 & 2 & \textbf{\color{sea}3} & \textbf{\color{sea}3} & {\color{mute}0} & \textbf{\color{sea}3} \\
+\texttt{eliqss3} & 1 & {\color{mute}0} & 2 & 2 & 2 & \textbf{\color{sea}3} & {\color{mute}0} & {\color{mute}0} \\
+\addlinespace[2pt]
+\texttt{cheqss1} & 1 & {\color{mute}0} & \textbf{\color{sea}3} & 2 & \textbf{\color{sea}3} & 2 & {\color{mute}0} & \textbf{\color{sea}3} \\
+\texttt{cheqss2} & {\color{mute}0} & {\color{mute}0} & 1 & 2 & \textbf{\color{sea}3} & \textbf{\color{sea}3} & {\color{mute}0} & \textbf{\color{sea}3} \\
+\texttt{cheqss3} & {\color{mute}0} & {\color{mute}0} & 1 & 2 & 2 & \textbf{\color{sea}3} & {\color{mute}0} & {\color{mute}0} \\
+\addlinespace[2pt]
+\texttt{liqss-bdf} & {\color{mute}0} & {\color{mute}0} & \textbf{\color{sea}3} & 2 & \textbf{\color{sea}3} & \textbf{\color{sea}3} & {\color{mute}0} & \textbf{\color{sea}3} \\
+\addlinespace[2pt]
+\midrule
+\texttt{euler} & {\color{mute}0} & {\color{mute}0} & {\color{mute}0} & \textbf{\color{sea}1} & \textbf{\color{sea}1} & \textbf{\color{sea}1} & {\color{mute}0} & {\color{mute}0} \\
+\texttt{rk4} & \textbf{\color{sea}1} & {\color{mute}0} & \textbf{\color{sea}1} & \textbf{\color{sea}1} & \textbf{\color{sea}1} & \textbf{\color{sea}1} & \textbf{\color{sea}1} & \textbf{\color{sea}1} \\
+\texttt{rk45} & \textbf{\color{sea}1} & {\color{mute}0} & \textbf{\color{sea}1} & \textbf{\color{sea}1} & \textbf{\color{sea}1} & \textbf{\color{sea}1} & \textbf{\color{sea}1} & \textbf{\color{sea}1} \\
+\bottomrule\end{tabular*}\par}
+Von 456 Läufen bestehen 222. Weitere 151 verfehlen die Toleranz, 20 haben die falsche Ereigniszahl, 46 erreichen das Zeitlimit und 17 enden mit Solverfehler oder Arbeitsbudget. Alle 20 Ereigniszahlfehler betreffen C05. Eine Null fasst verschiedene Ursachen zusammen.
+
+C13 zeigt die Bedeutung des Prüffensters. RK4 und RK45 treffen alle 15 Zustandsbeobachtungen. Der beste QSS-Lauf (QSS3) liegt bei etwa 2,20 zulässigen Fehlern. C09, C11 und C12 sehen in der Matrix ähnlich aus. Reglertakt, sehr kurzes Zeitfenster und lineare Flugsegmente erklären die Treffer dort aus jeweils anderen Gründen.
+\srcs{Aus den 456 archivierten Einzelzeilen ausgewertet · \repo{docs/evidence/qss-extension.csv}{Rohmessungen} · Projektstand \texttt{1824c91041}.}
+
+\lektion{Wählt der schnellste Solver das nächste Modell?}{befundwahl}{Labor}{Nachweise zum Modell}
+Ein Solver ist für eine neue Modellfamilie auszuwählen, bevor wir deren Zeiten kennen. Als einfache Regel betrachten wir die 17 Einstellungen, die für alle acht archivierten C-Modelle vorliegen. Wir lassen jeweils ein Modell vollständig außen vor. Auf den sieben übrigen Modellen minimieren wir zuerst die Zahl der Fehlschläge und anschließend die mittlere Laufzeit relativ zur schnellsten erfolgreichen Einstellung je Modell. Ein Gleichstand wird nach dem Methoden- und Einstellungsnamen entschieden.
+\subt{Was passiert am zurückgehaltenen Modell?}
+In allen acht Durchgängen wählt diese Regel RK45. Er erreicht 7 von 8 Zielen. Mehr ist unter diesen 17 Kandidaten unmöglich: Bei C05 enden 14 mit Solverfehler und 3 außerhalb des Fehlerziels. Drei Radau- und zwei BDF-Einstellungen außerhalb der Schnittmenge bestehen bei C05. In C21 dauert sein erfolgreicher Lauf rund \(10{,}29\)-mal so lange wie der schnellste zugelassene. Das Verfahren benutzt die bereits bekannte Studie rückblickend, hält jedoch die Testzeilen im jeweiligen Auswahlalgorithmus zurück.
+\subt{Zwei zusätzliche Systeme mit bekannten Lösungen}
+Als separate Gegenprobe fixieren wir dieselbe Wahl und rechnen ein erzwungenes Duffing-System mit exakter Schwingung und ein steifes gekoppeltes System mit exaktem Verlauf \((\cos t,e^{-t})\). Für alle drei Solver gelten \(\mathrm{rtol}=10^{-6}\), \(\mathrm{atol}=10^{-8}\), maximal \(10^{-4}\) gemessener Fehler auf 1\,001 Ausgabezeiten und höchstens 8\,000 Aufrufe der rechten Seite im Laufprotokoll.
+{\tblstart\begin{tabularx}{\linewidth}{@{}Yrrr@{}}\toprule
+\hd{Modell}&\hd{RK45}&\hd{Radau}&\hd{BDF}\\\midrule
+Erzwungene Schwingung&98&208&90\\
+Schnelle gekoppelte Mode&50\,300&148&89\\\bottomrule\end{tabularx}\par}
+Zellen nennen \texttt{nfev}; Faktorisierungen stehen separat in der Datei. RK45 überschreitet beim gekoppelten System das Aufrufbudget. Radau und BDF erfüllen hier beide Ziele. Die beiden Gegenproben sind eigenständige Läufe mit fester Toleranz und eigenem Budget. Sie gehen in die 7-von-8-Quote nicht ein. Eine nutzbare Regel muss ihre Modellfamilie, die Fehlergröße und das Budget mit angeben.
+\notebox{Welche Frage verlangt Außendaten?}{Genauigkeit und Sensorort (Kapitel 1) verlangen Messdaten vom Bauteil und eine kalibrierte Messkette.}
+\srcs{\repo{docs/evidence/qss-selection.csv}{Archiv mit 520 Konfigurationen} · \texttt{kapitel.json} · \texttt{gegenproben.json}.}
+
+\werkblatt{17}{Selbst prüfen}{ueb12}{Aus Messwerten entscheiden}
+
+\merke{Die Genauigkeitsanforderung legt fest, welche Läufe für die Aufgabe brauchbar sind. Erst innerhalb dieser Menge lässt sich eine definierte Aufwandsgröße vergleichen.}
+\subt{A · Eine Auswahl schriftlich begründen}
+Alle drei Lehrläufe melden die richtige Ereignisfolge. Gefordert sind höchstens \(0{,}5\unitm{ms}\) Zeitfehler und \(0{,}020\) absoluter Endfehler. Die Messungen sind als Tripel aus Zeitfehler in ms, Endfehler und Laufzeit in ms angegeben. Für die drei Läufe gelten \(A=(0{,}3;\,0{,}018;\,90)\), \(B=(0{,}6;\,0{,}002;\,40)\), \(C=(0{,}4;\,0{,}010;\,110)\). Welchen Lauf wählen Sie für die kürzeste Zeit? Entscheiden Sie erneut bei \(0{,}75\unitm{ms}\) Zeitfehlergrenze.
+\subt{B · Aufwand lesen, ohne die Messgröße zu wechseln}
+Ein expliziter Lauf benötigt 300 Auswertungen der rechten Seite. Ein impliziter Lauf benötigt 90 und zusätzlich 15 Matrixfaktorisierungen. Beide treffen das Ziel. Genügt das für eine Entscheidung über die Laufzeit? Geben Sie zwei mögliche Kostenmodelle an, bei denen sich die Reihenfolge umkehrt.
+\subt{C · Eine kleine Studie selbst zusammenfassen}
+Vier Aufgaben haben dasselbe Abnahmeschema. Die Laufzeiten von A sind \(1,\ 2,\ \text{Ausfall},\ 3\) und die von B \(2,\ 2,\ 4,\ 6\) in einer gemeinsamen Zeiteinheit. Ein Lauf zählt, wenn er erfolgreich ist und höchstens das 1,5-Fache der besten erfolgreichen Zeit \emph{derselben Aufgabe} kostet. Welchen Anteil aller vier Aufgaben erreicht jede Methode? Wie groß ist ihr jeweiliger Anteil für einen sehr großen Zeitfaktor?
+\hilfe{Der Ausfall zählt bei der Mindestzeit des einzelnen Falls nicht mit. Für den Gesamtanteil bleiben alle vier Aufgaben im Nenner.}
+
+\schreibfeld
+
+\srcs{\see{loesweg12}{Lösungswege A, B und C}\quad·\quad\see{kap12}{Zum Kapitelauftakt}.}
+
+\werkblatt{17}{Lösungswege}{loesweg12}{Aus Messwerten entscheiden}
+
+\subt{A · Ein Lauf mit kleinem Endfehler kann ausscheiden}
+A und C erfüllen die beiden ursprünglichen Fehlergrenzen. B verfehlt mit \(0{,}6\unitm{ms}\) die Zeitgrenze. Für minimale gemessene Laufzeit unter den zulässigen Kandidaten gewinnt A mit \(90\unitm{ms}\). Bei \(0{,}75\unitm{ms}\) Zeitfehlergrenze qualifiziert sich auch B und übernimmt mit \(40\unitm{ms}\) den ersten Platz.
+\subt{B · Die fehlende Messung durch Gegenmodelle sichtbar machen}
+Setzen wir die Kosten einer Auswertung auf eine Einheit. Kostet eine Faktorisierung fünf Einheiten, ergeben sich für den impliziten Lauf \(90+15\cdot5=165\) gegenüber 300. Kostet sie zwanzig Einheiten, sind es \(90+15\cdot20=390\). Dieselben Zähler führen zu beiden Rangfolgen. Ein Laufzeitvergleich braucht deshalb Messungen auf einer vergleichbaren Umgebung oder ein begründetes Kostenmodell.
+\subt{C · Erst pro Fall normieren, dann zählen}
+Die besten erfolgreichen Zeiten in den vier Spalten sind \(1,2,4,3\). Für A ergeben sich die Faktoren \(1,1,\infty,1\), für B die Faktoren \(2,1,1,2\). Der unendliche Eintrag kennzeichnet den Ausfall. Bei Faktor \(1{,}5\) zählen für A drei der vier Aufgaben und für B zwei der vier. Für jeden endlichen Faktor ab 2 erreicht B alle vier, während A bei drei bleibt.
+\notebox{Ihr eigener Methodensatz}{Ein präziser Schlusssatz nennt die Aufgabenmenge, die geforderte Genauigkeit, die Erfolgsquote und die gemessene Aufwandsgröße. In diesem Beispiel kann A auf drei Fällen am schnellsten sein, während B alle Fälle löst.}
+
+\srcs{\see{ueb12}{Noch einmal selbst rechnen}\quad·\quad\see{schluss12}{Forschungsstand und Beweisfragen}.}
+
+\kapschluss{17}{Was eine Ergebnismatrix belegen kann}{schluss12}
+\subt{Stand der Forschung}
+Dolan und Moré führen Leistungsprofile für Algorithmenvergleiche ein. Ein Profil beschreibt, auf welchem Anteil einer festgelegten Fallmenge ein Verfahren innerhalb eines vorgegebenen Faktors zum besten Ergebnis liegt. In der ODE-Praxis stellen Aufwand-Genauigkeits-Diagramme für jede Solverkonfiguration gemessenen Fehler und Rechenarbeit gegenüber. Beide Darstellungen brauchen klar definierte Referenzen und eine festgelegte Behandlung fehlerhafter Läufe.
+\subt{Beweis · Warum Trefferzahlen allein keine Rangfolge ergeben}
+Ein Solver liege in zwei gleich gewichteten Aufgaben um Faktoren \(1\) und \(3\) über den minimalen Kosten, ein anderer um \(2\) und \(1\). Beide erfüllen beide Genauigkeitsziele. Werden die Aufgaben mit Gewichten \(p\) und \(1-p\) versehen, sind die gemittelten Faktoren \(3-2p\) und \(1+p\). Der erste ist günstiger genau für \(p>2/3\), der zweite für \(p<2/3\). Bei identischer Erfolgszahl kann also schon das Gewicht der Anwendungsfälle die Entscheidung umkehren.
+\subt{Ergebnis der Nachuntersuchung}
+Die Nachrechnung hält nacheinander jedes der acht Modelle von der Auswahl zurück und prüft die gewählte Methode anschließend an zwei zusätzlich definierten Gleichungssystemen. Die Auswahlregel, ihre Fehlwahl und die Rechenbudgets sind dokumentiert.
+\srcs{\see{befundwahl}{Nachweis und Ergebnis} · \href{https://doi.org/10.1007/s101070100263}{Dolan und Moré (2002), Benchmarking optimization software with performance profiles} · \href{https://docs.sciml.ai/SciMLBenchmarksOutput/stable/}{SciMLBenchmarks, reproduzierbare Aufwand-Genauigkeits-Vergleiche} · \see{matrix}{ARGESIM-Matrix}.}
+
+\bilanz{II}{Was wir aus den Benchmarks gelernt haben}{finalII}
+\subt{Stand der Forschung und der Messungen}
+Die ARGESIM-Definitionen und publizierten Lösungen machen unterschiedliche Implementierungen vergleichbar. Welcher Solver einen technischen Auftrag erfüllt, hängt weiterhin von Modellfenster, Formulierung und Messgröße ab. C05 besitzt im festen Modus eine analytische Referenz. Bei C07 ergänzt eine Fachpublikation die selbst berechneten Ereigniszeiten. Bei C19R ist sogar die Wahl des räumlichen Referenzgebiets Teil der Fragestellung.
+{\tblstart\begin{tabularx}{\linewidth}{@{}P{23mm}YY@{}}\toprule
+\hd{Fall}&\hd{Gesichert im beschriebenen Versuch}&\hd{Was darüber hinaus offen ist}\\\midrule
+C05&Genau drei Übergänge bis \(3{,}5\unitm s\) für die Schwellen \(5{,}8\pm0{,}005\), \(2{,}5\pm0{,}005\) (S.\,\pagelink{befundereignis}).&Wie groß darf das Schwellenintervall werden?\\
+C12 / C21&Geschwindigkeitstausch bei zwei Kugeln. Für den idealen Ball mit \(0\le e<1\) sind ausgelassene Flugzeit und Höhe begrenzt (S.\,\pagelink{befundereignis}).&Simultane Mehrfachkontakte, Reibung und geschwindigkeitsabhängiger Rückprall.\\
+C07&Acht Wechsel in 10 s, unabhängige kartesische Rechnung und RATTLE (S.\,\pagelink{befundereignis} und \pagelink{befundrattle}).&Wie robust sind Kontaktzahl und Zeitgenauigkeit bei variiertem Stiftwinkel?\\
+C21-Diode&Bei Nullstart und Einvolt-Sinusquelle gilt \(z<0{,}1\unitm V<z_*\) (S.\,\pagelink{befunddiode}).&Welche höheren Quellamplituden bleiben sicher vor der Falte?\\
+C19R&Für den Brunnen bei \((5,0)\unitm m\) nach zehn Tagen liegt der Gesamtfehler bei höchstens \(0{,}95\,\%\) bzw. \(0{,}16\,\%\) (S.\,\pagelink{befundtransport}).&Schranken an weiteren Orten und für verteilte Quellen.\\
+CP2&Fehlerschranke für die lineare Saite aus Ruhelage mit \(\sum k^{2s}|a_k|^2\le R^2\), \(s>0\), und linearem Fourier-Operator (S.\,\pagelink{fnobeweis}).&Andere Wellengeschwindigkeiten, Anfangsgeschwindigkeiten und nichtlineare Netze gesondert prüfen.\\\bottomrule\end{tabularx}\par}
+\subt{Eine weiterführende Abschlussarbeit}
+Wählen Sie eine Zeile. Formulieren Sie eine Behauptung mit Quantoren, Parameterbereich und den benötigten Daten. Verdoppeln oder halbieren Sie zunächst eine numerische Auflösung und suchen Sie gezielt ein Gegenbeispiel. Ist die Behauptung weiterhin plausibel, benennen Sie, welche Abschätzung aus den Theoriekapiteln noch fehlt. Ein wiederholbarer Versuch und ein Beweis können auf diese Weise dieselbe, vorher präzise festgelegte Frage beantworten.
+\srcs{\href{https://www.argesim.org/benchmarks}{ARGESIM, offizieller Benchmarkkatalog}\enspace·\enspace\see{schluss12}{Aussagekraft des Solververgleichs}.}

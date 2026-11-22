@@ -6,7 +6,8 @@ Christian Stenzel · Numerische Simulation dynamischer Systeme
        python -m pip install numpy
        python auswerten.py
    Das Skript vergleicht die gespeicherten Felder und berechnet die Referenz der
-   Saite unabhängig mit der d’Alembert-Formel. rope/ enthält physikalische Höhen
+   Saite unabhängig mit der d’Alembert-Formel. Die ausgegebenen Fehler werden
+   gegen Sollwerte auf drei Nachkommastellen geprüft (±0,0005 Prozentpunkte). rope/ enthält physikalische Höhen
    in Metern, cavity/ den Geschwindigkeitsbetrag relativ zur Deckelgeschwindigkeit.
 
 2. Eigene Anfangsform vorhersagen

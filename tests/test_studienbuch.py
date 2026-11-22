@@ -9,6 +9,7 @@ from runpy import run_path
 from scripts import build_studienbuch as book
 
 LAB = run_path(str(book.MATERIAL / 'methodenlabor.py'))
+CHAPTERS = run_path(str(book.MATERIAL / 'kapitelproben.py'))
 
 
 class TextbookTests(unittest.TestCase):
@@ -35,6 +36,14 @@ class TextbookTests(unittest.TestCase):
             self.assertAlmostEqual(math.fsum(field), 1)
             self.assertEqual(field[1], field[3])
         self.assertAlmostEqual(after[1] - 1/9, (before[1] - 1/9)/2)
+
+    def test_contact_tolerance_rejects_correct_count_with_late_event(self):
+        check = CHAPTERS['pruefe_kontaktzeiten']
+        self.assertEqual(check((0.4, 1.1), (0.4, 1.1), 0.001), 0)
+        with self.assertRaisesRegex(ValueError, 'Score 2'):
+            check((0.402, 1.1), (0.4, 1.1), 0.001)
+        with self.assertRaisesRegex(ValueError, 'Ereigniszahl'):
+            check((0.4,), (0.4, 1.1), 0.001)
 
     def test_learning_step(self):
         for actual, expected in zip(LAB['lernschritt'](), (0.8, 1.6, 0.18)):

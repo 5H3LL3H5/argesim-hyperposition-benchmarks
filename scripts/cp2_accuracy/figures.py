@@ -55,22 +55,28 @@ def save(name, fig):
 
 
 def rope():
-    d = np.load(DATA / "saite_beispiel.npz")
+    d = np.load(DATA / "saite_beispiel.npz", allow_pickle=False)
     x = d["x"]
-    ref = d["ref"][0]
-    fig, ax = plt.subplots(2, 1, sharex=True, figsize=(6.8, 3.05), layout="constrained")
-    ax[0].plot(x, ref * 1000, color=INK, label="exakt")
-    ax[0].plot(x, d["old"][0] * 1000, "--", color=RUST, label="bisheriges FNO")
-    ax[0].set_ylabel("Auslenkung [mm]")
-    ax[0].legend(ncol=2, loc="lower center")
-    for key, label, col in [
-        ("old", "bisheriges FNO", RUST),
-        ("new", "lineare Fourier-Schicht", TEAL),
-    ]:
-        ax[1].plot(x, (d[key][0] - ref) * 1000, color=col, label=label, lw=1.4)
-    ax[1].legend(ncol=2, loc="upper center")
-    ax[1].set(xlabel="Ort [m]", ylabel="Fehler [mm]")
-    for axis in ax:
+    fig, ax = plt.subplots(2, 2, sharex=True, figsize=(7.0, 3.5), layout="constrained")
+    for j, t in enumerate((5, 8)):
+        ref = d["ref"][j]
+        key_top, key_bottom = ax[:, j]
+        key_top.plot(x, ref * 1000, color=INK, label="Exakt")
+        key_top.plot(x, d["old"][j] * 1000, "--", color=RUST, label="Urspr. FNO")
+        key_top.set_title(f"t = {t} s")
+        for key, label, color in [
+            ("old", "Urspr. FNO", RUST),
+            ("new", "Lineare Schicht", TEAL),
+        ]:
+            key_bottom.plot(
+                x, (d[key][j] - ref) * 1000, color=color, label=label, lw=1.4
+            )
+        key_bottom.set(xlabel="Ort [m]", ylim=(-0.87, 0.87))
+    ax[0, 0].set_ylabel("Auslenkung [mm]")
+    ax[1, 0].set_ylabel("Fehler [mm]")
+    ax[0, 0].legend(ncol=2, loc="upper center")
+    ax[1, 1].legend(ncol=2, loc="upper center", bbox_to_anchor=(0.5, -0.38))
+    for axis in ax.flat:
         axis.grid(axis="y", alpha=0.22)
     save("fno_saite_feld", fig)
     fig, ax = plt.subplots(1, 2, figsize=(6.9, 2.65), layout="constrained")
@@ -130,7 +136,7 @@ def cavity():
         im, ax=axes, shrink=0.87, extend="both", ticks=[-0.01, -0.001, 0, 0.001, 0.01]
     )
     cb.ax.set_yticklabels(["−0,01", "−0,001", "0", "+0,001", "+0,01"])
-    cb.set_label("Fehler / Deckeltempo")
+    cb.set_label(r"$(|\hat{u}|-|u|)/U$", labelpad=3)
     save("fno_kavitaet_feld", fig)
     d = read("zielkalibrierung.json")
     fig, ax = plt.subplots(figsize=(6.7, 2.55), layout="constrained")

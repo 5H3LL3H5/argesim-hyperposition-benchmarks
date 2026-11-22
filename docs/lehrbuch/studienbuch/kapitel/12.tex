@@ -1,0 +1,108 @@
+\seite{}{C12 und C21 · Kontakte}\anchorpage{1}{neu12}{12 · C12 und C21 – Stöße, Kontakte und Zeno-Kollaps}\ey{KAPITEL 12}\ptitle{C12 und C21 – Stöße, Kontakte und Zeno-Kollaps}
+Eine ruhende Kugelreihe bekommt links einen Stoß. Am Ende rollt nur die letzte Kugel. Ein fallender Ball kann dagegen in endlicher Zeit unendlich oft aufsetzen. Was muss die Simulation zwischen Anfang und Ende aufzeichnen, damit beide Geschichten überprüfbar werden?
+\par\textsf{\bfseries\color{sea}Phänomen und Leitfrage.} Bei der Kugelreihe wandert ein Impuls durch diskrete Kontakte. Beim Ball verkürzen sich die freien Flüge nach jedem Rückprall. Richtige Endgeschwindigkeiten allein sagen wenig über die Zeiten dieser Kontakte.
+\par\textsf{\bfseries\color{sea}Modellbildung.} Für freie Kugeln gilt \(x_i'=v_i,\ v_i'=0\). Am elastischen zentralen Kontakt zweier gleicher Massen tauschen sie ihre Geschwindigkeiten. Der frei fallende Ball erfüllt \(q'=v,\ v'=-g\) und \(v^+=-e v^-\) am Boden. Eine endliche Hertzsche Kontaktphase verlangt ein anderes Kraftgesetz.
+\par\textsf{\bfseries\color{sea}Numerischer Härtefall.} Zwei Kollisionen im selben Integrationsintervall können denselben Endpunktwächter herstellen. Bei einer Stoßkaskade verändert ein Reset die nächsten Kandidaten. Über einen Zeno-Grenzpunkt hinaus ist ein Fortsetzungsmodell erforderlich.
+\par\textsf{\bfseries\color{sea}Methodenvergleich.} Eine dichte kontinuierliche Bahn erlaubt Bisektion oder Brent im eingeklammerten Intervall. QSS2 beschreibt konstante Geschwindigkeit exakt zwischen Ereignissen. Der Lauf auf vier Kugeln benötigt 36 RHS-Auswertungen gegenüber 148 bei RK45. Beide Zahlen enthalten die Arbeit des untersuchten Protokolls.
+\par\textsf{\bfseries\color{sea}Aufgaben und Akzeptanz.} C12 registriert A, B und C. Der Matrixfall ist der reduzierte elastische Test mit Kontakten bei 1, 2 und 3 s sowie Endgeschwindigkeiten bei 4 s. C21 prüft im Ballfenster zwei gerichtete Stöße bis 5 s. Das Zeitbudget beträgt jeweils 1 ms. Die volle Kontaktdynamik besitzt zusätzliche Aufgaben.
+\par\textsf{\bfseries\color{sea}Diagnose.} Notieren Sie Abstand vor dem Treffer, Relativgeschwindigkeit links und rechts, Reihenfolge, Impuls sowie Energiebilanz. Ein bei korrektem Impuls um 2 ms verschobener Treffer liefert bereits \(S=2\). Für die Ruheschaltung des Balls ist zusätzlich die verbleibende idealisierte Flugzeit zu begrenzen.
+\seite{Rechenbeispiel}{C12 und C21 · Kontakte}\anchorpage{2}{kap9}{C12 · Wann stoßen die Kugeln zusammen?}\ptitle{C12 · Wann stoßen die Kugeln zusammen?}
+
+
+\lernziel{Sie können den nächsten isolierten Kontakt ausrechnen, die beiden Geschwindigkeiten aktualisieren und eine Simulation mit Impuls, Energie und Ereignisfolge prüfen.}
+Zwei gleich schwere Kugeln rollen auf einer Geraden nach rechts. Der freie Spalt zwischen ihren Oberflächen beträgt \(0{,}60\unitm m\). Links läuft die Kugel mit \(0{,}80\unitm{m/s}\), rechts mit \(0{,}20\unitm{m/s}\). Zu welchem Zeitpunkt müssen Sie die freie Bewegung unterbrechen?
+\subt{Zuerst die Geometrie, dann der Stoß}
+Jede Sekunde holt die linke Kugel \(0{,}80-0{,}20=0{,}60\unitm m\) auf. Im kräftefreien Modell verschwindet der Spalt nach einer Sekunde. Bei einem zentralen, ideal elastischen Einzelstoß gleicher Massen tauschen die Kugeln ihre Geschwindigkeiten. Unmittelbar danach nimmt der Spalt um \(0{,}60\unitm m\) pro Sekunde zu.
+\subt{Wie prüft man eine vermeintliche Lösung?}
+Für \(m=1\unitm{kg}\) pro Kugel ist der Gesamtimpuls vor und nach dem Tausch \(1{,}00\unitm{kg\,m/s}\). Die kinetische Energie beträgt jeweils \((0{,}8^2+0{,}2^2)/2=0{,}34\unitm J\). Würde ein Programm die beiden Geschwindigkeiten unverändert lassen, stimmten diese Summen ebenfalls. Dann würden die Kugeln ab dem Kontakt ineinander laufen.
+\notebox{Jetzt Sie}{Prüfen Sie deshalb auch das Vorzeichen der relativen Geschwindigkeit nach dem Kontakt. Bei einem schon wachsenden Spalt gibt es in dieser freien Phase keinen zukünftigen Stoß desselben Paars. Wie unterscheiden Sie diesen Fall von einer Kollision genau jetzt?}
+Im ARGESIM-Fall C12 konkurrieren mehrere Paare um das nächste Ereignis. Beim rückprallenden Ball aus C21 kommt noch die Frage hinzu, wie viele Einzelereignisse in eine endliche Zeit passen.
+
+\srcs{\textbf{Kernweg}\enspace\see{c12labor}{Kontaktzeiten}\quad\textbf{Vertiefung}\enspace\see{schluss9}{Mehrfachkontakt und Grenzzeit}\quad\see{ueb9}{Selbst prüfen}.}
+
+\lektion{Labor C12 · Ein Ereignis aus Abständen ausrechnen}{c12labor}{Labor}{C12 und C21}
+Zur Handrechnung setzen wir jede Masse der reduzierten A2-Aufgabe auf \(1\unitm{kg}\). Um unmittelbar mit den freien Spalten zu rechnen, ziehen Sie von jeder Mittelpunktkoordinate die bis dorthin aufsummierten Kugeldurchmesser ab. In diesen verkürzten Koordinaten \(X_i\) bedeutet Gleichheit benachbarter Werte Kontakt. Die Startabstände von einem Meter werden zu \(X(0)=(0,1,2,3)\unitm m\).
+\subt{Vom Modell zum Ereigniskalender}
+Der freie Spalt eines Paares beträgt \(g_i=X_{i+1}-X_i\). Es schließt sich mit der Rate \(w_i=v_i-v_{i+1}\). Zwischen Stößen bleiben die Geschwindigkeiten konstant, also \(g_i(t+\tau)=g_i(t)-w_i\tau\). Nur für \(w_i>0\) liegt ein künftiger schließender Kontakt bei \(\tau_i=g_i/w_i\ge0\). Der kleinste solche Wert bestimmt den nächsten Übergang. Ohne schließendes Paar folgt freier Flug bis zum Ende.
+
+Zu Beginn hat nur das erste Paar \(w_1=1\unitm{m/s}\). Nach einer Sekunde stößt es. Nach dem Geschwindigkeitstausch bewegt sich Kugel 2 mit \(1\unitm{m/s}\) auf Kugel 3 zu. Der nächste und übernächste Kontakt folgen je eine Sekunde später. Bei \(3{,}5\unitm s\) ergibt sich
+\[
+ X=(1,2,3,3{,}5)\unitm m,\qquad v=(0,0,0,1)\unitm{m/s}.
+\]
+Für jede Zeile müssen Gesamtimpuls \(1\unitm{kg\,m/s}\), kinetische Energie \(0{,}5\unitm J\) und nichtnegative Spalte erhalten bleiben.
+\subt{Wo ein scheinbar guter Test versagt}
+Gibt ein fehlerhafter Simulator nach dem ersten Stoß weiterhin \(v=(1,0,0,0)\) aus, bleiben Gesamtimpuls und Energie ebenfalls richtig. Der Spalt des ersten Paares würde danach negativ. Prüfen Sie deshalb zusätzlich, dass der getroffene Kontakt unmittelbar nach dem Reset öffnet, und protokollieren Sie die Paarindizes.
+\notebox{Eigener Versuch}{Vergrößern Sie nur den dritten Anfangsspalt von \(1\) auf \(1{,}2\unitm m\). Der dritte Stoß verschiebt sich auf \(3{,}2\unitm s\). Die ersten beiden Zeiten und sämtliche Geschwindigkeitswechsel bleiben unter diesen Annahmen gleich.}
+\srcs{Ereigniskalender \texttt{python labor.py c12}\enspace·\enspace\href{https://www.argesim.org/benchmarks/c12}{ARGESIM C12, Aufgabenfamilie}.}
+
+\lektion{C12 · Stöße in einer Kugelreihe}{kugeln}{Labor}{C12 und C21}
+\vorhersage{9}{Eine Kugel trifft zentral und ideal elastisch eine ruhende, gleich schwere Kugel. Welche bewegt sich danach?}{kontrolleB}
+Die reduzierte C12-Aufgabe enthält vier gleich schwere Kugeln mit je \(1\unitm m\) freiem Abstand. Nur Kugel 1 bewegt sich anfangs nach rechts mit \(1\unitm{m/s}\). Reibung und äußere Kräfte fehlen. Prüfen Sie nun, warum bei einem zentralen, vollkommen elastischen Einzelstoß gleicher Massen genau die im ersten Beispiel verwendete Tauschregel gilt.
+\subt{Die Resetregel aus Erhaltungsgrößen gewinnen}
+Seien \(u,v\) die Geschwindigkeiten unmittelbar vor und \(u',v'\) nach dem Stoß. Für gleiche Massen führen Impuls und kinetische Energie auf
+\[
+ u+v=u'+v',\qquad u^2+v^2=u'^2+v'^2 .
+\]
+Daraus folgt \(uv=u'v'\). Also haben \(u',v'\) dieselbe Summe und dasselbe Produkt wie \(u,v\) und sind die beiden Wurzeln desselben quadratischen Polynoms. Bei Annäherung wählt die elastische Stoßregel den trennenden Zweig \(u'=v,\ v'=u\).
+{\tblstart\begin{tabularx}{\linewidth}{@{}lYY@{}}\toprule
+\hd{Zeit}&\hd{Kontakt}&\hd{Geschwindigkeiten danach [m/s]}\\\midrule
+\(0\unitm s\)&Start&\((1,0,0,0)\)\\
+\(1\unitm s\)&Kugel 1 / Kugel 2&\((0,1,0,0)\)\\
+\(2\unitm s\)&Kugel 2 / Kugel 3&\((0,0,1,0)\)\\
+\(3\unitm s\)&Kugel 3 / Kugel 4&\((0,0,0,1)\)\\\bottomrule
+\end{tabularx}\par}
+Die drei Oberflächenspalte \(g_j\) erfüllen in der Flugphase \(\dot g_j=v_{j+1}-v_j\). Damit sind sie stückweise linear. Ein gerichteter Wächter findet \(g_j=0\) bei schließendem Spalt. Nach dem Reset muss eine erneute Auslösung auf derselben Fläche zur Bewegung passen.
+\minifig{kontakte}{23mm}{Zieht man die aufsummierten Kugeldurchmesser von den Positionen ab, zeigt der Schnitt benachbarter Bahnen den Kontakt.}
+\notebox{Warum QSS2 hier passt}{Lineare Position und konstante Geschwindigkeit beschreiben jeden freien Abschnitt genau. Jeder Kontakt löst einen Neustart aus. Für nachgiebige Kugeln mit schnellen Kontaktmoden wäre ein neuer Vergleich nötig.}
+\srcs{\href{https://www.argesim.org/benchmarks/c12}{Offizielle Aufgabe C12} · \repo{benchmarks/benchmark_solver_extension.py}{Definition der reduzierten A2-Aufgabe und ihrer Zielgrößen}.}
+
+\lektion{Wann trifft der Ball zum zweiten Mal auf?}{ball}{Labor}{C12 und C21}
+Die C21-Teilaufgabe beginnt mit einem Ball in \(H=10\unitm m\) Höhe und \(v_0=0\). Zwischen Kontakten wirkt die Schwerkraft. Daraus folgt \(\dot y=v,\ \dot v=-g,\ g=9{,}81\unitm{m/s^2}\). Der Boden ist starr. Beim Erreichen von \(y=0\) mit \(v^-<0\) setzt das Modell \(y^+=0,\ v^+=-e\,v^-\) mit \(e=0{,}9\). Masse und Luftwiderstand werden für diese Fallaufgabe nicht benötigt.
+
+Integration liefert \(y=H-gt^2/2\). Beim ersten Stoß ist \(t_1=\sqrt{2H/g}=1{,}427843\unitm s\). Danach gilt mit \(s=t-t_1\) die Parabel \(y=e g t_1s-gs^2/2\). Ihre nächste positive Nullstelle liegt bei \(s=2et_1\). Damit ist \(t_2=(1+2e)t_1=3{,}997961\unitm s\).
+\fig{ball}{.89}{Nach dem ersten Reset startet der Wächter genau bei null. Die zweite physikalisch gesuchte Nullstelle liegt auf dem absteigenden Ast. Die gepunktete Fortsetzung würde den Boden durchdringen.}
+\subt{Warum der Detektor zur Solverwahl gehört}
+Startet ein Schritt auf der Resetfläche, kann die Flugbahn innerhalb desselben großen Schritts aufsteigen und nochmals aufschlagen. Ein Test nur auf unterschiedliche Vorzeichen an den Endpunkten kann dieses Ereignis übersehen. Die archivierte Projektfassung zerlegt bei Koordinatenwächtern den kubischen Hermite-Interpolanten an inneren Extrema und sucht gerichtete Nullstellen auf den Teilintervallen.
+
+Im historischen Lauf \texttt{8332be4d} fehlte der zweite Stoß bei QSS3 und QSS4 auf allen drei Quantenstufen. In der späteren Acht-Fälle-Studie treffen beide Verfahren auf allen drei Stufen die beiden Aufprallzeiten. Das belegt die Verbesserung für diesen Wächter und dieses Flugmodell.
+\srcs{\repo{tests/test_hybrid_runtime.py}{Regressionstests für die Ereignissuche} · \repo{docs/evidence/qss-extension.csv}{spätere Messreihe} · \href{https://www.argesim.org/benchmarks/c21}{C21-Aufgabenstellung}.}
+
+\werkblatt{12}{Selbst prüfen}{ueb9}{Zeitpunkt und Stoßregel}
+
+\merke{Zuerst wird bis zum frühesten zulässigen Kontakt fortgerechnet. Danach ändern sich die Geschwindigkeiten und sämtliche möglichen Folgezeiten müssen zur neuen Lage passen.}
+\subt{A · Die Ereignisliste für drei Kugeln aufbauen}
+Verwenden Sie um die Durchmesser verkürzte Koordinaten, in denen gleiche Nachbarkoordinaten Kontakt bedeuten. Drei gleich schwere Kugeln starten bei \(X=(0;\,0{,}4;\,1{,}1)\unitm m\) und \(v=(1;\,0;\,0)\unitm{m/s}\). Jeder isolierte Stoß ist ideal elastisch. Notieren Sie beide ersten Kontaktzeiten, die jeweils beteiligten Kugeln und die Geschwindigkeiten unmittelbar danach.
+\subt{B · Eine unzureichende Prüfung widerlegen}
+Ein Simulator lässt alle Kugeln kräftefrei durchlaufen und speichert bloß Gesamtimpuls und Gesamtenergie. Können beide Prüfwerte für das Experiment A stimmen? Finden Sie einen Zeitpunkt und ein Paar, an dem eine geometrische Prüfung den Fehler sicher entdeckt.
+\subt{C · Auf einen anderen Stoß übertragen}
+Zwei gleich schwere Kugeln von je \(1\unitm{kg}\) treffen zentral aufeinander. Vorher sind die Geschwindigkeiten \(1\) und \(0\unitm{m/s}\). Der Stoß sei jetzt teilweise elastisch, mit Rückprallzahl \(e=0{,}5\). Nach dem Stoß gilt \(v'_2-v'_1=e(v_1-v_2)\). Berechnen Sie beide Geschwindigkeiten und die verlorene kinetische Energie unter der Annahme, dass kein äußerer Impuls wirkt.
+\hilfe{Bei A bewegt sich nach dem ersten Stoß nur die mittlere Kugel. Bei C brauchen Sie die Impulsgleichung und genau eine Gleichung für die relative Geschwindigkeit.}
+
+\schreibfeld
+
+\srcs{\see{loesweg9}{Lösungswege A, B und C}\quad·\quad\see{kap9}{Zum Kapitelauftakt}.}
+
+\werkblatt{12}{Lösungswege}{loesweg9}{Zeitpunkt und Stoßregel}
+
+\subt{A · Die freie Bewegung nach jedem Stoß neu starten}
+Der erste Spalt beträgt \(0{,}4\unitm m\), die Annäherungsgeschwindigkeit \(1\unitm{m/s}\). Bei \(t=0{,}4\unitm s\) stoßen Kugel 1 und 2. Danach ist \(v=(0,1,0)\). Kugel 2 muss noch \(1{,}1-0{,}4=0{,}7\unitm m\) überwinden. Bei \(t=1{,}1\unitm s\) stößt sie auf Kugel 3. Es folgt \(v=(0,0,1)\). Die \(0{,}7\) ist eine Dauer ab dem ersten Stoß, keine absolute Uhrzeit.
+\subt{B · Eine Prüfung über die Geometrie ergänzen}
+Beim fehlerhaften Durchlaufen behält jede Kugel ihre Geschwindigkeit. Die Summen für Gesamtimpuls und Energie bleiben dadurch unverändert. Zur Zeit \(0{,}5\unitm s\) hätte der Simulator jedoch \(X_1=0{,}5\) und \(X_2=0{,}4\unitm m\). Der Spalt \(X_2-X_1=-0{,}1\unitm m\) widerspricht der Reihenfolge und dem undurchdringlichen Kontaktmodell.
+\subt{C · Zwei lineare Gleichungen reichen hier aus}
+Impulserhaltung verlangt \(v'_1+v'_2=1\), das Rückprallgesetz \(v'_2-v'_1=0{,}5\), jeweils für die Zahlenwerte in \(\mathrm{m/s}\). Addition liefert \(v'_2=0{,}75\) und danach \(v'_1=0{,}25\). Die kinetische Energie sinkt von \(0{,}5\unitm J\) auf \((0{,}25^2+0{,}75^2)/2=0{,}3125\unitm J\). Der Verlust beträgt \(0{,}1875\unitm J\).
+\notebox{Welcher Nachweis passt?}{Ein Test auf exakte Energieerhaltung wäre bei C das falsche Kriterium. Prüfen Sie die vorhergesagte Energiedifferenz und den erhaltenen Impuls. Für gleichzeitige Mehrfachstöße ist zudem eine gemeinsame Kontaktregel nötig.}
+
+\srcs{\see{ueb9}{Noch einmal selbst rechnen}\quad·\quad\see{schluss9}{Forschungsstand und Beweisfragen}.}
+
+\kapschluss{12}{Einzelstoß, Mehrfachkontakt und Zeno-Zeit}{schluss9}
+\subt{Stand der Forschung}
+Die C12-Laboraufgabe enthält getrennte, reibungsfreie Zweierkontakte. Gleichzeitige Kontakte können weitere Modellentscheidungen verlangen. Halm und Posa entwickeln für simultane, reibungsbehaftete und inelastische Starrkörperstöße ein mengenwertiges Modell. Es lässt für eine Ausgangssituation mehrere physikalisch modellierte Ergebnisse zu. Ihre Problemstellung erklärt, warum ein beliebiges Sortieren identischer Ereigniszeiten keine allgemeine Stoßtheorie liefert.
+\subt{Beweis · Unendlich viele Stöße in endlicher Zeit}
+Beim idealen C21-Ball mit Rückprallfaktor \(0<e<1\) ist die Dauer nach dem ersten Stoß bis zum zweiten \(2et_1\). Nach jedem Stoß wird die Geschwindigkeit erneut mit \(e\) multipliziert. Die folgenden Flugdauern lauten daher \(2e^2t_1,2e^3t_1,\dots\). Die geometrische Reihe konvergiert und ergibt
+\[
+ T_*=t_1+\frac{2et_1}{1-e}.
+\]
+Für \(e=0{,}9\) ist \(T_*=19t_1\approx27{,}13\unitm s\). Das Zusammenlaufen unendlich vieler diskreter Ereignisse in endlicher Zeit heißt \emph{Zeno-Verhalten}. Die ersten zwei Stöße im kurzen Benchmarkfenster lassen sich unabhängig davon exakt prüfen.
+\subt{Ergebnis der Nachuntersuchung}
+Wird der Flug durch ruhenden Kontakt ersetzt, sobald die Abfluggeschwindigkeit unter \(v_{\min}\) liegt, ergeben die geometrische Flugzeitenfolge und der höchste folgende Scheitelpunkt zwei explizite Fehlergrenzen.
+\srcs{\see{befundereignis}{Nachweis und Ergebnis} · \href{https://doi.org/10.1177/02783649241236860}{Halm und Posa (2024), Set-valued rigid-body dynamics for simultaneous, inelastic, frictional impacts} · \href{https://www.argesim.org/benchmarks/c21}{ARGESIM C21}.}

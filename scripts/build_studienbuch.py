@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import io
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -28,7 +30,7 @@ def material_files():
 
 
 def source_digest(material):
-    files = [Path(__file__).resolve(), EVIDENCE, *SOURCE.glob('*.tex'),
+    files = [Path(__file__).resolve(), ROOT / 'scripts' / 'c19_profiles.py', EVIDENCE, *SOURCE.rglob('*.tex'),
              *(SOURCE / 'abbildungen').glob('*.pdf'), *material]
     studies = ROOT / 'scripts' / 'cp2_accuracy'
     files.extend(p for p in studies.iterdir() if p.suffix in {'.py', '.cpp'})
@@ -76,8 +78,51 @@ def zip_bytes(files):
     return stream.getvalue()
 
 
+def write_run_tables(stage):
+    """Typeset each archived configuration directly from the downloadable data."""
+    data = MATERIAL / 'qss-extension.csv'
+    if data.read_bytes() != (DOCS / 'evidence' / data.name).read_bytes():
+        raise ValueError('Die Labordaten stimmen nicht mit dem Studienarchiv überein.')
+    with data.open(encoding='utf-8', newline='') as stream:
+        rows = list(csv.DictReader(stream))
+    cases = ('C03', 'C05', 'C07', 'C09', 'C11', 'C12', 'C13', 'C21')
+    status = {'pass': 'OK', 'accuracy_miss': 'Ziel', 'event_mismatch': 'Ereig.',
+              'timeout': 'Limit', 'solver_error': 'Fehler'}
+    keys = {(r['case'], r['method'], r['quantum_factor']) for r in rows}
+    if len(rows) != 456 or len(keys) != 456 or {r['case'] for r in rows} != set(cases):
+        raise ValueError('Ungültiger Umfang der Acht-Fälle-Matrix.')
+    lines = []
+    for case in cases:
+        block = sorted((r for r in rows if r['case'] == case),
+                       key=lambda r: (r['method'], float(r['quantum_factor'] or 0)))
+        if len(block) != 57:
+            raise ValueError(f'{case} enthält nicht 57 Konfigurationen.')
+        for group, start in enumerate(range(0, 57, 19)):
+            label = f'run{case}{chr(ord("a") + group)}'
+            title = f'{case} · Konfigurationen {start + 1}–{start + 19}'
+            lines += [rf'\seite{{Einzelmessungen}}{{Anhang B.1}}\anchorpage{{3}}{{{label}}}{{{title}}}\ptitle{{{title}}}',
+                      r'{\tblstart\begin{tabularx}{\linewidth}{@{}Yrrlrrrr@{}}\toprule',
+                      r'\hd{Methode}&\hd{Faktor}&\hd{Score}&\hd{Status}&\hd{A}&\hd{V}&\hd{RHS}&\hd{ms}\\\midrule']
+            for row in block[start:start + 19]:
+                method = row['method']
+                if not re.fullmatch(r'[a-z0-9-]+', method):
+                    raise ValueError(f'Ungültiger Verfahrensname {method!r}')
+                score = row['error_over_limit']
+                median = row['median_ms']
+                cells = [method, row['quantum_factor'] or '–',
+                         format(float(score), '.4g') if score else '–', status[row['status']],
+                         *(str(int(row[k])) if row[k] else '–' for k in ('accepted', 'rejected', 'rhs')),
+                         format(float(median), '.4g') if median else '–']
+                lines.append(' & '.join(cells) + r'\\')
+            lines += [r'\bottomrule\end{tabularx}\par}',
+                      r'\srcs{\see{runs}{Spalten und Status lesen} · \texttt{qss-extension.csv}, vollständige Messwerte im Rechenlabor.}']
+    (stage / 'einzellaeufe.tex').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+
+
 def typeset(stage):
-    env = {**os.environ, 'TZ': 'UTC', 'SOURCE_DATE_EPOCH': '1795219200'}
+    write_run_tables(stage)
+    env = {**os.environ, 'TEXINPUTS': str(stage) + os.pathsep + os.environ.get('TEXINPUTS', ''),
+           'TZ': 'UTC', 'SOURCE_DATE_EPOCH': '1795219200'}
     command = ['xelatex', '-no-pdf', '-halt-on-error', '-interaction=nonstopmode',
                f'-output-directory={stage}', 'kurs.tex']
     for _ in range(2):
@@ -90,6 +135,27 @@ def typeset(stage):
             raise ValueError(f'XeLaTeX: {warning}')
     subprocess.run(['xdvipdfmx', '-q', '-o', str(stage / 'text.pdf'), str(stage / 'kurs.xdv')],
                    cwd=SOURCE, env=env, check=True)
+
+
+def verify_navigation(book):
+    targets = book.resolve_names()
+    links_by_page = []
+    for page in book:
+        names = set()
+        for link in page.get_links():
+            name = link.get('nameddest')
+            if name:
+                if name not in targets or not 0 <= targets[name]['page'] < len(book):
+                    raise ValueError(f'Invalid PDF link on page {page.number + 1}: {name}')
+                names.add(name)
+        links_by_page.append(names)
+
+    pairs = [(f'frage{i}', f'antwort{i}') for i in range(1, 13)]
+    pairs.extend((f'aufgabe{i}', f'loes{i}') for i in range(1, 7))
+    for first, second in pairs:
+        for source, dest in ((first, second), (second, first)):
+            if source not in targets or dest not in links_by_page[targets[source]['page']]:
+                raise ValueError(f'Missing exercise link: {source} -> {dest}')
 
 
 def build(out):
@@ -113,6 +179,12 @@ def build(out):
             toc = book.get_toc()
             if sorted(page for _, _, page in toc) != list(range(1, len(book) + 1)):
                 raise ValueError('Every page needs exactly one working bookmark. Check page breaks and labels.')
+            marks = [title for _, title, _ in toc]
+            if [int(m.group(1)) for title in marks if (m := re.match(r'^(\d+) · ', title))] != list(range(1, 18)):
+                raise ValueError('Das Buch benötigt genau 17 Hauptkapitel in der vereinbarten Reihenfolge.')
+            if sum(bool(re.match(r'^A\.\d+ · ', title)) for title in marks) != 24:
+                raise ValueError('Der Referenzkatalog benötigt alle 24 Projektmodelle.')
+            verify_navigation(book)
             if book.metadata['author'] != 'Christian Stenzel':
                 raise ValueError('Missing textbook author')
             for name, data in attachments.items():

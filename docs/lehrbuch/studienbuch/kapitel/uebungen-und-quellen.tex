@@ -1,0 +1,242 @@
+\clearpage\renewcommand{\running}{Aufgaben und Quellen}\anchorpage{1}{anhang}{Anhang · Aufgaben, Lösungen und Quellen}
+\ey{SELBSTSTUDIUM}\vspace{3pt}\ptitle{Aufgaben, Lösungen und Quellen}
+\why{Wählen Sie eine Aufgabe, versuchen Sie die Rechnung auf Papier und vergleichen Sie erst danach die Lösung.}
+\subt{39 Kapitelaufgaben und ihr Lösungsweg}Dreizehn erprobte Aufgabenblätter begleiten die Modelle. Weitere Übungen stehen in den Methodenkapiteln. Die \see{arbeitsindex}{Übersicht nach Thema} führt direkt zum Aufgabenblatt und den zugehörigen Rechenschritten.\par
+\subt{Zustand und Gleichungsform}
+Die Lösungen der zwölf verlinkten Vorhersagefragen stehen auf S.\,\pagelink{kontrolleA} und \pagelink{kontrolleB}. Die sechs Einstiegsaufgaben A bis F prüfen zusätzlich die Begriffe aus Kapitel 1 und den Übergang zur DAE. Bei B und C können Sie die Anfangsableitungen in die ursprüngliche Gleichung einsetzen.
+\subt{Modellbildung und Numerik}
+Die nummerierten Aufgaben 1 bis 6 stehen an den jeweiligen Rechenbeispielen. Das \see{aufgaben}{Übungsblatt} verlinkt sie und ergänzt die Aufgaben 7 bis 10. Die beiden Lösungsseiten enthalten die Zwischenschritte. Zu mehreren Aufgaben existieren unabhängige Kontrollen im beigefügten Code.
+\subt{Literatur und Daten}
+Das Glossar enthält die Notation; der zweite Begriffsteil ergänzt häufig verwechselte Worte. Die Literaturseiten unterscheiden Grundlagenwerke, aktuelle Forschungsfragen, offizielle Aufgaben und empirische Projektdaten. Versionsgebundene Links führen zu den jeweils verwendeten Projektmessungen.
+{\tblstart\begin{tabularx}{\linewidth}{@{}Y r Y r@{}}\toprule
+\hd{Üben}&\hd{Seite}&\hd{Nachschlagen}&\hd{Seite}\\\midrule
+Einstiegsaufgaben A--F&\pagelink{extrauf}&Notation und Glossar&\pagelink{glossar}\\
+Lösungen zu A--F&\pagelink{extraloes}&Begriffe im Zusammenhang&\pagelink{vokab}\\
+Übungsaufgaben 1--10&\pagelink{aufgaben}&Literatur und Forschung&\pagelink{literatur}\\
+Lösungen zu 1--10&\pagelink{loesungen1}&Messdaten und Skripte&\pagelink{daten}\\\bottomrule
+\end{tabularx}\par}
+
+\unit{Aufgaben und Lösungen nach Thema}{arbeitsindex}
+Wählen Sie eine Zeile und bearbeiten Sie zuerst Aufgabe A. Aufgabe B prüft eine Behauptung oder eine mögliche Fehlerquelle. In Aufgabe C entscheiden Sie selbst, wie sich das Werkzeug auf eine andere Fragestellung übertragen lässt.
+{\tblstart\begin{tabularx}{\linewidth}{@{}rYrr@{}}\toprule
+\hd{Kap.}&\hd{Woran Sie arbeiten}&\hd{Aufgaben}&\hd{Lösungen}\\\midrule
+1&Startwerte und Arbeitspunkt&\pagelink{ueb1}&\pagelink{loesweg1}\\
+1&Vom Kraftgesetz zum Vektor&\pagelink{ueb2}&\pagelink{loesweg2}\\
+1&Was ist aus Messungen bestimmbar?&\pagelink{ueb3}&\pagelink{loesweg3}\\
+2&Schrittweite, Ordnung und Stabilität&\pagelink{ueb4}&\pagelink{loesweg4}\\
+4&Strom, Spannung und Bindung&\pagelink{ueb5}&\pagelink{loesweg5}\\
+7&Nachbarn, Zeitschritt und Erhaltung&\pagelink{ueb6}&\pagelink{loesweg6}\\
+5&Schalten und Neuplanen&\pagelink{ueb7}&\pagelink{loesweg7}\\
+11&Zeitbudgets bei C05&\pagelink{ueb8}&\pagelink{loesweg8}\\
+12&Zeitpunkt und Stoßregel&\pagelink{ueb9}&\pagelink{loesweg9}\\
+13&Sprungregel und Lösungszweig&\pagelink{ueb10}&\pagelink{loesweg10}\\
+15&Quelle, Messort und Vergleich&\pagelink{ueb11}&\pagelink{loesweg11}\\
+17&Aus Messwerten entscheiden&\pagelink{ueb12}&\pagelink{loesweg12}\\
+16&Modellaufrufe und Feldoperatoren&\pagelink{ueb13}&\pagelink{loesweg13}\\
+\bottomrule\end{tabularx}\par}
+\subt{Ein vollständiger Versuch}
+Beim \see{projekt}{Abschlussprojekt zum C07-Stiftpendel} gehören Modellwahl, Ereignisregel, Rechnung und Interpretation in einen eigenen Kurzbericht. Die \see{projektantwort}{Musterbearbeitung} verwendet dieselben veröffentlichten und berechneten Vergleichsdaten wie das Labor.
+\srcs{\see{kontrolleA}{Vorhersagen aus der Theorie} · \see{kontrolleB}{Vorhersagen aus dem Praktikum} · \see{starthilfe}{Hilfe zu den Voraussetzungen}.}
+
+\unit{Vorhersagen prüfen · Grundlagen und Rechenwege}{kontrolleA}
+\begingroup\fontsize{10}{13.0}\selectfont
+Vergleichen Sie Ihren ersten Ansatz mit den folgenden kurzen Rechnungen. Wenn Ihre Vorhersage abweicht, suchen Sie zuerst die Annahme, die Sie anders gewählt haben.
+\subt{1 · Gleiche Raten an den Enden}
+\hypertarget{antwort1}{}Bei \(0\le s\le1\) liefern \(q_A(s)=1\) und \(q_B(s)=1+4s(1-s)\) an beiden Enden dieselbe Rate. Die zweite Kurve fördert im Inneren zusätzlich Wasser. Für die Zusatzfläche gilt \(\int_0^1 4s(1-s)\dg s=2/3\). Zwei Messpunkte können also mit verschiedenen Mengen vereinbar sein. Die \see{milliliter}{gesicherte Entscheidung} nutzte Wissen über die Kurve dazwischen.
+\subt{2 · Zwei mögliche Bewegungen}
+\hypertarget{antwort2}{}Bei \(q''=-q\) und \(q(0)=1\) erfüllen sowohl \(q=\cos t\) als auch \(q=\cos t+\sin t\) die Angaben. Die Anfangsgeschwindigkeiten sind 0 und 1. Erst deren Vorgabe wählt für diese Gleichung die Bahn aus.
+\subt{3 · Doppelte Wärmekapazität}
+\hypertarget{antwort3}{}Die Bilanz \(C\dot\theta=P-\theta/R\) hat für konstantes \(P\) den Endwert \(RP\). Bei verdoppeltem \(C\) bleibt dieser Wert gleich. Die Zeitkonstante wächst von \(RC\) auf \(2RC\). Eine stationäre Messung allein kann \(C\) hier nicht bestimmen.
+\subt{4 · Eine zunächst ruhende Masse}
+\hypertarget{antwort4}{}Am Start des Prüfwagens ist die Zugkraft null. Euler ergibt im ersten Schritt \(v_1=0\). Eine halbe Sekunde später berücksichtigt Heun bereits die gewachsene Zugkraft und liefert \(0{,}125\unitm{m/s}\). Die Referenz lautet \(0{,}12346\unitm{m/s}\). Siehe \see{wagenmodell}{Modell und Handrechnung}.
+\subt{5 · Anfangsstrom am Kondensator}
+\hypertarget{antwort5}{}Aus \(u+Ri=U\) folgen bei \(u(0)=0,\ U=5\unitm V,\ R=2000\,\Omega\) genau \(2{,}5\unitm{mA}\). Mit der Kondensatorspannung ist hier auch der Strom festgelegt. Ein weiterer frei gesetzter Strom kann die Maschengleichung verletzen.
+\subt{6 · Halbe Zellbreite}
+\hypertarget{antwort6}{}Bei eindimensionaler Wärmeleitung mit zentralen Differenzen und inneren Gitterpunkten haben alle Gewichte des expliziten Euler-Schritts unter der Schranke \(h\le\Delta x^2/(2\alpha)\) nichtnegative Werte. \(\alpha>0\) ist die Temperaturleitfähigkeit. Mit \(\Delta x/2\) beträgt der größte so zulässige Schritt ein Viertel des alten.
+\srcs{Zurück zu den Vorhersagen · \hyperlink{frage1}{Frage 1} · \hyperlink{frage2}{Frage 2} · \hyperlink{frage3}{Frage 3} · \hyperlink{frage4}{Frage 4} · \hyperlink{frage5}{Frage 5} · \hyperlink{frage6}{Frage 6}.}
+\endgroup
+
+\unit{Vorhersagen prüfen · Ereignisse und Anwendungen}{kontrolleB}
+\begingroup\fontsize{10}{13.0}\selectfont
+Im Praktikum hat jede Vorhersage einen Gegenstand. Stimmen Ereigniszahl, Zeitpunkt und Energie, oder ist bislang nur ein Endwert geprüft? Lesen Sie die Zahlen stets zusammen mit der jeweiligen Messgröße.
+\subt{7 · Zwei Nullstellen in einem Schritt}
+\hypertarget{antwort7}{}Für \(g(t)=(t-0{,}25)(t-0{,}75)\) sind \(g(0)=g(1)=0{,}1875>0\). Dazwischen wechselt das Vorzeichen zweimal. Eine Suche allein nach entgegengesetzten Vorzeichen an den Schrittenden kann beide Übergänge übersehen.
+\subt{8 · Die schnelle Zeitskala von C05}
+\hypertarget{antwort8}{}Eine skalare Störung mit \(z'=-az,\ a=2{,}7\cdot10^6\unitm{s^{-1}}\), fällt in \(1/a\approx0{,}370\) Mikrosekunden auf \(1/e\) ihres Anfangswerts. Im Vorwärts-Euler-Test verlangt Abklingen \(|1-ah|<1\), also \(0<h<2/a\approx0{,}741\) Mikrosekunden. Die langsame sichtbare Ausgangskurve allein gibt diesen Wert nicht preis.
+\subt{9 · Zentraler Stoß gleicher Kugeln}
+\hypertarget{antwort9}{}Ohne äußeren Impuls und bei ideal elastischem zentralem Stoß tauschen zwei gleich schwere Kugeln ihre Geschwindigkeiten. Kommt die erste mit \(1\unitm{m/s}\) an und ruht die zweite, dann ruht unmittelbar danach die erste, und die zweite fährt mit \(1\unitm{m/s}\) weiter.
+\subt{10 · Der verkürzte Pendelfaden}
+\hypertarget{antwort10}{}Die tangentiale Geschwindigkeit bleibt beim C07-Wechsel erhalten. Damit ist \(\omega^+=(1/0{,}3)\omega^-=(10/3)\omega^-\). Die Winkelgeschwindigkeit behält das Vorzeichen und wächst im Betrag.
+\subt{11 · Dieselbe Quelle auf feinerem Gitter}
+\hypertarget{antwort11}{}Halbieren wir beide Zellbreiten, sinkt die Quellzellfläche auf ein Viertel. Bei gleicher Schichtdicke und Porosität vervierfacht sich der Konzentrationszuwachs pro Zeit in dieser Zelle allein durch den Quellterm. Die freigesetzte Masse pro Zeit bleibt gleich.
+\subt{12 · Ein guter Endwert mit falscher Ereignisfolge}
+\hypertarget{antwort12}{}Fordert der Auftrag alle Ereignisse und einen korrekten Endwert, verfehlt ein Lauf mit verlorener Schaltung das Ziel. Sein kurzer Rechenaufwand rechtfertigt keinen Rang vor einer zulässigen Lösung. Der Fehler selbst gehört als Ergebnis in die Auswertung.
+\srcs{Zurück zu den Vorhersagen · \hyperlink{frage7}{Frage 7} · \hyperlink{frage8}{Frage 8} · \hyperlink{frage9}{Frage 9} · \hyperlink{frage10}{Frage 10} · \hyperlink{frage11}{Frage 11} · \hyperlink{frage12}{Frage 12}.}
+\endgroup
+
+\unit{Sechs Einstiegsaufgaben zu Zustand und Solverform}{extrauf}
+\subt{A · Eine Messung und zwei Zustände}
+Zwei Wagen sind bei \(t=0\) am Ort \(2\unitm m\), ihre Geschwindigkeiten sind \(0{,}4\) und \(-0{,}1\unitm{m/s}\). Beide rollen kräftefrei. Welche Zustände und Orte erhält man nach fünf Sekunden? Welche zusätzliche Messung reicht im exakten Modell aus, um die Geschwindigkeiten zu unterscheiden? \hyperlink{extraAB}{Lösung}
+\subt{B · Eine ODE dritter Ordnung übersetzen}
+Gegeben sei \(2q'''+q''-4q'+q=\sin t\) mit \((q(0),q'(0),q''(0))=(1,0,-1)\) in dimensionslosen Einheiten. Geben Sie den Zustandsvektor, seine rechte Seite und deren Wert am Start an. \hyperlink{extraAB}{Lösung}
+\subt{C · Zwei Residuen unterscheiden}
+Klassifizieren Sie \((2+x^2)\dot x+\sin t=0\) und das Paar \(\dot x=z,\ x^2+z-1=0\). Welche Anfangswerte sind jeweils frei? Rekonstruieren Sie im zweiten Fall \(\dot z(0)\) für \(x(0)=1/2\). \hyperlink{extraCD}{Lösung}
+\subt{D · Ein Randwert gehört an das andere Ende}
+Ein beschleunigungsfreier Wagen erfüllt \(q''=0,\ q(0)=1,\ q(2)=5\). Welche Anfangsgeschwindigkeit muss ein Anfangswertsolver erhalten? Wie ändert sich die Rechnung für \(q''=-2\) bei gleichen Randwerten? \hyperlink{extraCD}{Lösung}
+\subt{E · Ein schlechter Schaltzeitpunkt}
+Ein Wächter durchquert die Null mit wahrer Steigung von mindestens \(0{,}2\unitm{m/s}\) im gesamten betrachteten Zeitintervall. Der Zustands- und Interpolationsfehler im Wächter sei dort zusammen höchstens \(0{,}4\unitm{mm}\), die interpolierte Nullstelle exakt bestimmt. Welche Zeitunsicherheit folgt? Was passiert mit dieser Argumentation bei einem bloßen Berühren? \hyperlink{extraEF}{Lösung}
+\subt{F · Eine Zustandsdarstellung wählen}
+Ein ungedämpftes ebenes Pendel von \(1\unitm m\) Länge wird aus horizontaler Ruhelage freigegeben. Geben Sie konsistente Anfangsdaten in Winkel- und in kartesischen Koordinaten an. Die \(y\)-Achse zeige nach oben und der Start liege rechts vom Drehpunkt. Welche Beschleunigung hat es anfangs? \hyperlink{extraEF}{Lösung}
+
+\unit{Lösungen zu den sechs Einstiegsaufgaben}{extraloes}
+\hypertarget{extraAB}{}\subt{A und B · Zustand aufstellen}
+\textbf{A.} Die Zustände \((q,v)\) sind anfangs \((2;0{,}4)\) und \((2;-0{,}1)\), nach fünf Sekunden \((4;0{,}4)\) und \((1{,}5;-0{,}1)\), jeweils in Metern und Metern pro Sekunde. Bei konstantem \(v\) legt ein zweiter Ort zu einer bekannten anderen Zeit das jeweilige \(v\) bereits fest.
+
+\textbf{B.} Setze \(x=(q,q',q'')^\mathsf T\). Dann ist \(f(t,x)=(x_2,x_3,(\sin t-x_3+4x_2-x_1)/2)^\mathsf T\). Zu \(x_0=(1,0,-1)^\mathsf T\) gehört \(f(0,x_0)=(0,-1,0)^\mathsf T\).
+\hypertarget{extraCD}{}\subt{C und D · Bindung und Randwert}
+\textbf{C.} Da \(2+x^2>0\), ist die erste Gleichung eine reguläre ODE mit \(\dot x=-\sin t/(2+x^2)\). Ihr Anfangswert \(x_0\) kann frei gewählt werden. Im zweiten System ist \(x_0\) frei, \(z_0=1-x_0^2\) vorgeschrieben. Nach Elimination folgt \(\dot x=1-x^2\). Bei \(x_0=1/2\) gilt \(z_0=\dot x_0=3/4\). Differenzieren der Bindung ergibt \(\dot z_0=-2x_0\dot x_0=-3/4\).
+
+\textbf{D.} Für \(q''=0\) gilt \(q=1+v_0t\), also \(v_0=2\). Für \(q''=-2\) gilt \(q=1+v_0t-t^2\), also \(5=1+2v_0-4\) und \(v_0=4\). Ein Anfangswertsolver kann erst nach Wahl von \(v_0\) vorwärts rechnen. Beim \emph{Schießverfahren} wird \(v_0\) verändert, bis der zweite Randwert getroffen ist.
+\hypertarget{extraEF}{}\subt{E und F · Ereignis und Pendel}
+\textbf{E.} Die Abschätzung ergibt \(0{,}0004/0{,}2=0{,}002\unitm s\), also \(2\unitm{ms}\). An einer Berührung kann die Mindeststeigung null sein. Dann ist eine gesonderte Analyse der lokalen Krümmung bzw. des Ereignismodells nötig.
+
+\textbf{F.} Mit Winkel gegen die abwärts gerichtete Vertikale lauten die Daten \(\varphi=\pi/2,\ \omega=0\). Kartesisch sind \(r=(1,0)\unitm m,\ v=(0,0)\unitm{m/s}\). Es gilt \(\ddot\varphi=-g/L=-9{,}81\unitm{rad/s^2}\). Da die Geschwindigkeit null und die Schwerkraft tangential ist, ist die anfängliche Zwangskraft null. In kartesischen Koordinaten folgt \(\dot v=(0,-9{,}81)\unitm{m/s^2}\).
+
+\unit{Übungsblatt · Vier weitere Rechnungen}{aufgaben}
+\subt{7 · Was übersieht ein Randfühler?}
+Ein einziges lineares Element der stationären Stabrechnung trifft die Temperaturen \(61{,}25\,^\circ\mathrm C\) und \(60\,^\circ\mathrm C\) an den beiden Enden. Berechnen Sie den linearen FE-Wert in der Mitte. Vergleichen Sie ihn mit dem \see{pde}{exakten Profil mit Isolation bei \(x=0\)}. Würde eine Messung nur an den Enden einen Fehler von mehr als \(0{,}2\unitm K\) im Inneren entdecken? \hyperlink{loes7}{Lösung}
+\subt{8 · Eine Vorhersage zurücknehmen}
+Ein QSS1-Integrator startet bei \(x=q=0\) mit \(\Delta=1/4,\ x'=1\). Bei \(t=1/8\) ändert sich die externe Steigung auf \(-2\). Wann kommt die nächste Quantisierermeldung, und welcher Wert wird gemeldet? Nennen Sie auch den Zeitpunkt, zu dem die zuerst berechnete Meldung hätte stattfinden sollen. \hyperlink{loes8}{Lösung}
+\subt{9 · Ein stabiler Regelkreis mit Vorzeichenwechsel}
+Für den Tankregler aus Kapitel 1 beträgt der diskrete Faktor \(3e^{-0{,}05T_{\rm ab}}-2\). Berechnen Sie ihn für \(T_{\rm ab}=20\unitm s\). Was geschieht mit einer kleinen positiven Anfangsabweichung in den nächsten drei Takten? Welche Bedeutung hat ein noch kleinerer interner Solver-Schritt für diesen Faktor im Grenzfall exakter Integration? \hyperlink{loes9}{Lösung}
+\subt{10 · Den Aufwand am richtigen Ziel vergleichen}
+Im Versuch auf S.\,\pagelink{tracking} fordert ein Auftraggeber nun \(E\le2\cdot10^{-6}\) auf dem dort definierten Ausgabegitter. Welche bereits gemessenen Einstellungen kommen infrage? Welche davon benötigt die wenigsten \(f\)-Aufrufe? Würde dieselbe Aussage für die Rechenzeit eines großen dicht gekoppelten Modells gelten? \hyperlink{loes10}{Lösung}
+\subt{Die Aufgaben in den Kapiteln}
+{\tblstart\begin{tabularx}{\linewidth}{@{}YrYr@{}}\toprule
+\hd{Aufgabe}&\hd{Seite}&\hd{Aufgabe}&\hd{Seite}\\\midrule
+1 · Wärmespeicher am Kontakt&\pagelink{klassen}&4 · Diffusionsschritt&\pagelink{gitterstabil}\\
+2 · Unsichtbare Mode&\pagelink{moden}&5 · RC-Masche&\pagelink{indexeins}\\
+3 · Euler-Fehler&\pagelink{ordnung}&6 · Akzeptanzscore&\pagelink{vergleich}\\\bottomrule
+\end{tabularx}\par}
+\srcs{\see{loesungen1}{Lösungen 1 bis 5} · \see{loesungen2}{Lösungen 6 bis 10}.}
+
+\unit{Musterlösungen 1 bis 5}{loesungen1}
+\hypertarget{loes1}{}\subt{1 · Ein zusätzlicher Speicher}
+Mit \(\theta_s=T_s-T_a\) und \(\theta=T-T_a\) gelten \(q_1=(\theta-\theta_s)/R_1,\ q_2=\theta_s/R_2\). Die erste Bilanz ist \(C\dot\theta=P-q_1\), die zweite \(C_s\dot\theta_s=q_1-q_2\). Für \(C_s>0\) brauchen beide Temperaturen einen Anfangswert. Im masselosen Grenzmodell \(C_s=0\) folgt \(q_1=q_2\). Dann ist \(\theta_s=R_2\theta/(R_1+R_2)\). Bei kleinem positivem \(C_s\) können nicht verträgliche Anfangsdaten eine schnelle Anfangsschicht erzeugen. \hyperlink{aufgabe1}{Zurück zu Aufgabe 1.}
+\hypertarget{loes2}{}\subt{2 · Die unsichtbare Differenzmode}
+Der Anfangsvektor ist proportional zu \((1,-1)^\mathsf T\). Ohne Heizleistung bleibt der Mittelwert null. Links gilt \(\theta_1(t)=10e^{-(a+2b)t}\unitm K\). Nach einer Zeitkonstante bleiben etwa \(10/e=3{,}68\unitm K\). Rechts ist der Wert gerade entgegengesetzt. Eine genaue Mittelwertkurve allein kann diesen Abbau nicht prüfen. \hyperlink{aufgabe2}{Zurück zu Aufgabe 2.}
+\hypertarget{loes3}{}\subt{3 · Euler bei festem Endzeitpunkt}
+Ein Schritt mit \(h=1\) liefert \(0\). Bei zwei halben Schritten folgt \(1\to1/2\to1/4\). Die absoluten Fehler gegen \(e^{-1}\) sind \(0{,}367879\) bzw. \(0{,}117879\). Allgemein gilt \(y_n=(1-1/n)^n\). Aus \(n\log(1-1/n)=-1-1/(2n)+O(n^{-2})\) folgt \(y_n=e^{-1}(1-1/(2n)+O(n^{-2}))\). Der globale Fehler fällt asymptotisch wie \(1/n=h\). \hyperlink{aufgabe3}{Zurück zu Aufgabe 3.}
+\hypertarget{loes4}{}\subt{4 · Eine Länge halbieren}
+Die Maximumprinzip-Bedingung liefert \(\Delta t\le\Delta x^2/(2\alpha)\). Bei \(0{,}02\unitm m\) ergibt das \(2\unitm s\). Bei \(0{,}01\unitm m\) sinkt der zulässige Schritt auf \(0{,}5\unitm s\). Die Halbierung der Gitterweite vervierfacht die Zahl der Schritte im gleichen Zeitfenster. \hyperlink{aufgabe4}{Zurück zu Aufgabe 4.}
+\hypertarget{loes5}{}\subt{5 · Ein Residuum ist nur ein Teil des Tests}
+Aus \(5(1-e^{-t/2})=2{,}5\) folgt \(t=2\ln2=1{,}38629\unitm s\), dazu \(i=1{,}25\unitm{mA}\). Ein Rechner könnte fälschlich \(u(t)\equiv0,\ i(t)\equiv2{,}5\unitm{mA}\) ausgeben. Die Maschengleichung wäre erfüllt, die Speicherbilanz \(C_e\dot u=i\) wäre verletzt. \hyperlink{aufgabe5}{Zurück zu Aufgabe 5.}
+
+\unit{Musterlösungen 6 bis 10}{loesungen2}
+\hypertarget{loes6}{}\subt{6 · Ereignisfolge vor Score}
+Die Zeit beansprucht \(0{,}4/1=0{,}4\) ihrer Schranke. Für die Endzustände ergeben sich \(0{,}0024/0{,}006=0{,}4\) und \(0{,}0072/0{,}006=1{,}2\). Das Maximum \(S=1{,}2\) verfehlt das Ziel. Eine vierte Schaltung verletzt bereits die Ereignisfolge und erhält im Protokoll den eigenen Status für die falsche Ereigniszahl. \hyperlink{aufgabe6}{Zurück zu Aufgabe 6.}
+\hypertarget{loes7}{}\subt{7 · Zwei exakte Knoten reichen nicht}
+Das lineare Element liefert \((61{,}25+60)/2=60{,}625\,^\circ\mathrm C\). Das exakte Profil liefert \(60+1{,}25(1-(1/2)^2)=60{,}9375\,^\circ\mathrm C\). Die Abweichung von \(0{,}3125\unitm K\) übersteigt die Grenze von \(0{,}2\unitm K\). An beiden Randmessstellen ist sie unsichtbar.
+\hypertarget{loes8}{}\subt{8 · Die neue Steigung bestimmt den Termin}
+Ohne Eingangssprung wäre die erste Meldung bei \(t=1/4\) erfolgt. Zum Sprungzeitpunkt ist \(x=1/8\). Die untere Grenze liegt weiterhin bei \(q-\Delta=-1/4\). Die Reststrecke beträgt \(3/8\), bei Geschwindigkeit 2 dauert sie \(3/16\). Die Meldung erfolgt bei \(1/8+3/16=5/16\) und lautet \(q=-1/4\).
+\hypertarget{loes9}{}\subt{9 · Gedämpfte alternierende Abweichung}
+Für \(T_{\rm ab}=20\unitm s\) ergibt sich \(r=3/e-2\approx-0{,}89636\). Aus einem positiven Anfangswert \(x_0\) entstehen \(rx_0,\ r^2x_0,\ r^3x_0\). Die Abweichungen sind nacheinander negativ, positiv und negativ. Ihre Beträge sinken. Der Faktor wurde mit exakter Integration des gehaltenen Eingangs bestimmt. Eine kleinere interne Schrittweite nähert sich genau diesem Faktor.
+\hypertarget{loes10}{}\subt{10 · Das strengere Genauigkeitsziel}
+Es qualifizieren sich nur die feine RK45-Rechnung mit \(7{,}31\cdot10^{-7}\) und die feine BDF-Rechnung mit \(1{,}07\cdot10^{-6}\). BDF benötigt 256 Auswertungen der rechten Seite, RK45 benötigt 4394. BDF benötigt außerdem 28 LU-Faktorisierungen. Eine Laufzeitaussage für ein großes, dicht gekoppeltes Modell verlangt eigene Messungen einschließlich dieser linearen Algebra.
+\srcs{\see{aufgaben}{Übungsblatt} · \see{inhalt}{Inhalt und Lesewege}.}
+
+\clearpage\renewcommand{\running}{Nachschlagen}\anchorpage{1}{glossar}{Notation und Glossar}\ptitle{Notation und Glossar}
+{\tblstart\begin{tabularx}{\linewidth}{@{}P{33mm}Y@{}}\toprule
+\hd{Begriff oder Zeichen}&\hd{Bedeutung im Buch}\\\midrule
+\(x,u,y\) im Zustandsraum&Zustandsvektor, Eingang, Ausgang. Im Diffusionsprüfstand ist \(u(\xi,\tau)\) ausdrücklich das Temperaturfeld.\\
+\(T,T_a,T_s,\theta\)&Stab-, Umgebungs-, Kontakttemperatur und Temperaturüberschuss \(T-T_a\). Die digitale Abtastzeit heißt \(T_{\rm ab}\).\\
+\(q,\ \dot Q\)&Thermischer Leistungsfluss in Watt. Bei QSS ist \(q\) die quantisierte Meldung, beim Oszillator die Auslenkung. Die jeweiligen Modellgleichungen legen die Bedeutung fest.\\
+\(h,\Delta x,\Delta,\tau\)&Zeitschritt, Gitterweite, Zustandsquantum. \(\tau\) bezeichnet beim Wärmespeicher eine Zeitkonstante, im PDE-Prüfstand die dimensionslose Zeit.\\
+ODE / DAE / PDE&Gewöhnliche, differential-algebraische bzw. partielle Differentialgleichung. Die ersten beiden können nach räumlicher Diskretisierung einer zeitabhängigen PDE entstehen.\\
+LBM / D2Q9&Lattice-Boltzmann mit neun Richtungszuständen in zwei Dimensionen, \see{zellenlbm}{eine Zelle nachrechnen}.\\
+NN / FNO&Neuronales Netz bzw. Fourier Neural Operator, \see{nnrechnen}{ein Lernschritt} und \see{pyfno}{ein Feldoperator}.\\
+MOL / FDM / FVM / FEM&Linienmethode, finite Differenzen, finite Volumen, finite Elemente. MOL lässt die Zeit zunächst kontinuierlich.\\
+A- und L-Stabilität&A-stabil bedeutet \(|R(z)|\le1\) in der linken Halbebene. L-stabil verlangt zusätzlich das Abklingen von \(R(z)\) gegen null für sehr große \(|z|\).\\
+Index / Konsistenz&Differentiationsaufwand für eine explizite Ableitungsbeschreibung bzw. Verträglichkeit der angegebenen Startgrößen mit den Gleichungen.\\
+Wächter / Reset&Skalare Ereignisbedingung bzw. Zustands- oder Modusänderung am lokalisierten Ereignis.\\
+RHS / LU&Protokollierte Auswertungen der rechten Seite bzw. Dreieckszerlegungen einer Matrix. Zähler sind implementationsabhängig.\\
+Verifikation / Validierung&Verifikation prüft die Umsetzung der gewählten Gleichungen. Validierung vergleicht das Modell für seinen Verwendungszweck mit Beobachtungen des realen Systems.\\\bottomrule
+\end{tabularx}\par}
+\srcs{\see{klassen}{Modellklassen} · \see{radau}{Radau IIA} · \see{qkatalog}{QSS-Familien} · \see{matrix}{Acht-Fälle-Matrix}.}
+
+\unit{Begriffe für den zweiten Lesedurchgang}{vokab}
+{\tblstart\begin{tabularx}{\linewidth}{@{}P{35mm}Y@{}}\toprule
+\hd{Ausdruck}&\hd{Bedeutung und Ort der Anwendung}\\\midrule
+Modell, Formulierung, Algorithmus&Das Modell legt physikalische Annahmen fest. Die Formulierung wählt Unbekannte und Gleichungen. Der Algorithmus berechnet eine Näherung. Der RC-Kreis zeigt die drei Ebenen auf S.\,\pagelink{rcvergleich}.\\
+Ordnung und Index&ODE-Ordnung zählt die höchste Ableitung. Numerische Ordnung beschreibt asymptotischen Fehlerabfall. Der DAE-Differentiationsindex betrachtet, wie viele Ableitungen der Beziehungen für eine gewöhnliche Differentialbeschreibung nötig sind.\\
+Kondition und Stabilität&Kondition fragt nach der Empfindlichkeit der exakten Lösung gegen geänderte Daten. Numerische Stabilität beschreibt hier die Verstärkung von Störungen durch die Rechenvorschrift. Die lokale Steigung eines Wächters beeinflusst die Kondition der Schaltzeit.\\
+Diskretisierung und Konvergenz&Diskretisierung ersetzt kontinuierliche Größen durch endlich viele Unbekannte oder Schritte. Konvergenz verlangt, dass Näherungen bei Verfeinerung im vereinbarten Maß gegen die Zielgröße gehen.\\
+Gitter und Stützstelle&Ein Gitter ist eine Menge von räumlichen Punkten oder Zellen. Eine zeitliche Stützstelle ist ein Zeitpunkt, an dem eine Lösung dargestellt, ausgewertet oder erzwungen wird. Ausgabetermine und akzeptierte interne Schritte können auseinanderliegen.\\
+Fouriermode und Gibbs-Effekt&Eine Fourierdarstellung zerlegt ein periodisches Feld in Sinus- und Kosinuswellen. Bei der Annäherung eines Sprungs mit endlich vielen glatten Wellen können Überschwinger nahe dem Sprung bestehen.\\
+Prädiktor, Korrektor&Ein Prädiktor liefert einen ersten Vorschlag. Der Korrektor verbessert ihn durch weitere Gleichungen oder Auswertungen. Heuns Methode benutzt eine Vorhersage für die Endsteigung.\\
+Verifikation, Validierung&Verifikation fragt, ob die vorgesehenen Gleichungen und numerischen Anforderungen erfüllt sind. Validierung fragt, ob das Modell reale Beobachtungen für den beabsichtigten Zweck trifft.\\\bottomrule\end{tabularx}\par}
+\srcs{\see{grund}{Zustandsbegriff} · \see{normal}{Formulierung} · \see{zeit}{Zeitintegration} · \see{prakt}{Vergleiche}.}
+
+\unit{Literatur · Systemtheorie und Zeitintegration}{literatur}
+\newcommand{\lititem}[3]{\par\raggedright\vspace{3.2pt}\hypertarget{lit-#1}{}{\sffamily\bfseries\color{ink}#2}\enspace #3\par}
+\lititem{sy}{K. J. Åström und R. M. Murray (2021).}{\emph{Feedback Systems: An Introduction for Scientists and Engineers}, 2. Auflage, Princeton. Zustandsraum, Gleichgewicht, Beobachtbarkeit, Steuerbarkeit und Rückkopplung. \href{https://fbsbook.org/}{Buchwebsite}}
+\lititem{ode}{E. Hairer, S. P. Nørsett und G. Wanner (1993).}{\emph{Solving Ordinary Differential Equations I: Nonstiff Problems}, 2. Auflage, Springer. Herleitung, Konsistenz und Konvergenz von Einschrittverfahren. \href{https://doi.org/10.1007/978-3-540-78862-1}{DOI 10.1007/978-3-540-78862-1}}
+\lititem{stiff}{E. Hairer und G. Wanner (1996).}{\emph{Solving Ordinary Differential Equations II: Stiff and Differential-Algebraic Problems}, 2. Auflage, Springer. Stabilität, Radau-Verfahren, BDF und DAE-Index. \href{https://doi.org/10.1007/978-3-642-05221-7}{DOI 10.1007/978-3-642-05221-7}}
+\lititem{paare}{P. Bogacki und L. F. Shampine (1989) sowie J. R. Dormand und P. J. Prince (1980).}{Originalarbeiten zum eingebetteten 3(2)-Paar und zu expliziten eingebetteten RK-Formeln. \href{https://doi.org/10.1016/0893-9659(89)90079-7}{Bogacki--Shampine} · \href{https://doi.org/10.1016/0771-050X(80)90013-3}{Dormand--Prince}}
+\lititem{esdirk}{A. Kværnø (2004).}{Singly diagonally implicit Runge--Kutta methods with an explicit first stage. \emph{BIT Numerical Mathematics} 44, 489--502. \href{https://doi.org/10.1023/B:BITN.0000046811.70614.38}{Originalarbeit bei Springer}}
+\lititem{geom}{E. Hairer, C. Lubich und G. Wanner (2003).}{Geometric numerical integration illustrated by the Störmer--Verlet method. \emph{Acta Numerica} 12, 399--450. \href{https://www.unige.ch/~hairer/preprints/gniverlet.html}{Autorenfassung}}
+\lititem{radtab}{D. I. Ketcheson, Numipedia.}{Dreistufiges Radau IIA. Tableau, Stufenordnung und rationale Stabilitätsfunktion. \href{https://ketch.github.io/numipedia/methods/RadauIIA3.html}{Radau IIA3}}
+\lititem{scipy}{SciPy, Referenzdokumentation.}{\texttt{solve\_ivp} mit RK23, RK45, Radau und BDF. Vertrag für ODEs, Ereignisse und dichte Ausgabe. Die eigenen Zahlen dieses Buchs wurden mit Version 1.17.0 gerechnet. \href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html}{Dokumentation}}
+\srcs{Die verlinkten Originalarbeiten und Handbücher vertiefen die Herleitungen. Die Lehrrechnungen verwenden die im Text angegebenen Parameter.}
+
+\unit{Literatur · Felder, DAE und Zustandsquantisierung}{literatur2}
+\lititem{fnc}{T. A. Driscoll und R. J. Braun.}{\emph{Fundamentals of Numerical Computation}, Online-Ausgabe. Die räumliche Semidiskretisierung und der Zusammenhang mit ODE-Lösern. \href{https://fncbook.com/methodlines/}{The method of lines}}
+\lititem{fv}{R. J. LeVeque (2002).}{\emph{Finite Volume Methods for Hyperbolic Problems}, Cambridge University Press. Erhaltung, CFL-Bedingung, Flussfunktionen und Begrenzer. \href{https://www.clawpack.org/fvmhp_materials/}{Buch und Begleitmaterial}}
+\lititem{fem}{J. S. Dokken.}{\emph{The FEniCSx Tutorial}, Kapitel zur Wärmegleichung. Variationelle Form und finite Elemente für zeitabhängige Probleme. \href{https://jsdokken.com/dolfinx-tutorial/chapter2/heat_equation.html}{The heat equation}}
+\lititem{ida}{SUNDIALS.}{\emph{IDA, Mathematical Considerations}. Residualform, konsistente Anfangsdaten, BDF, Skalierung und Newton-Iteration. \href{https://sundials.readthedocs.io/en/latest/ida/Mathematics_link.html}{IDA-Handbuch} · \href{https://web.casadi.org/docs/\#initial-value-problems}{CasADi-Integratoren}}
+\lititem{devs}{B. P. Zeigler (1976) sowie B. P. Zeigler und J. S. Lee (1998).}{\emph{Theory of Modelling and Simulation}, Wiley. Die spätere Arbeit beschreibt die Zustandsquantisierung im DEVS-Kontext. \href{https://doi.org/10.1117/12.319354}{Theory of quantized systems}}
+\lititem{qorig}{E. Kofman und S. Junco (2001).}{Quantized-State Systems: A DEVS Approach for Continuous System Simulation. \emph{Transactions of the Society for Computer Simulation International} 18(3), 123--132. \href{https://www.fceia.unr.edu.ar/~kofman/files/qss.pdf}{Autorenfassung} · \href{https://doi.org/10.1177/0037549702078002206}{Kofman (2002), QSS2}}
+\lititem{liq}{G. Migoni, M. Bortolotto, E. Kofman und F. E. Cellier (2013).}{Linearly implicit quantization-based integration methods for stiff ordinary differential equations. \emph{Simulation Modelling Practice and Theory} 35, 118--136. \href{https://doi.org/10.1016/j.simpat.2013.03.004}{Originalarbeit zur LIQSS-Familie}}
+\lititem{qrev}{R. Castro u.\,a. (2024).}{Discrete-event simulation of continuous-time systems: evolution and state of the art of quantized state system methods. Überblick und Einordnung der Varianten. \href{https://doi.org/10.1177/00375497241230985}{DOI 10.1177/00375497241230985}}
+
+\unit{Forschungslektüre nach Fragestellung}{forschunglit}
+\subt{Zustand aus Daten und strukturierte Gleichungen}
+Messenger und Bortz untersuchen die asymptotische Konsistenz eines Verfahrens zur Gleichungsentdeckung. Coulson u.\,a. quantifizieren die Anregung in datenbasierten linearen Systemen. Nutzen Sie die Arbeiten für die Frage, welche Teile eines Modells aus einer Messreihe bestimmbar sind. \href{https://doi.org/10.1093/imanum/drae086}{WSINDy} · \href{https://doi.org/10.1109/LCSYS.2022.3232303}{Robustes Fundamental-Lemma}
+
+Stocco und Bertolazzi (2024) behandeln symbolische Indexreduktion. Bolten und Wimmer (2026) untersuchen Integration für eine bereits als regulär identifizierte Index-1-Klasse. Lesen Sie die Voraussetzungen vor den Konvergenzaussagen. \href{https://doi.org/10.1016/j.cam.2024.115898}{Symbolische Reduktion} · \href{https://doi.org/10.1007/s10915-026-03385-7}{Deferred Correction}
+\subt{Schrittweite, Ereignis und Kontakt}
+Ranocha und Giesselmann (2024) analysieren die Dynamik adaptiver Schrittweitenregler. Kong u.\,a. (2024) erläutern den Einfluss einer verschobenen Ereigniszeit auf linearisierte hybride Trajektorien. Halm und Posa (2024) behandeln simultane reibende Mehrfachstöße. \href{https://doi.org/10.1007/s44207-024-00001-0}{Schrittweitenregelung} · \href{https://arxiv.org/abs/2306.06862}{Hybride Sensitivität} · \href{https://doi.org/10.1177/02783649241236860}{Mehrfachstoß}
+\subt{Von der Aufgabe zum publizierten Vergleich}
+Die Übersicht von Breitenecker und Mitautoren ordnet die ARGESIM-Aufgaben nach Modellierungs- und Ausbildungsschwerpunkten. Für die detaillierte C07-Nachrechnung ist Tabelle 3 bei Grujic u.\,a. (2021) die Vergleichsquelle. Bei C19R liefern Aufgabenstellung und COMSOL-Lösung unabhängige Informationen über Parameter und Referenzgeometrie. \href{https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_29_1/articles/sne.29.1.10468.bn.OA.pdf}{ARGESIM-Übersicht} · \href{https://doi.org/10.11128/sne.31.bne07.10589}{C07-Studie} · \href{https://www.argesim.org/benchmarks/c19}{C19R}
+
+Zum Vergleich von Integratoren sind in der SciML-Sammlung ausführbare Aufwand-Genauigkeits-Diagramme zugänglich. Die auf S.\,\pagelink{matrix} abgedruckte Matrix gehört zum gesondert angegebenen ARGESIM-Projektstand. \href{https://docs.sciml.ai/SciMLBenchmarksOutput/stable/}{SciMLBenchmarks}
+
+\subt{Neuronale Operatoren und physikinformierte Netze}
+\href{https://openreview.net/pdf?id=c8P9NQVtmnO}{Li u.\,a., Fourier Neural Operator} · \see{pyfno}{Fourier-Schicht}.
+\href{https://doi.org/10.1016/j.jcp.2018.10.045}{Raissi u.\,a., PINN} und \href{https://www.nature.com/articles/s42256-021-00302-5}{Lu u.\,a., DeepONet} · \see{netzarten}{Residual und Sensorwahl}.
+\href{https://www.jmlr.org/papers/v24/21-1524.html}{Kovachki u.\,a., Neural Operator} · \see{schluss13}{Operator-Approximation und Voraussetzungen}.
+
+\unit{Datennachweise und ergänzendes Material}{daten}
+\begingroup\fontsize{10}{13}\selectfont
+\subt{Neu berechnete Lehrversuche}
+Alle Zahlen auf S.\,\pagelink{zeit}, \pagelink{tracking}, \pagelink{verlet} und \pagelink{raumfehler} stammen aus explizit angegebenen Modellgleichungen. Das Skript \texttt{nachrechnen.py} enthält die verwendeten Verfahren und Vergleichslösungen. Die Temperaturkurven zum Auftakt von Teil I beruhen auf
+\[
+ u(\xi,\tau)=e^{-\pi^2\tau}\sin(\pi\xi)
+       +0{,}32e^{-9\pi^2\tau}\sin(3\pi\xi)
+\]
+mit dimensionslosem Ort und dimensionsloser Zeit. Für den Gitterversuch im Text wird nur die erste Mode verwendet. Die Stabparameter, der abgetastete Eintankregler und der Folgeregler sind didaktische Modelle dieser Ausgabe.
+\subt{Archivierte Projektdaten}
+Die Acht-Fälle-Matrix und der RK-Vergleich beruhen auf den archivierten CSV-Zeilen. Der Diodenvergleich verwendet das zugehörige JSON. Die deutschen Tabellen wurden daraus geprüft oder neu ausgezählt. Die historischen Laufzeiten stammen von der im jeweiligen Protokoll dokumentierten Maschine.
+
+{\tblstart\begin{tabularx}{\linewidth}{@{}P{43mm}Y@{}}\toprule
+\hd{Nachweis}&\hd{Gegenstand}\\\midrule
+\repo{docs/evidence/qss-extension.csv}{Acht-Fälle-Daten (CSV)}&456 Läufe, 18 QSS-Namen und drei klassische Kontrollen auf acht Modellfenstern.\\
+\repo{docs/evidence/rk23-devs.csv}{RK-Zusatzversuch (CSV)}&138 Konfigurationen mit RK23, ESDIRK32 und Vergleichsverfahren.\\
+\repo{docs/evidence/qss-selection.csv}{Auswahlstudie (CSV)}&520 Konfigurationen, analytische Prüfmodelle und gezielte Modellwiederholungen.\\
+\repo{docs/evidence/c21-idas.json}{C21-Diode (JSON)}&Separate DAE-Referenz mit 149 Schaltungen.\\
+\href{https://www.argesim.org/benchmarks}{Offizieller ARGESIM-Katalog}&Originalaufgaben und veröffentlichte Varianten.\\\bottomrule
+\end{tabularx}\par}
+\subt{Anlagen im PDF}
+Die Anlage \texttt{CP2\_Genauigkeit.zip} ergänzt die \see{fnoprotokoll}{Genauigkeitsstudie}. Das \see{ueb13}{CP2-Feldlabor} enthält trainierte Gewichte, Ein- und Ausgabefelder sowie die NumPy-Auswertung. \texttt{kapitelproben.py} prüft kurze Rechnungen zu den dreizehn Aufgabenblättern. \texttt{labor.py} enthält Versuche zu Pumpe, Prüfwagen, Pendel, RC-Kreis und ARGESIM. Mit \texttt{c09vergleich} prüfen Sie den ersten Reglertakt, mit \texttt{periode} und \texttt{c07linear} die Linearisierung. Ergänzende Lehrmodelle stehen in \texttt{nachrechnen.py}. Die beiden CSV-Dateien liefern die archivierten Einzelzeilen. \texttt{c21-idas.json} enthält den Diodenvergleich. Der englische Studienanhang bewahrt die technischen Berichte der Vorauflage mit ihrer ursprünglichen Paginierung 33--51.
+\srcs{Historische Vergleichsstudie\enspace \texttt{1824c9104152674b82de6cd84d53b0b4f68dca37}.}
+\endgroup

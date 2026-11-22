@@ -1,0 +1,98 @@
+\seite{}{Benchmark-Methodik}\anchorpage{1}{neu10}{10 · Das ARGESIM-Benchmark-Framework und seine Methodik}\ey{KAPITEL 10}\ptitle{Das ARGESIM-Benchmark-Framework und seine Methodik}
+Zwei Programme liefern zum Versuchsende dieselbe Kugelgeschwindigkeit. Im ersten stimmt auch der Trefferzeitpunkt. Im zweiten kollidiert die Kugel zu spät. Welcher Lauf erfüllt den Auftrag? Ein Vergleich beginnt mit der Beobachtung, die in der Anwendung zählt. Erst dann lassen sich Zahlen verschiedener Solver sinnvoll zusammenbringen.
+\subt{Der Weg durch das Kapitel}
+{\tblstart\begin{tabularx}{\linewidth}{@{}Yr@{}}\toprule
+\hyperlink{abs10-1}{10.1 · Phänomen und Prüfaufgabe} & \pagelink{abs10-1}\\[2pt]
+\hyperlink{abs10-2}{10.2 · Toleranzvertrag, Modellhärte und Methodenvergleich} & \pagelink{abs10-2}\\[2pt]
+\hyperlink{abs10-3}{10.3 · Aufgaben ausführen und Ergebnisse diagnostizieren} & \pagelink{abs10-3}\\[2pt]
+\bottomrule\end{tabularx}\par}
+\seite{}{Benchmark-Methodik}\anchorpage{2}{abs10-1}{10.1 · Phänomen und Prüfaufgabe}\ey{ABSCHNITT 10.1}\ptitle{Phänomen und Prüfaufgabe}
+\subt{10.1.1\enspace Aus der Leitfrage wird eine beobachtbare Größe}
+Ein Prüfstand braucht dieselbe Aufgabe für jede Kandidatin. Die offizielle ARGESIM-Definition bestimmt Modell, Parameter und Aufgaben. Die Projektstudie kann ein kleineres Problemfenster wählen, etwa vier gleiche Kugeln statt einer vollständigen stochastischen Stoßkette. Dann muss das Ergebnis gerade dieses Fenster nennen.
+\subt{10.1.2\enspace Systemdarstellung und Referenz}
+Ein Eingang, ein Modell und ein Beobachter bilden den Versuch. Der Beobachter kann einen Zustand, eine Schaltzeit, ein Profil oder eine Verteilung liefern. Ein algebraischer Erhaltungssatz prüft eine andere Eigenschaft als eine unabhängig hergeleitete Lösung. Hängt eine Referenz von derselben rechten Seite ab, belegt Übereinstimmung in erster Linie die Integration dieser Gleichung.
+\seite{}{Benchmark-Methodik}\anchorpage{2}{abs10-2}{10.2 · Toleranzvertrag, Modellhärte und Methodenvergleich}\ey{ABSCHNITT 10.2}\ptitle{Toleranzvertrag, Modellhärte und Methodenvergleich}
+\subt{10.2.1\enspace Härtefälle vor dem Lauf festhalten}
+Ein Stoß verlangt gerichtete Wächter, eine algebraische Falte eine Astprüfung, ein Feld mehrere Gitter. Bei Zustandsgrößen unterschiedlicher Größenordnung erhalten Strom, Weg und Zeit jeweils eine eigene Einheit und ein eigenes positives Budget. Fehlende Ereignisse lassen sich auch bei kleinem Endfehler feststellen.
+\subt{10.2.2\enspace Vom Solverparameter zur unabhängigen Zielgröße}
+Die Integratortoleranzen \(\mathrm{rtol},\mathrm{atol}\) steuern lokale Fehlerschätzer, das Quantum \(\Delta_i\) den Abstand im Zustandsraum. Der äußere Akzeptanztest lautet \(S=\max_j |Q_j-Q_j^*|/b_j\) mit \(b_j>0\). Eine um zwei Millisekunden verspätete Kollision bei einem erlaubten Fehler von einer Millisekunde liefert \(S=2\). Vor dem Zahlenvergleich müssen Anzahl und Zuordnung der Ereignisse stimmen. Ein ausgefallener Lauf erhält einen eigenen Status.
+\seite{}{Benchmark-Methodik}\anchorpage{2}{abs10-3}{10.3 · Aufgaben ausführen und Ergebnisse diagnostizieren}\ey{ABSCHNITT 10.3}\ptitle{Aufgaben ausführen und Ergebnisse diagnostizieren}
+\subt{10.3.1\enspace Pflichtaufgaben, Versuchsfenster und Abnahme}
+Im Repository registriert \texttt{argesim\_benchmarks} die ausführbaren Teilaufgaben. Mit \texttt{python -m argesim\_benchmarks run C05 validate} prüfen Sie die Schaltreferenz. Der Vergleich auf 3,5 Sekunden hat eigene Beobachtungen und Budgets. Die Zielerfüllung bei \(S\le1\) gilt für die benannten Messungen und Einstellungen. Eine allgemeine Auszeichnung des Solvers folgt daraus nicht.
+\subt{10.3.2\enspace Diagnoseprotokoll}
+Sichern Sie Modellrevision, Einheiten, Parametersatz, Anfangswerte und Reihenfolge gleichzeitig eintreffender Ereignisse. Nach dem Lauf gehören akzeptierte und verworfene Schritte, Funktionsaufrufe, Ereigniszahl, Referenz, Rohfehler und Wandzeit ins Protokoll. Bei Zeitüberschreitung bleibt der Score leer. Ein Median macht Einzelmessungen vergleichbar, er ersetzt die Streuung und die Rechnerbeschreibung nicht.
+\clearpage\anchorpage{1}{laborstart}{Erster Laborversuch mit Bleistift und Python}\ey{VOR DEM PRAKTIKUM}\ptitle{Eine Laborrechnung in fünf Zeilen}
+Für das erste Programm genügt Python 3. Erstellen Sie eine Datei \texttt{start.py}, übernehmen Sie die fünf Zeilen und starten Sie sie mit \texttt{python start.py} (unter vielen Linux-Installationen \texttt{python3 start.py}). Wer auf Papier arbeitet, kann die vier Durchläufe von Hand nebeneinanderschreiben.
+\subt{Vorhersagen}
+Ein normiertes Signal erfüllt \(\dot x=-2x,\ x(0)=1\). Wir verwenden vier Euler-Schritte von je \(0{,}25\unitm s\). Wird \(x\) im ersten Schritt halbiert, verdoppelt oder auf null gesetzt? Begründen Sie Ihre Wahl vor dem Start.
+{\small\begin{verbatim}
+x = 1.0
+h = 0.25
+for k in range(4):
+    x = x + h * (-2 * x)
+    print(k + 1, x)
+\end{verbatim}}
+Die Einrückung gehört zum Programm. Zuerst verwendet die rechte Seite das alte \(x\), danach ersetzt die Zuweisung diesen Wert. Der Bildschirm zeigt nach den Schritten \(0{,}5;\ 0{,}25;\ 0{,}125;\ 0{,}0625\). Nach insgesamt einer Sekunde beträgt der unabhängige exakte Wert \(e^{-2}\approx0{,}135335\). Das Programm hat die vereinbarte Rechenregel richtig ausgeführt und doch eine Abweichung erzeugt.
+\subt{Jetzt eine Einstellung ändern}
+Setzen Sie \(h=0{,}125\) und die Schrittzahl auf 8, damit die Endzeit identisch bleibt. Erwartet wird \(0{,}75^8\approx0{,}100113\). Die Abweichung zum exakten Endwert sinkt. Würden Sie bei vier Schritten bleiben, verglichen Sie zwei verschiedene Endzeiten.
+\notebox{Die größeren Versuche starten}{Die Dateien des Begleitmaterials in denselben Ordner entpacken. \texttt{python kapitelproben.py} prüft die kurzen Rechnungen mit der Standardbibliothek. Für \texttt{python labor.py c05} und die weiteren Labore brauchen Sie auch NumPy und SciPy. Befehle und Referenzversionen stehen auf S.\,\pagelink{rechnen}.}
+
+\seite{Rechenbeispiel}{Benchmark-Methodik}\anchorpage{2}{kap13}{Wer ruft das Modell auf?}\ptitle{Wer ruft das Modell auf?}
+
+\lernziel{Sie können dieselbe Modellfunktion an verschiedene Integratoren übergeben und erklären, was sich bei einem Gittermodell und bei einem trainierten Feldoperator an den Ein- und Ausgaben ändert.}
+Ein Heizstab startet auf Umgebungstemperatur. Ein Student baut für Euler einen „Euler-Heizstab“ und für Runge--Kutta einen zweiten Heizstab. Nach einer Änderung der Heizleistung liefern die Programme verschiedene Gleichgewichtstemperaturen. Wie müsste der Code aufgebaut sein, damit beide Versuche dieselbe physikalische Annahme prüfen?
+
+\subt{Vom Bauteil zur Funktion}
+Der Temperaturüberschuss \(\theta\) wird in Kelvin gemessen. Die Wärmekapazität des Stabes beträgt \(120\unitm{J/K}\), der Heizer liefert \(10\unitm W\), der Wärmeverlust beträgt \(\theta/4\) Watt, wenn \(\theta\) in Kelvin eingesetzt wird. Die Bilanz aus Kapitel 2 liefert \(\dot\theta=(10-\theta/4)/120\) in Kelvin pro Sekunde. Die Modellfunktion nimmt die aktuelle Zeit und den Zustand entgegen und gibt einen Vektor von Änderungsraten zurück.
+{\small\begin{verbatim}
+def heizstab(t, zustand):
+    theta, = zustand
+    return ((10.0 - theta / 4.0) / 120.0,)
+\end{verbatim}}
+Das Komma in einem Tupel mit einem Element ist wichtig. Ein Modell mit zwei Zuständen liefert entsprechend zwei Raten. Hier kann dieselbe Uhrzeit mit verschiedenen angenommenen Temperaturen aufgerufen werden. Das kommt bei Zwischenstufen tatsächlich vor.
+
+\subt{Warum ohne Klammern?}
+\texttt{heizstab} ist das Funktionsobjekt. Python kann es wie eine Zahl an eine andere Funktion übergeben. \texttt{heizstab(0.0, (0.0,))} führt die Funktion sofort aus und ergibt das Tupel \((1/12,)\) in K/s. In C kann ein Funktionszeiger dieselbe Rolle übernehmen. Im Projekt heißt die Python-Typangabe für diese aufrufbare rechte Seite \texttt{Rhs}.
+\notebox{Erst ausprobieren}{Setzen Sie \(40\unitm K\) in die rechte Seite ein. Die Rate muss null sein, unabhängig vom später gewählten Solver. Damit haben Sie bereits einen Test für das Modell.}
+\srcs{\see{zeit}{Handrechnung am Heizstab} · \cpcode{argesim_benchmarks/ivp.py}{InitialValueProblem und Rhs} · \see{pyregler}{Solveraufruf} · \see{ueb13}{Aufgaben}.}
+
+\lektion{Laborjournal · Zwei Einstellungen fair vergleichen}{labjournal}{Labor}{Solververgleich}
+Stellen Sie sich vor, eine andere Laborgruppe soll Ihre Wahl morgen aus denselben Angaben nachrechnen. Welche Zeile dürfte in Ihrem Protokoll keinesfalls fehlen? Das Beispiel legt vor dem Vergleich den Auftrag für das Stiftpendel fest.
+{\tblstart\begin{tabularx}{\linewidth}{@{}P{39mm}Y@{}}\toprule
+\hd{Eintrag}&\hd{Beispiel C07 A(i)}\\\midrule
+Frage und Einheit&Zu welchen Zeiten in Sekunden berührt oder verlässt der Faden den Stift bis \(t=10\unitm s\)?\\
+Formulierung&Nichtlineare Winkel-ODE pro Modus, Übergang mit konstanter gerichteter Bahngeschwindigkeit.\\
+Referenz und Ziel&Publikation Tabelle 3, Spalte F. Genau acht gerichtete Übergänge, jeder höchstens \(1\unitm{ms}\) vom publizierten Wert entfernt.\\
+Konfiguration&Verfahrensname, Version, Toleranzen, Startwerte, Einheiten, Schrittobergrenze und Behandlung der Nullstelle.\\
+Gegenversuch&Zweites Verfahren und unabhängiger Grenzwert. Ein erzwungener falscher Reset muss als Fehler sichtbar werden.\\
+Ergebnis&Größte absolute Abweichung \(0{,}611\unitm{ms}\). Der achte Übergang bestimmt den Wert.\\\bottomrule\end{tabularx}\par}
+\subt{Eine Gegenprobe wirklich ausrechnen}
+Ohne Umrechnung bliebe die Winkelgeschwindigkeit bei \(-1{,}248739\unitm{rad/s}\). Die neue Bahngeschwindigkeit wäre \(0{,}3\omega^+=-0{,}374622\unitm{m/s}\). Die vorgeschriebene Bahngeschwindigkeit ist \(-1{,}248739\unitm{m/s}\). Damit verliert das fehlerhafte Modell am Übergang \(1-0{,}3^2=91\,\%\) der kinetischen Energie. Schon eine einzige Übergangsprüfung entlarvt den falschen Reset.
+\subt{Welche Art von Evidenz liegt vor?}
+Eine analytische Lösung prüft ausgewählte Gleichungen des Modells. Ein zweiter Integrator mit derselben rechten Seite prüft insbesondere deren numerische Behandlung. Ein Publikationsvergleich prüft zusätzlich, ob zwei Implementierungen denselben Versuch reproduzieren. Zur Vorhersage an realen Anlagen braucht man außerdem Messdaten mit Einheiten, Unsicherheiten und dokumentiertem Aufbau.
+\srcs{\see{c07labor}{Zeittabelle des Laborversuchs}\enspace·\enspace\href{https://www.argesim.org/benchmarks}{ARGESIM, Aufgaben und Lösungen}.}
+
+\lektion{Rechenpraktikum mit und ohne Projektcode}{rechnen}{Labor}{Solververgleich}
+Die neuen Lehrversuche verwenden Python 3.12.14, NumPy 2.3.5 und SciPy 1.17.0. Die im PDF eingebettete Datei \texttt{nachrechnen.py} läuft mit \texttt{python nachrechnen.py}. Die kurzen Aufgabenprüfungen laufen separat mit \texttt{python kapitelproben.py}. \texttt{nachrechnen.py} berechnet RK-Stufen, die thermische Residualgleichung, die vier Gitterrechnungen, Energie und Phase, den Folgeregler sowie analytische Ereigniszeiten. PDF-Programme mit Anlagenansicht können die Datei lokal speichern.
+\subt{Eine Gitterzeile nur mit der Standardbibliothek}
+Für eine einzelne Sinusmode genügt die folgende, vollständige Rechnung. Sie reproduziert die Zeile \(N=16\) aus Kapitel 7, weil der mittlere Knoten den Wert eins in der Anfangsmode besitzt.
+{\small\begin{verbatim}
+from math import exp, pi, sin
+
+N, steps, end = 16, 64, 0.1
+lam = -4 * N**2 * sin(pi / (2 * N))**2
+pde = exp(-pi**2 * end)
+mol = exp(lam * end)
+euler = (1 + end * lam / steps)**steps
+print(abs(mol-pde), abs(euler-mol), abs(euler-pde))
+\end{verbatim}}
+Erwartet werden gerundet \(0{,}00118216,\ 0{,}00284553,\ 0{,}00166337\). Das eingebettete Skript rechnet zusätzlich auf allen Innenknoten, ohne die modale Formel im Zeitschritt zu verwenden.
+\subt{Die ARGESIM-Studie wiederholen}
+Im verlinkten Publikationsstand erzeugen diese Aufrufe aus dem Stammverzeichnis zwei neue Ergebnistabellen.
+{\footnotesize\begin{verbatim}
+python benchmarks/benchmark_solver_extension.py --output acht.csv
+python benchmarks/benchmark_solver_selection.py \
+    --profile rk23 --output rk.csv
+\end{verbatim}}
+Beide Versuchsreihen verwenden dieselbe Definition des Scores. Das Manifest nennt CPU, Versionen, Seed und Wiederholungen. Prüfen Sie zuerst Ereignisse, Fehlerstatus und Zähler. Lokale Laufzeiten streuen.
+\srcs{\href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/tree/1824c9104152674b82de6cd84d53b0b4f68dca37}{Publikationsstand 1824c91041} · \repo{benchmarks/benchmark_solver_extension.py}{Acht-Fälle-Protokoll} · \repo{benchmarks/benchmark_solver_selection.py}{Auswahlprotokoll}.}

@@ -1,0 +1,65 @@
+\seite{ANHANG B}{Referenzkatalog}\anchorpage{1}{beweise}{Beweise, Schranken und Implementierungsverträge}\ptitle{Beweise, Schranken und Implementierungsverträge}
+{\tblstart\begin{tabularx}{\linewidth}{@{}Yr@{}}\toprule
+\hyperlink{runs}{B.1 · Alle 456 Einzelkonfigurationen} & \pagelink{runs}\\[2pt]
+\hyperlink{absB-2}{B.2 · Ereignisse und DAE-Astfortsetzung} & \pagelink{absB-2}\\[2pt]
+\hyperlink{absB-3}{B.3 · Intervallarithmetik und dichte Ausgaben} & \pagelink{absB-3}\\[2pt]
+\hyperlink{absB-4}{B.4 · Python und C++} & \pagelink{absB-4}\\[2pt]
+\bottomrule\end{tabularx}\par}
+\seite{Datenanhang}{Referenzkatalog}\anchorpage{2}{runs}{B.1 · Die 456 Einzelkonfigurationen}\ptitle{B.1 · Die 456 Einzelkonfigurationen}
+Alle acht Modellfenster enthalten 57 Einstellungen. Die folgenden Tabellen lesen dieselben Daten wie der Methodenvergleich in Kapitel 17. Die Reihenfolge folgt innerhalb eines Falls den Verfahrensnamen und Einstellungen. Der Score ist der größte normierte Fehler. Zeiten werden als Median der archivierten Wiederholungen in Millisekunden angegeben. Die vollständige Präzision und alle Einzelzeiten stehen in der beigefügten Datei \texttt{qss-extension.csv}.
+\subt{So lesen Sie eine Zeile}
+\textbf{OK} erfüllt das Ziel, \textbf{Ziel} verfehlt das Beobachtungsbudget, \textbf{Ereig.} bezeichnet eine abweichende Ereigniszahl, \textbf{Limit} eine Zeitüberschreitung und \textbf{Fehler} einen Solverabbruch. Ein Strich bedeutet fehlenden Messwert. Der Quantenfaktor multipliziert die jeweilige Komponentenskala. Für klassische Verfahren steht hier ein Strich. A/V zählt angenommene und verworfene Schritte oder die vom Solver gemeldeten entsprechenden Ereignisse. RHS zählt Modellauswertungen.
+{\tblstart\begin{tabularx}{\linewidth}{@{}Yr@{}}\toprule
+\hyperlink{runC03a}{C03 · 57 Konfigurationen} & \pagelink{runC03a}\\[2pt]
+\hyperlink{runC05a}{C05 · 57 Konfigurationen} & \pagelink{runC05a}\\[2pt]
+\hyperlink{runC07a}{C07 · 57 Konfigurationen} & \pagelink{runC07a}\\[2pt]
+\hyperlink{runC09a}{C09 · 57 Konfigurationen} & \pagelink{runC09a}\\[2pt]
+\hyperlink{runC11a}{C11 · 57 Konfigurationen} & \pagelink{runC11a}\\[2pt]
+\hyperlink{runC12a}{C12 · 57 Konfigurationen} & \pagelink{runC12a}\\[2pt]
+\hyperlink{runC13a}{C13 · 57 Konfigurationen} & \pagelink{runC13a}\\[2pt]
+\hyperlink{runC21a}{C21 · 57 Konfigurationen} & \pagelink{runC21a}\\[2pt]
+\bottomrule\end{tabularx}\par}
+\input{einzellaeufe}
+\seite{}{Beweise und Code}\anchorpage{2}{absB-2}{B.2 · Ereignisschranken, Stabilität und DAE-Astfortsetzung}\ey{ABSCHNITT B.2}\ptitle{Ereignisschranken, Stabilität und DAE-Astfortsetzung}
+\subt{B.2.1\enspace Eine Wurzel nachweisen und ihre Lage einschließen}
+Ein Positionssensor begrenzt den Wert eines Wächters nur auf ein Intervall. Wie sicher muss das Vorzeichen an beiden Enden sein? Sei \(G(t)=g(t,x(t))\) stetig auf \([a,b]\) und seien seine beiden Endwerte durch Intervalle vollständig eingeschlossen. Liegt die obere Schranke von \(G(a)\) unter null und die untere von \(G(b)\) über null, garantiert der Zwischenwertsatz mindestens einen Durchgang. Gilt außerdem \(G'\ge m>0\) im ganzen Intervall, ist er eindeutig.
+Für eine berechnete Nullstelle \(\hat t\) mit \(|G(\hat t)|\le\varepsilon\) liefert der Mittelwertsatz \(|\hat t-t_*|\le\varepsilon/m\). Bei \(m=0{,}2\,\mathrm{m/s}\) und \(\varepsilon=0{,}1\,\mathrm{mm}\) sind das 0,5 ms. Sind die Werte an beiden Enden positiv, kann es innen zwei Durchgänge geben. Dann helfen mehrere isolierte Intervalle oder eine Einschließung der Extrema.
+\subt{B.2.2\enspace Stationärer Ast und Verlust der Regularität}
+Sei \(g(t,x,z)=0\) stetig differenzierbar und \(g_z\) am Start invertierbar. Der Satz über implizite Funktionen liefert lokal einen eindeutigen Ast \(z=\zeta(t,x)\). Entlang einer glatten Lösung folgt \(z'=-g_z^{-1}(g_t+g_x\,x')\), wobei \(g_x\,x'\) das Produkt der Jacobi-Matrix \(g_x\) mit \(x'\) bezeichnet. Eine uniforme Schranke der Inversen, eine kompakte Einschließung in der regulären Umgebung und kontrollierte Startdaten erlauben die schrittweise Fortsetzung. Für \(g=z^2-x\) verschmelzen die beiden Äste bei \(x=z=0\). Dort scheitert diese Begründung. Die Diodenrechnung grenzt den tatsächlich durchlaufenen Ast auf S.\,\pagelink{befunddiode} ein.
+\seite{}{Beweise und Code}\anchorpage{2}{absB-3}{B.3 · Intervallarithmetik für dichte Polynomausgaben}\ey{ABSCHNITT B.3}\ptitle{Intervallarithmetik für dichte Polynomausgaben}
+\subt{B.3.1\enspace Vom Näherungspolynom zur garantierten Schranke}
+Bei Radau entsteht das Stufenpolynom aus der Kollokation. RK45 besitzt in SciPy eine quartische dichte Ausgabe. Bei BDF entsteht das Interpolationspolynom aus der verfügbaren Differenzenhistorie in der aktuellen Ordnung. Übersetzen Sie die Koeffizienten mitsamt ihrer Rundungsunsicherheit in eine gemeinsame Variable \(s=(t-t_n)/h\). Für \(p(s)=\sum a_ks^k\) einschließt das Horner-Schema mit nach außen gerundeten Intervalloperationen alle Werte von \(p\) auf einem Teilintervall \(I\). Intervallkoeffizienten benötigen dieselbe Rundung.
+Betrachten wir \(p(s)=s^2-s+3/16\), das die Nullen 1/4 und 3/4 besitzt. Auf \([0,1]\) ergibt Horner zunächst die grobe Hülle \([-13/16,3/16]\). Auf \([1/8,3/8]\) haben die Funktionswerte an den Grenzen verschiedene Vorzeichen und \(2I-1\) liegt strikt unter null. Damit ist die erste Wurzel isoliert. Die Unterteilung schärft sowohl die Werte- als auch die Ableitungsaussage.
+\subt{B.3.2\enspace Die zusätzliche Schranke für die wirkliche Bahn}
+Der tatsächliche Zustand \(x\) hat einen zweiten Fehlerweg. Kennt man einen Defekt \(\|p'-f(t,p)\|\le d\) in physikalischer Zeit, eine Anfangsschranke \(e_0\) und eine Lipschitz-Konstante \(L>0\) in einem umschließenden Gebiet, folgt \(\|x(t)-p(t)\|\le e^{Lt}e_0+d(e^{Lt}-1)/L\) für die seit Schrittbeginn verstrichene Zeit. Für \(L=0\) gilt \(e_0+dt\). Erst mit dieser zusätzlichen Hülle darf man aus dem eingeschlossenen numerischen Polynom auf die modellierte Bahn schließen. Bei DAEs kommt die Kontrolle der algebraischen Bindungen hinzu.
+\srcs{\href{https://flintlib.org/doc/tutorials/numerics/interval-newton.html}{FLINT, Einschließung einfacher Wurzeln} · \see{befund4}{Fehlerschranken im Lehrversuch}.}
+\seite{}{Beweise und Code}\anchorpage{2}{absB-4}{B.4 · Python- und C++-Schnittstellenverträge}\ey{ABSCHNITT B.4}\ptitle{Python- und C++-Schnittstellenverträge}
+\subt{B.4.1\enspace Ein identischer ODE-Vertrag für zwei Implementierungen}
+Der Versuch \(y'=-2y,\,y(0)=1\) hat einen unabhängigen Endwert \(e^{-2}\). Die ausführbare Python-Schnittstelle übergibt eine Funktion und den vollständigen Anfangszustand. Die vom Integrator ausgewählten Zwischenzeiten dürfen sich wiederholen, etwa bei einem verworfenen Schritt.
+{\small\begin{verbatim}
+from math import exp
+from argesim_benchmarks.ivp import InitialValueProblem
+from argesim_benchmarks.runtime import solve_ivp
+
+problem = InitialValueProblem(lambda t, y: (-2*y[0],),
+                              0.0, (1.0,), 1.0)
+run = solve_ivp(problem, "rk4", options={"step": 0.01})
+assert abs(run.final_state[0] - exp(-2.0)) < 1e-8
+\end{verbatim}}
+Als C++20-Gegenstück eignet sich eine Modellsignatur mit festen Ausgabespeichern. Der folgende ausführbare Lehrtest prüft das Modell an einem Zwischenzustand. Der vollständige Integrator ist hier die Python-Referenz.
+{\small\begin{verbatim}
+#include <array>
+#include <cassert>
+#include <span>
+
+void rhs(double, std::span<const double, 1> y,
+         std::span<double, 1> rate) { rate[0] = -2.0 * y[0]; }
+
+int main() {
+    std::array<double, 1> y{0.5}, rate{};
+    rhs(0.25, y, rate);
+    assert(rate[0] == -1.0 && y[0] == 0.5);
+}
+\end{verbatim}}
+\subt{B.4.2\enspace Was der Aufrufer beobachten kann}
+Dimensionen, endliche Werte und Zeitgrenzen werden an der API-Grenze geprüft. Der Ergebnisvertrag enthält Zeitpunkte, Zustände und Zähler. Bei einem Reset muss die neue Phase den rechten Grenzwert sehen. Der algebraische Residualvertrag benutzt zusätzlich die vorgeschlagene Ableitung. Zu jeder Gegenprobe gehört die Modellform, deren Antwort geprüft wird.

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
 import itertools
 import json
@@ -11,6 +12,7 @@ from pathlib import Path
 import mpmath as mp
 import numpy as np
 from scipy.integrate import solve_ivp
+from scipy.optimize import brentq
 from scipy.special import lambertw
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -156,7 +158,7 @@ def threshold_box():
     return records
 
 
-def diode():
+def diode(*, grid_study=False):
     # b=u_C+R2*i. Resolvent residues for input source and additive diode current.
     R = iv.mpf(20)
     L = iv.mpf(".0000253")
@@ -216,6 +218,60 @@ def diode():
         events=guard,
     )
     assert sol.success
+    if grid_study:
+        crossings = sol.t_events[0][sol.t_events[0] > 1e-12]
+        rows = []
+        for count in (1250, 2500, 5000):
+            grid = np.linspace(0.0, 5e-4, count + 1)
+            coarse = solve_ivp(
+                rhs,
+                (0, 5e-4),
+                [0.0, 0.0],
+                method="Radau",
+                rtol=1e-7,
+                atol=[1e-10, 1e-8],
+                max_step=grid[1],
+                dense_output=True,
+            )
+            assert coarse.success
+            samples = coarse.sol(grid)
+            residual = samples[1] + 20 * samples[0]
+            intervals = np.flatnonzero(residual[1:] * residual[:-1] < 0)
+            located = np.array(
+                [
+                    brentq(
+                        lambda t, evaluate=coarse.sol: guard(t, evaluate(t)),
+                        grid[j],
+                        grid[j + 1],
+                        xtol=1e-17,
+                    )
+                    for j in intervals
+                ]
+            )
+            assert len(located) == len(crossings) == 149
+            reference = sol.sol(grid)
+            rows.append(
+                {
+                    "uniform_interval_s": float(grid[1]),
+                    "crossings": len(located),
+                    "max_abs_time_error_s": float(abs(located - crossings).max()),
+                    "max_abs_current_error_A": float(
+                        abs(samples[0] - reference[0]).max()
+                    ),
+                    "max_abs_voltage_error_V": float(
+                        abs(
+                            voltage(residual)
+                            - voltage(reference[1] + 20 * reference[0])
+                        ).max()
+                    ),
+                    "times_s": located.tolist(),
+                }
+            )
+        return {
+            "reference_max_step_s": 8e-8,
+            "reference_times_s": crossings.tolist(),
+            "results": rows,
+        }
     times = np.random.default_rng(3267).uniform(0, 5e-4, 6013)
     i, uc = sol.sol(times)
     return {
@@ -343,6 +399,11 @@ def selection():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--diode-grid", action="store_true")
+    if parser.parse_args().diode_grid:
+        print(json.dumps(diode(grid_study=True), indent=2, allow_nan=False))
+        raise SystemExit(0)
     reports = {
         "dense": dense_bounds(),
         "thresholds": threshold_box(),

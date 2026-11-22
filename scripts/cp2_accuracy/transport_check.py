@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import math
 from pathlib import Path
@@ -41,6 +42,67 @@ def rhs(c, h, source):
     )
 
 
+def advance(c, h, step, source):
+    floor = 0.0
+    for _ in range(round(END / step)):
+        k1 = rhs(c, h, source)
+        s2 = c + step / 2 * k1
+        k2 = rhs(s2, h, source)
+        s3 = c + step / 2 * k2
+        k3 = rhs(s3, h, source)
+        s4 = c + step * k3
+        k4 = rhs(s4, h, source)
+        c += step / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
+        floor = min(floor, s2.min(), s3.min(), s4.min(), c.min())
+    return c, floor
+
+
+def linear_weights(centers, point):
+    """Distribute a point between the nearest two cell centers."""
+    upper = np.searchsorted(centers, point, side="right")
+    lower = upper - 1
+    fraction = (point - centers[lower]) / (centers[upper] - centers[lower])
+    weights = np.zeros(len(centers))
+    weights[[lower, upper]] = [1 - fraction, fraction]
+    return weights
+
+
+def fixed_faces():
+    west, east, south, north = -4.5, 12.5, -4.5, 4.5
+    step = 7200
+    rows = []
+    for h in (1, 0.5, 0.25):
+        x = west + h * (np.arange(round((east - west) / h)) + 0.5)
+        y = south + h * (np.arange(round((north - south) / h)) + 0.5)
+        faces = [x[0] - h / 2, x[-1] + h / 2, y[0] - h / 2, y[-1] + h / 2]
+        np.testing.assert_array_equal(faces, [west, east, south, north])
+        wx, wy = linear_weights(x, 0), linear_weights(y, 0)
+        np.testing.assert_allclose([wx @ x, wy @ y], 0, atol=1e-15, rtol=0)
+        volumes = p.porosity * p.thickness * h**2
+        source = np.outer(wy, wx) * (p.mass_rate / volumes)
+        mass_rate = source.sum() * volumes
+        np.testing.assert_allclose(mass_rate, p.mass_rate, atol=1e-15, rtol=0)
+        field, minimum = advance(np.zeros_like(source), h, step, source)
+        rows.append(
+            {
+                "h_m": h,
+                "shape_yx": list(field.shape),
+                "faces_west_east_south_north_m": faces,
+                "mass_rate_mg_s": mass_rate,
+                "well_mg_m3": float(wy @ field @ linear_weights(x, 5)),
+                "minimum_mg_m3": float(minimum),
+            }
+        )
+    return {
+        "step_s": step,
+        "time_s": END,
+        "source_m": [0, 0],
+        "well_m": [5, 0],
+        "source_and_well_weights": "bilinear in cell centers",
+        "rows": rows,
+    }
+
+
 def study(h, step, expanded=False, wide=False):
     x0, y0 = -8 if expanded else -4, -8 if expanded else -4
     xmax, ymax = 16 if expanded else 12, 8 if expanded else 4
@@ -54,17 +116,7 @@ def study(h, step, expanded=False, wide=False):
     else:
         source[j, i] = 1
     source *= p.mass_rate / (p.thickness * p.porosity * h * h)
-    floor = 0.0
-    for _ in range(round(END / step)):
-        k1 = rhs(c, h, source)
-        s2 = c + step / 2 * k1
-        k2 = rhs(s2, h, source)
-        s3 = c + step / 2 * k2
-        k3 = rhs(s3, h, source)
-        s4 = c + step * k3
-        k4 = rhs(s4, h, source)
-        c += step / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
-        floor = min(floor, s2.min(), s3.min(), s4.min(), c.min())
+    c, floor = advance(c, h, step, source)
     return {
         "h": h,
         "dt": step,
@@ -135,4 +187,9 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--fixed-faces", action="store_true")
+    if parser.parse_args().fixed_faces:
+        print(json.dumps(fixed_faces(), indent=2, allow_nan=False))
+    else:
+        run()

@@ -123,3 +123,16 @@ python scripts/build_studienbuch.py
 ```
 
 Die Versuche verwenden CPU, NeuralOperator 2.0.0, PyTorch 2.8 und SciPy 1.17.0. Die drei Trainingsläufe des festen Netzes ändern nur die Initialisierung und die Mischfolge der Trainingsbeispiele. Das Familiennetz verwendet separate Trainings- und Validierungsfelder. Der lange D2Q9-Lauf benötigt einen C++17-Compiler mit OpenMP-SIMD-Unterstützung. Das Skript kompiliert die Referenz, vergleicht ihren Kleingitterlauf mit dem skalaren Python-Kern und prüft beide Komponenten an je sechs Innenpunkten der publizierten Mittellinien. Jede Gittergröße endet bei derselben konvektiven Zeit. Die Profile, der Massenverlauf von Anfang zu Ende und die Unterschiede der letzten Zeitfenster sind archiviert. Der lange Lauf erzeugt eine physikalische Referenz für die Strömung. Der größte trainierte Ausgabezeitpunkt des neuronalen Kavitätsmodells ist Schritt 24. [ARGESIM-Definition](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/CP/CP2-definition.pdf) · [Ghia, Ghia und Shin, 1982](https://doi.org/10.1016/0021-9991(82)90058-4)
+
+## Zusatzprüfungen ohne neues Training
+
+```sh
+python -m scripts.cp2_accuracy.rope_symmetry
+python -m scripts.cp2_accuracy.transport_check --fixed-faces
+python -m scripts.cp2_accuracy.chapter_checks --diode-grid
+python scripts/cp2_accuracy/review_figures.py
+```
+
+Der Spiegeltest nutzt die drei veröffentlichten Saitenoperatoren. Die beiden
+Zeit- und Raumgitterprüfungen ergänzen die Kapitel zu C21 und C19R. Dafür
+werden SciPy, NumPy und mpmath benötigt. Matplotlib erzeugt die Vektorfiguren.
