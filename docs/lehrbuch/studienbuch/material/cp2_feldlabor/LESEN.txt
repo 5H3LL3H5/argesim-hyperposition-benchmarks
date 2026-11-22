@@ -1,4 +1,4 @@
-CP2-Feldlabor zu Kapitel 13
+CP2-Feldlabor zu Kapitel 16
 Christian Stenzel · Numerische Simulation dynamischer Systeme
 
 1. Ohne Training nachrechnen
