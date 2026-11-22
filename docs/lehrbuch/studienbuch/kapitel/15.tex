@@ -104,6 +104,21 @@ Die Quelle bei \((0,0)\unitm m\) liefert konstant \(2\unitm{mg/s}\). Auf feinen 
 Die Referenz für die unendliche Ebene beträgt etwa \(45\,021{,}62\unitm{mg/m^3}\). Das feine Gitter liegt wieder näher an dieser Referenz als das mittlere. Die Reihe verändert die Auflösung der Quellprojektion und der Beobachtung. Sie liefert für sich allein keine Konvergenzordnung. Zusätzlich lässt sich die Zeitintegration bei festem Operator, festem Gitter und gleicher Auswertung vergleichen.
 \srcs{\repocurrent{scripts/cp2_accuracy/transport_check.py}{Rechnung mit \texttt{--fixed-faces}} · \texttt{transport\_feste\_raender.json} · \see{c19gitter}{Archivierte Gitterreihe}.}
 
+\lektion{C19R · Ein Brunnenwert bekommt ein Fehlerbudget}{pruefung15}{Messwerte nachrechnen}{Kapitel 15}
+Wir wollen am zehnten Tag an genau einem Ort eine Entscheidung treffen. Quelle und Messstelle bleiben auf denselben physischen Koordinaten. Die Außenflächen des endlichen Gebiets stehen fest. Für diesen Lehrversuch wählen wir am Brunnen eine Abweichung von höchstens einem Prozent zur Referenz der unendlichen Ebene. Wie fällt das Urteil aus, wenn das Gitter verfeinert wird?
+
+Mit \(Q^*=45\,021{,}62\unitm{mg/m^3}\) ist das absolute Budget \(b=450{,}2162\unitm{mg/m^3}\). Die Reihe mit festen Außenflächen auf S.\,\pagelink{befundgitterfest} liefert folgende Nachrechnung aus den gerundeten Werten.
+{\tblstart\begin{tabularx}{\linewidth}{@{}lrrY@{}}\toprule
+\hd{Zellweite}&\hd{Brunnenwert}&\hd{\(|Q-Q^*|/b\)}&\hd{Lage zur Referenz}\\\midrule
+\(1\unitm m\)&48\,677,18&8,12&zu hoch\\
+\(0{,}5\unitm m\)&41\,471,80&7,88&zu niedrig\\
+\(0{,}25\unitm m\)&44\,134,39&1,97&zu niedrig\\\bottomrule\end{tabularx}\par}
+Alle drei Werte verfehlen dieses Ziel. In der früheren Reihe auf S.\,\pagelink{c19gitter} erreicht das feinste Gitter hingegen einen relativen Fehler von \(0{,}931\,\%\). Dort liegen die äußersten Zellzentren fest, sodass sich die Außenflächen beim Verfeinern verschieben. Die Messung ist jeweils aussagekräftig, sobald Gittergeometrie, Quellprojektion, Interpolation und Referenz zugleich angegeben sind.
+
+Eine zweite Probe führt die \(2\unitm{mg/s}\) eingespeiste Masse über zehn Tage auf \(1\,728\,000\unitm{mg}\) zurück. Bei anfangs leerem Gebiet ohne Abbau oder Entnahme müssen gespeicherte Masse und integrierter Nettoausfluss zusammen diese Menge ergeben. Der Probe liegt eine andere Messgröße zugrunde als dem Einzelwert am Brunnen.
+\notebox{Diagnose}{Bleibt die Bilanz beim Verfeinern richtig, während der Sensorwert wandert, untersuchen Sie zuerst Quellverteilung, Auswertestelle, Randnähe und numerische Dispersion. Eine richtige Gesamtmasse schließt einen zu breiten oder verschobenen Konzentrationspuls ein.}
+\srcs{\see{refC19R}{Profile und Behandlungsaufgaben} · \see{c19integral}{Unabhängige Referenz auf der Ebene}.}
+
 \werkblatt{15}{Selbst prüfen}{ueb11}{Quelle, Messort und Vergleich}
 
 \merke{Eine Referenz gehört zu einer bestimmten Messgröße, einem Ort, einer Zeit und Randbedingungen. Zeit-, Gitter- und Gebietsfehler lassen sich mit verschiedenen Gegenversuchen untersuchen.}

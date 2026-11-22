@@ -14,6 +14,9 @@ Für \(y'=\lambda y\) wird aus einem Schritt die Multiplikation mit \(R(z)\), \(
 \hypertarget{punkt3-1-2}{}\subt{3.1.2\enspace A-, Sektor- und L-Stabilität}
 Eine A-stabile Einschrittmethode besitzt \(|R(z)|\le1\) auf der gesamten abgeschlossenen linken Halbebene. Bei \(A(\alpha)\)-Stabilität genügt dort ein Sektor mit Halbwinkel \(\alpha\) um die negative reelle Achse. L-Stabilität verlangt zusätzlich \(R(z)\to0\) für sehr große steife Argumente in der linken Halbebene. Die Trapezregel liefert bei \(z=-100\) den Faktor \(-49/51\), Rückwärts-Euler dagegen \(1/101\). Das Vorzeichen und die Größe erklären das numerische Nachschwingen im ersten Fall.
 \notebox{Rechenfrage}{Bei welchem der beiden Ergebnisse ist die schnelle Mode nach zwei Schritten noch fast so groß wie zu Beginn? Quadrieren Sie beide Faktoren.}
+\subt{Vom skalaren Faktor zur ganzen Matrix}
+Für \(y'=Ay\) ist beim linearen Einschrittverfahren \(B=R(hA)\) die Fortschrittsmatrix. Ihr Spektralradius \(\rho(B)\) ist der größte Betrag ihrer Eigenwerte. Liegt er in endlicher Dimension strikt unter eins, fällt \(B^n\) für \(n\to\infty\) auf null. Wie groß einzelne Zwischenwerte werden, hängt auch von den Eigenrichtungen ab.
+\notebox{Achtung, Falle}{Die Matrix \(B=\left(\begin{smallmatrix}1/2&4\\0&1/2\end{smallmatrix}\right)\) hat Spektralradius \(1/2\). Dennoch bildet sie den Einheitsvektor \((0,1)\) im ersten Schritt auf \((4,1/2)\) ab. In \(B^n\) lautet der Nebendiagonaleintrag \(4n(1/2)^{n-1}\). Er verschwindet erst auf lange Sicht. Eigenwerte allein begrenzen die zwischenzeitliche Fehlerverstärkung eines nichtnormalen Systems nicht.}
 \lektion{Rechenversuch · Ein steifer Folgeregler}{tracking}{Kernweg}{Zeitintegration}
 Ein normierter Ausgang \(y\) soll einer Führungsgröße \(r(t)=\cos t\) folgen. Eine Vorsteuerung liefert \(\dot r\), eine Rückkopplung korrigiert den Abstand mit Rate \(a=1000\). Dadurch gilt \(\dot y=\dot r+a(r-y),\ y(0)=0\). Für den Folgefehler folgt \((y-r)'=-a(y-r)\). Somit ist \(y(t)=\cos t-e^{-1000t}\) eine unabhängige Referenz. Die Anfangsschicht dauert Millisekunden, der Versuch läuft bis \(2\unitm s\) bei \(t\) in Sekunden.
 
@@ -110,18 +113,37 @@ Beim explizit gestarteten, einfach diagonalen impliziten RK-Verfahren ist die er
 Beim Rosenbrock--Euler-Schritt eines autonomen Systems löst man \((I-hJ_n)k=f(y_n)\) und setzt \(y_{n+1}=y_n+hk\). Das ist eine Linearisierung des impliziten Euler-Schritts und bei linearem \(f\) exakt dessen Schritt. Mehrstufige Rosenbrock-Verfahren erreichen höhere Ordnung. Sie sind Kandidaten für steife ODEs mit gut zugänglichem \(J\), besonders wenn eine nichtlineare Stufeniteration teuer wäre.
 \notebox{Vergleichsmaß}{Gezählt werden angenommene Schritte, Auswertungen von \(f\), Jacobi-Matrizen und LU-Faktorisierungen. Ein einziges dichtes lineares System kann mehr kosten als viele Auswertungen eines lokalen Flusses.}
 \srcs{\refbk{stiff}{Hairer und Wanner} · \refbk{esdirk}{Kværnø, eingebettete ESDIRK-Paare} · \refbk{ida}{BDF beim Residualsolver IDA}.}
+\lektion{Warum ein großer Radau-Schritt eine schnelle Mode dämpft}{pruefung3}{Herleitung und Gegenprobe}{Kapitel 3}
+Unmittelbar nach dem Schalten schwingt ein schneller Anteil der Temperatur noch nach. Nehmen wir eine einzelne exponentiell abklingende Abweichung \(y'=\lambda y\) und setzen \(z=h\lambda\). Wir wollen wissen, wie viel von \(y_n\) ein ganzer RK-Schritt übrig lässt. Der Stufenvektor \(Y\) erfüllt \(Y=\mathbf{1}y_n+zAY\). Ziehen wir den zweiten Term nach links, erhalten wir
+\[
+ (I-zA)Y=\mathbf{1}y_n,\qquad y_{n+1}=y_n+zb^\mathsf TY.
+\]
+Wo die Stufenmatrix invertierbar ist, liefert Einsetzen \(y_{n+1}=R(z)y_n\) mit \(R(z)=1+zb^\mathsf T(I-zA)^{-1}\mathbf{1}\). Dieselbe Matrix erklärt zwei Beobachtungen. Ihre Lösung kostet bei einem impliziten Verfahren Arbeit. Ihre Inverse ermöglicht eine rationale Stabilitätsfunktion.
+
+Für die drei Radau-IIA-Stufen von \see{radau}{der Kollokationskonstruktion} ergibt sich
+\[
+ R(z)=\frac{1+2z/5+z^2/20}{1-3z/5+3z^2/20-z^3/60}.
+\]
+Bei \(z=-10\) ist der Zähler \(2\), der Nenner \(116/3\). Somit bleiben \(3/58\approx0{,}05172\) der Anfangsabweichung. Vorwärts-Euler liefert den Faktor \(-9\), die exakte Lösung \(e^{-10}\approx0{,}0000454\). Radau dämpft diesen Anteil, seine Amplitude ist nach diesem einzelnen groben Schritt noch deutlich größer als der exakte Wert.
+\notebox{Merksatz}{Die A-Stabilität von Radau IIA sichert das Stabilitätsgebiet in der linken Halbebene. Der gegenüber dem Nenner kleinere Zählergrad zeigt zusätzlich \(R(z)\to0\) für sehr große \(|z|\). Zusammen ergeben diese Eigenschaften L-Stabilität. Wer die Anfangsschicht messen will, benötigt auch dann ausreichend kleine Schritte.}
+\srcs{\see{alg3}{Newton-Iteration und Wiederverwendung der Faktorisierung} · \refbk{stiff}{Hairer und Wanner}.}
+
 \lektion{Der implizite Schritt am Newton-Protokoll}{alg3}{Werkstatt}{Kapitel 3}
 Ein Newton-Schritt liefert eine Korrektur, ein Integrationsschritt einen neuen Zeitpunkt. Beide dürfen nicht verwechselt werden. Das Schema verwendet eine feste Näherung der Jacobi-Matrix pro Versuch.
 {\small\begin{verbatim}
 Y = Praediktor(t, y, h)
+G = Y - y - h * f(t + h, Y)
+wenn G exakt null: gib Y als Stufenloesung zurueck
 M = I - h * Jacobi(t + h, Y)
-P, L, U = faktorisiere(M)
-wiederhole:
-    G = Y - y - h * f(t + h, Y)
-    wenn Defekt_und_Korrektur_klein: beende_Iteration
-    delta = loese_mit_LU(P, L, U, -G)
+LU = faktorisiere(M)
+fuer k von 1 bis k_max:
+    delta = loese_mit_LU(LU, -G)
     Y = Y + delta
-bei Stagnation: Matrix erneuern oder h verkleinern
+    G = Y - y - h * f(t + h, Y)
+    wenn normiert(delta) und normiert(G) unter ihren Zielen:
+        gib Y als Stufenloesung zurueck
+    bei Stagnation: verlasse die Iteration
+erneuere Jacobi und LU oder wiederhole mit kleinerem h
 \end{verbatim}}
 \subt{Selbst rechnen}
 Für den impliziten Schritt bei \(y'=-y^2\) und h=y=1 sei die Ableitung am Start festgehalten. Welcher zweite Näherungswert entsteht?

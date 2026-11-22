@@ -29,7 +29,7 @@ _EVIDENCE = {
     "C12": "Inverse restitution and the Dymola distribution of terminal speeds.",
     "C13": "Linear Task A endpoints validated at three loads. B/C holding and emergency brake logic tested. [C13R evidence](docs/C13_REFERENCE_ANALYSIS.md)",
     "C14": "D1 stock histories and 30-day cost and delivery studies. [Reference variants](docs/C14_VALIDATION.md)",
-    "C15": "Three bolus masses, Task B fit and a 1,000-sample parameter experiment.",
+    "C15": "Equal bolus dose at three infusion durations, Task B fit and a 1,000-sample parameter experiment.",
     "C16": "Year-five restaurant count compared with two published studies. [Validation scope](docs/C16_VALIDATION.md)",
     "C17R": "Default ODE trajectories validated. The spatial FHP-I comparison uses a published single-run statistic. [C17R results](docs/PUBLISHED_REFERENCE_CHECKS.md#c17r-default-ode-and-spatial-comparison)",
     "C18": "ARX, static and recurrent networks implemented. Figure reconstruction executable. Original training and validation recordings missing. [Provenance](docs/C18_FIGURE_RECONSTRUCTION.md)",

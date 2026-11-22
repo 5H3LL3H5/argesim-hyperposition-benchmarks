@@ -257,6 +257,13 @@ In Zelle 1 ist die Konzentration nach Lax--Wendroff negativ. Eine höhere Genaui
 Multipliziert man \(u_t=\kappa u_{xx}\) mit einer Testfunktion \(v\) und integriert partiell, entsteht \(\int v u_t+\int \kappa v_xu_x=[v\kappa u_x]_{\partial\Omega}\). Für die Ortsanteile genügen quadratintegrable Funktionen mit quadratintegrabler schwacher erster Ableitung, der Sobolev-Raum \(H^1\). Vorgegebene Dirichlet-Werte schränken den Lösungsraum ein, die zugehörigen Testfunktionen verschwinden dort.
 \hypertarget{punkt7-4-2}{}\subt{7.4.2\enspace Massen- und Steifigkeitsmatrix}
 Im Ansatz \(u_h=\sum_j U_j\varphi_j\) wählt Galerkin \(v=\varphi_i\). Somit gilt \(M\dot U+KU=b\), mit \(M_{ij}=\int\varphi_i\varphi_j\) und \(K_{ij}=\int\kappa\varphi'_i\varphi'_j\). Die Hutfunktionen überlappen nur Nachbarn, weshalb beide Matrizen dünn besetzt sind. Eine reguläre Massenmatrix liefert ein ODE-System. Zusätzliche Multiplikatoren oder masselose Freiheitsgrade können eine DAE erzeugen.
+
+Auf einem einzigen Element der Länge \(\ell\) lässt sich jeder Eintrag ausrechnen. Mit \(\xi=x/\ell\) fallen und steigen die beiden Hutfunktionen als \(1-\xi\) und \(\xi\). Daher ist \(M_{11}=\ell\int_0^1(1-\xi)^2\,\mathrm d\xi=\ell/3\) und \(M_{12}=\ell\int_0^1(1-\xi)\xi\,\mathrm d\xi=\ell/6\). Die räumlichen Ableitungen sind konstant \(-1/\ell\) und \(1/\ell\). Für eine konstante Diffusivität \(\kappa\) folgt
+\[
+ M_e=\frac{\ell}{6}\begin{pmatrix}2&1\\1&2\end{pmatrix},\qquad
+ K_e=\frac{\kappa}{\ell}\begin{pmatrix}1&-1\\-1&1\end{pmatrix}.
+\]
+Beim Zusammenbau werden die Beiträge beider angrenzenden Elemente am gemeinsamen Knoten addiert. Eine konstante Temperatur ohne Randantrieb muss die Steifigkeitsmatrix auf null abbilden. Genau das zeigen die verschwindenden Zeilensummen von \(K_e\).
 \lektion{Vier Raumverfahren an einem warmen Mittelpunkt}{raumwahl}{Kernweg}{Felder und Linienmethode}
 Ein dimensionsloser Stab reicht von 0 bis 1. Beide Enden bleiben bei null, die anfängliche Temperatur ist \(u(\xi,0)=\sin(\pi\xi)\). Für \(u_\tau=u_{\xi\xi}\) schätzen wir, wie schnell die Temperatur an der Mitte fällt. Ein sehr grobes Gitter hat nur den inneren Wert \(U(0)=1\) zwischen zwei Randwerten null. Was ändert sich, wenn wir den Ort verschieden beschreiben?
 \subt{Differenzen und Volumen liefern hier dieselben Zahlen}
@@ -347,6 +354,19 @@ Bei der eindimensionalen Diffusion und Vorwärts Euler sind die neuen Gitterwert
 \subt{Ergebnis der Nachuntersuchung}
 Die Nachrechnung leitet eine Schrittbedingung für die Positivität des tatsächlichen Euler-Teilschritts her. Sie prüft die RK4-Stufen in acht Transportläufen und gibt ein Gegenbeispiel zur unbedingten Positivität an.
 \srcs{\see{befundtransport}{Nachweis und Ergebnis} · \href{https://doi.org/10.4208/nmtma.OA-2023-0165}{Maximum-Principle-Preserving High-Order Conservative Difference Schemes for Convection-Dominated Diffusion Equations} · \href{https://doi.org/10.1137/17M1149961}{Guermond u.\,a., konvexe Begrenzung für die Euler-Gleichungen}.}
+\lektion{Was ein Flussbegrenzer an einer steilen Front entscheidet}{pruefung7}{Herleitung und Gegenprobe}{Kapitel 7}
+Ein rechteckiger Konzentrationspuls fährt in einer Rohrleitung nach rechts. Ein geradliniger Anstieg im Innern lässt sich innerhalb einer Zelle fortsetzen. Auf dem Gipfel würde dieselbe Konstruktion neue Konzentrationswerte oberhalb des Maximums erzeugen. Aus welchen Nachbarwerten kann ein Verfahren entscheiden, wo es seine Steigung zurücknimmt?
+
+Seien \(\bar u_j\) die Mittelwerte gleich breiter Zellen und \(a>0\) die konstante Geschwindigkeit. Bilden wir die ungeteilten Differenzen \(d_-=\bar u_j-\bar u_{j-1}\) und \(d_+=\bar u_{j+1}-\bar u_j\). Minmod liefert bei gleichem Vorzeichen die betragskleinere Differenz mit diesem Vorzeichen, sonst null. Der rekonstruierte linke Zustand an der rechten Zellfläche ist \(\bar u_j+\tfrac12\operatorname{minmod}(d_-,d_+)\). Der zugehörige Upwind-Fluss ist \(a\) mal dieser Zustand.
+
+Für die drei Zellmittel \(0,1,3\) sind die Differenzen \(1,2\). Die Frontseite aus der mittleren Zelle erreicht den Wert \(1{,}5\). Beim Tripel \(0,1,0\) ergeben sich \(1,-1\). An diesem Gipfel wird die Steigung null, beide Seiten der mittleren Zelle bleiben bei eins. Links und rechts einer gemeinsamen Fläche muss dann genau derselbe Flusswert im Speicher stehen. Denn bei
+\[
+ \bar u_j'=-\big(F_{j+1/2}-F_{j-1/2}\big)/\Delta x
+\]
+taucht jeder innere Fluss mit entgegengesetzten Vorzeichen in benachbarten Bilanzen auf. Nach Summation bleiben nur die Randflüsse.
+\notebox{Zwei getrennte Kontrollen}{Prüfen Sie die Gesamtmasse durch Teleskopieren und die Gesamtvariation \(TV=\sum_j|\bar u_{j+1}-\bar u_j|\) am fertigen Zeitschritt. Die Rekonstruktion allein gibt für einen beliebigen Zeitintegrator keine TVD-Garantie. Dazu gehören ein geeigneter Zeitschritt, eine geeignete Zeitintegration und die Randvorschrift.}
+\srcs{\see{abs7-3}{Flusswahl und Begrenzer} · \see{alg7}{Kontrollvolumina im Rechenprotokoll}.}
+
 \lektion{Eine konservative Flussbilanz programmieren}{alg7}{Werkstatt}{Kapitel 7}
 Am gemeinsamen Rand zweier Zellen wird derselbe Zahlenwert einmal abgezogen und einmal addiert. Separate Neuberechnungen mit vertauschten Vorzeichen können diesen Zusammenhang verdecken.
 {\small\begin{verbatim}

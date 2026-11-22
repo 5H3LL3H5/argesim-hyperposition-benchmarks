@@ -13,6 +13,14 @@ Python verwendet den Punkt als Dezimalzeichen. Die Nummer bezeichnet eines der 1
 Aufgabenblätter. Ohne Nummer laufen alle 13 Gegenproben. Die neue Kapitelzuordnung
 steht im Aufgabenregister der PDF. Python 3 genügt.
 
+Kapitelweise Nachrechnung
+
+    python kapitelvergleich.py
+
+Die 17 Ausgaben folgen den Kapitelnummern des Buchs. Der erste Teil berechnet
+Herleitungen nach. Der zweite gleicht die ausgewählten Versuche mit den im ZIP
+enthaltenen CSV- und JSON-Daten ab. Python ab 3.10 genügt.
+
 Das ARGESIM-Praktikum
 
 labor.py und nachrechnen.py benötigen zusätzlich NumPy und SciPy. Die Ausgabe

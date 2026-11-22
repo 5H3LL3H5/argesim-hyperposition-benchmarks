@@ -129,6 +129,16 @@ Zellen nennen \texttt{nfev}; Faktorisierungen stehen separat in der Datei. RK45 
 \notebox{Welche Frage verlangt Außendaten?}{Genauigkeit und Sensorort (Kapitel 1) verlangen Messdaten vom Bauteil und eine kalibrierte Messkette.}
 \srcs{\repo{docs/evidence/qss-selection.csv}{Archiv mit 520 Konfigurationen} · \texttt{kapitel.json} · \texttt{gegenproben.json}.}
 
+\lektion{Aus 456 Zeilen eine Entscheidung nachrechnen}{pruefung17}{Messwerte nachrechnen}{Kapitel 17}
+Angenommen, Sie wählen einen Solver für eine neue Koppelstange mit Kontakt. Ein Kollege schlägt QSS2 vor, weil der elastische C12-Fall mit 36 Funktionsaufrufen und \(S=0\) auskommt. Das ist ein konkreter Startpunkt. Wie belastbar ist seine Übertragung auf eine andere Kontaktgeometrie und auf schnelle Rückkopplung?
+
+Wir halten für den Vergleich den Quantenfaktor \(10^{-3}\) fest. Bei C07 (Stiftpendel) erreicht QSS2 \(S\approx1{,}583\), bei C09 (abgetastete Tanks) \(0{,}01169\), bei C12 (Kugelreihe) null und bei C13 (Lastkran) \(33{,}68\). Im C05-Fenster endet dieselbe Einstellung mit einem Timeout. Die Unterschiede ergeben sich auch daraus, dass Spaltweiten bei C12 zwischen den Stößen exakt linear sind, während beim Pendel die Krümmung und der Wechsel der Koordinaten wirksam werden. Ein günstiger Kontaktversuch ersetzt die Messung am vorgesehenen Modell also nicht.
+
+Von den 456 archivierten Einstellungen liefern 373 eine vollständige numerische Bewertung, denn \(222+151=373\). Weitere \(20+46+17=83\) enden mit falscher Ereignisfolge, Zeitlimit oder Solverfehler. Die Anteile \(222/456=48{,}7\,\%\) und \(222/373=59{,}5\,\%\) sind beide nachrechenbar. Der erste zählt alle begonnenen Einstellungen, der zweite nur vollständige Bewertungen. Keine der beiden Zahlen ist eine Erfolgswahrscheinlichkeit an zukünftigen Modellen. Die acht Fälle und die Quantenstufen sind gezielt ausgewählt.
+
+\notebox{Entscheidung am neuen Problem}{Legen Sie die Kontaktkennungen und die zulässigen Zeitfehler vorab fest. Rechnen Sie eine vereinfachte Bewegung exakt, prüfen Sie im vollen Modell eine unabhängige Referenz, zählen Sie verworfene Schritte und physikalische Kontakte einzeln. Vergleichen Sie anschließend ausschließlich innerhalb der erreichten Genauigkeitsklasse den Aufwand auf demselben Rechner.}
+\srcs{\see{matrix}{Ergebnisse nach Methoden} · \see{runs}{Alle 456 Einträge mit Status und Aufwand}.}
+
 \werkblatt{17}{Selbst prüfen}{ueb12}{Aus Messwerten entscheiden}
 
 \merke{Die Genauigkeitsanforderung legt fest, welche Läufe für die Aufgabe brauchbar sind. Erst innerhalb dieser Menge lässt sich eine definierte Aufwandsgröße vergleichen.}

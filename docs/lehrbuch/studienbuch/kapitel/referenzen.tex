@@ -29,6 +29,8 @@ Anhang A beginnt mit den vierzehn Referenzblättern zu den im Studiengang ausgew
 \hyperlink{refC20}{A.23 · C20 · Komplexe Produktionsanlage} & \pagelink{refC20}\\[2pt]
 \hyperlink{refC22}{A.24 · C22 · Warteschlangen mit Sonderregeln} & \pagelink{refC22}\\[2pt]
 \bottomrule\end{tabularx}\par}
+\subt{Welcher Nachweis zur Aufgabe passt}
+Bei einer numerischen Zielgröße bilden wir für jedes festgelegte Budget \(b_j>0\) den Quotienten \(|Q_j-Q_j^*|/b_j\). Das Maximum \(S\) darf höchstens eins sein. Ein fehlender Messwert oder eine falsche Ereigniskennung verhindert den Vergleich. Eine Besitz- oder Bestandsregel wird unmittelbar als erfüllt oder verletzt geprüft. Für zufällige Größen gehören Anzahl unabhängiger Replikationen, geschätzte Streuung und eine erklärte statistische Vergleichsregel zum Ergebnis. Wo veröffentlichte Rohdaten oder ein Budget fehlen, bleibt ein entsprechender numerischer Score offen.
 \srcs{\repocurrent{ARGESIM_COVERAGE.md}{Projektkatalog und Aufgabenregister} · \href{https://www.argesim.org/benchmarks}{ARGESIM-Übersicht}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refCP1}{A.1 · CP1 · Parallele Simulationstechniken}\ey{ANHANG A.1 · CP1}\ptitle{Parallele Simulationstechniken}
 \subt{1 · Phänomen und Leitfrage}
@@ -43,6 +45,7 @@ Vergleichen Sie serielles RK4 und die zerlegte Rechnung bei gleicher Schrittweit
 A, B, C und die Projektprüfung B-validate sind registriert. Die zehn Endwerte von B werden bei t=100 mit der Definition verglichen. Eine Laufzeitaussage braucht eine eigene Messung.
 \subt{6 · Diagnoseprotokoll}
 Reihenfolge der Parameter, Zahl der Prozesse, Kommunikationszeit und Komponentenfehler speichern. Ein schnellerer Lauf mit fehlenden Fällen ist unvollständig.
+\notebox{Gegenprobe zum Versuch}{Die zehn Endwerte von B gehören zu einem gemeinsamen Zeitstand. Prüfen Sie jede Population in derselben Reihenfolge und erst danach den Speed-up \(T_1/T_p\) mit \(p\) Prozessen. Erfasst der Timer bei der parallelen Rechnung auch den Aufbau und Datenaustausch? Für eine Verhältniszahl brauchen beide Zeiten dieselben Messgrenzen.}
 \srcs{\href{https://www.argesim.org/benchmarks/cp}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC01}{A.2 · C01 · Lithiumcluster unter Elektronenbeschuss}\ey{ANHANG A.2 · C01}\ptitle{Lithiumcluster unter Elektronenbeschuss}
 \subt{1 · Phänomen und Leitfrage}
@@ -57,6 +60,7 @@ Nehmen Sie die analytischen Gleichgewichtsbedingungen und die unabhängig transk
 A untersucht die Trajektorie und Laufzeit, B fünf Verlustparameter, C zwei stationäre Zustände. Die fünf Referenzverläufe und stationären Dymola-Werte stehen im Projektbericht.
 \subt{6 · Diagnoseprotokoll}
 Protokollieren Sie alle drei Komponenten, Anregung, Verlustparameter und Beobachtungszeit. Ein Fehler im stationären Zustand kann durch Überprüfen jeder einzelnen Bilanz eingegrenzt werden.
+\notebox{Gegenprobe zum Versuch}{Setzen Sie einen als stationär gemeldeten Dreiervektor nochmals in jede Bilanz ein. Ein kleiner Defekt prüft die Stationarität, ein Vergleich mit den beiden veröffentlichten Zuständen die Wahl des Gleichgewichts. Für fünf Abschalttrajektorien werden zusätzlich dieselbe Verlustkonstante, Abschaltzeit und Komponentenskalierung benötigt.}
 \srcs{\href{https://www.argesim.org/benchmarks/c01}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC03}{A.3 · C03 · Geschalteter Klasse-E-Verstärker}\ey{ANHANG A.3 · C03}\ptitle{Geschalteter Klasse-E-Verstärker}
 \subt{1 · Phänomen und Leitfrage}
@@ -68,9 +72,10 @@ Mikrosekunden und Sekunden zu verwechseln verändert das ganze Experiment. Ein S
 \subt{4 · Methodenvergleich}
 Die separate Matrixexponentialrechnung propagiert den idealen Schaltzustand. Klassische Integratoren und Quantisierer vergleichen ihre vier Komponenten mit dieser Referenz.
 \subt{5 · Aufgaben und Validierung}
-A, B und C betreffen die definierten Schaltfälle. Die 456er-Studie beobachtet vier Zustände nach 5 und 10 Mikrosekunden, mit Budget 0,001 mal Komponentenskala. Fünf von 57 Einstellungen bestehen.
+Die 456er-Studie beobachtet vier Zustände nach 5 und 10 Mikrosekunden, mit Budget 0,001 mal Komponentenskala. Fünf von 57 Einstellungen bestehen.
 \subt{6 · Diagnoseprotokoll}
 Prüfen Sie Schalterlogik und Halbperioden vor dem Solververgleich. Eine endliche Rampe braucht eine Referenz mit derselben Rampe.
+\notebox{Gegenprobe zum Versuch}{A prüft Eigenwerte für beide Schalterstellungen. B verfolgt den Idealschalter über 20 Halbperioden. C übernimmt den Endzustand von B als Start für endliche Flanken. Ein Start mit vier Nullen in C erzeugt eine andere Referenz. Im kurzen Zwei-Halbperioden-Raster erhält QSS2 bei Faktor \(10^{-3}\) den Score \(7{,}738\), RK45 rund \(1{,}06\cdot10^{-6}\).}
 \srcs{\href{https://www.argesim.org/benchmarks/c03}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC05}{A.4 · C05 · Steifes Zweizustandsmodell mit Hysterese}\ey{ANHANG A.4 · C05}\ptitle{Steifes Zweizustandsmodell mit Hysterese}
 \subt{1 · Phänomen und Leitfrage}
@@ -85,6 +90,7 @@ Vergleichen Sie den exakten Phasenfluss und die eingeklammerte Schaltzeit mit Ra
 Die Standardreferenz hat fünf Schaltungen im vollen Versuch, Aufgabe D hat 62. Das kurze 3,5-s-Fenster enthält drei. Im ursprünglichen Raster bestehen null von 57 Einstellungen.
 \subt{6 · Diagnoseprotokoll}
 Speichern Sie Schwelle, Richtung, beide Moduskennungen und Zustand unmittelbar am Übergang. Zu jedem Endfehler gehört die vorher überprüfte Ereignisfolge.
+\notebox{Gegenprobe zum Versuch}{Die Standardfolge, die Genauigkeitsvariation und D mit häufigen Ereignissen prüfen verschiedene Eigenschaften. Ein Kontrolllauf mit vertauschter Schaltreihenfolge scheitert vor dem Zahlenvergleich. Bei richtiger Reihenfolge lautet der Projektwert \(\max(\max_k|\delta t_k|/0{,}001,\max_i|\delta y_i|/0{,}006)\), Zeiten in Sekunden, im 3,5-s-Fenster.}
 \srcs{\href{https://www.argesim.org/benchmarks/c05}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC07}{A.5 · C07 · Stiftpendel}\ey{ANHANG A.5 · C07}\ptitle{Stiftpendel}
 \subt{1 · Phänomen und Leitfrage}
@@ -96,9 +102,10 @@ Ein falscher Längenfaktor am Reset verändert kinetische Energie. Kleine Phasen
 \subt{4 · Methodenvergleich}
 Hohe Genauigkeit der Winkelintegration, eine unabhängige DOP853-Rechnung sowie die kartesische Bindungsprüfung und RATTLE liefern unterschiedliche Kontrollen.
 \subt{5 · Aufgaben und Validierung}
-Die Aufgaben A, B und C sind registriert. Der Matrixfall A(i) bis 2 s verwendet 1 ms Zeitbudget und Komponentenbudgets für Winkel und Winkelgeschwindigkeit. 28 von 57 Einstellungen bestehen.
+Der Matrixfall A(i) bis 2 s verwendet 1 ms Zeitbudget und Komponentenbudgets für Winkel und Winkelgeschwindigkeit. 28 von 57 Einstellungen bestehen.
 \subt{6 · Diagnoseprotokoll}
 Nach jedem Kontakt Drehpunkt, Radius, Tangentialgeschwindigkeit und Bindungsfehler prüfen. Die Übung in Kapitel 13 unterscheidet Modellvereinfachung und Integrationsfehler.
+\notebox{Gegenprobe zum Versuch}{A vergleicht zwei vorgegebene Startfälle, B die lineare und die nichtlineare Pendelgleichung, C sucht eine Anfangswinkelgeschwindigkeit für die maximale Auslenkung \(-\pi/2\) am kurzen Faden. Ein passender Endwinkel nach zwei Sekunden löst dieses inverse Problem noch nicht. Prüfen Sie in C zusätzlich die Umkehrbedingung \(\omega=0\).}
 \srcs{\href{https://www.argesim.org/benchmarks/c07}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC09}{A.6 · C09 · Fuzzy-Regelung zweier Tanks}\ey{ANHANG A.6 · C09}\ptitle{Fuzzy-Regelung zweier Tanks}
 \subt{1 · Phänomen und Leitfrage}
@@ -113,6 +120,7 @@ Bei gleicher Reglerfunktion trennt ein DOP853-Vergleich den Integrationsfehler a
 Die Projektbefehle run und validate decken Reglervarianten und Figurenprüfungen ab. Im kurzen 16-Takt-Fenster bestehen 46 von 57 Einstellungen. Eines von drei Langzeit-Figurenfenstern trifft das vereinbarte Band.
 \subt{6 · Diagnoseprotokoll}
 Pegel und Stellwert an beiden Seiten jedes Takts sichern. Bei Abweichung zuerst den ersten unterschiedlichen Ventilwert finden.
+\notebox{Gegenprobe zum Versuch}{Ein Kontrollversuch löst beide Tankbilanzen mit genau demselben abgetasteten Regler. Eine zweite Kontrolle liest das zweite Niveau in veröffentlichten Kurven für P-FC und I-FC2 ab. Bei jeweils einem Zentimeter Ablesebudget ergeben die drei veröffentlichten Differenzen aus Kapitel 14 Beiträge von etwa \(2{,}986\), \(0{,}137\) und \(11{,}669\).}
 \srcs{\href{https://www.argesim.org/benchmarks/c09}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC11}{A.7 · C11 · SCARA-Roboter mit strombegrenzten Antrieben}\ey{ANHANG A.7 · C11}\ptitle{SCARA-Roboter mit strombegrenzten Antrieben}
 \subt{1 · Phänomen und Leitfrage}
@@ -127,6 +135,7 @@ Der kurze Neun-Zustände-Vergleich verwendet SciPy Radau mit identischer rechter
 A, B, C und main sind registriert. In der 0,1-ms-Matrixprüfung bestehen 52 von 57 Einstellungen. Eine unabhängige Vergleichstrajektorie für den ganzen begrenzten Betrieb bleibt offen.
 \subt{6 · Diagnoseprotokoll}
 Kommandierte und wirksame Antriebssignale, Stromgrenzen, Gelenkzustände und Zeitpunkt der Begrenzung protokollieren.
+\notebox{Gegenprobe zum Versuch}{A dokumentiert die Modellform und die Trägheitsterme, B die geregelte Punkt-zu-Punkt-Bewegung, C die Kollisionsvermeidung. Die neun Endgrößen bei \(0{,}1\) ms liegen vor der Strombegrenzung. Im kurzen Raster erreicht QSS2 bei Faktor \(10^{-3}\) einen Score von \(0{,}08517\). Ob der Arm später das Hindernis freihält, verlangt die eigene Bahnprüfung von C.}
 \srcs{\href{https://www.argesim.org/benchmarks/c11}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC12}{A.8 · C12 · Stoßprozesse in einer Kugelreihe}\ey{ANHANG A.8 · C12}\ptitle{Stoßprozesse in einer Kugelreihe}
 \subt{1 · Phänomen und Leitfrage}
@@ -141,6 +150,7 @@ Ein elastischer Test mit vier gleichen Massen besitzt eine analytische Folge. QS
 A, B und C enthalten auch die Bestimmung einer Stoßzahl und eine Verteilungsaufgabe. Im reduzierten Matrixfall bestehen 53 von 57 Einstellungen.
 \subt{6 · Diagnoseprotokoll}
 Zeit, beteiligte Kugeln, Abstand, Impuls und Energie vor und nach jedem Kontakt festhalten. Ein verfrühter zweiter Reset verändert die Reihenfolge.
+\notebox{Gegenprobe zum Versuch}{A liefert Weg-Zeit-Kurven und Endgeschwindigkeiten. B variiert die Stoßzahl und zählt Kollisionen. C sucht eine Stoßzahl aus einer Zielbedingung und untersucht die zufällige Streuung der Endgeschwindigkeit. Nur für den isolierten elastischen Matrixfall sind die sieben Zielgrößen unmittelbar \(1,2,3\) Sekunden und \(0,0,0,1\) Meter pro Sekunde.}
 \srcs{\href{https://www.argesim.org/benchmarks/c12}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC13}{A.9 · C13 · Portalkran mit eingebetteter Regelung}\ey{ANHANG A.9 · C13}\ptitle{Portalkran mit eingebetteter Regelung}
 \subt{1 · Phänomen und Leitfrage}
@@ -152,9 +162,10 @@ Eine falsche Pulsgrenze beeinflusst alle nachfolgenden Zustände. Die Bremslogik
 \subt{4 · Methodenvergleich}
 Die unabhängige affine Phasenrechnung kontrolliert klassische und quantisierte Integratoren für die lineare Aufgabe A. B und C stellen eigene Anforderungen.
 \subt{5 · Aufgaben und Validierung}
-A, B und C sind registriert. Im Raster für den Lastpuls \ensuremath{-}800 N werden fünf Zustände bei 4, 7 und 15 s beobachtet, zwei Einstellungen bestehen. Die veröffentlichte lineare Referenz umfasst drei Lasten.
+Im Raster für den Lastpuls \ensuremath{-}800 N werden fünf Zustände bei 4, 7 und 15 s beobachtet, zwei Einstellungen bestehen. Die veröffentlichte lineare Referenz umfasst drei Lasten.
 \subt{6 · Diagnoseprotokoll}
 Pulsrichtung, Kraft in Newton, Zustandsreihenfolge und beide Grenzzeiten prüfen. Ein passender Positionsendwert genügt für die Winkelgeschwindigkeit nicht.
+\notebox{Gegenprobe zum Versuch}{A prüft die offene lineare Fahrt mit Lastpuls. B betrachtet die geregelte Fahrt mit Haltebremse. C ergänzt die Diagnose und die verriegelnde Notbremsung. Ein Fehler im letzten Pulszustand wird beim Start der nächsten Phase übernommen. Prüfen Sie in A deshalb alle fünf Zustände an beiden Pulsgrenzen, in C zusätzlich Auslösezeit und Verriegelung.}
 \srcs{\href{https://www.argesim.org/benchmarks/c13}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC15}{A.10 · C15 · Clearance-Identifikation}\ey{ANHANG A.10 · C15}\ptitle{Clearance-Identifikation}
 \subt{1 · Phänomen und Leitfrage}
@@ -169,6 +180,7 @@ Die stückweise analytische Modelllösung kontrolliert die Integration. Die Para
 A verwendet dieselbe Eingangsmenge bei drei Dauern, B passt Parameter an die Messwerte an, C wiederholt die Schätzung an künstlichen Datensätzen. Die Matrix der 456 Einstellungen enthält C15 nicht.
 \subt{6 · Diagnoseprotokoll}
 Speichern Sie Eingangsmenge, Dauern, Messzeitpunkte, Anpassungsresiduen und Zufallsstartwert. Wiederholte Modellläufe ohne neue Messfehler prüfen eine andere Größe.
+\notebox{Gegenprobe zum Versuch}{In A ist die Eingangsmenge \(D=2500\) für die drei Dauern \(0{,}5,\ 3,\ 240\) gleich. Das Rechtecksignal hat Höhe \(D/\tau\) und Fläche \(D\). Wer die Höhe konstant lässt, ändert die Menge. Verfolgen Sie bei B das Residuum an den Messzeiten und bei C die Verteilung der Parameterschätzungen über die 1000 künstlichen Datensätze.}
 \srcs{\href{https://www.argesim.org/benchmarks/c15}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC17R}{A.11 · C17R · SIR-Dynamik mit ODE und zellulärem Automaten}\ey{ANHANG A.11 · C17R}\ptitle{SIR-Dynamik mit ODE und zellulärem Automaten}
 \subt{1 · Phänomen und Leitfrage}
@@ -183,6 +195,7 @@ Die deterministische Standardtrajektorie und die Streuung mehrerer reproduzierba
 Die Einträge task1, compare, ca und ode bilden die Projektzugänge. Die ODE-Referenz gilt für den Standardfall. Für den räumlichen Vergleich liegt ein veröffentlichter Einzelwert vor.
 \subt{6 · Diagnoseprotokoll}
 Prüfen Sie die Bilanz der Gesamtpopulation, die Anfangsbelegung, den Zufallsstartwert und die Zahl der Wiederholungen. Geben Sie bei stochastischen Resultaten die Streuung an.
+\notebox{Gegenprobe zum Versuch}{Für das betrachtete geschlossene, ohne Demografie formulierte Gruppenmodell muss sich die Summe der drei Zustände erhalten. Ein einzelner räumlicher Zufallslauf hat einen anderen Streubereich als eine deterministische ODE. Vergleichen Sie Wiederholungen nur bei derselben statistischen Zielgröße und geben Sie die Zahl der unabhängigen Läufe an.}
 \srcs{\href{https://www.argesim.org/benchmarks/c17r}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC19R}{A.12 · C19R · Transport im Grundwasser}\ey{ANHANG A.12 · C19R}\ptitle{Transport im Grundwasser}
 \subt{1 · Phänomen und Leitfrage}
@@ -197,6 +210,7 @@ Die Kontrollrechnung vergleicht die Brunnenkonzentration mit einer unabhängigen
 A, B und C untersuchen Profile und Behandlungsvarianten. Kapitel 15 nennt die Geometrie und die drei Messwerte der Reihe mit festen Rändern. Der Fall liegt außerhalb der 456er-Matrix.
 \subt{6 · Diagnoseprotokoll}
 Protokollieren Sie Masse pro Zeit, Positionen und Einheiten, Auswertezeit, kleinste Konzentration und Randflächen. Prüfen Sie, ob zwei Rechnungen tatsächlich dieselben Koordinaten beobachten.
+\notebox{Gegenprobe zum Versuch}{A bestimmt räumliche Konzentrationsprofile, B untersucht die kontinuierliche, C die zeitlich geschaltete Behandlung. Für das feste Quellgitter mit \(0{,}25\) m Zellweite beträgt der Brunnenbeitrag für das im Buch gewählte Ein-Prozent-Ziel rund \(1{,}97\). Eine Aussage über die Behandlungsaufgaben benötigt deren eigene Schaltzeiten und Messorte.}
 \srcs{\href{https://www.argesim.org/benchmarks/c19}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC21}{A.13 · C21 · Zustandsereignisse und strukturvariable Systeme}\ey{ANHANG A.13 · C21}\ptitle{Zustandsereignisse und strukturvariable Systeme}
 \subt{1 · Phänomen und Leitfrage}
@@ -211,6 +225,7 @@ Die Ballzeiten sind analytisch kontrollierbar. Bei der Schaltung vergleichen wir
 Projektaufgaben sind event-contact, dynamic-contact, pendulum-basic, pendulum-kick und rlc-diode. Die 456er-Matrix enthält nur das Ballfenster. Dort bestehen 36 von 57 Einstellungen.
 \subt{6 · Diagnoseprotokoll}
 Zeit, Modus, Richtung und Zustand beidseits des Kontakts sichern. Für die Schaltung kommen Astinformation, algebraisches Residuum und die 149 einzeln zugeordneten Wechsel hinzu.
+\notebox{Gegenprobe zum Versuch}{Beim freifliegenden Ball erhält im Raster jeder der ersten zwei Stöße ein Budget von \(1\) ms. Beim Diodenkreis haben Astzuordnung, Ereigniszeiten und algebraischer Defekt jeweils eine eigene Bedeutung. Die 149 im Protokoll übereinstimmenden Übergänge gehören zum 500-Mikrosekunden-Fenster der Schaltung.}
 \srcs{\href{https://www.argesim.org/benchmarks/c21}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refCP2}{A.14 · CP2 · Parallele und verteilte Simulation}\ey{ANHANG A.14 · CP2}\ptitle{Parallele und verteilte Simulation}
 \subt{1 · Phänomen und Leitfrage}
@@ -225,6 +240,7 @@ Vergleichen Sie serielle und parallele Algorithmen für dieselbe Aufgabe. Im erw
 Die drei offiziellen Fallnummern 1, 2 und 3 sind registriert. Trainings- und Testfelder, Lösungszeiten und Normen des Zusatzexperiments stehen in Kapitel 16. Ein FNO ist dort ein Projektvergleich.
 \subt{6 · Diagnoseprotokoll}
 Für die Kavität beide Komponenten und die Mittellinien, für die Saite exaktes Referenzfeld, Fehlerprofil und Symmetrie prüfen. Bei einer Beschleunigung die Kosten der Referenz und des Trainings separat angeben.
+\notebox{Gegenprobe zum Versuch}{1 untersucht Monte Carlo, 2 die Kavität, 3 die Saite. Vergleichen Sie für eine Beschleunigungsangabe serielle und parallele Rechnung derselben Aufgabe. Für den Feldvergleich der Saite braucht es dieselben festen Enden und Auswertezeiten. Bei der Kavität gehören Wandvorschrift, Reynolds-Zahl und Komponenten in den Vergleich.}
 \srcs{\href{https://www.argesim.org/benchmarks/cp}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC02}{A.15 · C02 · Flexible Montageanlage}\ey{ANHANG A.15 · C02}\ptitle{Flexible Montageanlage}
 \subt{1 · Phänomen und Leitfrage}
@@ -239,6 +255,7 @@ Serien identischer Auftragslast mit der gewählten Transportregel vergleichen, d
 main und study liefern Versuche zur Anlage. Elf CSIM-Lasten passen unter einer benannten Konvention. Drei Abweichungen zur Standard-SimEvents-Reihe sind dokumentiert.
 \subt{6 · Diagnoseprotokoll}
 Belegung, Reservierungen, Palettenbestand und jede Übergabe prüfen.
+\notebox{Gegenprobe zum Versuch}{Eine Palette kann sich im Transport, im Puffer oder in einer Station befinden. Ihre eindeutige Kennung darf zwischen zwei Journalzeiten weder verschwinden noch doppelt belegt sein. Für die drei abweichenden Lastfälle 13, 14 und 25 empfiehlt sich der erste unterschiedliche Übergabezeitpunkt als Ausgangspunkt.}
 \srcs{\href{https://www.argesim.org/benchmarks/c02}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC04}{A.16 · C04 · Speisende Philosophen}\ey{ANHANG A.16 · C04}\ptitle{Speisende Philosophen}
 \subt{1 · Phänomen und Leitfrage}
@@ -253,6 +270,7 @@ Vergleichen Sie Ereignisspuren unter gleicher Ordnung und anschließend untersch
 run, compare und refinements prüfen Gabelerhaltung, Reinigung und Wiederholung. Eine Übereinstimmung publizierter Fairness-Verteilungen bleibt offen.
 \subt{6 · Diagnoseprotokoll}
 Zu jedem Ereignis Eigentümer und freie Gabeln ausgeben.
+\notebox{Gegenprobe zum Versuch}{Eine Gabel hat zu einer Ereigniszeit genau einen zulässigen Zustand. Der Bestand über alle Zustände ist konstant. Diese ganzzahlige Prüfung entdeckt Doppelvergabe. Ob einzelne Teilnehmer selten essen, erfordert daneben die Wartezeit je Teilnehmer und eine Verteilung über mehrere Läufe.}
 \srcs{\href{https://www.argesim.org/benchmarks/c04}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC06}{A.17 · C06 · Notaufnahme und Folgebehandlung}\ey{ANHANG A.17 · C06}\ptitle{Notaufnahme und Folgebehandlung}
 \subt{1 · Phänomen und Leitfrage}
@@ -267,6 +285,7 @@ Gleiche Personalpolitik, Zeitfenster und Wiederholungszahl sind Voraussetzung f�
 A, B und C vergleichen drei Bedienpolitiken. Der Bericht stellt 21 Tagesgrößen einer publizierten STROBOSCOPE-Studie mit 100 Replikationen gegenüber.
 \subt{6 · Diagnoseprotokoll}
 Personenzahl zwischen Ankunft, Station und Abgang bilanzieren und Unsicherheit je Kennzahl nennen.
+\notebox{Gegenprobe zum Versuch}{Für jedes Tagesfenster gilt bei eindeutigen Personengrenzen Anfangsbestand plus Zugänge gleich Endbestand plus Abgänge. Zum externen Vergleich der 21 Größen gehören das gleiche Tagesfenster, die gleiche Bedienpolitik und die Stichprobenstreuung. Ein Einzelwert aus einer Replikation darf nicht als Mittelwert von 100 ausgegeben werden.}
 \srcs{\href{https://www.argesim.org/benchmarks/c06}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC08}{A.18 · C08 · Kanal und Schleuse}\ey{ANHANG A.18 · C08}\ptitle{Kanal und Schleuse}
 \subt{1 · Phänomen und Leitfrage}
@@ -281,6 +300,7 @@ Deterministische Referenzfolgen prüfen den Betrieb. Stochastische Ankünfte pr�
 replication und C führen die Versuche aus. Fünf veröffentlichte deterministische Datensätze sind hinterlegt.
 \subt{6 · Diagnoseprotokoll}
 Uhrzeit, Richtung, Warteschlangen und belegte Kapazität im Ereignisjournal prüfen.
+\notebox{Gegenprobe zum Versuch}{Ein Schiff belegt bei der Übergabe nur einen der zulässigen Orte. Führen Sie Einfahrt, Kammerbelegung und Ausfahrt mit derselben Schiffskennung zusammen. Prüfen Sie deterministische Fahrpläne zuerst mit ihren vorgegebenen Ereignissen. Bei Zufallsankünften gehört die Streuung zur mittleren Wartezeit.}
 \srcs{\href{https://www.argesim.org/benchmarks/c08}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC10}{A.19 · C10 · Speisende Philosophen II}\ey{ANHANG A.19 · C10}\ptitle{Speisende Philosophen II}
 \subt{1 · Phänomen und Leitfrage}
@@ -295,6 +315,7 @@ Vergleichen Sie gleiche Zugangsregeln und kontrollieren Sie zusätzlich die Wart
 A und B umfassen Priorität bei simultanem Zugang und eine Studie mit 50 Läufen. Vergleichbare veröffentlichte Wartezeitverteilungen bleiben offen.
 \subt{6 · Diagnoseprotokoll}
 Ereignisfolge und Eigentumsinvarianten sowie den Endgrund jedes Laufs sichern.
+\notebox{Gegenprobe zum Versuch}{Wer bei simultanem Zugriff die erste Gabel erhält, kann die gesamte Fortsetzung beeinflussen. Spielen Sie die gleiche Anfragefolge mit denselben Prioritäten erneut ab. Eine Verklemmung ist ein kategorischer Ausgang. Einen solchen Lauf als Wartezeit null zu zählen, würde den Durchschnitt verkleinern.}
 \srcs{\href{https://www.argesim.org/benchmarks/c10}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC14}{A.20 · C14 · Lieferkette}\ey{ANHANG A.20 · C14}\ptitle{Lieferkette}
 \subt{1 · Phänomen und Leitfrage}
@@ -309,6 +330,7 @@ Vergleichen Sie Bestellpolitiken mit gleicher Nachfrage und derselben Definition
 A1 bis C2 untersuchen Tagesbestände sowie 30-Tage-Kosten und Lieferungen. Referenzvarianten sind im Projektbericht benannt.
 \subt{6 · Diagnoseprotokoll}
 Bestand, offene Aufträge und Transitmengen getrennt buchen.
+\notebox{Gegenprobe zum Versuch}{Buchen Sie für jedes Lager den Tagesendbestand als Anfangsbestand plus erhaltene Lieferungen minus tatsächlich versandte Menge. Eine offene Bestellung ist noch kein Wareneingang. Identische Gesamtkosten können Verspätungen einzelner Lieferungen verdecken. Die Tagesprotokolle aus D1 erlauben, die erste Abweichung zu finden.}
 \srcs{\href{https://www.argesim.org/benchmarks/c14}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC16}{A.21 · C16 · Restaurantdynamik}\ey{ANHANG A.21 · C16}\ptitle{Restaurantdynamik}
 \subt{1 · Phänomen und Leitfrage}
@@ -320,9 +342,10 @@ Zufallsreihung und Zeitkonvention können sich über Jahre verstärken.
 \subt{4 · Methodenvergleich}
 Mehrere Replikationen und veröffentlichte Vergleichsstudien liefern unterschiedliche Kontrollen der Endgröße.
 \subt{5 · Aufgaben und Validierung}
-A, B und C sind registriert. Die Restaurantzahl im fünften Jahr wird mit zwei publizierten Studien verglichen.
+Die Restaurantzahl im fünften Jahr wird mit zwei publizierten Studien verglichen.
 \subt{6 · Diagnoseprotokoll}
 Anfangsbestand, Ein- und Austritte, Stichprobenumfang und Streuung festhalten.
+\notebox{Gegenprobe zum Versuch}{A verlangt Zeitverläufe über ein, fünf und zehn Jahre und den Mittelwert nach fünf Jahren aus 50 Läufen. B variiert den Steuersatz und betrachtet das Steueraufkommen. C variiert den Dichteparameter für die Standortwahl und betrachtet den Erlös neuer Restaurants. Vergleichen Sie diese drei Zielgrößen getrennt.}
 \srcs{\href{https://www.argesim.org/benchmarks/c16}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC18}{A.22 · C18 · Identifikation nichtlinearer Dynamik}\ey{ANHANG A.22 · C18}\ptitle{Identifikation nichtlinearer Dynamik}
 \subt{1 · Phänomen und Leitfrage}
@@ -337,6 +360,7 @@ Die synthetische Rechenprobe und rekonstruierte Abbildung prüfen Implementierun
 Der Eintrag all führt die Algorithmen aus. Die ursprünglichen beiden 100-Hz-Messreihen stehen für die offizielle Datenvalidierung weiterhin aus.
 \subt{6 · Diagnoseprotokoll}
 Herkunft jeder Eingabe, Trennstelle, Skalierung und Initialisierung der freien Prognose dokumentieren.
+\notebox{Gegenprobe zum Versuch}{Bei einer Einschrittprognose darf der vorige Messwert Eingang sein. In der freien Simulation muss an derselben Stelle die eigene frühere Vorhersage stehen. Berichten Sie daher beide Fehler mit Zeitfenster und Datensatz. Für die fehlenden Originalmessreihen ist ein numerischer Zielscore zur offiziellen Datenreihe nicht bestimmbar.}
 \srcs{\href{https://www.argesim.org/benchmarks/c18}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC20}{A.23 · C20 · Komplexe Produktionsanlage}\ey{ANHANG A.23 · C20}\ptitle{Komplexe Produktionsanlage}
 \subt{1 · Phänomen und Leitfrage}
@@ -351,6 +375,7 @@ Ein unabhängiges Nachspielen der Transportspur kontrolliert Reihenfolge, Kapazi
 replication und experiment umfassen die Produktionsstudie. Der veröffentlichte Projektversuch nutzt drei erzeugte Auftragsbücher, 360 Läufe und 36 ausführliche Replay-Prüfungen.
 \subt{6 · Diagnoseprotokoll}
 Eingangsbuch, Fehlerrealisierung, Replikationsindex, Teilenummer, Ein- und Ausgang abgleichen.
+\notebox{Gegenprobe zum Versuch}{Ein Teil, das nachgearbeitet wird, bleibt im System. Es als neues Teil zu zählen erzeugt scheinbar höheren Durchsatz. Vergleichen Sie zwei Anlagenvarianten bei identischem Auftragsbuch und passenden Störungsrealisierungen paarweise. Die hier verwendeten drei erzeugten Auftragsbücher begrenzen die Reichweite des Vergleichs.}
 \srcs{\href{https://www.argesim.org/benchmarks/c20}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}
 \seite{Referenzblatt}{Anhang A}\anchorpage{2}{refC22}{A.24 · C22 · Warteschlangen mit Sonderregeln}\ey{ANHANG A.24 · C22}\ptitle{Warteschlangen mit Sonderregeln}
 \subt{1 · Phänomen und Leitfrage}
@@ -365,4 +390,5 @@ Gleiche Ankunftsfolgen und Regeln erlauben deterministische Gegenproben zu den p
 basic, jockeying, reneging und classing sind registriert. Wartezeiten für Wechsel, Abbruch und Klassen besitzen publizierte Referenzen.
 \subt{6 · Diagnoseprotokoll}
 Ankünfte gleich bediente, abgebrochene und verbliebene Kunden setzen und die bisherige Wartezeit beim Wechsel konsistent fortführen.
+\notebox{Gegenprobe zum Versuch}{Beim Schlangenwechsel endet der bisherige Warteabschnitt, die Kundenidentität bleibt erhalten. Für die Zeit bis zum Bedienbeginn müssen alle Abschnitte addiert werden. Kunden mit Abbruch erhalten einen eigenen Ausgang. Eine mittlere Wartezeit benötigt die ausdrücklich bezeichnete Grundgesamtheit und das gleiche Beobachtungsfenster.}
 \srcs{\href{https://www.argesim.org/benchmarks/c22}{ARGESIM, Definition und Referenzen} · \repocurrent{ARGESIM_COVERAGE.md}{Aufgaben und Prüfstand im Projekt}.}

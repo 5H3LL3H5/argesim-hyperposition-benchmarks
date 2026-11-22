@@ -32,6 +32,7 @@ def material_files():
 def source_digest(material):
     files = [Path(__file__).resolve(), ROOT / 'scripts' / 'c19_profiles.py', EVIDENCE, *SOURCE.rglob('*.tex'),
              *(SOURCE / 'abbildungen').glob('*.pdf'), *material]
+    files.append(ROOT / 'scripts' / 'lehrbuch_verfahrensbilder.py')
     studies = ROOT / 'scripts' / 'cp2_accuracy'
     files.extend(p for p in studies.iterdir() if p.suffix in {'.py', '.cpp'})
     experiments = ROOT / 'argesim_benchmarks' / 'experiments'

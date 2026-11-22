@@ -635,6 +635,19 @@ Rückwärts Euler hat \(R(z)=1/(1-z)\). Für \(\operatorname{Re}z\le0\) gilt \(|
 
 Steifheit wird praktisch sichtbar, wenn ein explizites Verfahren wegen der Stabilität viel kleinere Schritte benötigt, als die geforderte Auflösung der interessierenden Dynamik nahelegt. Ein großer Eigenwertquotient ist ein Hinweis. Eingangssignal, Zeitfenster, nichtorthogonale Eigenrichtungen und Fehlerziel beeinflussen die tatsächliche Rechnung.
 \srcs{\refbk{stiff}{Hairer und Wanner, Band II} · \see{arg}{Stabilitätsgrenze im Schaltmodell C05}.}
+\lektion{Wie lange wirkt ein Fehler im Anfangswert nach?}{pruefung1}{Herleitung und Gegenprobe}{Kapitel 1}
+Zwei Temperaturfühler beobachten denselben Körper. Beim Einschalten zeigt einer um \(0{,}1\unitm K\) mehr an. Sollen wir bei jeder weiteren Messung mit derselben Abweichung rechnen? Die Antwort hängt davon ab, wie das Vektorfeld zwei benachbarte Zustände bewegt. Das lässt sich untersuchen, bevor man ein Zeitverfahren gewählt hat.
+
+Beide Lösungen \(u,v\) seien auf demselben Zeitintervall im Gebiet, in dem \(f\) bezüglich des Zustands die Lipschitz-Konstante \(L\) hat. Aus den Integralgleichungen folgt durch Subtraktion und die Dreiecksungleichung für \(d(t)=\|u(t)-v(t)\|\)
+\[
+ d(t)\le d_0+L\int_0^t d(s)\,\mathrm ds=:w(t).
+\]
+Hier ist \(d_0=d(0)\). Die rechte Seite ist leichter zu behandeln als der Abstand selbst. Ihre Ableitung ist \(w'=Ld\le Lw\). Nach der Produktregel ist daher die Ableitung von \(e^{-Lt}w(t)\) kleiner oder gleich null. Bei \(t=0\) ist \(w(0)=d_0\). Folglich gilt \(d(t)\le w(t)\le d_0e^{Lt}\). Für gleiche Anfangsdaten ergibt sich Eindeutigkeit.
+
+Beim Abkühlen gemäß \(T'=-k(T-T_U)\) gilt sogar \((u-v)'=-k(u-v)\). Für \(k=2\unitm{s^{-1}}\) bleiben nach einer Sekunde nur \(0{,}1e^{-2}=0{,}01353\unitm K\) übrig. Die allgemeine Normabschätzung mit \(L=2\unitm{s^{-1}}\) erlaubt bis zu \(0{,}739\unitm K\). Das Minuszeichen der Rückkopplung ging beim Übergang zum Betrag verloren.
+\notebox{Gegenprobe im Phasenbild}{Zeichnen Sie Temperatur waagerecht und \(T'\) senkrecht. Die Gerade fällt durch \(T_U\). Rechts davon zeigen die Zeitpfeile zu kleineren, links davon zu größeren Temperaturen. Eine auseinanderlaufende Rechnung bei gleichen Umgebungsdaten legt hier einen Fehler im Vorzeichen oder einen zu großen expliziten Schritt nahe.}
+\srcs{\see{abs1-2}{Anfangswertprobleme und Konditionierung} · \see{abs1-3}{Stabilität des diskreten Schritts}.}
+
 \lektion{Zwei Zonen im Modelltest}{alg1}{Werkstatt}{Kapitel 1}
 Bevor der Solver einen einzigen Schritt macht, prüfen wir seine Eingabe. Die rechte Seite muss den Wärmefluss zwischen den Zonen mit entgegengesetztem Vorzeichen verbuchen. Andernfalls kann sie in einem abgeschlossenen Paar Energie erzeugen.
 {\small\begin{verbatim}

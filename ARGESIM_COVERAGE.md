@@ -59,7 +59,7 @@ come from the runner registry. Each evidence note identifies the measured case.
 | C12 | `A`, `B`, `C` | Inverse restitution and the Dymola distribution of terminal speeds. |
 | C13 | `A`, `B`, `C` | Linear Task A endpoints validated at three loads. B/C holding and emergency brake logic tested. [C13R evidence](docs/C13_REFERENCE_ANALYSIS.md) |
 | C14 | `A1`, `A2`, `B1`, `B2`, `C1`, `C2` | D1 stock histories and 30-day cost and delivery studies. [Reference variants](docs/C14_VALIDATION.md) |
-| C15 | `A`, `B`, `C` | Three bolus masses, Task B fit and a 1,000-sample parameter experiment. |
+| C15 | `A`, `B`, `C` | Equal bolus dose at three infusion durations, Task B fit and a 1,000-sample parameter experiment. |
 | C16 | `A`, `B`, `C` | Year-five restaurant count compared with two published studies. [Validation scope](docs/C16_VALIDATION.md) |
 | C17R | `task1`, `compare`, `ca`, `ode` | Default ODE trajectories validated. The spatial FHP-I comparison uses a published single-run statistic. [C17R results](docs/PUBLISHED_REFERENCE_CHECKS.md#c17r-default-ode-and-spatial-comparison) |
 | C18 | `all` | ARX, static and recurrent networks implemented. Figure reconstruction executable. Original training and validation recordings missing. [Provenance](docs/C18_FIGURE_RECONSTRUCTION.md) |
