@@ -149,9 +149,14 @@ All grids have centres spanning x = −4…12 m and y = −4…4 m. With RK4 and
 7200 s step, the concentrations are 48,677.18, 48,251.10 and 45,440.70 mg/m³
 at grid spacings 1, 0.5 and 0.25 m. The independent infinite-plane integral
 gives 45,021.62 mg/m³. Halving only the time step on the 0.5 m grid changes
-the concentration by 0.00233 mg/m³. This comparison quantifies the spatial
-error at one interior point. The treatment disks and the breakthrough profile
-at 50 m are separate cases. Run `python scripts/c19_profiles.py --mesh-study`.
+the concentration by 0.00233 mg/m³. The physical outer faces move with the spacing because the outer cell
+centres are fixed. The infinite-plane difference includes the finite-domain
+and spatial-discretization effects at one point. Run
+`python scripts/c19_profiles.py --mesh-study` for the archived experiment.
+Run `python -m scripts.cp2_accuracy.transport_check --fixed-faces` for the
+repeat on three grids with identical faces, conservative bilinear deposition
+and bilinear well sampling. The treatment disks and the breakthrough profile
+at 50 m are separate cases.
 
 COMSOL Figure 2 shows a day-50 peak near 7.6. Figure 6 shows roughly 5,200 mg/m³ for continuous treatment and a weekly oscillation around 7,300 mg/m³. The 1 m grid gives 5,564 mg/m³ for continuous treatment at day 100. The scheduled calculation spans 7,578–7,938 mg/m³ over the preceding week. Values read from the figures are approximate. [COMSOL study, p. 80](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C19/C19R-solution-COMSOL.pdf)
 

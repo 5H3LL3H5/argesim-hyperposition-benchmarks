@@ -1,6 +1,6 @@
 """Kurze numerische Kontrollen für die Kapitelaufgaben des Studienbuchs.
 
-python kapitelproben.py       # alle zwölf Kapitel
+python kapitelproben.py       # alle dreizehn Aufgabenblätter
 python kapitelproben.py 5     # nur das RC-Beispiel
 
 Benötigt nur die Python-Standardbibliothek. Jede Probe verwendet die Einheiten
@@ -152,11 +152,19 @@ def schnelle_mode():
     return f"Zeit bis 1/e: {zeit_1e_us:g} µs; bis auf 1 %: {zeit_prozent_us:.2f} µs"
 
 
+def pruefe_kontaktzeiten(zeiten, erwartete_zeiten, toleranz):
+    if len(zeiten) != len(erwartete_zeiten):
+        raise ValueError("Falsche Ereigniszahl")
+    score = max(abs(t - soll) / toleranz for t, soll in zip(zeiten, erwartete_zeiten))
+    if not all(math.isfinite(t) for t in zeiten) or score > 1:
+        raise ValueError(f"Kontakttoleranz verfehlt: Score {score:.6g}")
+    return score
+
+
 def kugelstoss():
     spalte = [0.4, 1.1-0.4]
     t1, t2 = spalte[0]/1, sum(spalte)/1
-    nahe(t1, 0.4)
-    nahe(t2, 1.1)
+    pruefe_kontaktzeiten((t1, t2), (0.4, 1.1), 0.001)
     summe, differenz = 1, 0.5
     links = (summe-differenz)/2
     rechts = (summe+differenz)/2
@@ -236,7 +244,7 @@ PROBEN = (zustand, feder, heizer, zeitintegration, schaltung, waerme, schalten,
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("kapitel", type=int, nargs="?", choices=range(1,len(PROBEN)+1))
+    parser.add_argument("kapitel", metavar="BLATT", type=int, nargs="?", choices=range(1,len(PROBEN)+1))
     args = parser.parse_args()
     for nummer, probe in enumerate(PROBEN,1):
         if args.kapitel is None or args.kapitel == nummer:

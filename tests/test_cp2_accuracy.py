@@ -1,6 +1,10 @@
 """Independent regressions for the structure-aware CP2 operators."""
 
 import importlib.util
+import shutil
+import subprocess
+import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -64,6 +68,35 @@ class FieldTests(unittest.TestCase):
         np.testing.assert_allclose(a.pluck(x, 0.5 / (2 * 0.06), 0.5), 0, atol=1e-15)
         with self.assertRaises(ValueError):
             a.pluck(x, 0, 0)
+
+    def test_lab_commands_reject_modified_rope_fields(self):
+        import numpy as np
+
+        cases = (
+            ("cp2_feldlabor", "rope/rope-501-fields.npz", "fno", 0, "außerhalb"),
+            (
+                "cp2_genauigkeit",
+                "saite_beispiel.npz",
+                "ref",
+                2,
+                "Not equal to tolerance",
+            ),
+        )
+        for lab, file, key, scale, diagnostic in cases:
+            with self.subTest(lab=lab), tempfile.TemporaryDirectory() as tmp:
+                copy = Path(tmp) / lab
+                shutil.copytree(MAT.parent / lab, copy)
+                command = [sys.executable, str(copy / "auswerten.py")]
+                original = subprocess.run(command, capture_output=True, text=True, check=False)
+                self.assertEqual(original.returncode, 0, original.stderr)
+                path = copy / file
+                with np.load(path, allow_pickle=False) as data:
+                    arrays = {name: data[name] for name in data.files}
+                arrays[key] *= scale
+                np.savez_compressed(path, **arrays)
+                result = subprocess.run(command, capture_output=True, text=True, check=False)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(diagnostic, result.stderr)
 
 
 @unittest.skipUnless(NEURAL, "requires the operators extra")

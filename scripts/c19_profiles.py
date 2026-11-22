@@ -51,7 +51,7 @@ def infinite_plane(x: float, y: float, time: float) -> float:
 
 
 def mesh_study() -> list[dict]:
-    """Compare the same Task A point and domain while varying space or time."""
+    """Repeat the archived Task A runs with fixed outer centers, not fixed faces."""
     end = 10 * DAY
     reference = infinite_plane(5, 0, end)
     rows = []
@@ -60,7 +60,11 @@ def mesh_study() -> list[dict]:
         run = solve_c19("rk4", nx=nx, ny=ny, dx=spacing, dy=spacing,
                         x_offset=-4., y_offset=-4., t_bound=end, options={"step": step})
         value = run.final_state[round(4 / spacing) * nx + round(9 / spacing)]
+        half = spacing / 2
+        faces = [-4 - half, 12 + half, -4 - half, 4 + half]
         rows.append({"spacing_m": spacing, "step_s": step, "concentration": value,
+                         "outer_faces_west_east_south_north_m": faces,
+                         "point_source_m": [0, 0], "well_m": [5, 0], "time_s": end,
                          "infinite_plane": reference, "absolute_error": abs(value - reference)})
     return rows
 

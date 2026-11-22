@@ -1,0 +1,150 @@
+\seite{}{C19R · Grundwasser}\anchorpage{1}{neu15}{15 · C19R – Schadstofftransport im Grundwasser}\ey{KAPITEL 15}\ptitle{C19R – Schadstofftransport im Grundwasser}
+Ein Brunnen misst eine Konzentration. Verdoppelt sich diese Zahl nach einer Gitteränderung, kann das am Transport liegen, aber auch schlicht daran, dass die Quelle plötzlich mehr Masse einspeist. Welche Größen muss man festhalten, bevor eine Verfeinerungsreihe etwas über den Raumfehler aussagt?
+\par\textsf{\bfseries\color{sea}Phänomen und Leitfrage.} Die Strömung trägt Stoff mit, Dispersion verbreitert die Fahne. Ein Brunnen ist ein lokaler Beobachter. Er reagiert empfindlicher auf eine verschobene Quelle als eine gebietsweite Gesamtmenge.
+\par\textsf{\bfseries\color{sea}Modellbildung.} Eine Bilanz hat bei konstanten Koeffizienten die Form \(c_t+u\cdot\nabla c=\nabla\cdot(D\nabla c)+s\) mit dem zum Versuch gehörenden Abbau oder Behandlungsterm, sofern aktiv. Aus den Raumflüssen entsteht ein gekoppeltes Zeitproblem. Ein Fünf-Punkte-Operator verbindet nur benachbarte Zellen und ermöglicht dünn besetzte Jacobi-Matrizen.
+\par\textsf{\bfseries\color{sea}Numerischer Härtefall.} Quellzelle und Messort verschieben sich leicht um eine halbe Zelle. Bei gleicher Gesamtquellrate steigt die volumenbezogene Rate auf feineren Gittern. Ändern sich Außenflächen zusätzlich, enthält der Vergleich einen Geometrieeffekt.
+\par\textsf{\bfseries\color{sea}Methodenvergleich.} Auf festem Raumgitter trennt eine Zeitschrittfolge zeitliche von räumlichen Änderungen. Das Labor ergänzt eine Serie mit festen Außenflächen und bilinear verteilter Quelle. Eine unabhängige Integraldarstellung liefert unter ihren Modellannahmen eine zusätzliche Kontrolle am Brunnen.
+\par\textsf{\bfseries\color{sea}Aufgaben und Akzeptanz.} Die Aufgaben A, B und C behandeln Profile sowie kontinuierliche und geschaltete Behandlung. Im dokumentierten Quellversuch bleiben nach zehn Tagen die Massenrate 2 mg/s und der Messort \((5,0)\) m gleich. Bei 1, 0,5 und 0,25 m Rasterweite entstehen rund 48\,677, 41\,472 und 44\,134 mg/m³. Die nichtmonotone Reihe trägt keine einfache beobachtete Konvergenzordnung.
+\par\textsf{\bfseries\color{sea}Diagnose.} Pro Lauf gehören Außenflächen, Quellmassensumme, Messgewichte, Minimum der Konzentration und getrennte Fehlertabellen ins Journal. Der C19R-Versuch gehört zu den räumlichen Untersuchungen außerhalb der 456-Konfigurationen-Matrix.
+\seite{Rechenbeispiel}{C19R · Grundwasser}\anchorpage{2}{kap11}{C19R · Wann erreicht ein Stoff den Sensor?}\ptitle{C19R · Wann erreicht ein Stoff den Sensor?}
+
+
+\lernziel{Sie können aus einem Wasser- und Stoffvolumen eine Konzentration berechnen, die Transportzeit abschätzen und räumlichen Fehler von Zeit- und Randfehler unterscheiden.}
+Eine Messstelle liegt fünf Meter stromabwärts. Das Grundwasser bewegt sich im Modell mit \(0{,}864\unitm{m/Tag}\). Eine Kollegin hält fest, der Sensor zeige am Tag \(5/0{,}864\) erstmals einen Stoffeintrag an. Welcher Teil dieser Aussage lässt sich aus den beiden Zahlen wirklich ableiten?
+\subt{Eine Überschlagsrechnung mit geklärter Bedeutung}
+Ein mit der mittleren Strömung bewegtes Wasserpaket benötigt \(5/0{,}864\approx5{,}79\) Tage für diese Strecke. Das Modell C19R beschreibt außerdem eine räumliche Ausbreitung um diesen Transportweg. Für den ersten messbaren Ausschlag braucht man die Konzentration am Sensor und dessen Nachweisgrenze. Die reine Reisezeit liefert keine von beiden.
+\subt{Eine zweite Rechnung prüft die Quelle}
+In einem Rechenfeld von \(1\unitm{m^2}\) Fläche und \(10\unitm m\) Schichtdicke nimmt Wasser ein Viertel des Volumens ein. Es enthält damit \(2{,}5\unitm{m^3}\) Wasser. Ein Eintrag von \(2\unitm{mg/s}\) bewirkt allein durch die Quelle \(0{,}8\unitm{mg/(m^3\,s)}\) Konzentrationszuwachs. Transport in Nachbarzellen kommt gesondert hinzu.
+\notebox{Jetzt Sie}{Halbieren Sie die Seitenlänge der quadratischen Zelle. Beim erneuten Multiplizieren von lokaler Konzentrationsrate und neuem Wasservolumen müssen wieder \(2\unitm{mg/s}\) herauskommen. Diese Probe funktioniert auch, wenn keine exakte Konzentration an der Messstelle bekannt ist.}
+Der Laborauftrag vergleicht einen festen Zeitpunkt am festen Ort. Zu einer Behauptung über ein ganzes Konzentrationsfeld wären weitere Messgrößen nötig.
+
+\srcs{\textbf{Kernweg}\enspace\see{c19}{Quellbilanz}\quad\textbf{Vertiefung}\enspace\see{c19integral}{Integral als Referenz}\quad\see{ueb11}{Selbst prüfen}.}
+
+\lektion{C19R · Wie erreicht ein Schadstoff die Messstelle?}{c19}{Labor}{C19R}
+\vorhersage{11}{Beide Zellbreiten halbieren sich, der Massenstrom einer Punktquelle bleibt gleich. Was ändert sich in der Quellzelle?}{kontrolleB}
+Ein Sensor liegt fünf Meter stromabwärts einer ortsfesten Quelle. Der Laborauftrag fragt nach der Konzentration am zehnten Tag. Die Grundwasserschicht sei anfangs sauber und im betrachteten Fall homogen. Die Aufbereitungsanlage bleibt ausgeschaltet. Andere Sensoren, Zeitpunkte und Betriebsarten der offiziellen Aufgabenfamilie ergeben eigene Versuche.
+\subt{Aus Volumen, Masse und Flüssen wird die Gleichung}
+Wir mitteln über eine Schicht konstanter Dicke \(b\). Ein Bodenstück mit Grundfläche \(\Delta A\) enthält bei wassergefüllter Porosität \(\eta\) das Wasservolumen \(\eta b\,\Delta A\). Seine gespeicherte Stoffmasse ist näherungsweise \(\eta b\,c\,\Delta A\), wobei \(c\) die Konzentration pro Wasservolumen bezeichnet. Der mittlere Wassertransport nimmt Stoff mit der Geschwindigkeit \(\mathbf v=(v,0)\) mit. Die mechanische Dispersion verteilt ihn in Richtung fallender Konzentration. Daher ist der Fluss pro wasserführender Fläche \(\mathbf j=\mathbf v c-D\nabla c\).
+
+Die Stoffbilanz lautet Eintrag minus Nettostoffstrom nach außen. Für einen festen Gebietsausschnitt \(A\) mit der Quelle in seinem Inneren folgt
+\[
+ \frac{\dd}{\dd t}\int_A\eta b\,c\,\mathrm dA
+   =\dot m-\int_{\partial A}\eta b\,\mathbf j\cdot\mathbf n\,\mathrm ds .
+\]
+\(\partial A\) bezeichnet die Randlinie und \(\mathbf n\) die äußere Einheitsnormale. Liegt die Quelle außerhalb dieser Fläche, entfällt \(\dot m\). Im Inneren quellenfreier Teilgebiete folgt für die konstanten Koeffizienten \(c_t+v c_x=D(c_{xx}+c_{yy})\).
+\subt{Zwei Modelle für denselben Prüfpunkt}
+Die analytische Vergleichsrechnung nimmt eine unendliche Ebene und fern der Quelle abklingende Konzentration an. Die Gitterrechnung nutzt ein begrenztes Rechteck. Ihre äußeren Nachbarwerte werden für den dispersiven Anteil aus der Randzelle fortgesetzt, sodass der Normalgradient verschwindet. Der konvektive Randtransport bleibt in der Bilanz. In der Quellzelle trägt \(\dot m/(\eta b\Delta A)\) Konzentration pro Zeit ein. Die Halbierung beider Gitterweiten vervierfacht diese lokale Rate bei gleicher eingetragener Masse.
+\srcs{\href{https://www.argesim.org/benchmarks/c19}{ARGESIM C19R, Aufgabendefinition} · \repo{argesim_benchmarks/models/c19_groundwater.py}{Kontrollvolumen, Quellzelle und Randflüsse}.}
+
+\lektion{Labor C19R · Einen Kontrollwert unabhängig berechnen}{c19integral}{Vertiefung}{C19R}
+Wir verwenden Aufgabe A ohne Aufbereitung. In einer homogenen Schicht von \(b=10\unitm m\) und Porosität \(\eta=0{,}25\) setzt eine ortsfeste Quelle ab \(t=0\) konstant \(\dot m=2\unitm{mg/s}\) frei. Die Porosität ist der wassergefüllte Volumenanteil. Für diesen Fall sind die Dispersivitäten in beiden Richtungen \(\alpha=0{,}05\unitm m\). Bei \(v=10^{-5}\unitm{m/s}\) ergibt das \(D=\alpha v=5\cdot10^{-7}\unitm{m^2/s}\). Es gilt der Geschwindigkeitswert aus Tabelle 1 der Definition, entsprechend \(0{,}864\unitm{m/Tag}\).
+\subt{Vom einzelnen Stoffimpuls zur Dauerquelle}
+Ein einzelner Punktimpuls verteilt sich auf der unendlichen Ebene als verschobene zweidimensionale Gaußglocke. Für sein Alter \(a>0\) ist die normierte räumliche Dichte
+\[
+ K(x,y,a)=\frac{1}{4\pi D a}
+       \exp\!\left(-\frac{(x-va)^2+y^2}{4Da}\right).
+\]
+Ihr Mittelpunkt liegt bei \(va\), ihre Varianz pro Koordinate ist \(2Da\). Die über die Fläche integrierte Dichte ist eins. Ein Altersintervall \(\dd a\) trägt die Stoffmasse \(\dot m\dd a\) bei. Division durch \(\eta b\) rechnet Flächenmasse in Konzentration im Porenwasser um. Addition aller Altersbeiträge liefert
+\[
+ c(x,y,t)=\frac{\dot m}{\eta b}\int_0^t K(x,y,a)\dg a .
+\]
+\minifig{c19impuls}{35mm}{Längsschnitte desselben Impulses nach zwei, fünf und acht Tagen. Die Höhe sinkt und der Schwerpunkt wandert. Die Messstelle liegt bei \(x=5\unitm m\).}
+Für \(t=10\) Tage, \(x=5\unitm m,\ y=0\) ergibt direkte Quadratur \(45\,021{,}6231\unitm{mg/m^3}\). Das Skript integriert über den dimensionslosen Altersanteil \(a/t\). Verschärfung seiner relativen Quadraturtoleranz von \(10^{-8}\) auf \(10^{-12}\) verändert die gerundeten Stellen nicht. So entsteht ein Kontrollwert ohne Raumnetz.
+\srcs{\texttt{python labor.py c19r} · \repo{docs/PUBLISHED_REFERENCE_CHECKS.md\#c19r-spatial-and-time-accuracy}{Parameterwahl und Vergleich der unabhängigen Punktquellenrechnungen}.}
+
+\lektion{C19R · Was die Gitterverfeinerung bewirkt}{c19gitter}{Labor}{C19R}
+Die archivierte Rechnung misst nach zehn Tagen bei \((5,0)\unitm m\) mit RK4 und \(7200\unitm s\). Die Quelle liegt bei \((0,0)\unitm m\) und liefert \(2\unitm{mg/s}\). Das grobe, mittlere und feine Gitter enthalten \(17\cdot9=153\), \(33\cdot17=561\) und \(65\cdot33=2145\) Zellzentren. Die gesamte Quelle bleibt jeweils einer Zelle zugeordnet. Verglichen wird mit dem unabhängig berechneten Wert für die unendliche Ebene.
+{\tblstart\begin{tabularx}{\linewidth}{@{}Yrr@{}}\toprule
+\hd{Gitterweite \(\Delta x\)}&\hd{\(c\) [mg/m³]}&\hd{absolute Differenz [mg/m³]}\\\midrule
+1,00 m &48\,677,18&3\,655,56\\
+0,50 m &48\,251,10&3\,229,48\\
+0,25 m &45\,440,70&419,08\\\bottomrule
+\end{tabularx}\par}
+Alle drei archivierten Läufe verwenden RK4 mit \(7200\unitm s\). Auf dem mittleren Gitter ändert die Halbierung des Zeitschritts allein das Ergebnis um \(0{,}00233\unitm{mg/m^3}\). Die Abweichung zur externen Referenz liegt an diesem Punkt um Größenordnungen höher.
+\subt{Interpretation für einen neuen Vergleich}
+Die äußeren Zentren liegen bei \(x=-4,12\) und \(y=-4,4\unitm m\). Aus Zentrum \(\pm\Delta x/2\) folgen die Außenflächen \((-4{,}5;12{,}5;-4{,}5;4{,}5)\), \((-4{,}25;12{,}25;-4{,}25;4{,}25)\) und \((-4{,}125;12{,}125;-4{,}125;4{,}125)\), jeweils West, Ost, Süd, Nord in Metern. Die Differenzen enthalten Raum- und Gebietseinfluss. Ein Wiederholungslauf mit festen Außenflächen steht auf S.\,\pagelink{befundgitterfest}. Bei \(0{,}25\unitm m\) und \(3600\unitm s\) ergibt die getrennte Randvariation zweimal \(45\,440{,}69\unitm{mg/m^3}\) am Brunnen (S.\,\pagelink{befundtransport}). Für einen fairen Vergleich von RK gegen QSS fixiert man den räumlichen Operator, die äußeren Flüsse und die Beobachtungspunkte und misst die Arbeit bei gleicher Konzentrationsabweichung. Eine zweite Gitterweite prüft, ob die Schlussfolgerung trägt. Diese Datenreihe selbst vergleicht Gitterweiten unter RK4.
+\srcs{\repo{docs/PUBLISHED_REFERENCE_CHECKS.md\#c19r-spatial-and-time-accuracy}{Protokoll der Gitterstudie} · \repocurrent{scripts/c19_profiles.py}{Berechnung} · \href{https://www.argesim.org/benchmarks/c19}{C19/C19R-Aufgabe}.}
+
+\lektion{C19R · Ist der Zeitintegrator der Engpass?}{c19labor}{Labor}{C19R}
+\subt{Versuchsauftrag}
+Eine Messstelle liegt fünf Meter stromabwärts. Gewünscht sei nach zehn Tagen eine relative Abweichung von höchstens \(1\,\%\) gegenüber der homogenen Referenz auf der unendlichen Ebene. Die finite Rechnung verwendet Zellzentren \(x=-4\ldots12\unitm m,\ y=-4\ldots4\unitm m\). Die Quellmasse muss beim Verfeinern gleich bleiben. Wird einfach der gleiche Konzentrationszuwachs pro Zeitschritt in die Quellzelle geschrieben, verschwindet bei kleinerer Zelle künstlich ein Teil der eingetragenen Masse.
+\subt{Rechnung und Entscheidung}
+Der Kontrollwert von S.\,\pagelink{c19integral} ergibt mit den drei archivierten Gitterwerten von S.\,\pagelink{c19gitter} relative Abweichungen von \(8{,}12\,\%\), \(7{,}17\,\%\) und \(0{,}931\,\%\). Erst die Gitterweite \(0{,}25\unitm m\) erfüllt das gesetzte Ziel an \emph{dieser} Messstelle. Der Zeitvergleich am mittleren Gitter verschiebt die Konzentration beim Halbieren von \(h\) nur um \(0{,}00233\unitm{mg/m^3}\). Ein alleiniger Wechsel von RK4 zu einem höher geordneten Zeitverfahren hat auf Basis dieser Daten keine belegte Aussicht, die räumliche Abweichung um Größenordnungen zu beseitigen.
+\subt{Drei Kontrollrechnungen vor einer Verallgemeinerung}
+\textbf{Masse.} Nach zehn Tagen wurden \(\dot m\,t=1\,728\,000\unitm{mg}\) eingebracht. Im unendlichen Gebiet bleibt diese Masse vollständig im Wasser. Im endlichen Gebiet muss man die zeitlich integrierten äußeren Nettoflüsse mitbilanzieren.
+
+\textbf{Weg und Breite.} Der älteste Einzelimpuls ist \(vt=8{,}64\unitm m\) gewandert. Seine Standardabweichung pro Koordinate ist \(\sqrt{2Dt}=0{,}930\unitm m\). Die Dauerquelle besteht zusätzlich aus allen jüngeren, schmaleren Anteilen.
+
+\textbf{Gebiet.} Wiederholen Sie die Rechnung bei gleicher Gitterweite mit weiter entfernten äußeren Grenzen. Erst dieser Vergleich untersucht, wie die unendliche Referenz und der endliche Versuch am Messpunkt zusammenpassen.
+\notebox{Grenze der Aussage}{Die 1-Prozent-Entscheidung betrifft Ort, Zeit und homogenes Medium dieses Auftrags. Eine belastbare Konvergenzordnung verlangt eine systematische asymptotische Gitterfolge mit kontrollierter Zeit-, Quellen- und Randabweichung.}
+
+\lektion{C19R · Positivität und Fehler an der Messstelle}{befundtransport}{Nachweise}{Nachweise zum Modell}
+Bei nichtnegativen Zellwerten liegt der im Code rekonstruierte östliche Konzentrationswert zwischen null und dem Doppelten des Zellwerts \(c_i\). Das folgt aus der Begrenzung der Steigung durch das Doppelte des jeweiligen Nachbarsprungs. Der von Westen einströmende Wert ist ebenfalls nichtnegativ. Diffusion bringt nichtnegative Nachbarbeiträge, eine positive Quelle fügt Masse hinzu. Für einen Euler-Teilschritt genügt deshalb
+\[
+ h\left(2v/\Delta x+2D_x/\Delta x^2+2D_y/\Delta y^2+
+ \lambda_{\max}\right)\le 1.
+\]
+Hier sind \(v,D_x,D_y\) bereits um die Retardation skalierte Größen und \(\lambda_{\max}\) begrenzt die lokale Abbaurate. Der verbleibende Koeffizient von \(c_i\) ist dann nichtnegativ. Die örtliche Quellrate wird durch das Zellvolumen geteilt; Multiplikation mit Porenanteil, Dicke und Zellfläche ergibt bei \(R=1\) auf jedem getesteten Gitter \(2\unitm{mg/s}\).
+\subt{Wie verhält sich das tatsächlich verwendete RK4?}
+In acht Varianten des Zehntageversuchs wurden alle Zwischenstufen und Endwerte auf ihr Minimum geprüft; es lag jeweils bei null. Eine unbedingte RK4-Positivitätsgarantie ist falsch. Auf \(9\times9\) Zellen mit \(0{,}25\unitm m\) Abstand, schachbrettartigem Null-Eins-Start, Quelle außerhalb und \(h=200\,000\unitm s\) erzeugt ein einziger Schritt einen Wert unter \(-12\,535\). Die Euler-Bedingung oben ist eine bewiesene Aussage für Euler.
+\subt{Was lässt sich am Brunnen garantieren?}
+Bei \(x=5\unitm m,\ y=0\) nach zehn Tagen liegt die unendliche Punktquellenreferenz zwischen \(45\,014{,}84\) und \(45\,028{,}41\unitm{mg/m^3}\). Der Alterskern steigt bis zu einem Maximum und fällt dann; seine totale Variation ist höchstens zweimal die Gipfelhöhe. Damit ist der Fehler der Trapezsumme durch Schrittweite mal totale Variation eingeschlossen. Die Rechnung nutzt 65\,536 Intervalle.
+Das \(0{,}25\unitm m\)-Gitter liefert \(45\,440{,}70\), das \(0{,}125\unitm m\)-Gitter im erweiterten Gebiet \(45\,085{,}52\unitm{mg/m^3}\). Die gespeicherten Brunnenwerte liegen damit garantiert innerhalb von \(0{,}95\,\%\) bzw. \(0{,}16\,\%\) der kontinuierlichen Referenz. Auf dem Viertelmetergitter bewirkt Halbierung des Zeitschritts rund \(0{,}006\unitm{mg/m^3}\) Unterschied. Eine breiter verteilte Quelle gleicher Masse verschiebt den Wert auf \(44\,212{,}64\). Am Quellpunkt selbst ist das zweidimensionale Altersintegral wegen \(1/a\) singulär; eine globale punktweise Fehlerschranke über alle Orte wäre schon deshalb ungeeignet.
+\srcs{\see{c19integral}{Kern und Einheiten} · \texttt{transport.json} · \texttt{gegenproben.json}.}
+
+\lektion{C19R · Ein Gitterversuch mit festen Außenflächen}{befundgitterfest}{Labor}{Nachweise zum Modell}
+Wir fixieren die physischen Grenzen bei \(x\in[-4{,}5;12{,}5]\unitm m\) und \(y\in[-4{,}5;4{,}5]\unitm m\). Das erste bzw. letzte Zentrum liegt um eine halbe Zellweite innerhalb dieser Grenzen. Die vier Flächen ergeben sich für jede Auflösung wieder als äußeres Zentrum plus oder minus halbe Zellweite.
+\subt{Quelle und Brunnen behalten ihre Position}
+Die Quelle bei \((0,0)\unitm m\) liefert konstant \(2\unitm{mg/s}\). Auf feinen Gittern liegt dieser Punkt zwischen Zellzentren. Wir verteilen die Rate bilinear: Alle Gewichte sind nichtnegativ, summieren sich zu eins und ihr Ortsmittel ist der Quellpunkt. Am Brunnen \((5,0)\unitm m\) interpolieren wir am Tag 10 mit derselben Regel. Der RK4-Schritt beträgt stets \(7200\unitm s\).
+{\tblstart\begin{tabularx}{\linewidth}{@{}Yrr@{}}\toprule
+\hd{Zellweite [m]}&\hd{Zellzahl \(x\times y\)}&\hd{Brunnenwert [mg/m³]}\\\midrule
+1,00&\(17\times9\)&48\,677,18\\
+0,50&\(34\times18\)&41\,471,80\\
+0,25&\(68\times36\)&44\,134,39\\\bottomrule\end{tabularx}\par}
+Die Referenz für die unendliche Ebene beträgt etwa \(45\,021{,}62\unitm{mg/m^3}\). Das feine Gitter liegt wieder näher an dieser Referenz als das mittlere. Die Reihe verändert die Auflösung der Quellprojektion und der Beobachtung. Sie liefert für sich allein keine Konvergenzordnung. Zusätzlich lässt sich die Zeitintegration bei festem Operator, festem Gitter und gleicher Auswertung vergleichen.
+\srcs{\repocurrent{scripts/cp2_accuracy/transport_check.py}{Rechnung mit \texttt{--fixed-faces}} · \texttt{transport\_feste\_raender.json} · \see{c19gitter}{Archivierte Gitterreihe}.}
+
+\werkblatt{15}{Selbst prüfen}{ueb11}{Quelle, Messort und Vergleich}
+
+\merke{Eine Referenz gehört zu einer bestimmten Messgröße, einem Ort, einer Zeit und Randbedingungen. Zeit-, Gitter- und Gebietsfehler lassen sich mit verschiedenen Gegenversuchen untersuchen.}
+\subt{A · Den Stoffeintrag bilanzieren}
+Eine Quellzelle hat \(0{,}5\unitm m\) Seitenlänge, \(10\unitm m\) Schichtdicke und \(0{,}25\) wassergefüllten Volumenanteil. Die Quelle gibt \(2\unitm{mg/s}\) ab. Welche Konzentrationszunahme in fünf Sekunden folgt aus dem Quellterm allein? Prüfen Sie über die Stoffmasse, ob die Konzentration im richtigen Volumen angegeben ist.
+\subt{B · Einen Datenbefund deuten}
+An derselben C19R-Messstelle wurden für grobes, mittleres und feines Gitter relative Abweichungen von \(8{,}12\,\%\), \(7{,}17\,\%\) und \(0{,}931\,\%\) zur Referenz der unendlichen Ebene ermittelt. Welche der drei Rechnungen erfüllt hier das Ziel von einem Prozent? Erlauben diese drei Zahlen bereits eine Aussage über die Konzentration an allen anderen Punkten?
+\subt{C · Ein Gegenexperiment entwerfen}
+Ein Team will den verbleibenden Fehler durch einen neuen Zeitintegrator halbieren. Sie können drei paarweise Vergleiche durchführen. Beschreiben Sie, wie Sie nacheinander den Zeitschritt, die Zellbreite und den Abstand zum Außenrand verändern. Nennen Sie jeweils die Messgröße und eine Bedingung, unter der das Ergebnis mehrdeutig bliebe.
+\hilfe{A zählt Masse pro Wasservolumen. Bei C sind gleicher Messort und gleiche Quellenstärke erst der Anfang. Auch Parameter, Anfangsdaten und Definition der Konzentration müssen zusammenpassen.}
+
+\schreibfeld
+
+\srcs{\see{loesweg11}{Lösungswege A, B und C}\quad·\quad\see{kap11}{Zum Kapitelauftakt}.}
+
+\werkblatt{15}{Lösungswege}{loesweg11}{Quelle, Messort und Vergleich}
+
+\subt{A · Eine lokale und eine globale Einheit verbinden}
+Die Grundfläche beträgt \(0{,}25\unitm{m^2}\), das gesamte Zellvolumen \(2{,}5\unitm{m^3}\), das Wasservolumen \(0{,}625\unitm{m^3}\). Zehn Milligramm werden in fünf Sekunden freigesetzt. Der Quellterm allein liefert darum \(10/0{,}625=16\unitm{mg/m^3}\). Multiplizieren mit \(0{,}625\unitm{m^3}\) ergibt wieder \(10\unitm{mg}\).
+\subt{B · Die Reichweite des Befunds benennen}
+Nur das feine Gitter erfüllt mit \(0{,}931\,\%\) die inklusive Ein-Prozent-Grenze. Diese Aussage betrifft den untersuchten Sensor zum untersuchten Zeitpunkt. Nahe der schmalen Quelle kann die Gitterempfindlichkeit anders ausfallen. Für eine Aussage über das ganze Feld wären Daten an mehreren Orten oder eine definierte räumliche Fehlernorm erforderlich.
+\subt{C · Drei Vergleiche mit je einer Stellgröße}
+\textbf{Zeit.} Lassen Sie Raumgitter, Gebiet und Quellenabbildung gleich und halbieren Sie \(h\). Vergleichen Sie beide Sensorwerte zum selben physikalischen Zeitpunkt. Unterschiede beim Auslesen oder Interpolieren könnten den Zeitvergleich verfälschen.
+
+\textbf{Raum.} Halbieren Sie die Zellweite bei festem Gebiet und kontrolliert kleinem Zeitfehler. Halten Sie die gesamte Quellmasse pro Zeit fest. Eine von der Zellfläche abhängige Gesamtmasse würde ein anderes Modell erzeugen.
+
+\textbf{Gebiet.} Verlegen Sie bei unveränderter Zellweite den Rand weiter nach außen. Quelle und Sensor bleiben an ihrem physischen Ort. Eine Verschiebung des Sensors um eine halbe Zelle könnte wie ein Randeffekt aussehen. Vergleichen Sie in jedem Paar dieselbe Konzentration in \(\mathrm{mg/m^3}\).
+\notebox{Entscheidung}{Erst die Größe und Richtung dieser Änderungen helfen zu beurteilen, ob eine Änderung am Zeitintegrator das gewünschte Ziel erreichen kann.}
+
+\srcs{\see{ueb11}{Noch einmal selbst rechnen}\quad·\quad\see{schluss11}{Forschungsstand und Beweisfragen}.}
+
+\kapschluss{15}{Welche Referenz passt zur Transportaufgabe?}{schluss11}
+\subt{Stand der Forschung}
+Die überarbeitete C19-Definition und die veröffentlichte COMSOL-Lösung bieten für den Grundwasserfall einen weiteren Modellierungsweg mit finiten Elementen. Aktuelle Arbeiten zu konservativen, maximumprinziperhaltenden Verfahren untersuchen die Kombination von Genauigkeit und physikalisch zulässigen Schranken bei konvektionsdominierter Diffusion. Solche allgemeinen Ergebnisse übertragen sich auf den konkreten Quellterm, die Randbehandlung und den Integrator nur unter den jeweiligen Voraussetzungen.
+\subt{Beweis · Die Referenz erhält die eingebrachte Masse}
+Für \(a>0\) ist \(K\) das Produkt zweier normierter Gaußdichten. Translation um \(va\) verändert deren Integral nicht, also \(\int_{\mathbb R^2}K(x,y,a)\,\mathrm dx\,\mathrm dy=1\). Der Integrand ist nichtnegativ. Daher dürfen wir die Reihenfolge der Orts- und Altersintegration vertauschen und erhalten
+\[
+ \eta b\int_{\mathbb R^2}c(x,y,t)\,\mathrm dx\,\mathrm dy
+   =\dot m\int_0^t 1\dg a=\dot m t .
+\]
+Derselbe Kontrollwert kann für ein endliches Gebiet erst nach Addition des integrierten Nettoausflusses angewendet werden. Der Beweis für die unendliche Ebene klärt also, welcher Term im praktischen Gitterversuch zusätzlich gemessen werden muss.
+\subt{Ergebnis der Nachuntersuchung}
+An der festgelegten Messstelle ist der Fehler der gespeicherten Viertel- und Achtelmetergitter gegen die kontinuierliche Punktquellenlösung eingeschlossen. Änderungen von Zeitauflösung, Quellbreite und Außengrenzen sind einzeln nachgemessen. Eine allgemeine Konvergenzordnung für beliebige Messorte erfordert weitere Orts- und Regularitätsannahmen.
+\srcs{\see{befundtransport}{Nachweis und Ergebnis} · \href{https://www.argesim.org/benchmarks/c19}{Definition und C19R-Lösungen} · \href{https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C19/C19R-solution-COMSOL.pdf}{Publizierter FEM-Vergleich in COMSOL} · \href{https://doi.org/10.4208/nmtma.OA-2023-0165}{Konservative Verfahren mit Maximumprinzip}.}

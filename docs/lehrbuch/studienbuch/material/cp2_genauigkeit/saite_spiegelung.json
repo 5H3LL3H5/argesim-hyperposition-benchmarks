@@ -1,0 +1,65 @@
+{
+  "nodes": 501,
+  "length_m": 0.5,
+  "pluck_height_m": 0.05,
+  "pluck_positions_m": [
+    0.125,
+    0.375
+  ],
+  "rows": {
+    "original_fno": [
+      {
+        "time_s": 5,
+        "relative_l2_percent": [
+          3.4153707975287584,
+          3.124725305700625
+        ],
+        "max_reflection_difference_mm": 0.34211015701293945
+      },
+      {
+        "time_s": 8,
+        "relative_l2_percent": [
+          0.8865381024291957,
+          1.1826143641826614
+        ],
+        "max_reflection_difference_mm": 0.4308372735977173
+      }
+    ],
+    "fine_tuned_fno": [
+      {
+        "time_s": 5,
+        "relative_l2_percent": [
+          2.0295467950820245,
+          1.950905205494346
+        ],
+        "max_reflection_difference_mm": 0.10322034358978271
+      },
+      {
+        "time_s": 8,
+        "relative_l2_percent": [
+          0.7045376779352546,
+          0.6982500036693834
+        ],
+        "max_reflection_difference_mm": 0.11318176984786987
+      }
+    ],
+    "linear_fourier": [
+      {
+        "time_s": 5,
+        "relative_l2_percent": [
+          0.04512437272029871,
+          0.045124372720302494
+        ],
+        "max_reflection_difference_mm": 2.0816681711721685e-14
+      },
+      {
+        "time_s": 8,
+        "relative_l2_percent": [
+          0.01894253678120617,
+          0.018942536781206196
+        ],
+        "max_reflection_difference_mm": 2.7755575615628914e-14
+      }
+    ]
+  }
+}

@@ -1,0 +1,88 @@
+\seite{}{C05 · Steifigkeit}\anchorpage{1}{neu11}{11 · C05 – Zwei Zustände, Hysterese und schnelle Relaxation}\ey{KAPITEL 11}\ptitle{C05 – Zwei Zustände, Hysterese und schnelle Relaxation}
+Die Anzeige folgt einer langsam wandernden Sollgröße. Nach einem Moduswechsel ändert sich die Anzeige anfangs fast schlagartig. Wann kann ein Integrator diesen kurzen Vorgang überbrücken und trotzdem den folgenden Schaltaugenblick richtig treffen? Der Wärmeausgleich aus Kapitel 1 liefert die Anschauung. C05 selbst ist das in der Definition angegebene mathematische Zweizustandsmodell.
+\par\textsf{\bfseries\color{sea}Phänomen und Leitfrage.} Bei der oberen Schwelle wechselt das System in die abwärts gerichtete Phase, bei der unteren zurück. Die ungleichen Schwellen verhindern sofortiges Zurückschalten. Die gesuchte Größe ist der Zeitpunkt des gerichteten Durchgangs.
+\par\textsf{\bfseries\color{sea}Modellbildung.} Innerhalb eines Modus gilt \(y_1'=c_1(y_2+c_2-y_1)\), \(y_2'=c_3(c_4-y_2)\). Zuerst berechnet man \(y_2\) als exponentielle Annäherung an \(c_4\). Einsetzen in die erste Gleichung ergibt zwei Exponentialmoden. Die Separierung liefert eine unabhängige Referenz auch für sehr schnelle Relaxation.
+\par\textsf{\bfseries\color{sea}Numerischer Härtefall.} Mit \(c_1=2{,}7\cdot10^6\) und \(c_3=3{,}5651205\) liegen mehr als fünf Größenordnungen zwischen den Raten. Die nach dem Wechsel neue schnelle Komponente ist für explizite Verfahren teuer. Ein versehentlich aktiver alter Wächter kann zusätzliche Schaltungen vortäuschen.
+\par\textsf{\bfseries\color{sea}Methodenvergleich.} Die ursprünglichen 57 Einstellungen erreichen hier das physikalische Ziel sämtlich nicht. Die erweiterte Studie findet Treffer mit Radau und BDF. eLIQSS arbeitet auf Zustandsquanten. Seine Kosten und Schaltfehler sind am selben äußeren Test zu vergleichen.
+\par\textsf{\bfseries\color{sea}Aufgaben und Akzeptanz.} Das kurze Studienfenster verlangt bis 3,5 s genau drei Schaltungen mit je 1 ms Budget und zwei Endwerte mit je 0,006 Budget. Die vollständigen Standard- und D-Versuche sind separat über die Referenzschaltungen dokumentiert. Ein Zeitlimit ist ein eigener Ausgang.
+\par\textsf{\bfseries\color{sea}Diagnose.} Auf jeder Seite eines Wechsels werden Modus, Schwelle, Richtung und \(y_1,y_2\) gespeichert. Prüfen Sie die erste Schaltung bei etwa 1,108306 s, bevor Sie den fünften Übergang untersuchen. Erst dann lässt sich lokaler Integrationsfehler von einer falschen Schaltregel unterscheiden.
+\seite{Rechenbeispiel}{C05 · Steifigkeit}\anchorpage{2}{kap8}{C05 · Wie klein ist ein schneller Vorgang?}\ptitle{C05 · Wie klein ist ein schneller Vorgang?}
+
+
+\lernziel{Sie können im ARGESIM-Fall C05 die schnelle Zeitkonstante abschätzen, eine explizite Schrittweite beurteilen und Schaltzeit und Endzustand getrennt prüfen.}
+Eine Kurve auf dem Bildschirm umfasst mehrere Sekunden. Für ein schnell abklingendes Detail nennt das Modell eine Rate von \(a=2{,}7\cdot10^6\unitm{s^{-1}}\). Könnte ein Rechenschritt von einer Mikrosekunde schon zu groß sein? Für diese Vorrechnung betrachten wir eine einzelne Abweichung \(z\) mit \(\dot z=-az\).
+\subt{Ein überschaubares Experiment vor dem Benchmark}
+Starten wir mit \(z_0=1\), ergibt Euler \(z_1=1-ah\). Bei \(h=1\,\mu\mathrm s\) ist \(ah=2{,}7\). Also springt die Rechnung auf \(-1{,}7\). Eine zweite Anwendung liefert \(+2{,}89\). Der Betrag wächst, obwohl die exakte Abweichung \(e^{-at}\) ständig abnimmt. Nach der ersten Mikrosekunde beträgt sie nur rund \(0{,}0672\).
+\subt{Was diese Probe für die Solverwahl liefert}
+Probieren Sie \(0{,}25\,\mu\mathrm s\). Der Faktor wird \(0{,}325\). Die Abweichung fällt jetzt. Der Unterschied zur exakten Kurve bleibt eine eigene Frage. Für \(a>0\) ist \(|1-ah|<1\) genau bei \(0<h<2/a\) erfüllt. Das erklärt die Kosten kleiner expliziter Schritte über mehrere Sekunden.
+\notebox{Ihr Laborauftrag}{Prüfen Sie beim vollständigen Zweizustandsmodell zuerst Anzahl und Richtung der Schaltvorgänge. Vergleichen Sie danach jeden Zeitpunkt mit der Referenz und erst dann die beiden Endwerte. Ein Foto des Endzustands allein dokumentiert keinen einzigen Schaltzeitpunkt.}
+Die Parameter und Schaltregeln des offiziellen Modells folgen auf der nächsten Seite. Die skalare Abklingrechnung hier isoliert einen Teil der Dynamik.
+
+\srcs{\textbf{Kernweg}\enspace\see{arg}{Gleichungen und Schalter}\quad\textbf{Vertiefung}\enspace\see{schluss8}{Exakte Phasen beweisen}\quad\see{ueb8}{Selbst prüfen}.}
+
+\lektion{C05 · Zwei Zeitskalen und drei Schaltungen}{arg}{Labor}{C05}
+\vorhersage{8}{Wie schnell klingt eine Störung mit der Rate \(2{,}7\cdot10^6\unitm{s^{-1}}\) um den Faktor \(e\) ab?}{kontrolleB}
+Nun gilt das vollständige C05-Modell. Es ist durch Gleichungen vorgegeben. Die schnelle Größe \(y_1\) läuft dem momentanen Ziel \(y_2+c_2\) nach, die langsamere Größe \(y_2\) dem Ziel \(c_4\). Die rechte Seite verbindet jeweils die Abweichung vom Ziel mit dem Faktor für die Zeitskala.
+\[
+ \dot y_1=a(y_2+c_2-y_1),\qquad \dot y_2=b(c_4-y_2)
+\]
+modelliert. Die Raten sind \(a=2{,}7\cdot10^6\unitm{s^{-1}}\) und \(b=3{,}5651205\unitm{s^{-1}}\), der Start ist \((4{,}2;\,0{,}3)\). Zuerst gilt \((c_2,c_4)=(0{,}4;\,5{,}5)\). Steigt \(y_1\) auf \(5{,}8\), wird \((-0{,}3;\,2{,}73)\) aktiv. Beim Absinken auf \(2{,}5\) wird zurückgeschaltet. Beide Zustände sind beim Umschalten stetig, ihre Ableitungen können springen.
+\subt{Referenz innerhalb einer Phase}
+Seien \((y_{10},y_{20})\) der Phasenstart und \(s\) die lokale Zeit. Für \(d=y_{20}-c_4,\ B=ad/(a-b)\) gilt durch Lösung der zweiten Gleichung und Einsetzen in die erste
+\[
+ y_2=c_4+d e^{-bs},\qquad
+ y_1=c_4+c_2+B e^{-bs}+(y_{10}-c_4-c_2-B)e^{-as}.
+\]
+Eine Nullstellensuche auf der jeweiligen exakten Phase liefert bis \(3{,}5\unitm s\) die Schaltzeiten \(1{,}108306\), \(2{,}129685\) und \(3{,}054153\unitm s\). Die Anfangsschicht hat die Zeitkonstante \(1/a=0{,}37037\,\mu\mathrm s\).
+\fig{c05}{.98}{Links zeigt der Verlauf auf der Sekundenskala drei Schaltungen. Rechts sind die ersten drei Mikrosekunden aufgelöst. Ein expliziter Euler-Schritt müsste für die schnelle Mode \(h\le 2/a\approx0{,}741\,\mu\mathrm s\) erfüllen.}
+\srcs{\href{https://www.argesim.org/benchmarks/c05}{Offizielle Aufgabe C05} · \repo{argesim_benchmarks/models/c05_two_state.py}{Phasenmodell} · Schaltzeiten aus \texttt{c05\_schaltungen} nachgerechnet.}
+
+\lektion{Labor C05 · Zwei Solver unter derselben Schaltregel}{c05labor}{Labor}{C05}
+\subt{Auftrag und Versuchsaufbau}
+Berechnen Sie für das \see{arg}{Zweizustandsmodell} alle Schaltzeiten bis \(3{,}5\unitm s\) und den Endzustand. Verwenden Sie für diesen Lehrversuch die Schranken \(10\,\mu\mathrm s\) je Ereignis und \(10^{-5}\) je Zustandskomponente. Diese Grenzwerte sind enger als die des späteren Projektvergleichs. Halten Sie den jeweiligen Modus bis zum gerichteten Übergang fest, lokalisieren Sie die Nullstelle, schalten Sie um und starten Sie den Solver beim gefundenen Zeitpunkt neu. Ein Restart verwirft die Schrittgeschichte des bisherigen Modus.
+
+Radau IIA und BDF erhalten hier \(\mathrm{rtol}=10^{-8}\), \(\mathrm{atol}=10^{-10}\), \(h_\mathrm{max}=0{,}2\unitm s\) sowie die gleiche exakte Jacobi-Matrix \(J=\left(\begin{smallmatrix}-a&a\\0&-b\end{smallmatrix}\right)\). Als dritte, unabhängige Rechnung dienen die analytischen Phasen mit skalarem Nullstellensucher. Diese liefert \(y(3{,}5)=(2{,}97475519,3{,}27475448)^\mathsf T\).
+{\tblstart\begin{tabularx}{\linewidth}{@{}lrrYY@{}}\toprule
+\hd{Verfahren}&\hd{\(f\)-Aufrufe}&\hd{LU}&\hd{max. Zeitfehler}&\hd{max. Endfehler}\\\midrule
+Radau IIA&5\,029&256&\(0{,}0152\,\mu\mathrm s\)&\(2{,}95\cdot10^{-8}\)\\
+BDF&1\,690&169&\(1{,}13\,\mu\mathrm s\)&\(2{,}33\cdot10^{-6}\)\\\bottomrule\end{tabularx}\par}
+Beide Verfahren liefern alle drei Übergänge und erfüllen beide Ziele. Am Zeitfehler ist Radau hier genauer. BDF benötigt weniger Funktionsauswertungen und Faktorisierungen. Bei einer verschärften Zeitgrenze von \(1\,\mu\mathrm s\) qualifiziert sich in diesen Einstellungen allein Radau. So entscheidet ein geänderter Auftrag bei denselben Rohdaten anders.
+\subt{Gegenversuch}
+Verwenden Sie gedanklich Vorwärts Euler. Für die schnelle reelle Mode verlangt \(|1-ha|\le1\) bereits \(h\le 2/a=0{,}740740\ldots\,\mu\mathrm s\). Selbst an der Stabilitätsgrenze bräuchte ein gleichmäßiges Gitter über 3,5 Sekunden mindestens 4\,725\,000 Schritte. Bei \(0{,}740\,\mu\mathrm s\) ist \(R=-0{,}998\), bei \(0{,}741\,\mu\mathrm s\) schon \(R=-1{,}0007\). Für eine stabile Proberechnung eignet sich von diesen Werten nur der erste. Die Rechnung erklärt, warum ein naiver expliziter Vergleich hier teuer ist.
+\srcs{Neu gerechnet mit \texttt{python labor.py c05}, SciPy 1.17.0. \repo{argesim_benchmarks/models/c05_two_state.py}{Referenz für die Modellparameter}.}
+
+\werkblatt{11}{Selbst prüfen}{ueb8}{Zeitbudgets bei C05}
+
+\merke{Im C05-Versuch können schnelle Abweichungen längst abgeklungen sein, während ein expliziter Integrator für ihre numerische Stabilität weiterhin kleine Schritte benötigt.}
+\subt{A · Eine Zeitskala erkennen}
+Für eine vereinfachte Abklingprobe sei \(a=4\cdot10^5\unitm{s^{-1}}\) und \(\dot z=-az,\ z(0)=1\). Wie viele Mikrosekunden dauert es bis auf \(1/e\), wie lange bis auf ein Prozent? Schreiben Sie erst die Gleichung für den Restanteil und dann den Zahlenwert.
+\subt{B · Einen vermeintlich sicheren Schritt prüfen}
+Für dieselbe Probe behauptet jemand, bei \(h=5\,\mu\mathrm s\) bilde Euler das Abklingen gut ab, weil sein Zustandsbetrag begrenzt bleibt. Prüfen Sie die ersten drei Schritte. Untersuchen Sie anschließend \(h=2{,}5\,\mu\mathrm s\). Welches Verhalten zeigt diese Rechnung nach nur einem Schritt im Vergleich zum exakten Rest?
+\subt{C · Einen Auftrag für Prüfdaten auswerten}
+Für einen Lehrvergleich seien alle drei Ereignisse richtig geordnet und beide Endzustände hinreichend genau. Bei Einstellung A betragen die absoluten Zeitfehler \(0{,}3;\ 0{,}7;\ 0{,}9\,\mu\mathrm s\), bei B \(0{,}2;\ 1{,}4;\ 0{,}4\,\mu\mathrm s\). A benötigt 200, B 120 Auswertungen derselben rechten Seite. Welche Einstellungen erfüllen eine Grenze von \(1\,\mu\mathrm s\) je Ereignis? Wie verändert eine Grenze von \(2\,\mu\mathrm s\) die Wahl, wenn nur diese Auswertungen gezählt werden? Dies sind Übungsdaten.
+\hilfe{Bei einer Grenze pro Ereignis ist der größte Einzelwert entscheidend. Rechnen Sie Mikrosekunden vor dem Einsetzen in \(1-ah\) in Sekunden um.}
+
+\schreibfeld
+
+\srcs{\see{loesweg8}{Lösungswege A, B und C}\quad·\quad\see{kap8}{Zum Kapitelauftakt}.}
+
+\werkblatt{11}{Lösungswege}{loesweg8}{Zeitbudgets bei C05}
+
+\subt{A · Beide Restanteile berechnen}
+Mit \(z=e^{-at}\) gehört zum Restanteil \(1/e\) die Zeit \(t=1/a=2{,}5\,\mu\mathrm s\). Für \(z=0{,}01\) gilt \(-at=\ln(0{,}01)\). Damit ist \(t=\ln(100)/a\approx11{,}51\,\mu\mathrm s\). Eine Zeitkonstante senkt die Störung also noch lange nicht auf ein Prozent.
+\subt{B · Begrenzte Schwingung und richtiges Abklingen}
+Für \(5\,\mu\mathrm s\) ist der Euler-Faktor \(1-2=-1\). Aus \(1\) entstehen \(-1,1,-1\). Der Betrag bleibt konstant, die exakte Lösung fällt. Für \(2{,}5\,\mu\mathrm s\) ist der Faktor null. Nun verschwindet die numerische Störung schon im ersten Schritt vollständig. Exakt bleibt \(e^{-1}\approx0{,}3679\). Auch diese andere stabile Wahl erzeugt hier einen großen Fehler.
+\subt{C · Erst die Schwelle prüfen, dann zählen}
+Die größten absoluten Zeitfehler sind \(0{,}9\) und \(1{,}4\,\mu\mathrm s\). Bei \(1\,\mu\mathrm s\) erfüllt nur A den gesamten Auftrag. Bei \(2\,\mu\mathrm s\) erfüllen ihn beide. B braucht in den vorgegebenen Daten 80 Auswertungen weniger. Das sind bezogen auf A \(80/200=40\,\%\) weniger Auswertungen. Ob die Wanduhr ebenfalls 40 Prozent weniger anzeigt, wurde in dieser Übung nicht gemessen.
+\notebox{Bezug zum eigentlichen Labor}{Auch dort gibt es eine analytische Referenz innerhalb jeder Phase. Setzen Sie die Zeitmessung des Ereignisses an der verfeinerten Nullstelle an. Der nächste Ausgabepunkt eines Zeitrasters kann deutlich später liegen.}
+
+\srcs{\see{ueb8}{Noch einmal selbst rechnen}\quad·\quad\see{schluss8}{Forschungsstand und Beweisfragen}.}
+
+\kapschluss{11}{Eine Schaltzeit ist eine eigene Messgröße}{schluss8}
+\subt{Stand der Forschung}
+C05 gehört zu den frühen ARGESIM-Vergleichen für zustandsabhängiges Schalten. Die neuere Theorie hybrider Sensitivitäten erklärt, warum eine kleine Abweichung in einem kontinuierlichen Zustand den Zeitpunkt eines Wechsels verschieben kann. Untersuchungen zu adaptiven Reglern erklären außerdem, warum Schrittfolgen und Arbeitsaufwand vom implementierten Regler abhängen. Beide Fragen betreffen den vorliegenden Versuch.
+\subt{Beweis · Exakte Phasen trotz steifer Mode}
+In einem festen Modus ist \(y_2-c_4=d e^{-bs}\). Die erste Gleichung hat die Form \(\dot y_1+ay_1=a(c_4+c_2+d e^{-bs})\). Der Ansatz \(A+B e^{-bs}+C e^{-as}\) liefert durch Koeffizientenvergleich \(A=c_4+c_2,\ (a-b)B=ad\). Aus dem Anfangswert folgt \(C=y_{10}-A-B\). Damit ist die auf S.\,\pagelink{arg} verwendete Phasenreferenz für \(a\ne b\) bewiesen. Bei \(a=b\) benötigt der Resonanzterm stattdessen einen Faktor \(s e^{-as}\).
+\subt{Ergebnis der Nachuntersuchung}
+Für beide um bis zu \(0{,}005\) veränderten Schaltschwellen lassen sich die ersten vier Übergänge per Intervallarithmetik einklammern. Drei davon liegen sicher innerhalb des Lehrversuchs von \(3{,}5\unitm s\).
+\srcs{\see{befundereignis}{Nachweis und Ergebnis} · \href{https://www.argesim.org/benchmarks/c05}{ARGESIM C05} · \href{https://arxiv.org/abs/2306.06862}{Kong u.\,a., Sensitivität an Ereignissen} · \href{https://doi.org/10.1007/s44207-024-00001-0}{Ranocha und Giesselmann, adaptive Schrittweitenkontrolle}.}

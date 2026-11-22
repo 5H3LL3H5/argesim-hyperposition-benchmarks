@@ -1,0 +1,77 @@
+\seite{}{C09 und C13 · Regelung}\anchorpage{1}{neu14}{14 · C09 und C13 – abgetastete Tanks und Lastpulse am Kran}\ey{KAPITEL 14}\ptitle{C09 und C13 – abgetastete Tanks und Lastpulse am Kran}
+Eine Pumpe arbeitet noch mit dem alten Stellwert, während der Pegel schon fällt. Am Kran springt dagegen die äußere Kraft zu einem bekannten Zeitpunkt. Welche Größen dürfen unmittelbar springen, und welche muss ein Solver genau bis zur Grenze des Taktes fortführen?
+\par\textsf{\bfseries\color{sea}Phänomen und Leitfrage.} Am Tank beobachtet der Regler nur Abtastwerte. Ein kurzer falscher Stellimpuls kann den späteren Pegel stark verschieben. Beim Kran erzeugt ein Rechteckpuls eine neue Beschleunigung, obwohl Position und Geschwindigkeit zunächst stetig bleiben.
+\par\textsf{\bfseries\color{sea}Modellbildung.} Für einen Behälter gilt \(A h'=Q_{ein}-Q_{aus}\) mit Torricelli-Abfluss proportional zu \(\sqrt{h}\) unter den entsprechenden Modellannahmen. Der digitale Regler berechnet am Takt einen neuen Stellwert und hält ihn. Die lineare C13-Pulsphase hat die Form \(y'=Ay+b\) bei konstantem \(b\).
+\par\textsf{\bfseries\color{sea}Numerischer Härtefall.} Große adaptive Schritte dürfen einen Abtast- oder Pulszeitpunkt nicht ungeteilt überqueren. Die Reihenfolge Messen, Regeln, Halten ist reproduzierbar festzulegen. Gegen null wird der Pegel empfindlich gegenüber falsch fortgesetzten Wurzeltermen.
+\par\textsf{\bfseries\color{sea}Methodenvergleich.} DOP853 mit identischem Regler liefert für C09 eine Integrationsreferenz. Beim linearen Kran ermöglicht die Matrixexponentialrechnung eine unabhängige Kontrolle pro Pulsphase. QSS kann kurze lokale Änderungen günstig verfolgen, hat auf dem untersuchten C13-Raster das Genauigkeitsziel verfehlt.
+\par\textsf{\bfseries\color{sea}Aufgaben und Akzeptanz.} C09 prüft im kurzen Fenster 16 Einsekundentakte mit 0,5 mm Pegelbudget je Beobachtung. Für die längeren veröffentlichten Reglergrafiken trifft der Lauf eines von drei ausgewerteten Fenstern. C13 prüft fünf Zustände bei 4, 7 und 15 s in Aufgabe A. Zu B und C gehören eigene Brems- und Halteaufgaben.
+\par\textsf{\bfseries\color{sea}Diagnose.} Beim Tank sind Sollwert, Stellwert vor und nach dem Takt und Pegel zu speichern. Für den Kran wird der affine Zustand an beiden Pulsgrenzen verglichen. So lässt sich der Fehler bereits der ersten falschen Phase zuordnen.
+\lektion{Vom nichtlinearen Tank zum abgetasteten Regelkreis}{abtastung}{Vertiefung}{Modell und System}
+Ein offener Tank hat die konstante Querschnittsfläche \(A_t=0{,}04\unitm{m^2}\). Eine Pumpe speist den Volumenstrom \(u\) ein. Bei freiem Ausfluss und konstanter Schwerkraft modellieren wir den Abfluss durch \(c\sqrt H\), wobei \(H>0\) der Füllstand und \(c=0{,}002\,\mathrm{m}^{5/2}/\mathrm s\) der zusammengefasste Ausflusskoeffizient sind. Die Volumenbilanz lautet \(A_t\dot H=u-c\sqrt H\). Bei \(H_*=0{,}25\unitm m\) hält \(u_*=0{,}001\unitm{m^3/s}\) den Stand konstant.
+\subt{Die Linearisierung macht den Arbeitspunkt sichtbar}
+Für \(x=H-H_*,\ v=u-u_*\) liefert die Taylorentwicklung
+\[
+ \dot x=-a x+bv,\qquad a=\frac{c}{2A_t\sqrt{H_*}}=0{,}05\unitm{s^{-1}},
+ \qquad b=1/A_t=25\unitm{m^{-2}} .
+\]
+Das ungeregelte System hat eine Zeitkonstante von \(20\unitm s\). Ein kontinuierlicher Regler \(v=-Kx,\ K=0{,}004\unitm{m^2/s}\) verschiebt den Pol auf \(-(a+bK)=-0{,}15\unitm{s^{-1}}\). Im Versuch wirkt die Pumpe nur in der Nähe des Arbeitspunktes linear.
+\subt{Was ändert die digitale Abtastung?}
+Der Regler misst alle \(T_{\rm ab}\) Sekunden und hält \(v_n=-Kx_n\) dazwischen konstant. Die exakte Integration der linearen Streckengleichung bei konstantem Eingang ergibt
+\[
+ x_{n+1}=e^{-aT_{\rm ab}}x_n+\frac{b}{a}(1-e^{-aT_{\rm ab}})v_n
+       =(3e^{-0{,}05T_{\rm ab}}-2)x_n .
+\]
+Für \(T_{\rm ab}=5\unitm s\) ist der Faktor \(0{,}3364\), die Störung fällt. Bei \(T_{\rm ab}=25\unitm s\) ist er \(-1{,}1405\), die linearisierte Störung wechselt das Vorzeichen und wächst. Aus \(|3e^{-0{,}05T_{\rm ab}}-2|<1\) folgt für positive Abtastzeiten \(T_{\rm ab}<\ln(3)/0{,}05=21{,}97\unitm s\).
+\notebox{Modellzeit und Solverzeit}{Die Abtastzeit gehört zum Regelgesetz. Der Integrator darf innerhalb eines Takts beliebig viele geeignete Schritte ausführen, muss den Reglerwechsel aber am festgelegten Zeitpunkt behandeln. Selbst exakte Integration der Strecke kann die Instabilität einer zu langsam abgetasteten Rückkopplung abbilden.}
+\srcs{Eigenständiges Lehrmodell für Abtastung. Der ARGESIM-Fall C09 enthält zwei Tanks und einen anderen Regler, siehe S.\,\pagelink{faelle}.}
+
+\lektion{C09 · Den ersten Reglertakt selbst nachrechnen}{c09takt}{Labor}{Solververgleich}
+Zwei Tanks sind über eine Verbindung gekoppelt. Eine Pumpe speist Tank 1, Tank 2 hat einen Ablauf. Die Zustände \(h_1,h_2\) sind die Füllstände in Metern. Ein digitaler Regler liest \(h_2\) im Abstand von einer Sekunde und hält die Pumpenspannung \(u\) dazwischen konstant. Die Reibung in den Ausflüssen führt hier zu Wurzelgesetzen. In den kalibrierten Einheiten des Projektmodells gilt
+\[
+ \begin{aligned}
+ k_{12}&=0{,}06624\cdot0{,}4\,\operatorname{sgn}(h_1-h_2)\sqrt{|h_1-h_2|},\\
+ k_a&=0{,}0605\cdot0{,}3\,\beta\sqrt{\max(0,h_2)},\\
+ \dot h_1&=0{,}067u-k_{12},\qquad \dot h_2=k_{12}-k_a .
+ \end{aligned}
+\]
+Die Vorzeichenfunktion \(\operatorname{sgn}\) gibt die Strömungsrichtung vor. \(\beta=1{,}2\) gilt unter \(0{,}16\unitm m\), sonst \(\beta=1\). Die Kopplung tritt mit umgekehrten Vorzeichen auf. Die Summe der beiden Modellgleichungen liefert sofort die Kontrolle \(\dot h_1+\dot h_2=0{,}067u-k_a\).
+\subt{Warum der Solver nur die Strecke integriert}
+Start \(h_1=0{,}503\unitm m,\ h_2=0{,}30\unitm m\), Sollwert \(0{,}30\unitm m\). Der proportionale Fuzzy-Regler kombiniert gewichtete Regeln. In diesem Startpunkt ist nur die Regel für guten Fehler und niedrigen Füllstand aktiv. Der Schwerpunkt ihres Dreiecks ist \(u=(0{,}10+0{,}14+0{,}175)/3=0{,}138333\unitm V\). Damit folgen \(\dot h_1=-0{,}002670\unitm{m/s}\) und \(\dot h_2=0{,}001997\unitm{m/s}\). Nach einem Takt berechnet DOP853 \(h_1=0{,}500398\unitm m,\ h_2=0{,}301913\unitm m\). Erst jetzt wird der Regler erneut aufgerufen.
+\notebox{Was die Messreihe tatsächlich erfasst}{Der Archivversuch prüft beide Pegel nach jedem von 16 Takten mit einer Grenze von \(0{,}5\unitm{mm}\). Ab \(t=4\unitm s\) wird zusätzlich \(0{,}1\unitm V\) aufgeschaltet. Der eigenständige Lehrversuch prüft die erste Sekunde und die Bilanz. Eine Reglerauswertung in jeder RK-Stufe würde ein anderes Abtastsystem erzeugen.}
+\srcs{\texttt{python labor.py c09} · \href{https://www.argesim.org/benchmarks/c09}{ARGESIM C09} · \repo{argesim_benchmarks/models/c09_fuzzy_tanks.py}{Strecke und Regeln}.}
+
+\lektion{C09 · Was aus der Pumpenaufgabe geworden ist}{c09transfer}{Labor}{Solververgleich}
+Der Pumpenbecher der Einleitung hatte einen vorgegebenen Zufluss. Im ARGESIM-Versuch verändern zwei Wasserstände den Durchfluss zwischen den Behältern. Reicht es für den ersten Reglertakt, die zu Beginn gemessenen Änderungen eine ganze Sekunde lang festzuhalten? Schreiben Sie vor der Rechnung auf, bei welchem Becken Sie einen steigenden Pegel erwarten.
+\subt{Zwei Vorhersagen für dieselbe Sekunde}
+Wir übernehmen die Anfangspegel \(0{,}503\unitm m\) und \(0{,}300\unitm m\) sowie die Pumpenstellung der vorigen Seite. Die einfachste Rechnung verwendet für beide Becken die Anfangsrate. Für Becken 1 ergibt sie \(0{,}503-0{,}00266958=0{,}50033042\unitm m\). Das ist genau ein Vorwärts-Euler-Schritt. Die Referenz integriert die beiden gekoppelten Pegelgleichungen innerhalb dieses Takts.
+{\tblstart\begin{tabularx}{\linewidth}{@{}Y r r r@{}}\toprule
+\hd{Beobachtung}&\hd{Ein Euler-Schritt}&\hd{DOP853}&\hd{Euler minus Referenz}\\\midrule
+Pegel 1 [m]&0,500330&0,500398&\(-0{,}0674\unitm{mm}\)\\
+Pegel 2 [m]&0,301997&0,301913&\(+0{,}0834\unitm{mm}\)\\\bottomrule\end{tabularx}\par}
+\subt{Wie präzise muss der erste Takt sein?}
+Für das in der Studie verwendete Pegelziel von \(0{,}5\unitm{mm}\) liegen beide Abweichungen im ersten Takt innerhalb der Grenze. Wählen wir im Lehrversuch ein strengeres Ziel von \(0{,}05\unitm{mm}\), verfehlt derselbe Schritt es an beiden Becken. Eine Entscheidung über alle 16 Takte erfordert auch die späteren Zustände und die jeweils neu berechnete Reglerausgabe.
+\subt{Was der Vergleich mit dem Becher lehrt}
+Bei der Pumpe konnten wir den gesamten Flächenfehler mit einer Krümmungsschranke begrenzen. Hier hängt schon die nächste Rate vom vorher berechneten Pegel ab. Zusätzlich muss die Wirkung früher Zustandsfehler erfasst werden. Genau dazu dient die \see{ordnung}{Abschätzung für die Fehlerfortpflanzung}. Die Zahlen in dieser Tabelle sind Abstände zu einem unabhängigen Rechenweg. Eine garantierte globale Fehlerschranke würde einen eigenen Nachweis erfordern.
+\srcs{\texttt{python labor.py c09vergleich} · \see{c09takt}{Modell- und Reglergleichungen} · \href{https://www.argesim.org/benchmarks/c09}{ARGESIM C09}.}
+
+\lektion{C13 · Einen Lastpuls ohne Zeitschritt kontrollieren}{c13labor}{Vertiefung}{Solververgleich}
+Der lineare Kranversuch verwendet Wagenposition \(q\), Wagengeschwindigkeit \(v\), Lastwinkel \(\alpha\), Winkelgeschwindigkeit \(\omega\) und Antriebskraft \(F\) als Zustand. Zwei Gleichungen zweiter Ordnung für Wagen und Last werden zu vier ersten. Ein Antrieb mit eigener Trägheit ergänzt die fünfte. Der Versuch startet in Ruhe. Die Sollkraft ist \(160\unitm N\), die äußere Lastkraft \(F_d\) ist von 4 bis 7 Sekunden \(-800\unitm N\) und sonst null.
+
+In SI-Einheiten lauten die Projektgleichungen mit den eingesetzten Massen \(10\) und \(100\unitm{kg}\) und Seillänge \(5\unitm m\)
+\[
+ \begin{aligned}
+ \dot q&=v,\qquad \dot\alpha=\omega,\\
+ \dot v&=-0{,}05v+98{,}1\alpha+0{,}1F,\\
+ \dot\omega&=(0{,}05-0{,}00001)v/5-9{,}81\cdot11\alpha/5
+              -0{,}00001\omega-0{,}02F+F_d/500,\\
+ \dot F&=-4F+640 .
+ \end{aligned}
+\]
+Für jede Phase ist das eine \emph{affine} Gleichung \(\dot x=Ax+b\), mit einem vom Zustand unabhängigen Zusatz \(b\). Ergänzt man eine konstante sechste Komponente 1, gilt \(\dot z=Bz,\ B=\left(\begin{smallmatrix}A&b\\0&0\end{smallmatrix}\right)\). Deshalb folgt \(z(t+h)=e^{hB}z(t)\) für die ganze Phase. Der Rechner wertet das Matrixexponential numerisch aus. Er muss die Bewegung dafür nicht in Zeitschritte zerlegen.
+{\tblstart\begin{tabularx}{\linewidth}{@{}rYYYYY@{}}\toprule
+\hd{\(t\) [s]}&\hd{\(q\) [m]}&\hd{\(v\) [m/s]}&\hd{\(\alpha\) [rad]}&\hd{\(\omega\) [rad/s]}&\hd{\(F\) [N]}\\\midrule
+4&10,6947&3,7124&$-$0,10830&+0,372565&159,99998\\
+7&0,8437&$-$10,1442&$-$0,13276&$-$0,409117&160,00000\\
+15&$-$47,6444&1,0016&$-$0,09579&$-$0,252605&160,00000\\\bottomrule\end{tabularx}\par}
+Das Skript prüft alle fünf Zustände gegen eine gesondert formulierte DOP853-Rechnung. In der archivierten Acht-Fälle-Studie verfehlen bei C13 alle QSS-Einstellungen den vorgegebenen Score. Schon bei QSS3 sinkt er beim Verfeinern von \(58{,}29\) auf \(9{,}98\) und \(2{,}20\). Für das gesetzte Ziel wäre höchstens 1 erlaubt. Die Aussage betrifft den linearen Lastpuls. Die vollständige Benchmarkfamilie enthält auch den eingebetteten Regler.
+\srcs{\texttt{python labor.py c13} · \href{https://www.argesim.org/benchmarks/c13}{ARGESIM C13} · \repo{argesim_benchmarks/models/c13_crane.py}{Modellgleichungen}.}
