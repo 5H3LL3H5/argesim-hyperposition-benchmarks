@@ -16,8 +16,8 @@ class FNOAblationTests(unittest.TestCase):
         x, y = ab.triangle_samples(12, np.random.default_rng(77))
         self.assertEqual(x.shape, (12, 65))
         self.assertEqual(y.shape, (12, 2, 65))
-        np.testing.assert_array_equal(x[:, [0, -1]], 0)
-        np.testing.assert_allclose(y[:, :, [0, -1]], 0, atol=1e-6)
+        np.testing.assert_array_equal(x[:, [0, -1]], np.zeros((12, 2)))
+        np.testing.assert_allclose(y[:, :, [0, -1]], np.zeros((12, 2, 2)), atol=1e-6)
         self.assertTrue(np.isfinite(y).all())
 
     def test_splits_reproducible_and_disjoint(self):
@@ -51,7 +51,7 @@ class FNOAblationTests(unittest.TestCase):
                 x = np.sin(np.linspace(0, np.pi, nodes)) * fields.ROPE.h
                 prediction = baseline.predict_array("rope", model, x)
                 self.assertEqual(prediction.shape, (2, nodes))
-                np.testing.assert_array_equal(prediction[:, [0, -1]], 0)
+                np.testing.assert_array_equal(prediction[:, [0, -1]], np.zeros((2, 2)))
 
 
 if __name__ == "__main__":
