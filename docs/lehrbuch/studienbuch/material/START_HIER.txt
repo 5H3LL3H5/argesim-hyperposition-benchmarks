@@ -78,3 +78,7 @@ Das Skript verwendet die Python-Standardbibliothek. Es rechnet ein Transportprof
 die Kollision an einer Lattice-Boltzmann-Zelle, einen Lernschritt und vier
 Fehlerwerte der Saite nach. Für Newmark und FNO enthält cp2_feldlabor dieselben
 Vergleichsfelder wie im bisherigen CP2-Versuch.
+
+Genauigkeitsstudie zur Saite und Kavität
+python cp2_genauigkeit/auswerten.py
+Neue Felder, Gewichte, Zeitreihen, Kapitelrechnungen und Literaturprofile liegen im Ordner cp2_genauigkeit.

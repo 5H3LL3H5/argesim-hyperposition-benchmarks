@@ -1,0 +1,190 @@
+{
+  "dense": [
+    {
+      "method": "RK45",
+      "rtol": 0.001,
+      "steps": 610,
+      "lower": 0.0010933844343156956,
+      "upper": 0.002213523664618082,
+      "boxes": 669
+    },
+    {
+      "method": "RK45",
+      "rtol": 1e-06,
+      "steps": 731,
+      "lower": 7.230398807454978e-07,
+      "upper": 1.1864451754696368e-06,
+      "boxes": 779
+    },
+    {
+      "method": "Radau",
+      "rtol": 0.001,
+      "steps": 14,
+      "lower": 0.0020207157786479766,
+      "upper": 0.0020309124440364007,
+      "boxes": 102
+    },
+    {
+      "method": "Radau",
+      "rtol": 1e-06,
+      "steps": 56,
+      "lower": 2.0963224645603883e-05,
+      "upper": 2.2985298721501827e-05,
+      "boxes": 108
+    },
+    {
+      "method": "BDF",
+      "rtol": 0.001,
+      "steps": 56,
+      "lower": 0.0005417111739394137,
+      "upper": 0.0005438172913333127,
+      "boxes": 122
+    },
+    {
+      "method": "BDF",
+      "rtol": 1e-06,
+      "steps": 125,
+      "lower": 1.0814297883929686e-06,
+      "upper": 1.09492317904215e-06,
+      "boxes": 132
+    }
+  ],
+  "thresholds": [
+    [
+      1.0946207497972862,
+      1.1226937023266148,
+      0.3386864474997758
+    ],
+    [
+      2.0961219881151005,
+      2.1653846174708637,
+      0.23086654272165155
+    ],
+    [
+      3.006354912917231,
+      3.104783854532798,
+      0.33736883122555084
+    ],
+    [
+      4.007812985943018,
+      4.147513520965277,
+      0.23079912972804378
+    ]
+  ],
+  "diode": {
+    "source_bound": 0.05914283615117151,
+    "gain_ohm": 980.7653479478383,
+    "b_bound_V": 0.059592150922094314,
+    "derivative_lower": 0.9996399025552511,
+    "probe_max_V": 0.022113958989035315,
+    "noninitial_crossings": 149
+  },
+  "cartesian": {
+    "hits": [
+      {
+        "time": 0.7034594857621278,
+        "new_length_error": 7.216449660063518e-16,
+        "new_tangency": 1.41510792718698e-15,
+        "impulse_jump": 0.0
+      },
+      {
+        "time": 1.1517797076380831,
+        "new_length_error": 5.841993555577574e-13,
+        "new_tangency": 4.840807097972587e-12,
+        "impulse_jump": 0.0
+      },
+      {
+        "time": 2.5904179874711337,
+        "new_length_error": 8.526512829121202e-13,
+        "new_tangency": 9.98043057046666e-13,
+        "impulse_jump": 0.0
+      },
+      {
+        "time": 2.990529056607868,
+        "new_length_error": 7.860379014346108e-13,
+        "new_tangency": 1.9714091311500805e-12,
+        "impulse_jump": 0.0
+      },
+      {
+        "time": 4.542741390165029,
+        "new_length_error": 7.977507543444062e-13,
+        "new_tangency": 2.2609585548561776e-13,
+        "impulse_jump": 0.0
+      },
+      {
+        "time": 4.867487793864366,
+        "new_length_error": 7.097655796428626e-13,
+        "new_tangency": 1.960050852608181e-12,
+        "impulse_jump": 0.0
+      },
+      {
+        "time": 6.64870713803295,
+        "new_length_error": 3.1635805086693836e-13,
+        "new_tangency": 8.577945076042963e-13,
+        "impulse_jump": 0.0
+      },
+      {
+        "time": 6.720384168292416,
+        "new_length_error": 6.006306563222097e-14,
+        "new_tangency": 3.6585476048987415e-12,
+        "impulse_jump": 0.0
+      }
+    ],
+    "max_length": 1.170175067954915e-12,
+    "max_tangency": 5.322131624296844e-12,
+    "max_event_time": 3.765698863844591e-11
+  },
+  "selection": {
+    "candidates": 17,
+    "folds": [
+      {
+        "case": "C03",
+        "method": "rk45",
+        "level": "",
+        "cost_ratio": 1.0
+      },
+      {
+        "case": "C05",
+        "method": "rk45",
+        "level": "",
+        "cost_ratio": null
+      },
+      {
+        "case": "C07",
+        "method": "rk45",
+        "level": "",
+        "cost_ratio": 1.0
+      },
+      {
+        "case": "C09",
+        "method": "rk45",
+        "level": "",
+        "cost_ratio": 2.433368037480479
+      },
+      {
+        "case": "C11",
+        "method": "rk45",
+        "level": "",
+        "cost_ratio": 1.2439293461929517
+      },
+      {
+        "case": "C12",
+        "method": "rk45",
+        "level": "",
+        "cost_ratio": 2.5900047147571903
+      },
+      {
+        "case": "C13",
+        "method": "rk45",
+        "level": "",
+        "cost_ratio": 1.0
+      },
+      {
+        "case": "C21",
+        "method": "rk45",
+        "level": "",
+        "cost_ratio": 10.286514526951136
+      }
+    ]
+  }
+}
