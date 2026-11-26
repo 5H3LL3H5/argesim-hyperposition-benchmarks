@@ -49,12 +49,12 @@ jobs:
           /tmp/python/bin/python scripts/build_studienbuch.py --output-dir /tmp/studienbuch
           BUILD
       - name: Assemble all published experiments and field data
-        run: python scripts/build_studienbuch.py --full-lab "$RUNNER_TEMP/ARGESIM_Rechenlabor_v9_19.zip"
+        run: python scripts/build_studienbuch.py --full-lab "$RUNNER_TEMP/ARGESIM_Rechenlabor_v9_20.zip"
       - name: Attach the complete offline lab
         uses: actions/upload-artifact@v4
         with:
-          name: ARGESIM-Rechenlabor-v9.19
-          path: ${{ runner.temp }}/ARGESIM_Rechenlabor_v9_19.zip
+          name: ARGESIM-Rechenlabor-v9.20
+          path: ${{ runner.temp }}/ARGESIM_Rechenlabor_v9_20.zip
           compression-level: 0
           if-no-files-found: error
       - name: Attach the verified repository edition

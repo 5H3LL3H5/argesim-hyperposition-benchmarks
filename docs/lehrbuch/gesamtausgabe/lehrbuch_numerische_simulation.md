@@ -1,7 +1,7 @@
 # Numerische Simulation dynamischer Systeme
 
 **Christian Stenzel**  
-Gesamtausgabe · Revision v9.19 · QSS-Verfahren und wiederholte Vergleichsstudien · 18 Fachkapitel und vier Anhänge
+Gesamtausgabe · Revision v9.20 · Parallele QSS und Kavität im Vollgitter · 18 Fachkapitel und vier Anhänge
 
 <a id="buch-einleitung"></a>
 
@@ -3502,6 +3502,38 @@ Schreiben wir die Wirbelgleichung als $z'=F(z)$ und setzen wir am Gruppenereigni
 
 <!-- Buchseite -->
 
+<a id="pdes-vorausschau"></a>
+
+## 6.7 Wie weit darf ein Nachbar schon rechnen?
+
+Zwei Prozesse berechnen zwei Hälften eines Grundwassergebiets. Im linken Teilgebiet erreicht eine Zelle ihre nächste Konzentrationsschwelle nach 80 simulierten Sekunden. Im rechten Teilgebiet wäre das nächste lokale Ereignis erst nach 120 Sekunden fällig. Darf der rechte Prozess 120 Sekunden vorlaufen? Dafür müssen wir wissen, ob er vor diesem Termin einen neuen Zufluss von links erhält.
+
+Der **Scheduler** entscheidet, welcher Übergang ausgeführt wird. Im **Ereigniskalender** (*future event list*) stehen die derzeit vorhergesagten Termine. Der **Lookahead** beschreibt, wie weit ein Prozess die nächste mögliche Ausgabe an einen Nachbarn sicher ausschließen kann. Ein Kalendereintrag kann sich durch eine noch ausstehende Eingabe verschieben.
+
+Für den konservativen C19R-Versuch starten alle Prozesse zum bestätigten Zeitpunkt $t$ mit zugestellten Grenzmeldungen. Jeder berechnet probeweise mit unveränderten Nachbardaten, wann er zuerst einen Wert über seine Grenze senden würde. Heiße dieser Zeitpunkt $e_p$. Das gemeinsame Minimum $e=\min_p e_p$ ist sicher. Eine frühere eingehende Meldung müsste von einem Prozess stammen, der bereits vor $e$ etwas ausgibt. Bis zur ersten solchen Ausgabe haben jedoch alle dieselben Eingaben wie im Probelauf. Am rechten Ende werden alle gleichzeitigen Meldungen zusammengeführt. Ein vorgesehener Ausgabe- oder Quelltermin kann den Schritt zusätzlich begrenzen.
+
+Nehmen wir an, die erste **grenzüberschreitende** Meldung liegt links bei 80 und rechts bei 120 Sekunden. Konservativ verarbeiten beide bis 80. Ein optimistischer Prozess kann bis 120 vorausrechnen, seinen Ausgangszustand sichern und nach Eintreffen der früheren Nachricht ab der Sicherung neu rechnen. Dieses Zurücksetzen heißt **Rollback**. Der Aufwand hängt davon ab, wie viele lokale Ereignisse dabei erneut ausgeführt werden.
+
+**Rechenprobe.** In C19R wurden bei acht Prozessen 65 292 Ereignisse mit 11 556 konservativen Freigaben bestätigt. Pro Freigabe fallen zusammen $65\,292/11\,556=5{,}65$ Ereignisse an. Die gemessene Wandzeit stieg von 31,7 ms mit einem auf 353,9 ms mit acht Prozessen. Hier kostet die gemeinsame Freigabe mehr, als die Aufteilung der Arbeit einspart. Der konservative Lauf hat dabei null Rollbacks.
+
+<!-- Buchseite -->
+
+<a id="pdes-schnitt"></a>
+
+### Wo zieht man die Partitionsgrenze?
+
+![Abbildung 6.9. Dieselben 65 × 33 Grundwasserzellen über zehn simulierte Tage. Die Farbe zählt die Quantisierungen je Zelle. Die orangefarbenen Linien zeigen, welche Nachbarn auf verschiedenen Prozessen liegen.](abbildungen/pdes_c19r.svg)
+
+Bei einem regelmäßigen Gitter kann man zunächst die geschnittenen Nachbarschaftskanten zählen. Im linken Bild schneiden die acht Kacheln 164 Kanten, im rechten schneiden die Streifen sogar 231. Trotzdem sinkt die Zahl der bestätigten Grenzmeldungen **von 31 848 auf 14 609**. Ein Schnitt durch eine häufig quantisierende Zelle erzeugt bei jeder neuen Meldung Arbeit. Ein Schnitt durch eine ruhende Zelle trägt während dieser Ruhephase nichts zum Datenverkehr bei.
+
+Für einen vertikalen Schnitt zwischen Spalten $c-1$ und $c$ summieren wir die gemessenen Ereigniszahlen beider Spalten. Horizontale Schnitte behandeln wir ebenso. Für vier oder acht Prozesse wurden alle durchgehenden rechtwinkligen Schnitte betrachtet, deren Bandbreite je Achse zwischen den nach außen gerundeten Grenzen von 90 und 110 Prozent der gleichmäßigen Breite liegt. Unter den 2 832 zulässigen Achterkarten minimierten im Nennfall dieselben Streifen die Zahl der Exporte und maximierten den mittleren sicheren Fortschritt. Dieser wuchs von 32,03 auf 74,77 simulierte Sekunden. Bei einer spekulativen Fensterweite von 6 750 s sank die Zahl zurückgesetzter lokaler Fenster von 5 803 auf 2 988.
+
+**Übung mit Lösung.** Beim Doppelpuls und vier Prozessen erhält Karte A 16 350 bestätigte Exporte und 52,82 s mittleren sicheren Fortschritt. Karte B liefert 16 516 Exporte und 67,79 s. Welche Karte wählen Sie für möglichst wenige übertragene Zustände? A. Für möglichst große konservative Schritte? B. Im optimistischen Betrieb wurden für A 1 774 und für B 2 681 Fenster zurückgesetzt. Das Quellprofil, das Protokoll und die Zielgröße bestimmen gemeinsam, was „optimal“ bedeutet. Beide Rechnungen reproduzieren das serielle Ergebnis. Das physikalische Feldbudget der unabhängigen Green-Referenz verfehlen bei diesem Quantum beide Quellprofile.
+
+Die [Kavität in Kapitel 16](#pdes-kavitaet) hat eine andere Kopplung. Dort verändert eine einzelne Wirbelstärke über die Poisson-Gleichung die rekonstruierte Strömung im ganzen Gebiet.
+
+<!-- Buchseite -->
+
 <a id="kap06-schluss"></a>
 
 ## Schluss · Zustandsschwelle, Kalender und Bahnfehler
@@ -3509,6 +3541,8 @@ Schreiben wir die Wirbelgleichung als $z'=F(z)$ und setzen wir am Gruppenereigni
 Der Speicher meldet erneut, sobald seine laufende Näherung das eigene Quantenband verlässt. Eine Nachbarmeldung kann vorher die Steigung ändern. Dann rechnet der Solver den Zustand zunächst mit der alten Rate bis zu dieser Uhrzeit fort und bestimmt erst danach den neuen Termin. Die Version des Kalendereintrags schützt vor einer Berechnung mit überholter Rate. Für gleichzeitige Eingänge braucht die Kopplung außerdem eine festgelegte Übergangsregel.
 
 QSS höherer Ordnung verändert das zwischen zwei Meldungen verwendete Polynom. Bei einer steifen Rückkopplung bleibt die Frage, wie oft das Band erreicht wird. LIQSS und die hier besprochenen Erweiterungen suchen dazu lokale implizite oder partitionierte Schritte. Einen Lauf vergleichen wir am globalen Bahnfehler oder am Schaltzeitpunkt. Das gewählte Quantum beschreibt zunächst den Abstand zwischen Zustand und Meldung. Wie weit dieser Abstand den gemessenen Fehler beeinflusst, hängt auch vom Modell ab.
+
+**Eine andere Laufzeit, eine andere Grenze.** In den ersten vier simulierten Sekunden der Saite senkte eine an die Ereignisdichte angepasste Aufteilung auf vier Prozesse die Zahl der Grenzmeldungen von 8 381 auf 1 773 (79 %). Über die vollen 30 Sekunden verteilt sich die Welle weiter. In der seriellen Ereignisspur ergeben gleich breite Abschnitte 5 531 225 Grenzübertritte, die für diese Spur günstigsten zulässigen Schnitte 5 379 607. Übrig bleiben 2,74 % Einsparung. Diese zweite Messung zählt Übertritte aus der vollständigen Spur. Eine parallele Gesamtlaufzeit wurde dafür nicht erhoben.
 
 In einem räumlich diskreten Modell bestimmt die Nachbarschaft des Gitters, welche Komponenten voneinander abhängen. Wir werden an der Wärmeleitung sehen, wie feinere Nachbarschaften zugleich die Zeitskalen verändern. [Räumliche Diskretisierung](#kap07-einstieg)
 
@@ -7794,11 +7828,37 @@ Die Lehrbudgets sind $E_2\leq 0{,}01$ und $E_\infty\leq0{,}01$. Für D2Q9-Treue 
 | Gruppe 2, 0,0010 | 259,49 | 479,21 | 15,791 | 0,2938 |
 | Gruppe 2, 0,0002 | 295,04 | 403,30 | 15,777 | 0,2938 |
 
-Die Fehler in dieser Tabelle beziehen sich auf D2Q9. An allen 37 gespeicherten Takten stimmen die Rohfelder des seriellen und des OpenMP-Laufs in Dichte und beiden Geschwindigkeitskomponenten bis auf 0 überein. Aus den gemessenen Wandzeiten folgt ein Faktor 0,40 für diese Ausführung. Die CPU-Zeit summiert die Prozessorthreads. Gleichzeitig laufende Aufträge beeinflussten die Wandzeit. Die Zeiten der Vollgitterkerne schließen das Schreiben der Felddateien aus.
+Die Fehler in dieser Tabelle beziehen sich auf D2Q9. An allen 37 gespeicherten Takten stimmen die Rohfelder des seriellen und des OpenMP-Laufs in Dichte und beiden Geschwindigkeitskomponenten bis auf 0 überein. Aus den gemessenen Wandzeiten folgt ein Faktor 0,40 für diese Ausführung. Die CPU-Zeit summiert die Prozessorthreads. Zwei spätere Messpaare über je 350 000 Takte ergaben auf einem anderen Rechner mit gebundenen Threads die Faktoren 2,74 und 2,85. In einer Lastgegenprobe über 4 096 Takte sank der Faktor von 2,54 auf 0,63, als Zusatzarbeit genau einen der vier Threads verzögerte. Die übrigen Threads warten nach jedem Gittertakt an der Barriere. Im historischen Lauf wurde diese Wartezeit je Thread nicht aufgezeichnet. Die Kernzeiten schließen Dateiausgabe aus.
 
 Die Quanten in der Tabelle betreffen $z=h\omega$. Für $\Delta=0{,}001$ beträgt das Maximum des relativen QSS-Zeitfehlers bei Gruppen-QSS1 0,215 %, bei Gruppen-QSS2 0,032 %. Zwischen AB2 mit zwei und vier Takten messen wir höchstens 0,0037 %. Der viel größere Abstand zu D2Q9 ist am ersten Prüfzeitpunkt am stärksten. Am Ende betragen die Profil-RMS-Fehler an sechs Kontrollpunkten je Richtung für D2Q9 0,01011 und 0,00360 in Einheiten des Deckeltempos. Die mittlere Dichte erreicht 0,980986. Die Geschwindigkeitsänderung während der letzten 10 000 Takte beträgt relativ 1,35e-06. Für diese unabhängige Profilprobe sind die sechs Koordinaten je Komponente in der Messdatei aufgeführt. Die ältere Profilstichprobe weiter vorn im Kapitel hat eine andere Punktauswahl. Im Gruppenlauf erster Ordnung fallen bei feinerem Quantum 42 127 statt 36 675 Gruppentermine an. Die dafür gemessene kürzere Laufzeit tritt unter wechselnder Rechnerlast auf.
 
 Am ruhenden Rand misst die makroskopische Ausgabe nach dem Streaming zum Endzeitpunkt maximal 0,0383 $U$. Bei der Wirbelrechnung setzt die Rekonstruktion dort beide Komponenten auf null. Für die Hankel-Korrektur liegt das lokale Fehlmaximum am Takt 4096 bei $x/L=0{,}930$, $y/L=0{,}758$. Die größte Abweichung kann beim Anfahren also auch im Innenraum auftreten. Eine separate Wiederholung mit sieben Dateiausgaben misst vom Prozessstart bis zum Ende 170,5 s auf einem Thread und 365,5 s auf vier Threads. Der beobachtete Beschleunigungsfaktor beträgt 0,47.
+
+<!-- Buchseite -->
+
+<a id="cp2-voll-direktvergleich"></a>
+
+## Welcher Solver erreicht das letzte Feld zuerst?
+
+Zwei Stoppuhren können verschiedene Fragen beantworten. Beim Speedup führen ein und acht Prozesse **denselben** Algorithmus bis zum selben Zustand aus. Bei der Methodenwahl interessiert, wie lange verschiedene Modelle und Integratoren bis zum verlangten Geschwindigkeitsfeld brauchen und wie gut dieses Feld übereinstimmt.
+
+Wir starten sieben Rechnungen auf dem vollen Gitter bei Ruhe, $\mathrm{Re}=1000$ und gleichem Deckeltempo. Alle erreichen $t^*=136{,}71875$, entsprechend 350 000 LBM-Takten. Geschrieben werden 37 Felder. Die Fehler sind Maxima über die sieben vereinbarten Prüfzeiten und alle inneren Orte. Die Wandzeit umfasst den Integrationskern einschließlich der für die DOP853-Ausgabe benötigten Interpolation. Das Schreiben der Felddateien ist ausgeklammert. Die Hardware ist ein AMD EPYC 9V45. Jeder serielle Lauf war an eine logische CPU gebunden, der OpenMP-Lauf an vier. DOP853 lief zeitweise auf einer separaten CPU parallel zur nativen Messreihe. Jeder Tabellenwert stammt aus einem Volllauf. DOP853 läuft in SciPy mit $\mathrm{rtol}=10^{-7}$ und $\mathrm{atol}=10^{-10}$, die übrigen Kerne in kompiliertem C++.
+
+| Integrator im Vollgitter | Wand s | Feldabstand zu D2Q9, % | Feldabstand zu DOP853, % |
+| --- | ---: | ---: | ---: |
+| D2Q9, 1 Thread | 58,71 | 0 | 18,05739 |
+| D2Q9, 4 Threads | 23,35 | 0 | 18,05739 |
+| AB2, 2 Takte | 180,26 | 15,77358 | 0,00123 |
+| AB2, 4 Takte | 91,44 | 15,77461 | 0,00497 |
+| DOP853, adaptiv | 205,46 | 15,77325 | 0 |
+| Gruppen-QSS1 | 42,77 | 15,72579 | 0,21521 |
+| Gruppen-QSS2 | 89,64 | 15,79072 | 0,03337 |
+
+D2Q9 entwickelt neun Populationen pro Gitterknoten. AB2 (Adams–Bashforth zweiter Ordnung), DOP853 und die beiden Gruppen-QSS-Verfahren integrieren dieselbe räumlich diskretisierte inkompressible Wirbelgleichung mit 65 025 Zuständen. AB2 verwendet feste Schritte von zwei bzw. vier LBM-Takten. Die Gruppe setzt beim ersten Bandtreffer einen gemeinsamen Termin für den gesamten Wirbelvektor, mit $\Delta=0{,}001$ für $z=h\omega$. Ihre Zeiten sind vollständige QSS-Rechnungen. Die [komponentenweisen QSS3/4-Läufe](#pdes-kavitaet) besitzen eigene Termine und haben bisher nur den Anlauf durchlaufen.
+
+Die beiden D2Q9-Läufe liefern 37 bytegleiche Felder. Vier Threads gewinnen hier den Faktor $58{,}71/23{,}35=2{,}51$. Bei Gruppen-QSS1 kostet die ganze Rechnung 42,77 s. Der größte Feldabstand zu DOP853 beträgt 0,2152 %, zur D2Q9-Bahn 15,73 %. Der Normierungsnenner ist jeweils das Feld des genannten Referenzverfahrens. DOP853 selbst weicht von D2Q9 anfangs um 15,77 %, am Endtermin noch um 3,29 % ab. Eine kleinere Zeitschrittweite allein beseitigt diesen Modellabstand nicht.
+
+**Lesetest.** Welches Verfahren würden Sie als Gegenprobe des QSS-Zeitfehlers wählen? DOP853 oder schrittverfeinertes AB2 auf derselben Wirbelgleichung. Für die Frage, wie gut die verlangte kinetische LBM-Bahn reproduziert wird, vergleichen Sie dagegen mit D2Q9. Die PDF-Anlage `CP2_Vollgitter_v9_20.json` enthält die Einzelzeiten und Feldprüfsummen.
 
 <!-- Buchseite -->
 
@@ -7843,6 +7903,28 @@ Mit derselben nominellen Schranke von 240 CPU-Sekunden erreicht QSS3 $t^*=0,0008
 Die Klein- und Kurzzeitserie enthält 221 Konfigurationen, darunter 28 mit QSS3 oder QSS4. In diesen 28 Rechnungen erreichen 25 sämtliche verlangten Ausgaben. Das begleitende Kavitätenlabor enthält die Rohfelder, Zeit- und Raumfehler sowie die Versuchsgrenzen.
 
 **Den Befund selbst nachrechnen.** Lesen Sie das erste Wurzelpolynom in Kapitel 6, vergleichen Sie den ersten ausgegebenen Zeitpunkt und verfolgen Sie für dieselbe Zelle $|x-q|/\Delta$. Eine zutreffende erste Meldung und ein vollständiges Strömungsfeld am letzten Takt beantworten zwei verschiedene Fragen. Die Methodenmatrix bewahrt für jede der 19 nativen Methoden sowohl die erreichte Zeit als auch den Abbruchstatus.
+
+<!-- Buchseite -->
+
+<a id="pdes-kavitaet"></a>
+
+### Warum beschleunigt sich schon der Anlauf?
+
+Beim Anfahren des Deckels quantisieren zuerst Zellen nahe der oberen Wand. Eine Zeilenpartition hält viele dieser Zellen im selben Teilgebiet. Spalten verteilen sie auf mehrere Prozesse. Dazu kommt eine zweite, räumlich globale Aufgabe. Für die Geschwindigkeit braucht der Poisson-Löser das vollständige Wirbelfeld. Im Versuchsprogramm liegen die lokalen Taylor-Polynome auf acht Prozessen. Ein Prozess sammelt die Felder, berechnet die rechte Seite und gibt die Ergebnisse an die Eigentümer zurück.
+
+| Aufteilung der Kavität | QSS3-Faktor | QSS4-Faktor | Rücksetzungen QSS3 | Rücksetzungen QSS4 |
+| --- | ---: | ---: | ---: | ---: |
+| Zeilen am Deckel | 5,03 | 4,98 | 31 | 0 |
+| Zwei mal vier Kacheln | 4,93 | 5,32 | 96 | 96 |
+| Spalten | 4,38 | 4,92 | 224 | 224 |
+
+Die Zeitspalten betreffen acht akzeptierte Ereignisabschnitte im konservativen Modus. Der Faktor ist $S_8=T_1/T_8$ aus den Medianen von je drei Wandzeiten einschließlich Prozessstart und Rückgabe der Prüffelder. QSS3 benötigt in der Zeilenaufteilung 8,90 s mit einem und 1,77 s mit acht Prozessen. Bei QSS4 sind es für die Kacheln 11,84 s und 2,23 s. Die Rücksetzungen stammen aus einem eigenen Lauf über **32** Abschnitte je Aufteilung mit begrenzter Spekulation über $0{,}003$ Einheiten $t^*$. Vorläufige Ausgaben blieben bis zur Bestätigung lokal. Jede Rücksetzung macht tatsächlich ausgeführte lokale Arbeit rückgängig.
+
+Alle geprüften Zeitstempel und vollständigen Wirbelfelder stimmen bytegenau mit der seriellen Referenz überein. Nach 32 Abschnitten erreicht QSS3 $t^*=0{,}000894246$, QSS4 $t^*=0{,}001849961$. Bis zum ersten regulären Vergleichsfeld bei $0{,}1$ fehlt bei beiden noch der größte Teil der Simulationszeit. Die medianen Abstände aufeinanderfolgender globaler Termine betragen bei allen drei Aufteilungen $1{,}03\cdot10^{-9}$ bzw. $1{,}61\cdot10^{-9}$ in $t^*$. Aus der Partitionsbreite folgt hier kein garantierter positiver Lookahead. Eine Änderung der Wirbelstärke wirkt über die Poisson-Lösung sofort im gesamten Feld. Für eine Hochrechnung bis Takt 350 000 müsste man zudem die spätere Ereignisdichte kennen.
+
+Beim D2Q9-Streaming benötigt eine Zelle nur Populationen ihrer direkten und diagonalen Nachbarn. Im MPI-Versuch über 1 024 Gittertakte übertrugen acht Kacheln nur 6 140 Populationen pro Takt, acht Zeilenstreifen dagegen 10 766. Die Kacheln bedienten 32 gerichtete Prozesspaare, die Streifen nur 14. Die Streifen erreichten Faktor 1,34, die beiden Kachelanordnungen 1,06 und 1,13. Wer nur Bytes zählt, übersieht die Kosten der einzelnen Nachrichten.
+
+**Was kostet der Kalender?** Im seriellen Profil beansprucht die Auswahl des Minimums aus den bereits berechneten Kandidaten 0,03–0,04 Prozent der CPU-Zeit. Die Kandidaten selbst kosten 25–27 Prozent, das Verschieben der Polynome 25–28 Prozent und die Taylor-Koeffizienten 37–43 Prozent. Ein schnelleres Minimum lässt die Kosten dieser Arbeiten bestehen. Für QSS3 über 32 Abschnitte transportierte der zentrale Poisson-Pfad in Zeilen 159,22 MB und in Kacheln 159,13 MB. Bei gleich vielen Zellen auf dem koordinierenden Prozess ist dieses Volumen für alle Aufteilungen identisch. Die [lokale Kopplung in Kapitel 6](#pdes-schnitt) erklärt, wann günstig gelegte Schnitte deutlich mehr bewirken.
 
 <!-- Buchseite -->
 

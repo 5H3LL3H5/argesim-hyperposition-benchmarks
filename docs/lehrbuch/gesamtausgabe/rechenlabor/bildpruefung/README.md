@@ -1,8 +1,8 @@
 # Abbildungen prüfen und nachrechnen
 
-Christian Stenzel · Numerische Simulation dynamischer Systeme · Register und Bildatlas der Druckfassung v9.19
+Christian Stenzel · Numerische Simulation dynamischer Systeme · Register und Bildatlas der Druckfassung v9.20
 
-Die Tafeln zu CP-Dynamik entstehen im [Labor für CP-Dynamik](../cp_dynamik/README.md). Der neue Fühlervergleich und die zwei ergänzten Tafeln sind im [Revisionslabor](../revisionspruefung/README.md) beschrieben.
+Abb. 6.9 entsteht aus den Ereigniszahlen und Schnittkarten des [PDES-Labors](../pdes_partitionierung/README.md). Die Tafeln zu CP-Dynamik entstehen im [Labor für CP-Dynamik](../cp_dynamik/README.md). Der neue Fühlervergleich und die zwei ergänzten Tafeln sind im [Revisionslabor](../revisionspruefung/README.md) beschrieben.
 
 Welche Spuren muss ein Modell hinterlassen, damit eine Abbildung seine Aussage trägt? In C12 verraten die Knicke der Positionsbahnen den Geschwindigkeitsaustausch. Bei der Diode bestimmt erst die Fortsetzung vom Anfangswert, welcher algebraische Ast zum Experiment gehört. Dieses Labor führt von den Modellparametern über die Messdatei zum druckfertigen Bild. Das Abbildungsverzeichnis nennt zu jeder Tafel des Buchs ihre Nummer, Druckseite, Quelldatei, Abmessungen und Prüfsummen.
 
@@ -17,7 +17,7 @@ python3 -B rechenlabor/bildpruefung/bestand.py
 python3 -B rechenlabor/bildpruefung/test_bilder.py -v
 ```
 
-Benötigt werden Python ab 3.10, NumPy, SciPy, Matplotlib, PyMuPDF und für zwei überarbeitete SVG-Druckvorlagen Inkscape. Die tatsächlich geprüften Versionen stehen in `umgebung.txt`. Alle Eingabedaten liegen bei. Die wissenschaftlichen Kurven und Kartendaten werden unabhängig von der PDF-Seitenfolge erzeugt. Das seitenbezogene Verzeichnis enthält die 90 Abbildungen der Druckausgabe v9.18. Wer nur ein Teilbild ablesen möchte, findet die neun neuen Druckvorlagen im Ordner `druck/` unter dem Namen `bild_*.pdf`.
+Benötigt werden Python ab 3.10, NumPy, SciPy, Matplotlib, PyMuPDF und für zwei überarbeitete SVG-Druckvorlagen Inkscape. Die tatsächlich geprüften Versionen stehen in `umgebung.txt`. Alle Eingabedaten liegen bei. Die wissenschaftlichen Kurven und Kartendaten werden unabhängig von der PDF-Seitenfolge erzeugt. Das seitenbezogene Verzeichnis enthält die 92 Abbildungen der Druckausgabe v9.20. Wer nur ein Teilbild ablesen möchte, findet die neun neuen Druckvorlagen im Ordner `druck/` unter dem Namen `bild_*.pdf`.
 
 | Abbildung | Experiment und Beleg |
 |---|---|
@@ -40,7 +40,7 @@ Die kleineren D2Q9-Karten in 16.1 und 16.4 geben die Originaldaten wieder. In 16
 
 ## Druckausgabe und Bildatlas kontrollieren
 
-Der folgende Aufruf prüft die 83 Bildnummern in der gelieferten Buch-PDF, gleicht die Seiten und SHA-256-Werte mit dem Verzeichnis ab und erzeugt den vollständigen Bildatlas erneut. Legen Sie die Buch-PDF dazu in den Paketstamm oder geben Sie ihren Pfad an. Für die Verzeichnisseiten verwendet der Bildsatz die DejaVu-Schriften in der Standardinstallation von Debian. Ohne die Option `--atlas` führt das Programm nur die Prüfung aus.
+Der folgende Aufruf prüft die 92 Bildnummern in der gelieferten Buch-PDF, gleicht die Seiten und SHA-256-Werte mit dem Verzeichnis ab und erzeugt den vollständigen Bildatlas erneut. Legen Sie die Buch-PDF dazu in den Paketstamm oder geben Sie ihren Pfad an. Für die Verzeichnisseiten verwendet der Bildsatz die DejaVu-Schriften in der Standardinstallation von Debian. Ohne die Option `--atlas` führt das Programm nur die Prüfung aus.
 
 ```sh
 python3 -B rechenlabor/bildpruefung/buchatlas.py lehrbuch_numerische_simulation.pdf --atlas Mein_Bildatlas.pdf

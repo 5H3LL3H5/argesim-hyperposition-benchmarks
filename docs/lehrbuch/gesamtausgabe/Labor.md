@@ -1,4 +1,6 @@
-# Rechenlabor zur Gesamtausgabe v9.19
+# Rechenlabor zur Gesamtausgabe v9.20
+
+[PDES und CP2-Vollgitter](rechenlabor/pdes_partitionierung/README.md) enthält die gemessenen 1/4/8-Prozessvergleiche, die Quelltexte und die neuen Vollläufe mit AB2, DOP853, D2Q9 und Gruppen-QSS.
 
 **QSS3/4-Nachtrag:** Der [Vorher-Nachher-Vergleich](rechenlabor/qss_pruefung/messung/taylor_kontakt/README.md) enthält die neu gemessenen 120 Konfigurationen. Die ursprünglichen Tabellen und Vollgitterberichte gehören weiterhin zum publizierten Messstand v9.19. Zum Nachrechnen des alten Stands den dort genannten Git-Commit auschecken.
 
@@ -7,12 +9,12 @@ Die vier Primärdateien und der zeilenweise Vergleich mit `c635504` liegen in [k
 
 ## Das vollständige Labor öffnen
 
-Beim GitHub-Actions-Lauf **Studienbuch** entsteht die Datei `ARGESIM_Rechenlabor_v9_19.zip` mit allen Quelltexten, Modellgewichten, Feldmessungen und Druckvorlagen. Sie lässt sich auch aus einem Checkout der veröffentlichten Revision mit der Python-Standardbibliothek erzeugen.
+Beim GitHub-Actions-Lauf **Studienbuch** entsteht die Datei `ARGESIM_Rechenlabor_v9_20.zip` mit allen Quelltexten, Modellgewichten, Feldmessungen und Druckvorlagen. Sie lässt sich auch aus einem Checkout der veröffentlichten Revision mit der Python-Standardbibliothek erzeugen.
 
 ```bash
 python scripts/build_studienbuch.py --check
-python scripts/build_studienbuch.py --full-lab ARGESIM_Rechenlabor_v9_19.zip
-python -m zipfile -e ARGESIM_Rechenlabor_v9_19.zip labor
+python scripts/build_studienbuch.py --full-lab ARGESIM_Rechenlabor_v9_20.zip
+python -m zipfile -e ARGESIM_Rechenlabor_v9_20.zip labor
 cd labor
 python pruefen.py
 ```

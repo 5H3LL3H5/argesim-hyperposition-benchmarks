@@ -35,7 +35,8 @@ COMPARISON = AUDIT / "messung/revisionsvergleich.csv"
 REPLAY = COMPARISON.parent / "skalenfix_c635504"
 MANUSCRIPT = "lehrbuch_numerische_simulation.md"
 CONTACT = COMPARISON.parent / "kontakt_v919"
-REVISION = "v9.19"
+PDES = Path("rechenlabor/pdes_partitionierung")
+REVISION = "v9.20"
 DATE = (2026, 11, 26, 0, 0, 0)
 
 
@@ -61,6 +62,7 @@ def edition_files():
 
 def verify_measurements():
     compact.verify_measurements()
+    runpy.run_path(str(EDITION / PDES / "nachweis.py"))["verify"](EDITION)
     with (EDITION / COMPARISON).open(encoding="utf-8", newline="") as stream:
         rows = list(csv.DictReader(stream))
     counts = Counter(r["reihe"] for r in rows)
@@ -173,13 +175,16 @@ def core_lab(path):
             write_entry(
                 lab, source.relative_to(MATERIAL).as_posix(), source.read_bytes()
             )
-        write_entry(lab, "START_v9_19.md", (EDITION / "Labor.md").read_bytes())
+        write_entry(lab, "START_v9_20.md", (EDITION / "Labor.md").read_bytes())
         matrix = Path("daten/qss-extension.csv")
         write_entry(lab, matrix.as_posix(), (EDITION / matrix).read_bytes())
         with zipfile.ZipFile(PACKAGES / "Laborquellen.zip") as source:
             for name in sorted(source.namelist()):
                 if name.startswith((AUDIT.as_posix() + "/", "beispiele/")):
                     write_entry(lab, name, source.read(name))
+        for source in sorted((EDITION / PDES).iterdir()):
+            if source.is_file():
+                write_entry(lab, source.relative_to(EDITION).as_posix(), source.read_bytes())
         for source in sorted((EDITION / AUDIT).rglob("*")):
             if source.is_file() and "__pycache__" not in source.parts:
                 write_entry(
@@ -354,6 +359,7 @@ def publish_pdf(stage):
         attachments["Archiv_" + name] = attachments.pop(name)
         attachments[name] = (EDITION / "daten" / name).read_bytes()
     attachments["QSS_Kontaktvergleich_v9_19.csv"] = (EDITION / CONTACT / "vergleich.csv").read_bytes()
+    attachments["CP2_Vollgitter_v9_20.json"] = (EDITION / PDES / "vollgitter.json").read_bytes()
     with pymupdf.open(stage / "text.pdf") as book:
         verify_navigation(book)
         if (

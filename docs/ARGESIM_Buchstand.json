@@ -1,8 +1,8 @@
 {
-  "edition": "v9.19",
-  "sources_sha256": "1a8abcd6518cdcbe05d6a71a40c0ad94bafda5b91a476735070c5d5d6d21cd00",
+  "edition": "v9.20",
+  "sources_sha256": "bd592023df8ac724c0df6e11dc9f16dba3644aaf6b23c9c7229928177e83e80b",
   "outputs_sha256": {
-    "ARGESIM_SOLVER_STUDY.pdf": "45340238a9d1280aa431faea03c2d5b4f4d9792a3edf27131fcccd6885c4729c",
-    "ARGESIM_Bachelor_Rechenlabor.zip": "d1d336fdfe2b36e76186cc723903affc698972b4f8b7360f833ac4ece71a60b1"
+    "ARGESIM_SOLVER_STUDY.pdf": "984f670c7edb13e103091839e3e275205dcc737decacff3bd54b59258a67bbd7",
+    "ARGESIM_Bachelor_Rechenlabor.zip": "30c4d90275ea128d4b105ec39e34c5e34eb1109e330701154a03705b3e55dcf9"
   }
 }
