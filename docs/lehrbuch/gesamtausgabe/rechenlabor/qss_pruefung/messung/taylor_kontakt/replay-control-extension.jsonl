@@ -1,0 +1,48 @@
+{"case": "C09", "method": "qss4", "quantum_factor": 0.005, "accepted": 0, "rejected": 0, "rhs": 560, "status": "pass", "error_over_limit": 4.424132615810095e-06, "median_ms": 8.10065, "times_ms": "8.272755 8.100650 8.042044"}
+{"case": "C12", "method": "qss3", "quantum_factor": 0.005, "accepted": 0, "rejected": 0, "rhs": 104, "status": "pass", "error_over_limit": 0.0, "median_ms": 2.604727, "times_ms": "2.524640 2.604727 2.686711"}
+{"case": "C12", "method": "qss4", "quantum_factor": 0.001, "accepted": 0, "rejected": 0, "rhs": 164, "status": "pass", "error_over_limit": 0.0, "median_ms": 3.952917, "times_ms": "4.487986 3.952917 3.598340"}
+{"case": "C07", "method": "qss3", "quantum_factor": 0.0002, "accepted": 94, "rejected": 0, "rhs": 710, "status": "pass", "error_over_limit": 0.2693071600196606, "median_ms": 35.469452, "times_ms": "39.811526 35.469452 35.304694"}
+{"case": "C07", "method": "qss4", "quantum_factor": 0.0002, "accepted": 40, "rejected": 0, "rhs": 453, "status": "pass", "error_over_limit": 0.21724350211055343, "median_ms": 21.378649, "times_ms": "26.518457 21.378649 20.946908"}
+{"case": "C11", "method": "qss3", "quantum_factor": 0.0002, "accepted": 4, "rejected": 0, "rhs": 40, "status": "pass", "error_over_limit": 0.0048759216363641195, "median_ms": 4.647304, "times_ms": "4.460041 4.771636 4.647304"}
+{"case": "C07", "method": "qss4", "quantum_factor": 0.005, "accepted": 20, "rejected": 0, "rhs": 273, "status": "accuracy_miss", "error_over_limit": 3.285314392881211, "median_ms": 10.864306, "times_ms": "10.831406 11.196992 10.864306"}
+{"case": "C05", "method": "qss3", "quantum_factor": 0.0002, "status": "timeout", "detail": "per-integration time limit"}
+{"case": "C03", "method": "qss3", "quantum_factor": 0.0002, "status": "timeout", "detail": "per-integration time limit"}
+{"case": "C21", "method": "qss3", "quantum_factor": 0.005, "accepted": 0, "rejected": 0, "rhs": 66, "status": "pass", "error_over_limit": 2.291500322826323e-10, "median_ms": 1.210922, "times_ms": "1.361344 1.114270 1.210922"}
+{"case": "C13", "method": "qss3", "quantum_factor": 0.005, "accepted": 392, "rejected": 0, "rhs": 2015, "status": "accuracy_miss", "error_over_limit": 53.41168110471273, "median_ms": 278.754981, "times_ms": "278.754981 283.664752 276.238062"}
+{"case": "C09", "method": "qss4", "quantum_factor": 0.001, "accepted": 0, "rejected": 0, "rhs": 560, "status": "pass", "error_over_limit": 4.424132615810095e-06, "median_ms": 7.86102, "times_ms": "7.222573 7.861020 8.480210"}
+{"case": "C13", "method": "qss4", "quantum_factor": 0.001, "accepted": 443, "rejected": 0, "rhs": 3206, "status": "accuracy_miss", "error_over_limit": 19.532377107904328, "median_ms": 442.314543, "times_ms": "442.314543 439.869578 443.184091"}
+{"case": "C11", "method": "qss3", "quantum_factor": 0.001, "accepted": 1, "rejected": 0, "rhs": 25, "status": "pass", "error_over_limit": 0.043703481027002056, "median_ms": 1.597588, "times_ms": "1.597588 1.549701 1.610566"}
+{"case": "C05", "method": "qss3", "quantum_factor": 0.001, "status": "timeout", "detail": "per-integration time limit"}
+{"case": "C07", "method": "qss3", "quantum_factor": 0.001, "accepted": 53, "rejected": 0, "rhs": 423, "status": "accuracy_miss", "error_over_limit": 1.492778583089549, "median_ms": 20.16182, "times_ms": "20.161820 19.827509 20.470213"}
+{"case": "C05", "method": "qss4", "quantum_factor": 0.001, "status": "timeout", "detail": "per-integration time limit"}
+{"case": "C12", "method": "qss3", "quantum_factor": 0.001, "accepted": 0, "rejected": 0, "rhs": 104, "status": "pass", "error_over_limit": 0.0, "median_ms": 2.163108, "times_ms": "2.275707 2.159371 2.163108"}
+{"case": "C05", "method": "qss3", "quantum_factor": 0.005, "status": "timeout", "detail": "per-integration time limit"}
+{"case": "C09", "method": "qss3", "quantum_factor": 0.005, "accepted": 0, "rejected": 0, "rhs": 320, "status": "pass", "error_over_limit": 0.00014991179986267866, "median_ms": 5.100979, "times_ms": "5.068328 5.100979 5.576009"}
+{"case": "C11", "method": "qss4", "quantum_factor": 0.005, "accepted": 0, "rejected": 0, "rhs": 35, "status": "pass", "error_over_limit": 0.0020132609913348087, "median_ms": 2.138153, "times_ms": "2.141050 2.138153 1.867873"}
+{"case": "C12", "method": "qss4", "quantum_factor": 0.0002, "accepted": 0, "rejected": 0, "rhs": 164, "status": "pass", "error_over_limit": 0.0, "median_ms": 3.330559, "times_ms": "3.755411 3.302836 3.330559"}
+{"case": "C21", "method": "qss3", "quantum_factor": 0.0002, "accepted": 0, "rejected": 0, "rhs": 66, "status": "pass", "error_over_limit": 2.291500322826323e-10, "median_ms": 1.015207, "times_ms": "1.053479 1.000866 1.015207"}
+{"case": "C09", "method": "qss3", "quantum_factor": 0.001, "accepted": 0, "rejected": 0, "rhs": 320, "status": "pass", "error_over_limit": 0.00014991179986267866, "median_ms": 5.324614, "times_ms": "5.077975 5.324614 6.085590"}
+{"case": "C11", "method": "qss4", "quantum_factor": 0.001, "accepted": 0, "rejected": 0, "rhs": 35, "status": "pass", "error_over_limit": 0.0020132609913348087, "median_ms": 1.945385, "times_ms": "2.025145 1.837733 1.945385"}
+{"case": "C12", "method": "qss4", "quantum_factor": 0.005, "accepted": 0, "rejected": 0, "rhs": 164, "status": "pass", "error_over_limit": 0.0, "median_ms": 3.428948, "times_ms": "3.404369 3.463590 3.428948"}
+{"case": "C21", "method": "qss4", "quantum_factor": 0.005, "accepted": 0, "rejected": 0, "rhs": 111, "status": "pass", "error_over_limit": 6.154306397831988e-06, "median_ms": 1.656127, "times_ms": "1.689903 1.549218 1.656127"}
+{"case": "C21", "method": "qss4", "quantum_factor": 0.0002, "accepted": 0, "rejected": 0, "rhs": 111, "status": "pass", "error_over_limit": 6.154306397831988e-06, "median_ms": 1.543653, "times_ms": "1.634266 1.543653 1.500103"}
+{"case": "C05", "method": "qss4", "quantum_factor": 0.0002, "status": "timeout", "detail": "per-integration time limit"}
+{"case": "C03", "method": "qss4", "quantum_factor": 0.001, "status": "timeout", "detail": "per-integration time limit"}
+{"case": "C11", "method": "qss3", "quantum_factor": 0.005, "accepted": 0, "rejected": 0, "rhs": 20, "status": "pass", "error_over_limit": 0.0575590751537014, "median_ms": 0.534153, "times_ms": "0.534153 0.760491 0.481533"}
+{"case": "C11", "method": "qss4", "quantum_factor": 0.0002, "accepted": 0, "rejected": 0, "rhs": 35, "status": "pass", "error_over_limit": 0.0020132609913348087, "median_ms": 1.137797, "times_ms": "1.141524 1.137797 0.959652"}
+{"case": "C09", "method": "qss4", "quantum_factor": 0.0002, "accepted": 0, "rejected": 0, "rhs": 560, "status": "pass", "error_over_limit": 4.424132615810095e-06, "median_ms": 4.089075, "times_ms": "4.270258 4.089075 3.888723"}
+{"case": "C03", "method": "qss3", "quantum_factor": 0.001, "status": "timeout", "detail": "per-integration time limit"}
+{"case": "C13", "method": "qss3", "quantum_factor": 0.001, "accepted": 642, "rejected": 0, "rhs": 3265, "status": "accuracy_miss", "error_over_limit": 10.131742816058983, "median_ms": 253.875005, "times_ms": "258.713895 253.023204 253.875005"}
+{"case": "C13", "method": "qss3", "quantum_factor": 0.0002, "accepted": 1043, "rejected": 0, "rhs": 5270, "status": "accuracy_miss", "error_over_limit": 2.21536970329636, "median_ms": 397.139202, "times_ms": "397.139202 410.545289 396.788088"}
+{"case": "C03", "method": "qss4", "quantum_factor": 0.005, "status": "timeout", "detail": "per-integration time limit"}
+{"case": "C21", "method": "qss4", "quantum_factor": 0.001, "accepted": 0, "rejected": 0, "rhs": 111, "status": "pass", "error_over_limit": 6.154306397831988e-06, "median_ms": 0.85428, "times_ms": "1.148638 0.854280 0.808118"}
+{"case": "C13", "method": "qss4", "quantum_factor": 0.0002, "accepted": 606, "rejected": 0, "rhs": 4347, "status": "accuracy_miss", "error_over_limit": 3.255500735950989, "median_ms": 322.448948, "times_ms": "322.448948 321.159037 332.265823"}
+{"case": "C03", "method": "qss4", "quantum_factor": 0.0002, "status": "timeout", "detail": "per-integration time limit"}
+{"case": "C21", "method": "qss3", "quantum_factor": 0.001, "accepted": 0, "rejected": 0, "rhs": 66, "status": "pass", "error_over_limit": 2.291500322826323e-10, "median_ms": 0.630241, "times_ms": "0.649496 0.582614 0.630241"}
+{"case": "C07", "method": "qss3", "quantum_factor": 0.005, "accepted": 31, "rejected": 0, "rhs": 269, "status": "accuracy_miss", "error_over_limit": 7.1290434645469025, "median_ms": 7.281685, "times_ms": "7.281685 7.244641 9.143332"}
+{"case": "C05", "method": "qss4", "quantum_factor": 0.005, "status": "timeout", "detail": "per-integration time limit"}
+{"case": "C07", "method": "qss4", "quantum_factor": 0.001, "accepted": 28, "rejected": 0, "rhs": 345, "status": "pass", "error_over_limit": 0.7645274920113909, "median_ms": 9.503948, "times_ms": "10.659833 9.503948 8.487027"}
+{"case": "C03", "method": "qss3", "quantum_factor": 0.005, "status": "timeout", "detail": "per-integration time limit"}
+{"case": "C13", "method": "qss4", "quantum_factor": 0.005, "accepted": 324, "rejected": 0, "rhs": 2373, "status": "accuracy_miss", "error_over_limit": 49.13282382397774, "median_ms": 174.387746, "times_ms": "176.851532 174.387746 173.686497"}
+{"case": "C12", "method": "qss3", "quantum_factor": 0.0002, "accepted": 0, "rejected": 0, "rhs": 104, "status": "pass", "error_over_limit": 0.0, "median_ms": 1.523796, "times_ms": "1.523796 1.426886 1.545700"}
+{"case": "C09", "method": "qss3", "quantum_factor": 0.0002, "accepted": 0, "rejected": 0, "rhs": 320, "status": "pass", "error_over_limit": 0.00014991179986267866, "median_ms": 3.182337, "times_ms": "3.060794 3.182337 3.351292"}

@@ -1,5 +1,7 @@
 # Rechenlabor zur Gesamtausgabe v9.19
 
+**QSS3/4-Nachtrag:** Der [Vorher-Nachher-Vergleich](rechenlabor/qss_pruefung/messung/taylor_kontakt/README.md) enthält die neu gemessenen 120 Konfigurationen. Die ursprünglichen Tabellen und Vollgitterberichte gehören weiterhin zum publizierten Messstand v9.19. Zum Nachrechnen des alten Stands den dort genannten Git-Commit auschecken.
+
 Die vier Primärdateien und der zeilenweise Vergleich mit `c635504` liegen in [kontakt_v919](rechenlabor/qss_pruefung/messung/kontakt_v919). Für alle 19 nativen Verfahren sind Mechanismus, Verfahrenseinstieg, zugehörige Abbildung und analytische Proben im [Methodenregister](rechenlabor/qss_pruefung/messung/kontakt_v919/methodenregister.csv) aufgeführt. Für die logarithmischen und gruppierten Varianten gibt es eigene Zeilen. Die beiden CSV-Anlagen `qss-extension.csv` und `rk23-devs.csv` in der PDF gehören zum aktuellen Messstand. Anlagen mit Präfix `Archiv_` und die Übungen im Wurzelverzeichnis des kompakten Bachelor-Labors dokumentieren frühere Ausgaben.
 
 
