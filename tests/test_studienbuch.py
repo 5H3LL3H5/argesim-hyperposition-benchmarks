@@ -1,4 +1,5 @@
 """Check the published PDF and exercises with the core standard-library suite."""
+import json
 import math
 import shutil
 import tempfile
@@ -26,10 +27,30 @@ class TextbookTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'changed'):
                 book.check(out)
 
-    def test_worked_examples_cover_each_chapter_and_match_lab_data(self):
+    def test_compact_edition_worked_examples_cover_all_17_chapters(self):
         checks = run_path(str(book.MATERIAL / 'kapitelvergleich.py'))
         results = [*checks['theorie'](), *checks['benchmark']()]
         self.assertEqual([number for number, _ in results], list(range(1, 18)))
+
+    def test_published_qss_replays_preserve_results_and_work_counts(self):
+        measurements = book.EDITION / book.AUDIT / "messung"
+        self.assertEqual(
+            (measurements / "vertragsproben.csv").read_bytes(),
+            (measurements / "vertragsproben_skalenfix.csv").read_bytes(),
+        )
+        runs = []
+        for name in ("gegenlauf_v918.jsonl", "gegenlauf_skalenfix.jsonl"):
+            records = {}
+            for line in (measurements / name).read_text(encoding="utf-8").splitlines():
+                row = json.loads(line)
+                case = (row["case"], row["method"], row["quantum_factor"])
+                self.assertNotIn(case, records)
+                records[case] = tuple(
+                    row[key] for key in ("status", "error_over_limit", "accepted", "rejected", "rhs")
+                )
+            runs.append(records)
+        self.assertEqual(len(runs[0]), 12)
+        self.assertEqual(runs[0], runs[1])
 
     def test_transport_and_collision_invariants(self):
         upwind, lax_wendroff = LAB['transport']()

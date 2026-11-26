@@ -1,4 +1,5 @@
-"""Build the German textbook and lab together, or verify the committed edition."""
+"""Publish or verify the German complete edition and its reproducible QSS lab."""
+
 from __future__ import annotations
 
 import argparse
@@ -8,204 +9,362 @@ import io
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
 import zipfile
+from collections import Counter
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-DOCS = ROOT / 'docs'
-SOURCE = DOCS / 'lehrbuch' / 'studienbuch'
-MATERIAL = SOURCE / 'material'
-EVIDENCE = DOCS / 'evidence' / 'cp2-operators.json'
-PDF = 'ARGESIM_SOLVER_STUDY.pdf'
-LAB = 'ARGESIM_Bachelor_Rechenlabor.zip'
-RECORD = 'ARGESIM_Buchstand.json'
-MATERIAL_TYPES = {'.csv', '.json', '.npy', '.npz', '.pdf', '.py', '.txt'}
+if __package__:
+    from . import build_studienbuch_kompakt as compact
+else:
+    import build_studienbuch_kompakt as compact
+
+ROOT = compact.ROOT
+DOCS = compact.DOCS
+MATERIAL = compact.MATERIAL
+PDF, LAB, RECORD = compact.PDF, compact.LAB, compact.RECORD
+EDITION = DOCS / "lehrbuch" / "gesamtausgabe"
+PRINT = EDITION / "druck"
+PACKAGES = EDITION / "pakete"
+AUDIT = Path("rechenlabor/qss_pruefung")
+COMPARISON = AUDIT / "messung/revisionsvergleich.csv"
+REPLAY = COMPARISON.parent / "skalenfix_c635504"
+MANUSCRIPT = "lehrbuch_numerische_simulation.md"
+REVISION = "v9.18"
+DATE = (2026, 11, 26, 0, 0, 0)
 
 
-def material_files():
-    return sorted(p for p in MATERIAL.rglob('*') if p.is_file() and p.suffix in MATERIAL_TYPES)
-
-
-def source_digest(material):
-    files = [Path(__file__).resolve(), ROOT / 'scripts' / 'c19_profiles.py', EVIDENCE, *SOURCE.rglob('*.tex'),
-             *(SOURCE / 'abbildungen').glob('*.pdf'), *material]
-    files.append(ROOT / 'scripts' / 'lehrbuch_verfahrensbilder.py')
-    studies = ROOT / 'scripts' / 'cp2_accuracy'
-    files.extend(p for p in studies.iterdir() if p.suffix in {'.py', '.cpp'})
-    experiments = ROOT / 'argesim_benchmarks' / 'experiments'
-    files.extend(experiments / name for name in (
-        'cp2_fields.py', 'cp2_operators.py', 'cp2_accuracy.py',
-        'cp2_residual_fno.py', 'cp2_parameter_fno.py'))
+def sha256(path):
     digest = hashlib.sha256()
-    for path in sorted(files):
-        digest.update(path.relative_to(ROOT).as_posix().encode() + b'\0')
-        digest.update(hashlib.sha256(path.read_bytes()).digest())
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
     return digest.hexdigest()
 
 
+def edition_files():
+    return sorted(
+        p
+        for p in EDITION.rglob("*")
+        if p.is_file()
+        and not any(
+            x == "__pycache__" or x.startswith(".")
+            for x in p.relative_to(EDITION).parts
+        )
+    )
+
+
 def verify_measurements():
-    evidence = json.loads(EVIDENCE.read_text(encoding='utf-8'))
-    for name in ('rope', 'cavity'):
-        path = MATERIAL / 'cp2_feldlabor' / name / f'{name}-metrics.json'
-        if json.loads(path.read_text(encoding='utf-8')) != evidence[name]:
-            raise ValueError(f'{path.name} differs from {EVIDENCE.name}')
+    compact.verify_measurements()
+    with (EDITION / COMPARISON).open(encoding="utf-8", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    counts = Counter(r["reihe"] for r in rows)
+    keys = {(r["reihe"], r["fall"], r["verfahren"], r["einstellung"]) for r in rows}
+    if counts != {
+        "baseline": 399,
+        "extension": 456,
+        "selection": 520,
+        "rk23": 138,
+    } or len(keys) != len(rows):
+        raise ValueError(
+            "The QSS comparison must contain 1,513 distinct configurations across four suites."
+        )
+    with (EDITION / REPLAY / "skalenvergleich.csv").open(
+        encoding="utf-8", newline=""
+    ) as stream:
+        replay_rows = list(csv.DictReader(stream))
+    replay_keys = {
+        (r["suite"], r["case"], r["method"], r["level"]) for r in replay_rows
+    }
+    if replay_keys != keys or len(replay_rows) != len(keys):
+        raise ValueError(
+            "The full replay on the reviewed solver must cover the same configurations."
+        )
+    summary = json.loads(
+        (EDITION / REPLAY / "skalenvergleich.json").read_text(encoding="utf-8")
+    )
+    for suite, count in counts.items():
+        record = summary[suite]
+        name = suite + ".csv"
+        if (
+            record["configurations"] != count
+            or record["archived_csv_sha256"]
+            != sha256(EDITION / COMPARISON.parent / name)
+            or record["repeated_csv_sha256"] != sha256(EDITION / REPLAY / name)
+        ):
+            raise ValueError(
+                f"Replay manifest does not match the primary measurements for {suite}."
+            )
+    with zipfile.ZipFile(PACKAGES / "Laborquellen.zip") as sources:
+        for name in ("_polynomial.py", "advanced_qss.py", "qss.py"):
+            path = Path("argesim_benchmarks/solvers") / name
+            expected = (ROOT / path).read_bytes()
+            for directory in (
+                AUDIT / "quellen",
+                Path("rechenlabor/messplanung/projekt"),
+                Path("rechenlabor/kavitaet_vollgitter/basis/original"),
+                Path("rechenlabor/kavitaet_kleingitter/original"),
+            ):
+                if sources.read((directory / path).as_posix()) != expected:
+                    raise ValueError(
+                        f"Published solver differs from {path} in {directory}"
+                    )
+        regression = "test_qss_calendar_regressions.py"
+        if (
+            sources.read((AUDIT / "programme" / regression).as_posix())
+            != (ROOT / "tests" / regression).read_bytes()
+        ):
+            raise ValueError(
+                "Published calendar regression tests differ from the repository."
+            )
 
 
-def distribution_record(out, digest):
-    return {'sources_sha256': digest,
-            'outputs_sha256': {name: hashlib.sha256((out / name).read_bytes()).hexdigest()
-                               for name in (PDF, LAB)}}
+def distribution_record(out):
+    digest = hashlib.sha256()
+    digest.update(bytes.fromhex(compact.source_digest(compact.material_files())))
+    for path in sorted([*edition_files(), Path(__file__).resolve()]):
+        digest.update(path.relative_to(ROOT).as_posix().encode() + b"\0")
+        digest.update(bytes.fromhex(sha256(path)))
+    return {
+        "edition": REVISION,
+        "sources_sha256": digest.hexdigest(),
+        "outputs_sha256": {name: sha256(out / name) for name in (PDF, LAB)},
+    }
 
 
 def check(out):
     verify_measurements()
-    expected = json.loads((out / RECORD).read_text(encoding='utf-8'))
-    actual = distribution_record(out, source_digest(material_files()))
-    if expected != actual:
-        raise ValueError('Textbook sources, PDF or lab changed. Run python scripts/build_studienbuch.py and commit the three outputs together.')
+    if json.loads((out / RECORD).read_text(encoding="utf-8")) != distribution_record(
+        out
+    ):
+        raise ValueError(
+            "Textbook sources, PDF or lab changed. Rebuild and commit the edition together."
+        )
 
 
-def zip_bytes(files):
-    stream = io.BytesIO()
-    with zipfile.ZipFile(stream, 'w') as archive:
-        for path in files:
-            item = zipfile.ZipInfo(path.relative_to(MATERIAL).as_posix(), (2026, 1, 1, 0, 0, 0))
-            item.compress_type = zipfile.ZIP_DEFLATED
-            item.external_attr = 0o100644 << 16
-            archive.writestr(item, path.read_bytes())
-    return stream.getvalue()
+def write_entry(archive, name, data):
+    info = zipfile.ZipInfo(name, DATE)
+    info.external_attr = (0o100755 if name.endswith(".sh") else 0o100644) << 16
+    info.compress_type = zipfile.ZIP_DEFLATED
+    archive.writestr(info, data, compresslevel=6)
 
 
-def write_run_tables(stage):
-    """Typeset each archived configuration directly from the downloadable data."""
-    data = MATERIAL / 'qss-extension.csv'
-    if data.read_bytes() != (DOCS / 'evidence' / data.name).read_bytes():
-        raise ValueError('Die Labordaten stimmen nicht mit dem Studienarchiv überein.')
-    with data.open(encoding='utf-8', newline='') as stream:
-        rows = list(csv.DictReader(stream))
-    cases = ('C03', 'C05', 'C07', 'C09', 'C11', 'C12', 'C13', 'C21')
-    status = {'pass': 'OK', 'accuracy_miss': 'Ziel', 'event_mismatch': 'Ereig.',
-              'timeout': 'Limit', 'solver_error': 'Fehler'}
-    keys = {(r['case'], r['method'], r['quantum_factor']) for r in rows}
-    if len(rows) != 456 or len(keys) != 456 or {r['case'] for r in rows} != set(cases):
-        raise ValueError('Ungültiger Umfang der Acht-Fälle-Matrix.')
-    lines = []
-    for case in cases:
-        block = sorted((r for r in rows if r['case'] == case),
-                       key=lambda r: (r['method'], float(r['quantum_factor'] or 0)))
-        if len(block) != 57:
-            raise ValueError(f'{case} enthält nicht 57 Konfigurationen.')
-        for group, start in enumerate(range(0, 57, 19)):
-            label = f'run{case}{chr(ord("a") + group)}'
-            title = f'{case} · Konfigurationen {start + 1}–{start + 19}'
-            lines += [rf'\seite{{Einzelmessungen}}{{Anhang B.1}}\anchorpage{{3}}{{{label}}}{{{title}}}\ptitle{{{title}}}',
-                      r'{\tblstart\begin{tabularx}{\linewidth}{@{}Yrrlrrrr@{}}\toprule',
-                      r'\hd{Methode}&\hd{Faktor}&\hd{Score}&\hd{Status}&\hd{A}&\hd{V}&\hd{RHS}&\hd{ms}\\\midrule']
-            for row in block[start:start + 19]:
-                method = row['method']
-                if not re.fullmatch(r'[a-z0-9-]+', method):
-                    raise ValueError(f'Ungültiger Verfahrensname {method!r}')
-                score = row['error_over_limit']
-                median = row['median_ms']
-                cells = [method, row['quantum_factor'] or '–',
-                         format(float(score), '.4g') if score else '–', status[row['status']],
-                         *(str(int(row[k])) if row[k] else '–' for k in ('accepted', 'rejected', 'rhs')),
-                         format(float(median), '.4g') if median else '–']
-                lines.append(' & '.join(cells) + r'\\')
-            lines += [r'\bottomrule\end{tabularx}\par}',
-                      r'\srcs{\see{runs}{Spalten und Status lesen} · \texttt{qss-extension.csv}, vollständige Messwerte im Rechenlabor.}']
-    (stage / 'einzellaeufe.tex').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+def core_lab(path):
+    """Keep the established exercises at the root and the current calendar lab under rechenlabor/."""
+    with zipfile.ZipFile(path, "w") as lab:
+        for source in compact.material_files():
+            write_entry(
+                lab, source.relative_to(MATERIAL).as_posix(), source.read_bytes()
+            )
+        write_entry(lab, "START_v9_18.md", (EDITION / "Labor.md").read_bytes())
+        with zipfile.ZipFile(PACKAGES / "Laborquellen.zip") as source:
+            for name in sorted(source.namelist()):
+                if name.startswith((AUDIT.as_posix() + "/", "beispiele/")):
+                    write_entry(lab, name, source.read(name))
+        for source in sorted((EDITION / AUDIT).rglob("*")):
+            if source.is_file():
+                write_entry(
+                    lab, source.relative_to(EDITION).as_posix(), source.read_bytes()
+                )
+
+
+def full_lab(target):
+    """Reconstruct the complete, self-contained offline lab from the checked-in volumes."""
+    target = target.resolve()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=target.parent) as tmp:
+        zipped = Path(tmp) / "complete.zip"
+        with zipfile.ZipFile(zipped, "w") as lab:
+            # Sources and evidence retain the directory layout expected by the original experiments.
+            for source in edition_files():
+                rel = source.relative_to(EDITION)
+                if (
+                    rel.parts[0] != "pakete"
+                    and rel.as_posix() != "druck/Druckabbildungen.zip"
+                ):
+                    write_entry(lab, rel.as_posix(), source.read_bytes())
+            with zipfile.ZipFile(PRINT / "Druckabbildungen.zip") as figures:
+                for name in figures.namelist():
+                    write_entry(lab, "druck/" + name, figures.read(name))
+            with zipfile.ZipFile(PACKAGES / "Laborquellen.zip") as core:
+                for name in core.namelist():
+                    write_entry(lab, name, core.read(name))
+            index = json.loads(
+                (PACKAGES / "Feldpakete.json").read_text(encoding="utf-8")
+            )
+            for name, record in sorted(index.items()):
+                data = b"".join((PACKAGES / p).read_bytes() for p in record["parts"])
+                if (
+                    len(data) != record["size"]
+                    or hashlib.sha256(data).hexdigest() != record["sha256"]
+                ):
+                    raise ValueError(f"Field archive changed or incomplete: {name}")
+                with zipfile.ZipFile(io.BytesIO(data)) as fields:
+                    for field in fields.namelist():
+                        if field in lab.NameToInfo:
+                            raise ValueError(
+                                f"Duplicate entry in the full lab: {field}"
+                            )
+                        write_entry(lab, field, fields.read(field))
+        with zipfile.ZipFile(zipped) as assembled:
+            if (
+                len(assembled.namelist()) != len(set(assembled.namelist()))
+                or assembled.testzip()
+            ):
+                raise ValueError("Invalid full lab archive")
+        zipped.replace(target)
 
 
 def typeset(stage):
-    write_run_tables(stage)
-    env = {**os.environ, 'TEXINPUTS': str(stage) + os.pathsep + os.environ.get('TEXINPUTS', ''),
-           'TZ': 'UTC', 'SOURCE_DATE_EPOCH': '1795219200'}
-    command = ['xelatex', '-no-pdf', '-halt-on-error', '-interaction=nonstopmode',
-               f'-output-directory={stage}', 'kurs.tex']
-    for _ in range(2):
-        result = subprocess.run(command, cwd=SOURCE, env=env, check=False, stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT, text=True)
-        if result.returncode:
-            raise ValueError(result.stdout[-4500:])
-    for warning in ('multiply defined', 'undefined references', 'Missing character'):
-        if warning in result.stdout:
-            raise ValueError(f'XeLaTeX: {warning}')
-    subprocess.run(['xdvipdfmx', '-q', '-o', str(stage / 'text.pdf'), str(stage / 'kurs.xdv')],
-                   cwd=SOURCE, env=env, check=True)
+    input_dir = stage / "input"
+    working = input_dir / "druck"
+    working.mkdir(parents=True)
+    shutil.copyfile(EDITION / MANUSCRIPT, input_dir / MANUSCRIPT)
+    shutil.copyfile(PRINT / "setzen.py", working / "setzen.py")
+    subprocess.run([sys.executable, str(working / "setzen.py")], check=True)
+    if (working / "buch.tex").read_bytes() != (PRINT / "buch.tex").read_bytes():
+        raise ValueError(
+            "The print source differs from the Markdown manuscript generated with Pandoc."
+        )
+    with zipfile.ZipFile(PRINT / "Druckabbildungen.zip") as figures:
+        for name in figures.namelist():
+            if name != Path(name).name or not name.endswith(".pdf"):
+                raise ValueError(f"Invalid print figure: {name}")
+            (working / name).write_bytes(figures.read(name))
+    env = {
+        **os.environ,
+        "TZ": "UTC",
+        "SOURCE_DATE_EPOCH": "1795651200",
+        "FORCE_SOURCE_DATE": "1",
+    }
+    previous = None
+    for _ in range(5):
+        proc = subprocess.run(
+            [
+                "xelatex",
+                "-no-pdf",
+                "-halt-on-error",
+                "-interaction=nonstopmode",
+                "buch.tex",
+            ],
+            cwd=working,
+            env=env,
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+        if proc.returncode:
+            raise ValueError(proc.stdout[-4000:])
+        aux = (working / "buch.aux").read_bytes()
+        if aux == previous:
+            break
+        previous = aux
+    else:
+        raise ValueError("LaTeX cross-references did not stabilize.")
+    for warning in (
+        "undefined references",
+        "multiply defined",
+        "Missing character",
+        "Rerun to get cross-references",
+    ):
+        if warning in proc.stdout:
+            raise ValueError(f"XeLaTeX: {warning}")
+    subprocess.run(
+        ["xdvipdfmx", "-q", "-o", str(stage / "text.pdf"), "buch.xdv"],
+        cwd=working,
+        env=env,
+        check=True,
+    )
 
 
 def verify_navigation(book):
+    toc = book.get_toc()
+    chapters = [
+        int(match[1])
+        for level, title, _ in toc
+        if level == 2 and (match := re.match(r"^Kapitel (\d+) ·", title))
+    ]
+    if (
+        chapters != list(range(1, 19))
+        or sum(bool(re.match(r"^A\.\d+\b", title)) for _, title, _ in toc) != 24
+    ):
+        raise ValueError(
+            "The book must contain chapters 1–18 and all 24 benchmark entries."
+        )
+    appendices = [
+        m[1]
+        for level, title, _ in toc
+        if level == 2 and (m := re.match(r"^Anhang ([A-Z]) ·", title))
+    ]
+    if appendices != list("ABCD") or not all(1 <= p <= len(book) for _, _, p in toc):
+        raise ValueError("Invalid appendix or bookmark destination.")
     targets = book.resolve_names()
-    links_by_page = []
     for page in book:
-        names = set()
         for link in page.get_links():
-            name = link.get('nameddest')
-            if name:
-                if name not in targets or not 0 <= targets[name]['page'] < len(book):
-                    raise ValueError(f'Invalid PDF link on page {page.number + 1}: {name}')
-                names.add(name)
-        links_by_page.append(names)
+            name = link.get("nameddest")
+            if name and (
+                name not in targets or not 0 <= targets[name]["page"] < len(book)
+            ):
+                raise ValueError(f"Invalid PDF link on page {page.number + 1}: {name}")
 
-    pairs = [(f'frage{i}', f'antwort{i}') for i in range(1, 13)]
-    pairs.extend((f'aufgabe{i}', f'loes{i}') for i in range(1, 7))
-    for first, second in pairs:
-        for source, dest in ((first, second), (second, first)):
-            if source not in targets or dest not in links_by_page[targets[source]['page']]:
-                raise ValueError(f'Missing exercise link: {source} -> {dest}')
+
+def publish_pdf(stage):
+    import pymupdf
+
+    material = compact.material_files()
+    attachments = {
+        p.name: p.read_bytes()
+        for p in material
+        if p.parent == MATERIAL and p.name != "START_HIER.txt"
+    }
+    for folder, name in (
+        ("cp2_feldlabor", "CP2_Feldlabor.zip"),
+        ("cp2_genauigkeit", "CP2_Genauigkeit.zip"),
+    ):
+        attachments[name] = compact.zip_bytes(
+            [p for p in material if folder in p.relative_to(MATERIAL).parts]
+        )
+    attachments["QSS_Revisionsvergleich_v9_18.csv"] = (
+        EDITION / COMPARISON
+    ).read_bytes()
+    attachments["QSS_Gegenprobe_c635504.csv"] = (
+        EDITION / REPLAY / "skalenvergleich.csv"
+    ).read_bytes()
+    with pymupdf.open(stage / "text.pdf") as book:
+        verify_navigation(book)
+        if (
+            book.metadata["author"] != "Christian Stenzel"
+            or REVISION not in book.metadata["title"]
+        ):
+            raise ValueError("Unexpected title or author")
+        for name, data in attachments.items():
+            xref = book.embfile_add(
+                name, data, filename=name, ufilename=name, desc=name
+            )
+            for field in ("CreationDate", "ModDate"):
+                book.xref_set_key(xref, "Params/" + field, "(D:20261126000000Z)")
+        book.save(stage / PDF, garbage=4, deflate=True, no_new_id=True)
+    with pymupdf.open(stage / PDF) as book:
+        verify_navigation(book)
+        if any(book.embfile_get(name) != data for name, data in attachments.items()):
+            raise ValueError("Invalid embedded lab files.")
 
 
 def build(out):
-    import pymupdf
-
     verify_measurements()
-    material = material_files()
-    digest = source_digest(material)
     out.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(dir=out) as tmp:
         stage = Path(tmp)
         typeset(stage)
-        (stage / LAB).write_bytes(zip_bytes(material))
-        attachments = {p.name: p.read_bytes() for p in material
-                       if p.parent == MATERIAL and p.name != 'START_HIER.txt'}
-        fields = [p for p in material if 'cp2_feldlabor' in p.relative_to(MATERIAL).parts]
-        attachments['CP2_Feldlabor.zip'] = zip_bytes(fields)
-        accuracy = [p for p in material if 'cp2_genauigkeit' in p.relative_to(MATERIAL).parts]
-        attachments['CP2_Genauigkeit.zip'] = zip_bytes(accuracy)
-        with pymupdf.open(stage / 'text.pdf') as book:
-            toc = book.get_toc()
-            if sorted(page for _, _, page in toc) != list(range(1, len(book) + 1)):
-                raise ValueError('Every page needs exactly one working bookmark. Check page breaks and labels.')
-            marks = [title for _, title, _ in toc]
-            if [int(m.group(1)) for title in marks if (m := re.match(r'^(\d+) · ', title))] != list(range(1, 18)):
-                raise ValueError('Das Buch benötigt genau 17 Hauptkapitel in der vereinbarten Reihenfolge.')
-            if sum(bool(re.match(r'^A\.\d+ · ', title)) for title in marks) != 24:
-                raise ValueError('Der Referenzkatalog benötigt alle 24 Projektmodelle.')
-            verify_navigation(book)
-            if book.metadata['author'] != 'Christian Stenzel':
-                raise ValueError('Missing textbook author')
-            for name, data in attachments.items():
-                xref = book.embfile_add(name, data, filename=name, ufilename=name, desc=name)
-                for field in ('CreationDate', 'ModDate'):
-                    book.xref_set_key(xref, 'Params/' + field, '(D:20261121000000Z)')
-            metadata = book.metadata
-            metadata.update(subject='Modellbildung, numerische Verfahren und ARGESIM-Python-Praktikum',
-                            keywords=f'MOL, LBM, NN, CP2, Newmark, Verlet, FNO; sources-sha256={digest}')
-            book.set_metadata(metadata)
-            book.save(stage / PDF, garbage=3, deflate=True, no_new_id=True)
-        with pymupdf.open(stage / PDF) as book:
-            if set(book.embfile_names()) != set(attachments) or any(
-                book.embfile_get(name) != data for name, data in attachments.items()
-            ):
-                raise ValueError('Invalid course material embedded in the textbook')
-        record = distribution_record(stage, digest)
-        (stage / RECORD).write_text(json.dumps(record, indent=2) + '\n', encoding='utf-8')
-        if digest != source_digest(material_files()):
-            raise ValueError('Textbook inputs changed during typesetting. Repeat the build.')
+        publish_pdf(stage)
+        core_lab(stage / LAB)
+        (stage / RECORD).write_text(
+            json.dumps(distribution_record(stage), indent=2) + "\n", encoding="utf-8"
+        )
         for name in (PDF, LAB, RECORD):
             (stage / name).replace(out / name)
     check(out)
@@ -213,19 +372,36 @@ def build(out):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--check', action='store_true', help='verify hashes without installing typesetting tools')
-    parser.add_argument('--output-dir', type=Path, default=DOCS)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
+        "--check",
+        action="store_true",
+        help="verify the publication without typesetting tools",
+    )
+    mode.add_argument(
+        "--full-lab",
+        type=Path,
+        metavar="ZIP",
+        help="assemble all programs, data and weights",
+    )
+    parser.add_argument("--output-dir", type=Path, default=DOCS)
     args = parser.parse_args()
-    out = args.output_dir.resolve()
     try:
-        if args.check:
-            check(out)
+        if args.full_lab:
+            check(args.output_dir.resolve())
+            full_lab(args.full_lab)
+        elif args.check:
+            check(args.output_dir.resolve())
         else:
-            build(out)
-    except (OSError, ValueError, subprocess.CalledProcessError) as exc:
+            build(args.output_dir.resolve())
+    except (
+        OSError,
+        ValueError,
+        subprocess.CalledProcessError,
+        zipfile.BadZipFile,
+    ) as exc:
         sys.exit(str(exc))
-    print(f'Verified {out / PDF} and {out / LAB}')
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

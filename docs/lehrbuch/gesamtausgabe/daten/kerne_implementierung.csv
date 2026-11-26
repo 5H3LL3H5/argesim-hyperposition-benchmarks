@@ -1,0 +1,8 @@
+Kern,Tatsächliche endliche 1D-Abbildung,Rang der 64×24-Matrix,Rang für 8 Deckelfaktoren,CP2 bestanden innen /16,CP2 bestanden Profil /4,CP2 bestanden außen /8
+Fourier,"Reelle FFT auf 64 Werten. Bänder der Moden 0–4, 5–12 und 13–32, Rücktransformation und Abtastung.",24,8,12,2,0
+Laplace,Direktsignal plus Real- und Imaginärteil eines festen komplexen Polfilters. In der gespeicherten Matrix tragen nur acht Signalpositionen bei.,8,6,15,1,0
+Wavelet,"Haar-Blockmittel der Breiten 2 und 8. Grobes Band, Differenz und feiner Rest werden abgelesen.",20,6,15,3,1
+Hankel,"Drei diskrete Dirichlet-Green-Antworten mit ungerader Fortsetzung und Parametern 8, 32, 128. Randkorrektur in Toeplitz/Hankel-Form.",18,8,16,4,0
+Radon (1D),"Symmetrische Richtungsmittel mit Fensterbreiten 1, 5, 13. Kein 2D-Sinogramm in diesen beiden Zeitversuchen.",23,8,16,3,0
+Wavelet–Laplace,Haar-Bänder mit tiefpassgefilterten Real- und Imaginäranteilen des festen Polfilters kombiniert.,21,6,15,2,0
+Fourier–Mellin,"Positive und negative Koordinatenhälfte getrennt auf logarithmischen Radius interpoliert, in drei FFT-Bänder geteilt und zurückinterpoliert.",24,8,13,0,0

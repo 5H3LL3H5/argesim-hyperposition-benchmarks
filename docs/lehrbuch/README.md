@@ -1,48 +1,26 @@
 # Numerische Simulation dynamischer Systeme
 
-**Autor** · Christian Stenzel
+**Christian Stenzel · Gesamtausgabe v9.18 · 18 Fachkapitel und vier Anhänge**
 
-**Deutsche Bachelor-Ausgabe.** 17 Kapitel führen von Modellbildung und Systemtheorie über ODE, DAE, PDE und Solvertechnik zu ausführbaren ARGESIM-Versuchen. Die drei Teile umfassen neun Theoriekapitel, acht Kapitel zu Methodik, Leitbenchmarks und Synthese sowie die Anhänge mit 24 Referenzblättern und den 456 Einzelkonfigurationen. [Aktuelles Lehrbuch (PDF)](../ARGESIM_SOLVER_STUDY.pdf) · [PDF herunterladen](../ARGESIM_SOLVER_STUDY.pdf?raw=true) · [Python-Rechenlabor mit CP2-Gewichten (ZIP)](../ARGESIM_Bachelor_Rechenlabor.zip)
+Die mathematischen Grundlagen führen von Fehlermaßen und Stabilität zu Zeitintegration, Ereignissen und räumlicher Diskretisierung. Kapitel 6 erklärt die Kalender der QSS-Familie. Kapitel 16 prüft die Verfahren an der CP2-Kavität. Kapitel 18 vergleicht ihre Entscheidungen an den ARGESIM-Modellfenstern. Die Ausgabe enthält 90 nummerierte Abbildungen.
 
-## Gliederung und Quellen
+[Lehrbuch öffnen (PDF)](../ARGESIM_SOLVER_STUDY.pdf) · [PDF herunterladen](../ARGESIM_SOLVER_STUDY.pdf?raw=true) · [Volltext und Kapitelfahrplan](gesamtausgabe/lehrbuch_numerische_simulation.md) · [Einzelkapitel](gesamtausgabe/kapitel)
 
-[Fachlich-didaktische Kapitelprüfung mit PDF-Fundstellen](../ARGESIM_Kapitelpruefung.md) · [Inhalt, Lesewege und Drucksatz](studienbuch/kurs.tex) · [Hauptkapitel und Anhänge](studienbuch/kapitel) · [Abnahme der PR-77-Befunde mit aktualisierten PDF-Seiten](../ARGESIM_Review_PR77_Abnahme.md)
+## Messungen und Rechenlabor
 
-| Teil | Inhalt |
-|---|---|
-| I, Kapitel 1–9 | Modellierung und Steifigkeit, explizite und implizite Integration, DAEs, Ereignisse, QSS/DEVS, räumliche Diskretisierung, Lattice-Boltzmann und Operator Learning. |
-| II, Kapitel 10–17 | Prüfmethodik, C05, C12 und C21-Ball, C07 und C21-Diode, C09 und C13, C19R, CP2 sowie die Synthese über acht Modellfenster. |
-| III, Anhänge A und B | 14 vertiefte Referenzblätter und die 10 weiteren Familien des Projektkatalogs, alle 456 Messkonfigurationen, Ereignis- und Intervallschranken sowie der Python- und C++-Vertrag. |
+Im Revisionsvergleich sind die Ergebnisse von 399 Basisfällen, 456 erweiterten Einstellungen, 520 Auswahlversuchen und 138 RK23-Vergleichen paarweise zugeordnet. Die ergänzende Skalierungsprüfung enthält 82 Vertragsproben sowie zwölf direkte Gegenläufe. Die Vollgitterstudie dokumentiert auch die bis zum Zeitlimit erreichten Zustände.
 
-### Redaktioneller Maßstab
+[1.513 Vergleichszeilen (CSV)](gesamtausgabe/rechenlabor/qss_pruefung/messung/revisionsvergleich.csv) · [Wiederholungsprotokoll](gesamtausgabe/rechenlabor/qss_pruefung/README.md) · [QSS-Prüflabor und Bachelor-Übungen (ZIP)](../ARGESIM_Bachelor_Rechenlabor.zip?raw=true) · [Vollständiges Labor mit Messfeldern und Modellgewichten](gesamtausgabe/Labor.md)
 
-Jedes Theoriekapitel beginnt mit einem beobachtbaren physikalischen Vorgang und einer Leitfrage. Die Herleitung führt Voraussetzungen, Einheiten und Zwischenrechnungen ein. Eine Werkstattseite legt den inneren Algorithmus offen und schließt mit einer lösbaren Gegenprobe. Bei Benchmarks folgen auf die Leitfrage Modell, Härtefall, Methodenvergleich, Aufgaben mit Akzeptanzkriterium und Diagnose. Quellen, Datenfenster und Grenzen stehen an der betreffenden Aussage.
+## Druckausgabe und Nachweise
 
-## Drei Einstiege in die Methodenwahl
+`python scripts/build_studienbuch.py --check` prüft die Ausgaben und ihre Eingaben mit der Python-Standardbibliothek. Der Drucksatz verwendet Pandoc, XeLaTeX und PyMuPDF. Der Build prüft das erzeugte TeX gegen das Manuskript und überprüft die PDF-Navigation. Der Aktionslauf **Studienbuch** liefert zusätzlich das vollständige Labor als ein ZIP-Archiv.
 
-| Frage | Rechnung im Buch |
-|---|---|
-| Wie wird ein Feld zu einem Zeitproblem? | Kapitel 7 führt die Linienmethode (MOL) am Wärmestab ein. Raumverfahren, Zeitintegrator und algebraische Randbedingungen lassen sich am selben Modell wechseln. Im Vier-Zellen-Versuch werden Erhaltung und Positivität getrennt geprüft. |
-| Was bewegt sich im Lattice-Boltzmann-Modell? | Kapitel 8 verfolgt die Kollision und den Transport aus einer einzigen D2Q9-Zelle bis zur CP2-Deckelströmung. |
-| Was lernt das Netz? | Ein Gradientenschritt von Hand führt zu FNO, PINN und DeepONet. An der CP2-Saite lassen sich die gemessenen FNO-, Newmark- und Verlet-Fehler gegen die exakte Lösung vergleichen. |
-
-Im entpackten Rechenlabor startet `python methodenlabor.py` die Handrechnungen und die Störmer–Verlet-Studie ohne Zusatzpakete. `python cp2_feldlabor/auswerten.py` benötigt NumPy und vergleicht die archivierten Felder. [CP2-Versuchsanleitung](../CP2_NEURAL_OPERATORS.md)
-
-## Ausgabe aktualisieren
-
-Die Fassung auf `main` ist unter demselben PDF- und ZIP-Link erreichbar. Die Buchquellen, Abbildungen und Begleitdateien liegen gemeinsam unter [studienbuch](studienbuch/). Für den Satz werden XeLaTeX mit deutscher Silbentrennung, `xdvipdfmx`, die Schriften Noto Serif, Noto Sans Display, DejaVu Sans Mono und Latin Modern Math sowie PyMuPDF benötigt. Unter Debian und Ubuntu liefert `texlive-fonts-recommended` die von Hyperref verwendeten Schriftmetriken. Für die Prüfung des eingecheckten Buchstands genügt Python ab 3.10.
-
-```sh
-python -m pip install PyMuPDF==1.26.6
-python scripts/build_studienbuch.py
-python scripts/build_studienbuch.py --check
-```
-
-Der Bau schreibt PDF, ZIP und `docs/ARGESIM_Buchstand.json`. Alle drei gehören zusammen mit den geänderten Quellen in denselben Commit. Bei Pull Requests und Pushes auf `main` vergleicht die Testsuite die SHA-256-Werte der Quellen, der Messdateien und beider Ausgaben. Ein altes PDF oder Labor lässt diese Prüfung fehlschlagen.
+[Build und Prüfsummen](../ARGESIM_Buchstand.json) · [Druckquellen](gesamtausgabe/druck) · [Archiv der früheren 17-Kapitel-Ausgabe](studienbuch) · [Kapitelprüfung der früheren Ausgabe](../ARGESIM_Kapitelpruefung.md)
 
 ## Kompaktfassung zum Nachschlagen
 
-Die folgenden Markdown-Kapitel bilden die frühere Kurzfassung. Die vollständige Bachelor-Ausgabe steht oben.
+Die folgenden Markdown-Kapitel bilden die frühere Kurzfassung. Die Gesamtausgabe v9.18 steht oben.
 
 | Kapitel | Leitfrage |
 |---|---|
@@ -58,10 +36,10 @@ Die folgenden Markdown-Kapitel bilden die frühere Kurzfassung. Die vollständig
 | [10 · Lösungen und Glossar](10-loesungen.md) | Welche Zahlen, Einheiten und Gegenproben sichern die Rechnung ab? |
 | [Bibliographie und Quellenverzeichnis](literatur.md) | Welche Arbeiten begründen die Methode und welche Messdaten tragen den Vergleich? |
 
-Die historischen Fachkapitel sind als separate Quellen und über den eingebetteten Studienanhang zugänglich. [DEVS und QSS](../QSS_DEVS_HISTORY.md) · [Solverwahl](../SOLVER_SELECTION.md) · [Methodenkatalog](../SOLVER_METHODS.md) · [Acht ARGESIM-Fälle](../SOLVER_COMPARISON.md)
+Die historischen Fachkapitel sind als separate Quellen zugänglich. [DEVS und QSS](../QSS_DEVS_HISTORY.md) · [Solverwahl](../SOLVER_SELECTION.md) · [Methodenkatalog](../SOLVER_METHODS.md) · [Acht ARGESIM-Fälle](../SOLVER_COMPARISON.md)
 
 Für den historischen Markdown-Satz mit Pandoc, WeasyPrint, lxml und Matplotlib dient `python scripts/build_solver_study.py --revision <Commit-SHA> --output kurzfassung.pdf`.
 
 ## Was verbessert die Genauigkeit der Fourier-Operatoren?
 
-Der Zusatzversuch in Kapitel 16 untersucht sechs Zupfpositionen, vier Saitengitter, Zwischenzeiten und veränderte Kavitätsparameter. Fünf Grafiken zeigen die Ortsfehler, Modenzahl, neuronale Korrektur, Übertragung auf neue Bedingungen und den Vergleich der langen Kavitätsrechnung mit Literaturprofilen. Die Abschlussfragen aller 17 Kapitel verweisen auf Rechnung, Beweis, Gegenbeispiel oder die benötigten realen Messdaten. [Genauigkeitsstudie mit Python-Befehlen](../CP2_NEURAL_OPERATORS.md#genauigkeitsstudie-für-saite-und-kavität)
+Der Zusatzversuch in Kapitel 16 untersucht sechs Zupfpositionen, vier Saitengitter, Zwischenzeiten und veränderte Kavitätsparameter. Fünf Grafiken zeigen die Ortsfehler, Modenzahl, neuronale Korrektur, Übertragung auf neue Bedingungen und den Vergleich der langen Kavitätsrechnung mit Literaturprofilen. Die Abschlussfragen der früheren 17-Kapitel-Ausgabe verweisen auf Rechnung, Beweis, Gegenbeispiel oder die benötigten realen Messdaten. [Genauigkeitsstudie mit Python-Befehlen](../CP2_NEURAL_OPERATORS.md#genauigkeitsstudie-für-saite-und-kavität)

@@ -1,0 +1,147 @@
+{
+  "CP2_Operatorfelder.zip": {
+    "parts": [
+      "CP2_Operatorfelder.zip.001",
+      "CP2_Operatorfelder.zip.002",
+      "CP2_Operatorfelder.zip.003",
+      "CP2_Operatorfelder.zip.004",
+      "CP2_Operatorfelder.zip.005",
+      "CP2_Operatorfelder.zip.006",
+      "CP2_Operatorfelder.zip.007",
+      "CP2_Operatorfelder.zip.008",
+      "CP2_Operatorfelder.zip.009",
+      "CP2_Operatorfelder.zip.010",
+      "CP2_Operatorfelder.zip.011"
+    ],
+    "sha256": "6c83832caa167b9605129bb34037cad64a41387cfdc80a7f90ad19ad3752fb34",
+    "size": 33626587
+  },
+  "CP_Dynamikfelder.zip": {
+    "parts": [
+      "CP_Dynamikfelder.zip.001",
+      "CP_Dynamikfelder.zip.002",
+      "CP_Dynamikfelder.zip.003",
+      "CP_Dynamikfelder.zip.004",
+      "CP_Dynamikfelder.zip.005",
+      "CP_Dynamikfelder.zip.006",
+      "CP_Dynamikfelder.zip.007"
+    ],
+    "sha256": "fd257321066ca977ac8376dfe05e28164374ff221049be1654377c951c08631d",
+    "size": 21242200
+  },
+  "Kavitaet_Kleingitter_Felder.zip": {
+    "parts": [
+      "Kavitaet_Kleingitter_Felder.zip.001",
+      "Kavitaet_Kleingitter_Felder.zip.002",
+      "Kavitaet_Kleingitter_Felder.zip.003",
+      "Kavitaet_Kleingitter_Felder.zip.004",
+      "Kavitaet_Kleingitter_Felder.zip.005",
+      "Kavitaet_Kleingitter_Felder.zip.006",
+      "Kavitaet_Kleingitter_Felder.zip.007"
+    ],
+    "sha256": "10df78251af534418e1fc766580efb63f1e6dbf14bce1e44d1b9433a89fe037c",
+    "size": 18899322
+  },
+  "Kavitaet_Operatorfelder_Korrektur.zip": {
+    "parts": [
+      "Kavitaet_Operatorfelder_Korrektur.zip.001",
+      "Kavitaet_Operatorfelder_Korrektur.zip.002",
+      "Kavitaet_Operatorfelder_Korrektur.zip.003",
+      "Kavitaet_Operatorfelder_Korrektur.zip.004",
+      "Kavitaet_Operatorfelder_Korrektur.zip.005",
+      "Kavitaet_Operatorfelder_Korrektur.zip.006",
+      "Kavitaet_Operatorfelder_Korrektur.zip.007",
+      "Kavitaet_Operatorfelder_Korrektur.zip.008",
+      "Kavitaet_Operatorfelder_Korrektur.zip.009",
+      "Kavitaet_Operatorfelder_Korrektur.zip.010"
+    ],
+    "sha256": "7ecdb0be40a872462d2703d03a7e0b0546b988e84bb484dbb338b408f00075b7",
+    "size": 31066679
+  },
+  "Kavitaet_Operatorfelder_direkt.zip": {
+    "parts": [
+      "Kavitaet_Operatorfelder_direkt.zip.001",
+      "Kavitaet_Operatorfelder_direkt.zip.002",
+      "Kavitaet_Operatorfelder_direkt.zip.003",
+      "Kavitaet_Operatorfelder_direkt.zip.004",
+      "Kavitaet_Operatorfelder_direkt.zip.005",
+      "Kavitaet_Operatorfelder_direkt.zip.006",
+      "Kavitaet_Operatorfelder_direkt.zip.007",
+      "Kavitaet_Operatorfelder_direkt.zip.008"
+    ],
+    "sha256": "26add1622e0e865aa75801b8488670442edc5dda244d75cdc0c93bd042632eda",
+    "size": 24347313
+  },
+  "Kavitaet_Referenz_und_Galerkinbasis.zip": {
+    "parts": [
+      "Kavitaet_Referenz_und_Galerkinbasis.zip.001",
+      "Kavitaet_Referenz_und_Galerkinbasis.zip.002",
+      "Kavitaet_Referenz_und_Galerkinbasis.zip.003",
+      "Kavitaet_Referenz_und_Galerkinbasis.zip.004",
+      "Kavitaet_Referenz_und_Galerkinbasis.zip.005",
+      "Kavitaet_Referenz_und_Galerkinbasis.zip.006",
+      "Kavitaet_Referenz_und_Galerkinbasis.zip.007",
+      "Kavitaet_Referenz_und_Galerkinbasis.zip.008",
+      "Kavitaet_Referenz_und_Galerkinbasis.zip.009"
+    ],
+    "sha256": "cd69216571001a5c5d9710e2fc3aaf7cbe942ffc9fc9142818eaa85813c89a89",
+    "size": 25190757
+  },
+  "Kavitaet_Vollgitter_Felder.zip": {
+    "parts": [
+      "Kavitaet_Vollgitter_Felder.zip.001",
+      "Kavitaet_Vollgitter_Felder.zip.002",
+      "Kavitaet_Vollgitter_Felder.zip.003",
+      "Kavitaet_Vollgitter_Felder.zip.004",
+      "Kavitaet_Vollgitter_Felder.zip.005",
+      "Kavitaet_Vollgitter_Felder.zip.006",
+      "Kavitaet_Vollgitter_Felder.zip.007",
+      "Kavitaet_Vollgitter_Felder.zip.008",
+      "Kavitaet_Vollgitter_Felder.zip.009"
+    ],
+    "sha256": "0f42be83be1b1411c47f2e07dd418f96647f9ec1ca0fcf171ecd28c7fd762114",
+    "size": 25974656
+  },
+  "Kavitaet_basis_direkt.zip": {
+    "parts": [
+      "Kavitaet_basis_direkt.zip.001",
+      "Kavitaet_basis_direkt.zip.002",
+      "Kavitaet_basis_direkt.zip.003",
+      "Kavitaet_basis_direkt.zip.004",
+      "Kavitaet_basis_direkt.zip.005",
+      "Kavitaet_basis_direkt.zip.006",
+      "Kavitaet_basis_direkt.zip.007",
+      "Kavitaet_basis_direkt.zip.008"
+    ],
+    "sha256": "fa033be8fe8964a6eafd1328a132164d37b3fd9718e82ed3d7f6d97ac843b38e",
+    "size": 24231013
+  },
+  "Kavitaet_basis_korrektur.zip": {
+    "parts": [
+      "Kavitaet_basis_korrektur.zip.001",
+      "Kavitaet_basis_korrektur.zip.002",
+      "Kavitaet_basis_korrektur.zip.003",
+      "Kavitaet_basis_korrektur.zip.004",
+      "Kavitaet_basis_korrektur.zip.005",
+      "Kavitaet_basis_korrektur.zip.006",
+      "Kavitaet_basis_korrektur.zip.007",
+      "Kavitaet_basis_korrektur.zip.008"
+    ],
+    "sha256": "3bccb33077ba6ab60bfea7130ab4ca632a44b47556e2f07228aab8425516f759",
+    "size": 24237399
+  },
+  "Transfer_und_Vergleichsfelder.zip": {
+    "parts": [
+      "Transfer_und_Vergleichsfelder.zip.001",
+      "Transfer_und_Vergleichsfelder.zip.002",
+      "Transfer_und_Vergleichsfelder.zip.003",
+      "Transfer_und_Vergleichsfelder.zip.004",
+      "Transfer_und_Vergleichsfelder.zip.005",
+      "Transfer_und_Vergleichsfelder.zip.006",
+      "Transfer_und_Vergleichsfelder.zip.007",
+      "Transfer_und_Vergleichsfelder.zip.008"
+    ],
+    "sha256": "b18cc53bef5c2b3520fd3f175df2563e954bee87a42cd5ee9ca2ff2a9c3ce50c",
+    "size": 23681232
+  }
+}

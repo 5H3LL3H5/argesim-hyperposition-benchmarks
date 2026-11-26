@@ -1,0 +1,143 @@
+% !TeX program = xelatex
+% Vollständig mit XeLaTeX setzbar. Zum Einfügen nur den Inhalt zwischen
+% %<*Kennung> und %</Kennung> kopieren. Interne Buchstellen sind als Seiten ausgegeben.
+\documentclass[10pt,a4paper]{article}
+\usepackage[a4paper,left=19.5mm,right=19.5mm,top=22mm,bottom=22mm,headheight=15pt]{geometry}
+\usepackage{fontspec,amsmath,unicode-math,booktabs,tabularx,array,xcolor,graphicx,fancyhdr,hyperref,fancyvrb}
+\setmainfont{Noto Serif}\setsansfont{Noto Sans Display}\setmonofont[Scale=.86]{DejaVu Sans Mono}\setmathfont{Latin Modern Math}
+\definecolor{tinte}{HTML}{1D3240}\definecolor{gruen}{HTML}{00675E}\definecolor{grau}{HTML}{48616D}
+\hypersetup{pdflang=de-DE,pdfauthor={Christian Stenzel},colorlinks=true,urlcolor=gruen,linkcolor=gruen}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\sffamily\small Numerische Simulation dynamischer Systeme}
+\fancyhead[R]{\sffamily\small Druckfassung v9.16}\fancyfoot[L]{\sffamily\small Christian Stenzel}
+\fancyfoot[R]{\sffamily\small\thepage}\renewcommand{\headrulewidth}{.35pt}
+\newcommand{\titel}[1]{{\sffamily\bfseries\fontsize{24}{27}\selectfont\color{tinte}#1\par}\vspace{5pt}}
+\newcommand{\absatz}[1]{\par\addvspace{6pt}{\sffamily\bfseries\large\color{gruen}#1}\par\nobreak}
+\newcommand{\unter}[1]{{\sffamily\color{grau}#1\par}\vspace{6pt}}
+\setlength{\parindent}{0pt}\setlength{\parskip}{4pt}\setlength{\emergencystretch}{2em}
+\renewcommand{\arraystretch}{1.18}\urlstyle{same}
+\hypersetup{pdftitle={Geprüfte LaTeX-Druckbausteine v9.16}}
+\begin{document}\raggedright\titel{Geprüfte Druckbausteine}
+\absatz{K09-04 · Kavität, Wand und Fluss}
+\unter{Buch S.~225}
+%<*K09-04>
+In einer Deckel-Kavität treibt die obere Wand das Fluid an, durch die Wände soll keine Flüssigkeit austreten. Wir schreiben die diskrete Divergenz und die vorgeschriebenen Wandwerte als \(A v=d\) mit \(A=(D_h^\top,B_h^\top)^\top\) und \(d=(0,g_h)^\top\). Eine positiv definite Matrix \(M\) legt die Gewichtung des Abstands fest. Ist das System verträglich, erhält man den eindeutigen nächstgelegenen Zustand durch
+
+\[
+u^\star=\tilde u-M^{-1}A^\top(AM^{-1}A^\top)^\dagger(A\tilde u-d).
+\]
+
+Die Formel folgt, wenn man die Ableitung nach \(u\) in den Lagrange-Gleichungen null setzt und den Multiplikator aus der Nebenbedingung bestimmt. Die Pseudoinverse berücksichtigt abhängige Zeilen. Ein zulässiges Feld wird auf sich selbst abgebildet. Bei bewegten Randdaten ist ein zum neuen Zeitpunkt passendes Grundfeld nötig. Die Arbeit von Zhou, Xian und Yang verbindet für inkompressible Strömungen eine tangentiale Korrektur mit der Rückführung auf die vom Solver vorgegebene zulässige Menge. \href{https://arxiv.org/abs/2611.19753}{PCM-NO, Vorabdruck vom 15. November 2026}
+
+\textbf{Wo tritt der Wandfehler auf?} Wir lesen die extrapolierte Tangentialgeschwindigkeit an den Wandflächen und teilen die Abweichung vom Sollwert durch das Deckeltempo \(U\). Das Rohfeld aus affinem Modell und Fourier-Korrektur erreicht \(0{,}22449\) an der rechten, ruhenden Wand bei \(y/L=63{,}5/65\). Nach alleiniger Flussprojektion liegt das Maximum an derselben Stelle bei \(0{,}37603\). Am Boden bleibt das Rohmaximum bei \(0{,}00049444\). Erst die gemeinsame Projektion auf die hier gewählten Wand- und Flussgleichungen bringt das Wandmaximum auf rund \(4{,}4\cdot10^{-16}\). Acht ecknahe Flächen erhalten den Sollwert durch die Geisterzellenregel aus 9.20. Ein Ansatz \(v=v_0+Nz\) mit \(B_hv_0=g_h\) und \(B_hN=0\) erfüllt die Wandwerte bereits konstruktiv.
+
+Für die Fourier-Variante steigt der relative Innenfeldfehler von 1,173 \% über 2,024 \% auf 2,151 \%. Gleichzeitig sinkt der größte diskrete Divergenzbetrag bei gemeinsamer Projektion auf weniger als \(5\cdot10^{-13}\) und der größte Defekt der extrapolierten Wandwerte auf weniger als \(10^{-14}\) in den gewählten Einheiten. Im ursprünglichen Buchscore gehen der Innenfeldfehler, die RMS-Divergenz im Kern und die Ghia-Profile gemeinsam ein. Dieser Score sinkt von 0,737 auf 0,717. Eine Verbesserung des schlechtesten budgetbezogenen Teilwerts kann also mit einem größeren Fehler einer einzelnen Zielgröße einhergehen. Die \(0{,}05074\,\%\) im 17²-Anlauf (Buch S. 329) sind ein Mittel über die \textbf{Betragsfelder} von 24 Testfällen nach 16 Schritten. Abb. 9.4 links misst dagegen den \textbf{Vektorfehler im Kern} eines nominalen 65²-Feldes.
+%</K09-04>
+
+\clearpage
+\absatz{K15-02 · Quellenbreite und Brunnenradius}
+\unter{Buch S.~313}
+%<*K15-02>
+Am Viertelmetergitter liegt der bilineare FV-Wert um \(29{,}91\,\mathrm{mg/m^3}\) über der Green-Referenz mit denselben Sensorzellen. Gegen den physischen Punktwert von \(45\,021{,}62\,\mathrm{mg/m^3}\) beträgt die Differenz \(-887{,}24\,\mathrm{mg/m^3}\). Drei Gitter mit unterschiedlichen Quell- und Beobachtungsfehlern bestimmen noch keine asymptotische Ordnung des Flussverfahrens.
+
+\textbf{Was ändert die Breite genau?} In jeder Richtung verschiebt der zusätzliche Filter die Quelle mit Gewichten \((1/4,1/2,1/4)\) um \(-h,0,+h\). Die Summe ist eins, die mittlere Verschiebung null. Das zweite zentrale Ortsmoment steigt je Richtung um \(h^2/2\). Am Viertelmetergitter messen wir beim Wechsel von bilinear zu verbreitert \(42\,943{,}91-44\,134{,}39=-1\,190{,}48\,\mathrm{mg/m^3}\). Das ist die Antwort des festen FV-Verfahrens am Messort \((5,0)\,\mathrm m\) nach zehn Tagen auf genau diese Änderung.
+
+\textbf{Wann hilft Peacemans Brunnenradius?} Betrachten wir eine stationär fördernde, vertikale Bohrung in einer homogenen isotropen Schicht der Dicke \(b\), ohne zusätzlichen Bohrlochwiderstand. Mit Permeabilität \(k\), dynamischer Viskosität \(\mu\) und positiver Volumenförderrate \(Q\) folgt aus dem radialen Darcy-Gesetz \(dp/dr=\mu Q/(2\pi k b r)\). Integration vom Bohrlochradius \(r_w\) zum effektiven Zellblockradius \(r_e\) ergibt \[p_{\rm Block}-p_{\rm Brunnen}=\frac{\mu Q}{2\pi k b}\log\!\frac{r_e}{r_w}.\] Beim klassischen quadratischen Gitter im Inneren des Gebiets entspricht der Zelldruck ungefähr dem Druck bei \(r_e\simeq0{,}2h\). Die linke Seite hat die Einheit Pascal. Im C19R-Versuch sind die Eingabe eine Stoffrate und die Ausgabe eine Konzentration stromabwärts. Dort trennt der kontrollierte Quellenwechsel den Einfluss der Quellgewichte vom übrigen diskreten Rechenweg. \href{https://doi.org/10.2118/6893-PA}{Peaceman, 1978, SPE Journal}
+%</K15-02>
+
+\clearpage
+\absatz{K04-01 · Kritische Dämpfung des Bindungsfehlers}
+\unter{Buch S.~113}
+%<*K04-01>
+\textbf{Wie schnell darf die Rückführung sein?} Die Fehlergleichung besitzt die Eigenwerte \(\lambda_\pm=-\alpha\pm\sqrt{\alpha^2-\beta^2}\). Bei kritischer Dämpfung ist \(\alpha=\beta=1/T_B\) mit einer physikalisch gewählten Zeit \(T_B\). Dann hat allein die Fehlerdynamik den doppelten Eigenwert \(-1/T_B\). Ein kleineres \(T_B\) beschleunigt die Rückführung und kann dem Gesamtsystem eine kurze Zeitskala hinzufügen. Bei \(x=h/T_B\) dämpft Vorwärts-Euler den Fehlerblock für \(0<x<2\), klassisches RK4 für \(0<x<x_4\) mit \(x_4=2{,}785293563\ldots\) aus Abschnitt 2.2 (Buch S. 66).
+
+Warum steht hier eine strikte Grenze? In den Koordinaten \((g,T_B\dot g)\) lautet die dimensionslose Fehlermatrix \(B=-I+N\) mit \(N=\left(\begin{smallmatrix}1&1\\-1&-1\end{smallmatrix}\right)\) und \(N^2=0\). Für jedes RK-Polynom gilt \(R(xB)=R(-x)I+xR'(-x)N\). Am rechten Rand bleibt bei beiden Verfahren ein Jordan-Anteil, der unter Wiederholung linear wächst. Im Inneren klingt auch dieser Anteil ab. Bei \(h=T_B\) ist der RK4-Eigenfaktor \(R_4(-1)=3/8\). Für \(\dot g(0)=0\) bleibt nach einem RK4-Schritt tatsächlich \(17g(0)/24\), analytisch \(2g(0)/e\). Damit lassen sich Stabilität und Zeitfehler getrennt prüfen.
+
+Wählen Sie erst die gewünschte Erholungszeit und halbieren Sie dann \(h\) bei gleichem \(T_B\). Wer \(T_B=h\) nach jedem adaptiven Schritt neu setzt, ändert zugleich die Rückführung. Benötigt das Pendel am Ausgabezeitpunkt Ort und Geschwindigkeit auf der Bindung, prüft RATTLE in 4.4 (Buch S. 115) diese beiden Bedingungen direkt. \href{https://doi.org/10.1016/0045-7825(72)90018-7}{Baumgarte, 1972}
+%</K04-01>
+
+\clearpage
+\absatz{K06-01 · Versionskalender für QSS}
+\unter{Buch S.~147}
+%<*K06-01>
+\textbf{Kalenderregel für interne QSS-Termine.} Ein Heap-Eintrag speichert Zeit, Knoten und Version der Prognose. Der Versionszähler steigt auch dann, wenn die neue Prognose unendlich ist. Damit lässt sich ein alter Termin ohne Suche im Heap streichen.
+
+\begin{Verbatim}[fontsize=\small]
+def kalender(d, t0, schnitt, fortschreiben, ausgabe, uebernehmen, deps):
+    heap, version = [], [0] * d
+    def plane(i, t):
+        version[i] += 1
+        s = schnitt(i, t)
+        if s < inf:
+            heappush(heap, (s, i, version[i]))
+
+    for i in range(d):
+        plane(i, t0)
+    while heap:
+        t = heap[0][0]
+        faellig = set()
+        while heap and heap[0][0] == t:
+            _, i, v = heappop(heap)
+            if v == version[i]:
+                faellig.add(i)
+        if faellig:
+            betroffen = faellig.union(*(deps(i) for i in faellig))
+            fortschreiben(t, betroffen)
+            post = {i: ausgabe(i) for i in sorted(faellig)}
+            uebernehmen(t, post, betroffen)
+            for j in sorted(betroffen):
+                plane(j, t)
+\end{Verbatim}
+
+\texttt{heappush} und \texttt{heappop} stammen aus \texttt{heapq}, \texttt{inf} aus \texttt{math}. Zuerst laufen die betroffenen Zustände bis \(t\) mit den bisherigen Raten. \texttt{ausgabe} liest die Quantisierermeldung jedes fälligen Knotens aus diesem gemeinsamen Vorzustand. Bei QSS1 ist das der erreichte neue Schwellenwert. Erst \texttt{uebernehmen} stellt alle Meldungen zusammen zu und aktualisiert die Raten. Auch der auslösende Knoten braucht einen neuen Termin. Im Beispiel verfällt \((1/2,i,1)\), gültig bleibt \((3/4,i,2)\). Für eine gleichzeitige externe Meldung legt das Modell zusätzlich den gemeinsamen internen und externen Übergang fest.
+%</K06-01>
+
+\clearpage
+\absatz{RK · Reelle und imaginäre Stabilitätsgrenzen}
+\unter{Buch S.~66}
+%<*RK>
+Frieren wir eine abklingende Mode \(y'=-ay\) mit \(a>0\) für einen Schritt der Länge \(h>0\) ein. Schreiben wir \(x=ah\), dann wird eine Störung nach \(n\) gleich langen Schritten mit \(R(-x)^n\) multipliziert. Sie bleibt genau für \(|R(-x)|\le1\) beschränkt. Wirkliche Dämpfung verlangt \(|R(-x)|<1\). Vorwärts-Euler liefert \(R(-x)=1-x\), also \(0\le x\le2\). Für die schwingende Mode \(\lambda=-a+i\omega\) folgt aus \((1-ah)^2+(h\omega)^2\le1\) die Grenze \(h\le2a/(a^2+\omega^2)\).
+
+\textbf{Vier Stufen.} Setzen wir \(f(y)=\lambda y\) in die vier Stufen aus 2.1 ein, erhalten wir \(R_4(z)=1+z+z^2/2+z^3/6+z^4/24\). Für \(x>0\) ist \(R_4(-x)>e^{-x}>0\) nach der Taylorformel mit Restglied. Es genügt deshalb, den Schnitt mit \(+1\) zu suchen: \[
+R_4(-x)-1=\frac{x}{24}(x^3-4x^2+12x-24).
+\] Die Ableitung des Klammerausdrucks ist \(3x^2-8x+12>0\), sein Wert bei 0 negativ und bei 3 positiv. Seine einzige positive Nullstelle \(x_4=2{,}785293563\ldots\) gibt das exakte Intervall \(0\le ah\le x_4\) an. Auf der imaginären Achse ergibt das Betragsquadrat \(|R_4(i\eta)|^2-1=\eta^6(\eta^2-8)/576\). Für eine ungedämpfte Mode ist RK4 also genau bei \(|\omega h|\le2\sqrt2\) betragsstabil.
+
+\textbf{Drei Stufen und eine eingebettete Schätzung.} Für den fortgeschriebenen Wert des Bogacki--Shampine-Paares aus 2.3 entfällt der Term \(z^4/24\). Das kubische \(R_3(-x)\) fällt streng, denn seine Ableitung nach \(x\) ist \(-[(x-1)^2+1]/2\). Es trifft \(-1\), wenn \(x^3-3x^2+6x-12=0\), also bei \(x=2{,}512745327\ldots\). Bei eingebetteten Verfahren muss man wissen, welcher Wert den nächsten Schritt startet. Die Rechnung für Dormand--Prince in C05 (Buch S. 258) verwendet den Wert fünfter Ordnung. \href{https://fncbook.com/julia/absstab-diffusion/}{Driscoll und Braun, Absolute Stability}
+%</RK>
+
+\clearpage
+\absatz{DP · Dormand–Prince in C05}
+\unter{Buch S.~258}
+%<*DP>
+Die analytische Lehrprobe kann neben Euler auch Dormand--Prince 5(4) beurteilen. Für die schnelle C05-Mode gilt \(\lambda=-a\). Setzen wir \(z=-ah\) in das Stabilitätspolynom der akzeptierten Formel ein, erhalten wir \[
+R(z)=1+z+\tfrac12z^2+\tfrac16z^3+\tfrac1{24}z^4+
+\tfrac1{120}z^5+\tfrac1{600}z^6 .
+\]
+
+Warum endet das Intervall gerade hier? Für \(x=ah>0\) ist \(R(-x)\) größer als \(e^{-x}\), denn es ist das Taylorpolynom sechsten Grades für \(e^{-x}\) plus \(x^6/3600\). Es genügt daher, \(R(-x)=1\) zu lösen. Nach Ausklammern von \(x/600\) bleibt \[p(x)=x^5-5x^4+25x^3-100x^2+300x-600.\] Es gilt \(p(0)<0\), \(p(4)>0\) und \(p'(x)=5(x^2-2x)^2+55x^2-200x+300>0\). Das letzte Quadratpolynom hat negative Diskriminante. Die einzige positive Nullstelle \(x_5=3{,}306567893\ldots\) liefert also genau \(0\le ah\le x_5\). Bei \(a=2{,}7\cdot10^6\,\mathrm{s^{-1}}\) folgt \(h\le1{,}22465\,\mu\mathrm s\), also mindestens 2\,857\,949 gleich große Schritte über \(3{,}5\,\mathrm s\). Das Labor gewinnt das Polynom unabhängig aus dem Stufentableau. \href{https://doi.org/10.1016/0771-050X\%2880\%2990013-3}{Dormand und Prince, 1980}
+%</DP>
+
+\clearpage
+\absatz{MOL · Diffusion und Upwind}
+\unter{Buch S.~161}
+%<*MOL>
+Die diskrete Sinusbasis ist orthogonal. Die diskrete \(L^2\)-Norm aller Störungen wächst daher in einem Euler-Schritt genau dann nicht, wenn \textbf{jeder} Faktor \(|1-4r\sin^2(m\pi/(2N))|\le1\) bleibt. Auf dem endlichen Dirichlet-Gitter ist \(m=N-1\) maßgeblich. Wegen \(\sin((N-1)\pi/(2N))=\cos(\pi/(2N))\) ergibt sich \(0\le r\le[2\cos^2(\pi/(2N))]^{-1}\). Bei \(N=4\) ist die Grenze \(2/(2+\sqrt2)\approx0{,}586\). Schon für \(r>1/2\) wird das zentrale Euler-Gewicht negativ. Die modale Norm kann also noch sinken, während ein Zellwert das bisherige Minimum unterschreitet. Auf dem periodischen Gitter mit gerader Knotenzahl erreicht die alternierende Mode die Grenze \(r=1/2\) genau.
+
+Dieselbe Grenze lässt sich als Verstärkungsfaktor lesen. Für die periodische Mode \(u_j=e^{\mathrm i j\theta}\) ist \(G=1-\sigma+\sigma e^{-\mathrm i\theta}\). Damit gilt \(|G|^2=1-4\sigma(1-\sigma)\sin^2(\theta/2)\). Für \(0\le\sigma\le1\) wächst keine Mode. Für \(\sigma>1\) wächst jede Mode mit \(\sin(\theta/2)\ne0\). Die alternierende Mode hat bei \(\sigma=1{,}25\) den Faktor \(-1{,}5\). Dieses Argument bezieht sich auf den gezeigten expliziten Upwind-Schritt. \href{https://www.clawpack.org/riemann_book/html/Advection.html}{Clawpack, Advektion und Charakteristiken}
+%</MOL>
+
+\clearpage
+\absatz{Verlet · Störmer–Verlet und Newmark}
+\unter{Buch S.~337}
+%<*Verlet>
+Mit \(\xi=\omega_h\Delta t>0\) lautet die Verlet-Gleichung \(q_{n+1}-(2-\xi^2)q_n+q_{n-1}=0\). Ihre Wurzeln haben Produkt eins. Für \(0<\xi<2\) liegen sie getrennt auf dem Einheitskreis, für \(\xi>2\) wächst eine. Bei \(\xi=2\) liefert die doppelte Wurzel \(-1\) die Folge \((a+bn)(-1)^n\). Beliebige Startstörungen bleiben also nur für \(\xi<2\) beschränkt. Beim Newmark-Verfahren mit mittlerer Beschleunigung hat \((1+i\xi/2)/(1-i\xi/2)\) stets Betrag eins.
+%</Verlet>
+
+\clearpage
+\absatz{DM · Leistungsprofil bei festem Fehlerbudget}
+\unter{Buch S.~385}
+%<*DM>
+Sei \(m_p\) die kleinste Medianzeit eines bestandenen Laufs in Fenster \(p\). Ein bestandener Lauf der festen Einstellung \(s\) erhält \(r_{p,s}=t_{p,s}/m_p\), jeder Fehllauf \(r_{p,s}=+\infty\). Hat ein Fenster keinen Gewinner, setzen wir alle seine Quotienten auf \(+\infty\). Für endliches \(\tau\ge1\) zeigt die rechtsstetige Treppe \[\rho_s(\tau)=\tfrac18\sum_{p=1}^{8}\mathbf{1}\{r_{p,s}\le\tau\}.\] Bei \(\tau=1\) zählen alle geteilten Bestzeiten mit. RK45 erreicht dort \(1/8\), QSS2 mit Quantenfaktor \(0{,}0002\) erreicht \(2/8\). Bei \(\tau=10\) lauten die Werte \(6/8\) und \(4/8\), am rechten Bildrand \(7/8\) und \(5/8\). Eigenständiges Radau IIA und BDF werden in Kapitel 11 separat verglichen. \href{https://doi.org/10.1007/s101070100263}{Dolan und Moré, 2002}
+
+Im Fenster C05 besteht keine der 57 Konfigurationen (54 QSS-Einstellungen einschließlich der Hybride und drei klassische Kontrollen). C05 bleibt im Nenner acht und trägt bei jedem endlichen Zeitfaktor null zum Zähler bei. Somit ist \(7/8\) die obere Schranke. RK4 und RK45 erreichen sie. Die drei archivierten \texttt{liqss-bdf}-Zeilen zu C05 tragen alle den Status \texttt{accuracy\_miss}. Ein Zusatzversuch hält die BDF-Kopplung, die drei Ereignisbudgets (je 1 ms) und die zwei Endwertbudgets fest. Beim Quantenfaktor \(2\cdot10^{-4}\) wiederholt sich \(S=7{,}572\). Bei \(4\cdot10^{-5}\) sinkt der Wert auf \(1{,}486\). Bei \(8\cdot10^{-6}\) bestehen alle vier Läufe mit \(S=0{,}263\). Der dritte Schaltzeitpunkt weicht dann um \(0{,}263\) ms ab. Bei \(1{,}6\cdot10^{-6}\) greift auf dem Versuchsrechner das Zeitlimit von zwei Sekunden. Das Zusatzprotokoll zu C05 steht im Revisionslabor. Abb. 18.3 zeigt die ursprüngliche Matrix.
+%</DM>
+\end{document}

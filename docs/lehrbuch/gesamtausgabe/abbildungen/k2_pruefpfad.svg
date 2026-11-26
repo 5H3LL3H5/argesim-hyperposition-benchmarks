@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="190.8pt" viewBox="0 0 576 190.8" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 190.8 
+L 576 190.8 
+L 576 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 176.9472 39.86928 
+L 399.0528 39.86928 
+Q 400.649184 39.86928 400.649184 38.2464 
+L 400.649184 12.1392 
+Q 400.649184 10.51632 399.0528 10.51632 
+L 176.9472 10.51632 
+Q 175.350816 10.51632 175.350816 12.1392 
+L 175.350816 38.2464 
+Q 175.350816 39.86928 176.9472 39.86928 
+z
+" clip-path="url(#pe4b05086fa)" style="fill: #eaf2f4; stroke: #50636c; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 288 48.4776 
+L 355.32576 68.94 
+L 288 89.4024 
+L 220.67424 68.94 
+z
+" clip-path="url(#pe4b05086fa)" style="fill: #ffffff; stroke: #50636c; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 28.76112 175.69728 
+L 269.60688 175.69728 
+Q 271.203264 175.69728 271.203264 174.0744 
+L 271.203264 111.9816 
+Q 271.203264 110.35872 269.60688 110.35872 
+L 28.76112 110.35872 
+Q 27.164736 110.35872 27.164736 111.9816 
+L 27.164736 174.0744 
+Q 27.164736 175.69728 28.76112 175.69728 
+z
+" clip-path="url(#pe4b05086fa)" style="fill: #edf6f1; stroke: #08735e; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 306.39312 175.69728 
+L 547.23888 175.69728 
+Q 548.835264 175.69728 548.835264 174.0744 
+L 548.835264 111.9816 
+Q 548.835264 110.35872 547.23888 110.35872 
+L 306.39312 110.35872 
+Q 304.796736 110.35872 304.796736 111.9816 
+L 304.796736 174.0744 
+Q 304.796736 175.69728 306.39312 175.69728 
+z
+" clip-path="url(#pe4b05086fa)" style="fill: #fbf2ed; stroke: #aa470e; stroke-width: 1.1; stroke-linejoin: miter"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 220.67424 68.94 
+L 149.184 68.94 
+" clip-path="url(#pe4b05086fa)" style="fill: none; stroke: #08735e; stroke-width: 1.55; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 355.32576 68.94 
+L 426.816 68.94 
+" clip-path="url(#pe4b05086fa)" style="fill: none; stroke: #aa470e; stroke-width: 1.55; stroke-linecap: square"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 10.5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #1d3240" x="288" y="28.090144" transform="rotate(-0 288 28.090144)">Stufen berechnen und Fehler E schätzen</text>
+   </g>
+   <g id="patch_6">
+    <path d="M 288 42.012471 
+Q 288 44.598205 288 45.450986 
+" style="fill: none; stroke: #1d3240; stroke-width: 1.55; stroke-linecap: round"/>
+    <path d="M 290.1 41.250986 
+L 288 45.450986 
+L 285.9 41.250986 
+z
+" style="fill: #1d3240; stroke: #1d3240; stroke-width: 1.55; stroke-linecap: round"/>
+   </g>
+   <g id="text_2">
+    <!-- $E\leq 1$? -->
+    <g style="fill: #1d3240" transform="translate(272.0925 71.837344)">
+     <text>
+      <tspan x="0" y="-0.828125" style="font-style: oblique; font-size: 10.5px; font-family: 'DejaVu Sans'; fill: #1d3240">E</tspan>
+      <tspan x="8.679932" y="-0.828125" style="font-size: 10.5px; font-family: 'DejaVu Sans'; fill: #1d3240">≤</tspan>
+      <tspan x="19.523438" y="-0.828125" style="font-size: 10.5px; font-family: 'DejaVu Sans'; fill: #1d3240">1</tspan>
+      <tspan x="26.203857" y="-0.828125" style="font-size: 10.5px; font-family: 'DejaVu Sans'; fill: #1d3240">?</tspan>
+     </text>
+    </g>
+   </g>
+   <g id="patch_7">
+    <path d="M 149.184 70.943277 
+Q 149.184 89.403919 149.184 106.131608 
+" style="fill: none; stroke: #08735e; stroke-width: 1.55; stroke-linecap: round"/>
+    <path d="M 151.284 101.931608 
+L 149.184 106.131608 
+L 147.084 101.931608 
+z
+" style="fill: #08735e; stroke: #08735e; stroke-width: 1.55; stroke-linecap: round"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 426.816 70.943277 
+Q 426.816 89.403919 426.816 106.131608 
+" style="fill: none; stroke: #aa470e; stroke-width: 1.55; stroke-linecap: round"/>
+    <path d="M 428.916 101.931608 
+L 426.816 106.131608 
+L 424.716 101.931608 
+z
+" style="fill: #aa470e; stroke: #aa470e; stroke-width: 1.55; stroke-linecap: round"/>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 10.5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #08735e" x="183.888" y="63.2952" transform="rotate(-0 183.888 63.2952)">Ja</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 10.5px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #aa470e" x="392.112" y="63.2952" transform="rotate(-0 392.112 63.2952)">Nein</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 10.5px; font-family: 'DejaVu Sans'; fill: #1d3240" transform="translate(102.134977 132.970887)">Schritt annehmen</text>
+    <text style="font-size: 10.5px; font-family: 'DejaVu Sans'; fill: #1d3240" transform="translate(67.408687 145.925344)">Zeit und Zustand fortschreiben</text>
+    <text style="font-size: 10.5px; font-family: 'DejaVu Sans'; fill: #1d3240" transform="translate(60.952008 158.879801)">Neues h nach dem Regler wählen</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 10.5px; font-family: 'DejaVu Sans'; fill: #1d3240" transform="translate(381.283734 132.970887)">Schritt verwerfen</text>
+    <text style="font-size: 10.5px; font-family: 'DejaVu Sans'; fill: #1d3240" transform="translate(316.926937 145.925344)">Zeit, Zustand und PI-Gedächtnis behalten</text>
+    <text style="font-size: 10.5px; font-family: 'DejaVu Sans'; fill: #1d3240" transform="translate(338.069672 158.879801)">Mit kleinerem h erneut versuchen</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pe4b05086fa">
+   <rect x="10.368" y="1.908" width="555.264" height="186.984"/>
+  </clipPath>
+ </defs>
+</svg>

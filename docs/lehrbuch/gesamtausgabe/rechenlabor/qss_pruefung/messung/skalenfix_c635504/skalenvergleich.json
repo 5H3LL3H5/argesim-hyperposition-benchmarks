@@ -1,0 +1,42 @@
+{
+  "baseline": {
+    "archived_csv_sha256": "8f218abf2ba1cb604689e2868cdb6e2e12c871852fb2f9451092e0cce1cce297",
+    "configurations": 399,
+    "different_work_counts": 0,
+    "identical_scores": 360,
+    "paired_scores": 360,
+    "repeated_csv_sha256": "7da1e4169b80ce9a8c408673c3f6311c4bbb49056508848128b9e73c39651a99",
+    "same_status": 387,
+    "switch_involving_timeout": 12
+  },
+  "extension": {
+    "archived_csv_sha256": "5e0d03e333689db69690fddb6d11615940562069cf3f1a14f5215a18d0fb1d3e",
+    "configurations": 456,
+    "different_work_counts": 0,
+    "identical_scores": 318,
+    "paired_scores": 318,
+    "repeated_csv_sha256": "0425d6a693a127e9b4a38463b7f79167a9934d36afa53e36fca63fa52062e917",
+    "same_status": 406,
+    "switch_involving_timeout": 50
+  },
+  "rk23": {
+    "archived_csv_sha256": "f890eac495f58da5b9c019bbe941322704f10e69cdf550d2a55c55c17a961e06",
+    "configurations": 138,
+    "different_work_counts": 0,
+    "identical_scores": 116,
+    "paired_scores": 116,
+    "repeated_csv_sha256": "d370c9604d1b0f28ae1d6f853cac1217eadd672bd541d3a86a378e48a4d82d59",
+    "same_status": 124,
+    "switch_involving_timeout": 14
+  },
+  "selection": {
+    "archived_csv_sha256": "ca6b63dfe885bda45220ecd7a3b7042f38d49b3c39f7ef3ef23d2d7ebf9ab14d",
+    "configurations": 520,
+    "different_work_counts": 0,
+    "identical_scores": 382,
+    "paired_scores": 382,
+    "repeated_csv_sha256": "a2f724eed081b4559f82b966d6ea8776746a0be36b8606c40806959d4393b7f8",
+    "same_status": 461,
+    "switch_involving_timeout": 59
+  }
+}

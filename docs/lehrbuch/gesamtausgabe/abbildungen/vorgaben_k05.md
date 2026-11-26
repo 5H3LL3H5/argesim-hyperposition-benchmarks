@@ -1,0 +1,21 @@
+# Abbildungen zu Kapitel 5
+
+**Bildsatz für alle drei Abbildungen.** Zwei waagerecht angeordnete Teilbilder A und B, SVG mit ViewBox in Punkten, Zeichenfläche 8,0 × 3,85 Zoll. Die Druckfassung verwendet knapp 170 mm Gesamtbreite. Achsentitel 9,4 pt, Teilbildtitel 10,6 pt, Strichstärke der Datenkurven 1,65 pt bezogen auf die Originalgrafik. Dezimalzahlen auf linearen Achsen tragen ein Komma. Potenzbeschriftungen kennzeichnen logarithmische Achsen. Blau `#0072B2` steht für die zuerst besprochene Kurve, dunkles Orange `#A84012` für das zweite Modell oder besondere Treffer, Grün `#007567` für die Fehlerschranke und Grau `#536670` für Hilfen und Referenzen. Form, Füllung und Strichmuster unterscheiden die Daten auch im Graudruck. Jede Unterschrift folgt der tatsächlichen Reihenfolge A, B. Die SVGs und das Programm für die Neuzeichnung stehen im Quellenpaket.
+
+### Abbildung 5.1 · Durchgänge, Berührung und Konditionierung
+
+**Linkes Teilbild.** Lineare Abszisse „Zeit t [s]“ mit Marken 0, 0,25, 0,5, 0,75 und 1. Lineare Ordinate „Wächterwert [1]“. Der Zahlenwert ist dimensionslos. In Blau den Wächter $(s-1/4)(s-3/4)$ mit $s=t/(1\,\mathrm s)$ zeichnen. Seine beiden Endwerte sind gefüllte Kreise und seine Nullstellen offene Kreise. Den zweiten Wächter $(s-1/2)^2$ orange gestrichelt mit offener Raute bei Berührung zeichnen. Dünne graue Nullgerade. **Rechtes Teilbild.** Doppelt logarithmische Achsen „Schrittweite h [s]“ und „Zeitfehler [s]“. Blaue Kreise für $|\hat t-\ln(2)\,\mathrm s|$, offene grüne Quadrate und gestrichelte Linie für die aus RK4 und Hermite abgeleitete Schranke. Die vier Datenpunkte sind Rechnungen mit demselben Brent-Parameter. Zwischenlinien erleichtern das Zuordnen.
+
+**Bildunterschrift.** Abbildung 5.1. A zeigt zwei dimensionslose Wächter über derselben Sekunde. Offene Kreise markieren die Durchgänge, die Raute die Berührung. B zeigt für einen anderen Versuch den Zeitfehler beim Erreichen von $y=2$ und seine analytische Schranke. Beide Achsen in B sind logarithmisch. Die Brent-Toleranz bleibt bei allen vier Schrittweiten gleich.
+
+### Abbildung 5.2 · Zwei Fallbahnen zur selben Zeit
+
+**Linkes Teilbild.** „Laborzeit t [s]“ von 0,55 bis 0,88 und „Höhe q [m]“. Beide glatten Lösungen mit 71 Punkten je Flugteil auswerten. $H=2\,\mathrm m$ blau durchgezogen, $H=2{,}25\,\mathrm m$ orange gestrichelt. **Rechtes Teilbild.** Dieselben Zeiten mit „Geschwindigkeit v [m/s]“. Vertikale punktierte Verbindungen zeigen Geschwindigkeitssprünge. Offene Kreise markieren $v^-$, gefüllte Kreise $v^+$. Bei $T=0{,}8\,\mathrm s$ in beiden Teilbildern die Vergleichszeit strichpunktiert zeichnen und jede Bahn mit einer Raute markieren. Das Intervall enthält genau einen Stoß jeder Bahn.
+
+**Bildunterschrift.** Abbildung 5.2. Beide Bälle starten aus der Ruhe, der blaue aus 2,00 m und der gestrichelte aus 2,25 m. A zeigt die stetige Höhe. In B kennzeichnen offene und gefüllte Kreise die Geschwindigkeiten vor und nach jedem Stoß. Die punktierte Verbindung steht für einen Sprung. Die Rauten bei 0,8 s vergleichen die Bahnen zur selben Laborzeit.
+
+### Abbildung 5.3 · Zeno-Folge und letzte aufgelöste Rückflüge
+
+**Linkes Teilbild.** „Zeit t [s]“ auf linearem Maßstab über den gesamten Fall und „Höhe q [m]“. Die Höhe aus dem jeweiligen freien Flug und den protokollierten Stoßdaten in Schritten von 1 ms auswerten. Die ersten drei Kontakte eigens markieren und die analytische Häufungszeit mit einer gestrichelten Senkrechten eintragen. **Rechtes Teilbild.** Lineare Abszisse „Stoßnummer k [1]“, logarithmische Ordinate „Flugzeit nach Stoß k [s]“. Grau gestrichelt die exakte geometrische Folge, blaue offene Kreise für ausgewählte Differenzen aufeinanderfolgender protokollierter Stoßzeiten. Eine orange Raute bezeichnet die analytisch berechnete Dauer des ersten ausgelassenen Fluges. Ihre Ordinate ist die Dauer dieses einzelnen Flugs. Die gesamte Restzeit ergibt sich erst durch Summieren aller noch folgenden Flüge.
+
+**Bildunterschrift.** Abbildung 5.3. A zeigt die Höhe im Lehrversuch, die drei ersten Stöße als offene Kreise und die analytische Häufungszeit als gestrichelte Senkrechte. B zeigt die Flugzeit nach dem $k$-ten Stoß auf logarithmischer Ordinatenachse. Die offenen Kreise sind ausgewählte gemessene Intervalle. Die Raute bei $k=56$ bezeichnet den ersten durch den Ruhemodus ausgelassenen Flug.
