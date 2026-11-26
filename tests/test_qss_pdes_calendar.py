@@ -3,6 +3,7 @@ import math
 import random
 import unittest
 from fractions import Fraction
+from itertools import pairwise
 
 from argesim_benchmarks.qss_pdes_calendar import PartitionedCalendar, certified_interval
 
@@ -72,7 +73,7 @@ class PartitionedCalendarTests(unittest.TestCase):
 
     def test_book_sized_partitions_equal_the_same_serial_bags(self):
         # Manufactured event times only. Keep both string states on their node.
-        for columns, scalars in ((65, 33), (799, 2)):
+        for columns, scalars in ((65, 33), (798, 2), (799, 2)):
             size = columns * scalars
             inputs = [(i, (float((i * 11) % 37), 0)) for i in range(size)]
             expected = [
@@ -82,13 +83,18 @@ class PartitionedCalendarTests(unittest.TestCase):
             for parts in (1, 4, 8):
                 with self.subTest(columns=columns, partitions=parts):
                     widths = [columns // parts + (p < columns % parts) for p in range(parts)]
-                    owners = [p for p, w in enumerate(widths) for _ in range(w * scalars)]
-                    if columns == 799:
-                        # cp1_task_c_ivp stores all positions, then velocities.
-                        spatial = [p for p, w in enumerate(widths) for _ in range(w)]
+                    spatial = [p for p, w in enumerate(widths) for _ in range(w)]
+                    self.assertEqual(sum(a != b for a, b in pairwise(spatial)), parts - 1)
+                    if scalars == 2:
+                        # Two global blocks: all displacements, then all velocities.
                         owners = spatial + spatial
                         self.assertEqual(owners[:columns], owners[columns:])
-                        self.assertEqual(sum(a != b for a, b in zip(spatial, spatial[1:])), parts - 1)
+                    else:
+                        # C-order FV arrays have shape (y, x). Partition x into strips.
+                        owners = spatial * scalars
+                        east_cuts = sum(owners[i] != owners[i+1] for i in range(size) if (i+1) % columns)
+                        north_cuts = sum(a != b for a, b in zip(owners, owners[columns:]))
+                        self.assertEqual((east_cuts, north_cuts), (scalars * (parts-1), 0))
                     c = PartitionedCalendar(owners, parts)
                     c.schedule(inputs)
                     self.assertEqual([c.pop_bag() for _ in expected], expected)
@@ -131,6 +137,14 @@ class LookaheadTests(unittest.TestCase):
         self.assertEqual(certified_interval(5, (0,), 3), 3)
         with self.assertRaises(TypeError):
             certified_interval(1, (0.1,), 3)
+
+    def test_positive_certificate_at_arbitrarily_small_reserve(self):
+        margin = Fraction(1, 2**500)
+        for coefficients in ((1,), (1, 2), (1, 2, 3)):
+            h = certified_interval(margin, coefficients, 1, iterations=2)
+            self.assertGreater(h, 0)
+            self.assertLessEqual(sum(c * h**k for k, c in enumerate(coefficients, 1)), margin)
+        self.assertEqual(certified_interval(margin, (1,), 1), margin)
 
     def test_changed_input_preempts_root_for_all_three_orders(self):
         # Under the old continuation d(s)=s**p would first reach 1 at s=1.

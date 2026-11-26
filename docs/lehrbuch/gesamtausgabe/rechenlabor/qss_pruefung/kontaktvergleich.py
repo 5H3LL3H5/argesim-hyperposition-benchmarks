@@ -42,10 +42,12 @@ def compare(previous, current):
             moved = paired and float(old) != float(new)
             switches = a["status"] != b["status"]
             work = [k for k in WORK if a.get(k) and b.get(k) and a[k] != b[k]]
-            comparisons.append(dict(suite=suite, case=case, method=method, level=level,
-                                    status_before=a["status"], status_after=b["status"],
-                                    score_before=old, score_after=new, changed_counters=" ".join(work),
-                                    median_ms_before=a["median_ms"], median_ms_after=b["median_ms"]))
+            comparisons.append({
+                "suite": suite, "case": case, "method": method, "level": level,
+                "status_before": a["status"], "status_after": b["status"],
+                "score_before": old, "score_after": new, "changed_counters": " ".join(work),
+                "median_ms_before": a["median_ms"], "median_ms_after": b["median_ms"],
+            })
             counts.update(configurations=1, paired_scores=int(paired), different_scores=int(moved),
                           status_changes=int(switches), work_changes=bool(work),
                           timeout_changes=int(switches and "timeout" in (a["status"], b["status"])))

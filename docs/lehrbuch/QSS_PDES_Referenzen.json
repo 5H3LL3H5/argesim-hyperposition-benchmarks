@@ -1,0 +1,53 @@
+{
+  "c19r": {
+    "profiles": [
+      "konstant",
+      "frueher Puls",
+      "spaete Erhoehung",
+      "spaete Absenkung",
+      "Doppelpuls",
+      "fallend",
+      "steigend",
+      "abwechselnd"
+    ],
+    "physical_scores": [
+      13.916131498150886,
+      27.45473726608621,
+      58.5956898426196,
+      19.202532124020514,
+      104.90235122353705,
+      14.092620236829195,
+      15.425597922622261,
+      18.100912363844163
+    ],
+    "physical_passes": 0,
+    "max_field_relative": 0.3385353537510487,
+    "max_well_relative": 1.0490235122353706,
+    "max_mass_closure_fraction": 4.20651569383685e-15,
+    "max_relative_to_half_step_rk4": 1.704046434530617e-07
+  },
+  "cp1c": [
+    {
+      "nodes_including_ends": 800,
+      "intervals": 799,
+      "interior_nodes": 798,
+      "ode_states": 1596,
+      "time_samples": 121,
+      "relative_field_difference": 8.666106766747621e-15,
+      "max_sensor_difference_m": 1.0880185641326534e-14,
+      "max_nearest_vs_linear_m": 0.01004343057688134,
+      "score_between_semidiscrete_references": 1.0880185641326534e-11
+    },
+    {
+      "nodes_including_ends": 801,
+      "intervals": 800,
+      "interior_nodes": 799,
+      "ode_states": 1598,
+      "time_samples": 121,
+      "relative_field_difference": 1.2136761813190685e-14,
+      "max_sensor_difference_m": 1.3433698597964394e-14,
+      "max_nearest_vs_linear_m": 0.0,
+      "score_between_semidiscrete_references": 1.3433698597964394e-11
+    }
+  ]
+}

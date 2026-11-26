@@ -165,12 +165,16 @@ def certified_interval(
     lo, hi = Fraction(0), Fraction(horizon)
     if margin == 0:
         return lo
-    if variation(hi) <= margin:
+    end_variation = variation(hi)
+    if end_variation <= margin:
         return hi
+    # Nonnegative coefficients give E(sH) <= s*E(H) for 0 <= s <= 1.
+    # This yields a positive certified start even far below the bisection scale.
+    positive_lower_bound = hi * margin / end_variation
     for _ in range(iterations):
         mid = (lo + hi) / 2
         if variation(mid) <= margin:
             lo = mid
         else:
             hi = mid
-    return lo
+    return max(lo, positive_lower_bound)
