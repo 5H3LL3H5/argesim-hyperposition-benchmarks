@@ -83,6 +83,12 @@ class PartitionedCalendarTests(unittest.TestCase):
                 with self.subTest(columns=columns, partitions=parts):
                     widths = [columns // parts + (p < columns % parts) for p in range(parts)]
                     owners = [p for p, w in enumerate(widths) for _ in range(w * scalars)]
+                    if columns == 799:
+                        # cp1_task_c_ivp stores all positions, then velocities.
+                        spatial = [p for p, w in enumerate(widths) for _ in range(w)]
+                        owners = spatial + spatial
+                        self.assertEqual(owners[:columns], owners[columns:])
+                        self.assertEqual(sum(a != b for a, b in zip(spatial, spatial[1:])), parts - 1)
                     c = PartitionedCalendar(owners, parts)
                     c.schedule(inputs)
                     self.assertEqual([c.pop_bag() for _ in expected], expected)

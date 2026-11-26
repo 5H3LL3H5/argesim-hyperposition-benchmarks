@@ -118,6 +118,65 @@ def _bracketed_root(
             right = middle
 
 
+def _divide_exact(a, b):
+    """Euclidean division of ascending rational coefficient lists."""
+    remainder = a.copy()
+    quotient = [Fraction(0)] * max(0, len(a) - len(b) + 1)
+    while len(remainder) >= len(b):
+        shift = len(remainder) - len(b)
+        factor = remainder[-1] / b[-1]
+        quotient[shift] = factor
+        for i, coefficient in enumerate(b):
+            remainder[i + shift] -= factor * coefficient
+        while remainder and not remainder[-1]:
+            remainder.pop()
+    return quotient, remainder
+
+
+def _certified_roots(values, upper, tolerance):
+    """Count distinct roots in (a,b] by exact Sturm variations near contact."""
+    polynomial = [Fraction(c) for c in values]
+    a, b = polynomial, polynomial_derivative(polynomial)
+    while b:
+        a, b = b, _divide_exact(a, b)[1]
+    square_free, _ = _divide_exact(polynomial, a)
+    chain = [square_free, polynomial_derivative(square_free)]
+    while True:
+        _, remainder = _divide_exact(*chain[-2:])
+        if not remainder:
+            break
+        chain.append([-c for c in remainder])
+
+    def variations(t):
+        previous = 0
+        count = 0
+        for member in chain:
+            value = _event_value(member, t)
+            sign = (value > 0) - (value < 0)
+            if sign:
+                count += previous == -sign
+                previous = sign
+        return count
+
+    pending = [(0.0, upper, variations(0.0), variations(upper))]
+    roots = []
+    while pending:
+        left, right, vleft, vright = pending.pop()
+        if vleft == vright:
+            continue
+        middle = left + (right - left) * 0.5
+        if middle == left or middle == right:
+            roots.append(right)
+            continue
+        if vleft - vright == 1 and right - left <= min(tolerance, 1e-8 * middle):
+            roots.append(right if _event_value(square_free, right) == 0 else middle)
+            continue
+        vmid = variations(middle)
+        pending.append((middle, right, vmid, vright))
+        pending.append((left, middle, vleft, vmid))
+    return roots
+
+
 def _interval_roots(
     coefficients: Sequence[_Coefficient], upper: float, time_tolerance: float,
     *, exact: bool = False,
@@ -146,19 +205,19 @@ def _interval_roots(
     relative_roundoff: _Coefficient = 16.0 * sys.float_info.epsilon
     if exact:
         relative_roundoff = Fraction(relative_roundoff)
+    # A tiny residual can mean a true tangency, two crossings, or no root.
+    # Count roots of the represented polynomial before accepting a contact.
+    if any(
+        abs(sample) <= relative_roundoff * _event_value(magnitudes, point)
+        for point, sample in zip(points[1:], samples[1:])
+    ):
+        return _certified_roots(values, upper, time_tolerance)
     roots = []
     for i, crossing in enumerate(crossings):
-        right = points[i + 1]
         if crossing:
-            roots.append(_bracketed_root(values, points[i], right, samples[i], time_tolerance))
-        # A multiple root may touch the threshold without changing sign.
-        # Its residual is relative to the local Horner terms at this extremum.
-        if samples[i + 1] == 0.0:
-            roots.append(right)
-        elif not crossing and (i + 1 == len(crossings) or not crossings[i + 1]):
-            roundoff = relative_roundoff * _event_value(magnitudes, right)
-            if abs(samples[i + 1]) <= roundoff:
-                roots.append(right)
+            roots.append(_bracketed_root(
+                values, points[i], points[i + 1], samples[i], time_tolerance
+            ))
     return roots
 
 
