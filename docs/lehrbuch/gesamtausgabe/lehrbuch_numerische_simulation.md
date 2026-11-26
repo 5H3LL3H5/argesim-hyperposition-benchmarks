@@ -8699,7 +8699,7 @@ Lesen Sie die Kurzbezeichnung zusammen mit dem tatsächlich geprüften Ausschnit
 
 Die acht Fälle ergeben 456 Konfigurationen. Die ältere 399er-Reihe umfasste unter anderem C01, C15, C17R, CP1 und ein auf drei innere Knoten reduziertes CP2-Seil. Die spätere 520er-Auswahlstudie verbindet analytische Prüfmodelle mit gezielten Wiederholungen. Die 138er-Reihe ergänzt insbesondere RK23 und ESDIRK32. Solche Reihen haben verschiedene Versuchsraster und Nenner.
 
-Die vier wiederholten Matrizen sind im Quellenpaket unter `rechenlabor/qss_pruefung/messung/` mit den unveränderten Studienbezeichnungen baseline, extension, selection und rk23 abgelegt.
+Im vollständigen Labor liegen `baseline.csv`, `extension.csv`, `selection.csv` und `rk23.csv` unter `rechenlabor/qss_pruefung/messung/kontakt_v919/`. Der übergeordnete Ordner `messung/` dokumentiert den v9.18-Vergleich.
 
 <a id="fb-matrix"></a>
 
@@ -8707,7 +8707,7 @@ Die vier wiederholten Matrizen sind im Quellenpaket unter `rechenlabor/qss_pruef
 
 Jede Zahl zählt bestandene Einstellungen. Für jeden QSS-Namen wurden drei Quantenfaktoren $0{,}005,\ 0{,}001,\ 0{,}0002$ mal Komponentenskala geprüft. Euler, RK4 und RK45 haben hier je eine Einstellung pro Fall. Fettdruck kennzeichnet Zellen, in denen alle geprüften Einstellungen bestehen.
 
-**Versuchsbezug.** Acht-Fälle-Archiv. Je Modell 18 QSS-Verfahren zu drei Quanten und drei klassische Kontrollen. Bezugsfenster und Referenzen stehen in der vorangehenden Falltabelle.
+**Versuchsbezug.** [Primärdatei der Acht-Fälle-Matrix (456 Zeilen, 224 bestanden)](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/b065fe61f10faef9c9781473a89315abdd467c75/docs/lehrbuch/gesamtausgabe/rechenlabor/qss_pruefung/messung/kontakt_v919/extension.csv). Je Modell 18 QSS-Verfahren zu drei Quanten und drei klassische Kontrollen. Bezugsfenster und Referenzen stehen in der vorangehenden Falltabelle.
 
 <a id="tab-k18-06"></a>
 
@@ -8958,7 +8958,7 @@ Für jede Konfiguration verbinden wir Fall, Methodenname und Einstellung mit der
 
 **Basisreihe.** 399 Einstellungen, 167 bestanden. Zwei Statuswechsel gegenüber `c635504`.
 
-**Acht Modellfenster.** 456 Einstellungen, 224 bestanden. 15 Statuswechsel.
+**Acht Modellfenster.** Je 456 Einstellungen: 222 bestanden in der Vorauflage (`vorher/qss-extension.csv`), 209 im v9.18-Vergleich (`messung/extension.csv`) und 224 in der aktuellen Tabelle (`messung/kontakt_v919/extension.csv`); alle Pfade ab `rechenlabor/qss_pruefung/`. Die 15 Statuswechsel zählen den direkten Vergleich mit der Zwischenprobe `c635504` (227 bestanden).
 
 **Auswahlstudie.** 520 Einstellungen, 285 bestanden. 13 Statuswechsel.
 
@@ -10022,7 +10022,7 @@ Ankünfte gleich bediente, abgebrochene und verbliebene Kunden setzen und die bi
 
 Jedes der acht Modellfenster hat 57 Konfigurationen. Die Tabellen führen jedes Verfahren und jede Einstellung auf. Zur Zeile gehören in der CSV-Datei auch Arbeitszähler, neu gemessene Laufzeiten in Millisekunden und gegebenenfalls die Diagnose.
 
-Je Zelle stehen die Statuskennung und, sofern vorhanden, der auf drei signifikante Stellen gerundete gespeicherte Score. **B** bedeutet bestanden, **G** numerisches Budget überschritten, **T** Zeitlimit, **E** abweichende Zahl von Beobachtungen und **F** Solverfehler. Für abgeschlossene Bewertungen gilt der ungerundete CSV-Wert. Vier unvollständige Zeilen enthalten bereits einen Score aus dem Vorlauf. Die Statuskennung entscheidet über die Verwertbarkeit. Die Schreibweise 2,6e-5 entspricht 0,000026. Die Reihenfolge der Quanten ist grob, mittel, fein. Die drei klassischen Kontrollen besitzen jeweils eine feste Konfiguration. Messzeiten, Kosten und Fehlerdetails stehen für jede Zeile in `daten/qss-extension.csv`.
+Je Zelle stehen die Statuskennung und, sofern vorhanden, der auf drei signifikante Stellen gerundete gespeicherte Score. **B** bedeutet bestanden, **G** numerisches Budget überschritten, **T** Zeitlimit, **E** abweichende Zahl von Beobachtungen und **F** Solverfehler. Für abgeschlossene Bewertungen gilt der ungerundete CSV-Wert. Vier unvollständige Zeilen enthalten bereits einen Score aus dem Vorlauf. Die Statuskennung entscheidet über die Verwertbarkeit. Die Schreibweise 2,6e-5 entspricht 0,000026. Die Reihenfolge der Quanten ist grob, mittel, fein. Die drei klassischen Kontrollen besitzen jeweils eine feste Konfiguration. Messzeiten, Kosten und Fehlerdetails stehen in der [Primärdatei der Acht-Fälle-Matrix][matrix].
 
 Die [Methodenlegende direkt unter der Hauptmatrix](#auflage-k18-01) erklärt die Ordnungsziffer, die Schwellenwahl und den steifen Block.
 
@@ -11268,7 +11268,7 @@ Das Quellenpaket enthält den mathematischen Grundlagenteil, 18 Kapitel, vier An
 [synthese]: https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/17.tex
 [katalog]: https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/referenzen.tex
 [anhangb]: https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/beweise.tex
-[matrix]: https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/48e43e2ce056395719f7e735832e57ac5b9f2ee3/docs/lehrbuch/gesamtausgabe/daten/qss-extension.csv
+[matrix]: https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/b065fe61f10faef9c9781473a89315abdd467c75/docs/lehrbuch/gesamtausgabe/rechenlabor/qss_pruefung/messung/kontakt_v919/extension.csv
 [argesim]: https://www.argesim.org/benchmarks
 [picard]: https://ocw.mit.edu/courses/18-100b-real-analysis-spring-2025/resources/ocw_18100b-lec23-2025may08_mp4/
 [mcgill]: https://www.math.mcgill.ca/labute/courses/325b.02/lecture11.pdf

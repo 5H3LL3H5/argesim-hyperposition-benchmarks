@@ -1,5 +1,7 @@
 # Rechenlabor zur Gesamtausgabe v9.22
 
+**Acht-Fälle-Matrix, jeweils 456 Einstellungen:** [Historische Vorauflage (222 bestanden)](rechenlabor/qss_pruefung/vorher/qss-extension.csv), [Vergleich v9.18 (209 bestanden)](rechenlabor/qss_pruefung/messung/extension.csv), [aktuelle Buchmatrix (224 bestanden)](rechenlabor/qss_pruefung/messung/kontakt_v919/extension.csv). Die vier Primärdateien liegen unter `rechenlabor/qss_pruefung/messung/kontakt_v919/`. Die Zwischenprobe `c635504` (227 bestanden) ist davon getrennt.
+
 [Neue Skalierungsdaten](rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip) · [Wiederaufnahme der komponentenweisen QSS-Läufe](rechenlabor/pdes_partitionierung/QSS34_Fortsetzung.zip)
 
 [PDES und CP2-Vollgitter](rechenlabor/pdes_partitionierung/README.md) enthält die gemessenen 1/4/8-Prozessvergleiche, die Quelltexte und die neuen Vollläufe mit AB2, DOP853, D2Q9 und Gruppen-QSS.
