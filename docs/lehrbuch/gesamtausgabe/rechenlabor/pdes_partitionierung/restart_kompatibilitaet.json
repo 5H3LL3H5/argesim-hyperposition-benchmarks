@@ -1,0 +1,36 @@
+{
+  "experiment": {
+    "grid": 257,
+    "reynolds": 1000,
+    "end_tick": 350000,
+    "tick_duration": 0.000390625,
+    "reference_ticks": [
+      256,
+      4096,
+      16384,
+      65536,
+      131072,
+      262144,
+      350000
+    ],
+    "quantum": 0.001,
+    "sources": {
+      "cavity": "54384d793f08795cc75185b8e978b6d65b16774ae171aed4357afc2ca51b89bc",
+      "cp2": "cf9f6533c56489a490d28f0d7e40610bd516765294e59a6aa84d05f8a6f73efd",
+      "boundary": "ac4732d2a88886130daf8e9afbb4453b9b4c6c081d26cc839220325ed0de49dc",
+      "polynomial": "fe72aee87f5eaa7ab5a50f02685bee7cea783bcb2d8c8f82b4ba3906547dd538",
+      "integrator": "98d45dcea46f562a4a1733e633778f8d2ce95b1de8495f941c675cd58b95d1da"
+    },
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "python": [
+      3,
+      12,
+      14
+    ]
+  },
+  "checkpoints": {
+    "3": "a8f76c8142db06742f97d7f57f7f1d44fd77e65b4df4945846c10b7145ea12d7",
+    "4": "1e8e9cd598ddf12b107f12eaa8887e34ed1a354494519a1a31f4f5470168a6c5"
+  }
+}

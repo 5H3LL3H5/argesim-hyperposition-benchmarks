@@ -1,8 +1,8 @@
 # Numerische Simulation dynamischer Systeme
 
-**Christian Stenzel · Gesamtausgabe v9.19 · 18 Fachkapitel und vier Anhänge**
+**Christian Stenzel · Gesamtausgabe v9.21 · 18 Fachkapitel und vier Anhänge**
 
-Die mathematischen Grundlagen führen von Fehlermaßen und Stabilität zu Zeitintegration, Ereignissen und räumlicher Diskretisierung. Kapitel 6 erklärt die Kalender der QSS-Familie. Kapitel 16 prüft die Verfahren an der CP2-Kavität. Kapitel 18 vergleicht ihre Entscheidungen an den ARGESIM-Modellfenstern. Die Ausgabe enthält 91 nummerierte Abbildungen.
+Die mathematischen Grundlagen führen von Fehlermaßen und Stabilität zu Zeitintegration, Ereignissen und räumlicher Diskretisierung. Kapitel 6 erklärt die Kalender der QSS-Familie. Kapitel 16 prüft die Verfahren an der CP2-Kavität. Kapitel 18 vergleicht ihre Entscheidungen an den ARGESIM-Modellfenstern. Die Ausgabe enthält 92 nummerierte Abbildungen.
 
 [Lehrbuch öffnen (PDF)](../ARGESIM_SOLVER_STUDY.pdf) · [PDF herunterladen](../ARGESIM_SOLVER_STUDY.pdf?raw=true) · [Volltext und Kapitelfahrplan](gesamtausgabe/lehrbuch_numerische_simulation.md) · [Einzelkapitel](gesamtausgabe/kapitel)
 
@@ -14,7 +14,7 @@ Im Revisionsvergleich sind die Ergebnisse von 399 Basisfällen, 456 erweiterten 
 
 ## Forschungsstudie zur Parallelisierung von QSS
 
-Wann darf ein logischer Prozess bis zur nächsten vorhergesagten Schwelle vorausrechnen? Die Studie zu Kapitel 6 leitet sichere Zeitgrenzen und die Bedingungen für lokale Rollbacks her. Sie enthält einen ausführbaren partitionierten Kalender und den Versuchsplan für C19R und CP1/C mit vier und acht Prozessen.
+Wann darf ein logischer Prozess bis zur nächsten vorhergesagten Schwelle vorausrechnen? Die Studie zu Kapitel 6 leitet sichere Zeitgrenzen und die Bedingungen für lokale Rollbacks her. Kapitel 6 führt die Messungen mit bis zu acht Prozessen anhand der Grundwasserfahne ein. Kapitel 16 vergleicht LBM, klassisches AB2, adaptives DOP853 und Gruppen-QSS auf allen 257 × 257 Knoten bis zum selben Endtermin. [Lehrbeispiel und Übung](gesamtausgabe/kapitel/06.md#pdes-vorausschau) · [Laufzeiten und Referenzfehler](gesamtausgabe/kapitel/16.md#cp2-voll-direktvergleich) · [Messpakete und Wiederholung](gesamtausgabe/rechenlabor/pdes_partitionierung/README.md)
 
 [Forschungsstudie als PDF](QSS_PDES_Studie.pdf) · [Text und Quellen](QSS_PDES_Studie.md) · [Messwerte der seriellen Kontrollläufe](QSS_PDES_Referenzen.json) · [Python-Referenz](../../argesim_benchmarks/qss_pdes_calendar.py) · [Kalender- und Kausalitätstests](../../tests/test_qss_pdes_calendar.py)
 
@@ -26,7 +26,7 @@ Wann darf ein logischer Prozess bis zur nächsten vorhergesagten Schwelle voraus
 
 ## Kompaktfassung zum Nachschlagen
 
-Die folgenden Markdown-Kapitel bilden die frühere Kurzfassung. Die Gesamtausgabe v9.19 steht oben.
+Die folgenden Markdown-Kapitel bilden die frühere Kurzfassung. Die Gesamtausgabe v9.21 steht oben.
 
 | Kapitel | Leitfrage |
 |---|---|
