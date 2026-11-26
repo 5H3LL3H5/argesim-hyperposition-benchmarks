@@ -19,7 +19,21 @@ import numpy as np
 from buchquellen import CAVITY_BASIS, read_book_source, solver_root
 
 
+LAYOUTS = ('rows', 'columns', 'tiles', 'cyclic')
+MODES = ('conservative', 'optimistic')
+
+
+def validate_layout(count, layout):
+    if count < 1:
+        raise ValueError('Rank count must be positive')
+    if layout not in LAYOUTS:
+        raise ValueError(f'Unknown layout: {layout}')
+    if layout == 'tiles' and count > 1 and count % 2:
+        raise ValueError('The tiles layout requires 1 or an even number of ranks')
+
+
 def partitions(side, count, layout):
+    validate_layout(count, layout)
     grid = np.arange(side * side).reshape(side, side)
     if layout == 'rows':
         ny, nx = count, 1
@@ -164,8 +178,10 @@ def distributed(rank, cpus, ids, pipe, mode, order, segments, window, epoch, res
 
 
 def trial(cpus, order, count, layout, mode, segments, window):
-    ctx = mp.get_context('fork')
+    if mode not in MODES:
+        raise ValueError(f'Unknown execution mode: {mode}')
     groups = partitions(255, count, layout)
+    ctx = mp.get_context('fork')
     pipes = [ctx.Pipe() for _ in range(count-1)]
     barrier, results = ctx.Barrier(count), ctx.Queue()
     processes = [ctx.Process(target=distributed, args=(r, cpus, groups,
@@ -241,14 +257,20 @@ if __name__=='__main__':
     a.add_argument('--segments',type=int,default=8)
     a.add_argument('--window',type=float,default=.003)
     a.add_argument('--repeats',type=int,default=3)
-    a.add_argument('--layouts',nargs='+',default=['rows','columns','tiles'])
+    a.add_argument('--layouts', nargs='+', choices=LAYOUTS, default=['rows','columns','tiles'])
     a.add_argument('--ranks',nargs='+',type=int,default=[1,4,8])
-    a.add_argument('--modes',nargs='+',default=['conservative','optimistic'])
+    a.add_argument('--modes', nargs='+', choices=MODES, default=MODES)
     args=a.parse_args()
-    configure(args.repo.resolve())
+    try:
+        for count in args.ranks:
+            for layout in args.layouts:
+                validate_layout(count, layout)
+    except ValueError as exc:
+        a.error(str(exc))
     cpus=sorted(os.sched_getaffinity(0))
     if min(args.ranks) < 1 or max(args.ranks) > len(cpus) or args.segments <= 0 or args.repeats <= 0:
         a.error('Require positive segments, repeats and available worker counts')
+    configure(args.repo.resolve())
     reference=oracle(args.order,args.segments)
     rng=random.Random(25473); trace=None
     for repeat in range(args.repeats):

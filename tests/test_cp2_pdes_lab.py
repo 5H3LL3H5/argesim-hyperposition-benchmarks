@@ -43,6 +43,31 @@ class Cp2PdesLabTests(unittest.TestCase):
             self.assertNotEqual(subprocess.run(command, check=False, capture_output=True).returncode, 0)
             self.assertFalse((root / 'gqss3/run.json').exists())
 
+    @unittest.skipUnless(importlib.util.find_spec('numpy'), 'requires NumPy')
+    def test_cavity_cli_rejects_invalid_rank_layout_and_mode_before_work(self):
+        # Use the published copy with a nonexistent source root: validation must
+        # run before loading any solver code or launching processes.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with zipfile.ZipFile(book.DOCS / book.LAB) as archive:
+                for name in ('cavity_pdes.py', 'buchquellen.py'):
+                    archive.extract((book.PDES / name).as_posix(), root)
+            command = [
+                sys.executable, str(root / book.PDES / 'cavity_pdes.py'),
+                str(root / 'unavailable'), '--order', '3',
+            ]
+            for args, message in (
+                (['--ranks', '3', '--layouts', 'tiles'], '1 or an even number of ranks'),
+                (['--modes', 'optimstic'], 'invalid choice'),
+            ):
+                with self.subTest(args=args):
+                    result = subprocess.run(
+                        [*command, *args], capture_output=True, text=True, timeout=10
+                    )
+                    self.assertEqual(result.returncode, 2)
+                    self.assertIn(message, result.stderr)
+                    self.assertEqual(result.stdout, '')
+
     def test_c19_archives_keep_distinct_repetitions_and_speedup_baselines(self):
         verify = run_path(str(LAB / 'skalierung_pruefen.py'))
         result = verify['summaries']()
