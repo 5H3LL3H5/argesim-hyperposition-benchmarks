@@ -648,29 +648,37 @@ Setzen Sie $h=0{,}125$ und die Schrittzahl auf 8, damit die Endzeit identisch bl
 
 ## Wer ruft das Modell auf?
 
-**Lernziel.** Sie können dieselbe Modellfunktion an verschiedene Integratoren übergeben und erklären, was sich bei einem Gittermodell und bei einem trainierten Feldoperator an den Ein- und Ausgaben ändert.
+**Lernziel.** Übergeben Sie dieselbe Modellfunktion an mehrere Integratoren. Bei gleichen Daten müssen Unterschiede aus der Rechenregel kommen, nicht aus zwei verschiedenen Heizstabmodellen.
 
-Ein Heizstab startet auf Umgebungstemperatur. Ein Student baut für Euler einen „Euler-Heizstab“ und für Runge–Kutta einen zweiten Heizstab. Nach einer Änderung der Heizleistung liefern die Programme verschiedene Gleichgewichtstemperaturen. Wie müsste der Code aufgebaut sein, damit beide Versuche dieselbe physikalische Annahme prüfen?
+<a id="fb-heizstab-hand"></a>
 
-### Vom Bauteil zur Funktion
+### Handrechnung am Heizstab
 
-Der Temperaturüberschuss $\theta$ wird in Kelvin gemessen. Die Wärmekapazität des Stabes beträgt $120\,\mathrm{J/K}$, der Heizer liefert $10\,\mathrm{W}$, der Wärmeverlust beträgt $\theta/4$ Watt, wenn $\theta$ in Kelvin eingesetzt wird. Die Wärmebilanz liefert $\dot\theta=(10-\theta/4)/120$ in Kelvin pro Sekunde. Die Modellfunktion nimmt die aktuelle Zeit und den Zustand entgegen und gibt einen Vektor von Änderungsraten zurück.
+Für Wärmekapazität $C=120\,\mathrm{J/K}$, Heizleistung $10\,\mathrm W$ und Widerstand $R=4\,\mathrm{K/W}$ gilt $\dot\theta=(10-\theta/4)/120=(40-\theta)/480$. Setzen wir $z=40-\theta$, ergibt sich $\dot z=-z/480$ und $z(0)=40\,\mathrm K$. Folglich ist $\theta(t)=40(1-e^{-t/480})\,\mathrm K$. Bei $t=60\,\mathrm s$ speichern wir $C\theta=564{,}015\,\mathrm J$; die momentane Leistung ist $10\,\mathrm W-\theta/R=8{,}82497\,\mathrm W$.
+
+<a id="fb-heizstab-solver"></a>
+
+### Drei Solveraufrufe für dieselbe Bilanz
 
 ```python
+from argesim_benchmarks.ivp import InitialValueProblem
+from argesim_benchmarks.runtime import solve_ivp
+
 def heizstab(t, zustand):
     theta, = zustand
     return ((10.0 - theta / 4.0) / 120.0,)
+
+p = InitialValueProblem(heizstab, 0.0, (0.0,), 60.0)
+for methode, opts in (
+    ("euler", {"step": 60.0}), ("rk4", {"step": 60.0}),
+    ("rk45", {"initial_step": 60.0, "rtol": 1e-8, "atol": 1e-10}),
+):
+    print(methode, solve_ivp(p, methode, options=opts).final_state[0])
 ```
 
-Das Komma in einem Tupel mit einem Element ist wichtig. Ein Modell mit zwei Zuständen liefert entsprechend zwei Raten. Hier kann dieselbe Uhrzeit mit verschiedenen angenommenen Temperaturen aufgerufen werden. Das kommt bei Zwischenstufen tatsächlich vor.
+Euler ergibt $5{,}000000$, RK4 $4{,}700114$ und RK45 $4{,}700124\,\mathrm K$; exakt sind es $4{,}700123897\,\mathrm K$. Der Callback `heizstab` wird als Funktion übergeben. Das Komma erzeugt ein Tupel mit einer Rate. Bei $40\,\mathrm K$ muss diese Rate null sein.
 
-### Warum ohne Klammern?
-
-`heizstab` ist das Funktionsobjekt. Python kann es wie eine Zahl an eine andere Funktion übergeben. `heizstab(0.0, (0.0,))` führt die Funktion sofort aus und ergibt das Tupel $(1/12,)$ in K/s. In C kann ein Funktionszeiger dieselbe Rolle übernehmen. Im Projekt heißt die Python-Typangabe für diese aufrufbare rechte Seite `Rhs`.
-
-**Erst ausprobieren.** Setzen Sie $40\,\mathrm{K}$ in die rechte Seite ein. Die Rate muss null sein, unabhängig vom später gewählten Solver. Damit haben Sie bereits einen Test für das Modell.
-
-[Handrechnung am Heizstab](#t1-k2) · [InitialValueProblem und Rhs](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/52f8a33e469d36514e7830db544b9fc27243a82c/argesim_benchmarks/ivp.py) · [Solveraufruf](#t1-k2) · [Aufgaben](#fb-ueb13).
+[Handrechnung](#fb-heizstab-hand) · [Solveraufrufe](#fb-heizstab-solver) · [Archivierter Stabtest, S. 31](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/ARGESIM_SOLVER_STUDY.pdf?raw=true#page=31) · [Aufgaben](#fb-ueb13).
 
 <!-- Buchseite -->
 
@@ -1451,7 +1459,7 @@ Am Ende können wir das Budget eines einzelnen Schritts, den Fehler der gesamten
 
 ## 2.1 Wie viel Bewegung steckt in einer Steigung?
 
-[Grundlagen · Ableitungen, Integrale und Taylorentwicklung](#g-analysis)
+[Grundlagen · Ableitungen, Integrale und Taylorentwicklung](#g-analysis) · [Zum Heizstabversuch](#fb-heizstab-hand)
 
 Ein Temperaturfühler kühlt nach einem Wärmepuls ab. In der ersten Sekunde ändert sich seine Anzeige stark, später können mehrere Sekunden zwischen zwei Messungen liegen. Ein Integrator steht vor derselben Entscheidung. Mit der Anfangssteigung kann er den nächsten Wert sofort vorhersagen. Ob die Steigung bis zum Schrittende passt, lässt sich erst beurteilen, wenn man den Verlauf dazwischen betrachtet.
 
@@ -3317,7 +3325,7 @@ Wir nehmen den Speicher aus Abschnitt 6.1 mit $x(0)=q(0)=1$, $\Delta=1/4$ und sc
 $$
 x(s)-q(s)=s^2/2,\qquad s_*=\sqrt{1/2}=0{,}70710678\ldots .
 $$
-Bis dahin bleibt der Abstand im Band. Zum Meldetermin ist $q\approx0{,}292893$ und $x\approx0{,}542893$. Die Differenz beträgt genau ein Viertel. Der nächste Abschnitt beginnt mit einem neuen Meldepolynom. Eine vorher eintreffende Nachbarmeldung würde schon vorher eine neue Prognose erfordern.
+Bis dahin bleibt der Abstand im Band. Zum Meldetermin ist $q\approx0{,}292893$ und $x\approx0{,}542893$. Die Differenz beträgt genau ein Viertel. Der nächste Abschnitt beginnt mit einem neuen Meldepolynom. Eine frühere Nachbarmeldung erzwingt eine neue Prognose. [Kofman: Originalarbeit zur QSS2-Terminbestimmung](https://doi.org/10.1177/0037549702078002206).
 
 In einem gekoppelten QSS2-Abschnitt können die Koeffizienten von $x-q\mp\Delta$ zu $As^2+Bs+C=0$ führen. Auch $B$ ist eine **Differenz** von Steigungen. Wenn $\sqrt{B^2-4AC}$ im Betrag nahe an $|B|$ liegt, kann die Subtraktion in der üblichen Wurzelformel die kleine Nullstelle auslöschen. Für zwei verschiedene reelle Wurzeln und $A\ne0$ bildet man
 $$
@@ -5345,7 +5353,7 @@ Zum Auftrag können außerdem die richtigen Ereigniskennungen, Reihenfolge, ein 
 
 ### Welche Modellfunktion gehört in diesen Abnahmetest?
 
-Der Integrator fragt die aktuelle Rate ab. Beim Heizstab übergibt er dafür die Zeit und einen Temperaturüberschuss. Die Funktion liefert $\dot\theta=(10-\theta/4)/120$ in Kelvin pro Sekunde zurück. Bei $40\,\mathrm K$ muss sie null ergeben. Diese Probe gilt für jeden Integrator, dem wir dieselbe Funktion übergeben. Den vollständigen Aufruf können Sie im [vorangestellten Laborversuch](#fb-kap13) ausführen. Für den Kugelversuch reicht die Probe der Modellfunktion allein noch nicht. Erst die geordnete Liste der berührenden Paare bestimmt, welche gemessenen Zeiten im Abnahmetest miteinander verglichen werden dürfen.
+Der Integrator fragt die aktuelle Rate ab. Beim Heizstab übergibt er dafür die Zeit und einen Temperaturüberschuss. Die Funktion liefert $\dot\theta=(10-\theta/4)/120$ in Kelvin pro Sekunde zurück. Bei $40\,\mathrm K$ muss sie null ergeben. Diese Probe gilt für jeden Integrator, dem wir dieselbe Funktion übergeben. Den vollständigen Aufruf können Sie im [vorangestellten Solverversuch](#fb-heizstab-solver) ausführen. Für den Kugelversuch reicht die Probe der Modellfunktion allein noch nicht. Erst die geordnete Liste der berührenden Paare bestimmt, welche gemessenen Zeiten im Abnahmetest miteinander verglichen werden dürfen.
 
 
 <!-- Buchseite -->
@@ -6534,6 +6542,8 @@ $$
 
 Das ungeregelte System hat eine Zeitkonstante von $20\,\mathrm{s}$. Ein kontinuierlicher Regler $v=-Kx,\ K=0{,}004\,\mathrm{m^2/s}$ verschiebt den Pol auf $-(a+bK)=-0{,}15\,\mathrm{s^{-1}}$. Im Versuch wirkt die Pumpe nur in der Nähe des Arbeitspunktes linear.
 
+<a id="fb-tank-abtastfaktor"></a>
+
 ### Was ändert die digitale Abtastung?
 
 Der Regler misst alle $T_{\rm ab}$ Sekunden und hält $v_n=-Kx_n$ dazwischen konstant. Die exakte Integration der linearen Streckengleichung bei konstantem Eingang ergibt
@@ -6547,7 +6557,7 @@ Für $T_{\rm ab}=5\,\mathrm{s}$ ist der Faktor $0{,}3364$, die Störung fällt. 
 
 **Modellzeit und Solverzeit.** Die Abtastzeit gehört zum Regelgesetz. Der Integrator darf innerhalb eines Takts beliebig viele geeignete Schritte ausführen, muss den Reglerwechsel aber am festgelegten Zeitpunkt behandeln. Selbst exakte Integration der Strecke kann die Instabilität einer zu langsam abgetasteten Rückkopplung abbilden.
 
-Eigenständiges Lehrmodell für Abtastung. Der ARGESIM-Fall C09 enthält zwei Tanks und einen anderen Regler, siehe [Was die acht Anwendungsfälle tatsächlich prüfen](#fb-faelle).
+Diese Herleitung ersetzt das frühere Aufgabenpaar zum Eintankregler. Für $T_{\rm ab}=20\,\mathrm{s}$ ist der Faktor $3/e-2\approx-0{,}89636$: Das Vorzeichen wechselt, der Betrag sinkt. Der ARGESIM-Fall C09 enthält zwei Tanks und einen anderen Regler, siehe [Was die acht Anwendungsfälle tatsächlich prüfen](#fb-faelle).
 
 <a id="fb-c09takt"></a>
 
@@ -6624,9 +6634,9 @@ Für jede Phase ist das eine *affine* Gleichung $\dot x=Ax+b$, mit einem vom Zus
 
 | $t$ [s] | $q$ [m] | $v$ [m/s] | $\alpha$ [rad] | $\omega$ [rad/s] | $F$ [N] |
 | --- | --- | --- | --- | --- | --- |
-| 4 | 10,6947 | 3,7124 | $-$0,10830 | +0,372565 | 159,99998 |
-| 7 | 0,8437 | $-$10,1442 | $-$0,13276 | $-$0,409117 | 160,00000 |
-| 15 | $-$47,6444 | 1,0016 | $-$0,09579 | $-$0,252605 | 160,00000 |
+| 4 | 10,6947 | 3,7124 | −0,10830 | +0,372565 | 159,99998 |
+| 7 | 0,8437 | −10,1442 | −0,13276 | −0,409117 | 160,00000 |
+| 15 | −47,6444 | 1,0016 | −0,09579 | −0,252605 | 160,00000 |
 
 Das Skript prüft alle fünf Zustände gegen eine gesondert formulierte DOP853-Rechnung. In der wiederholten Acht-Fälle-Studie erreicht der beste abgeschlossene QSS-Lauf zu C13 den Score 2,22. Eine genaue Zustandsbeobachtung an einem einzigen Lastzeitpunkt würde zur Methodenwahl für alle drei Zeitpunkte nicht ausreichen.
 
@@ -6657,7 +6667,7 @@ Für eine Handrechnung hat ein Tank die Fläche $A=0{,}1\,\mathrm{m^2}$. Wir ver
 
 Rechnet ein Programm die alte Phase bis $1{,}1\,\mathrm s$ weiter, hat der Tank zu dieser Zeit noch den alten Pegel. Im vorgesehenen Modell ist der Pegel inzwischen um $0{,}002\cdot0{,}1\,\mathrm m=0{,}2\,\mathrm{mm}$ gestiegen. Die Abweichung stammt aus dem zu spät aktualisierten Stellwert. Dass der Zeitintegrator auf beiden Teilintervallen die jeweils übergebene Gleichung exakt löst, kann daran nichts ändern.
 
-Für den tatsächlichen Tankversuch protokollieren wir deshalb am Takt zunächst den aus der alten Phase eintreffenden Pegel. Dann prüfen wir den daraus berechneten Stellwert und erst danach seine Wirkung auf den weiteren Verlauf. Ein einzelner Endwert würde weder den ersten falschen Takt noch seine Ursache benennen.
+[Zum exakten Abtastfaktor des Eintankmodells](#fb-tank-abtastfaktor). Für den tatsächlichen Tankversuch protokollieren wir deshalb am Takt zunächst den aus der alten Phase eintreffenden Pegel. Dann prüfen wir den daraus berechneten Stellwert und erst danach seine Wirkung auf den weiteren Verlauf. Ein einzelner Endwert würde weder den ersten falschen Takt noch seine Ursache benennen.
 
 <!-- Buchseite -->
 
@@ -10502,7 +10512,7 @@ Für die Probe $n$ erhält die Schicht die letzten 64 Verdickungswerte einschlie
 
 Im Labor ändern wir die zweite Hälfte des Eingangssignals und kontrollieren, dass alle Vorhersagen für die erste Hälfte bis auf Rundung gleich bleiben. Die Fourier-Auswertung wird zusätzlich gegen eine direkte inverse FFT und die Trainingsableitung gegen Differenzen geprüft. Für jede der beiden FNO-Varianten gibt es drei Initialisierungen. Die Auswahl erfolgt anhand des regularisierten Verlusts am ersten Muskel. Alle sechs Trainingsläufe erreichen das festgelegte Limit von 450 Optimierungsschritten. Die gemeldeten Ergebnisse verwenden die dort erhaltenen Gewichte.
 
-[Belič, Originaldefinition und Abbildungen](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-definition.pdf) · [Rekonstruktion der Kurven](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/main/docs/C18_FIGURE_RECONSTRUCTION.md)
+[Belič, Originaldefinition und Abbildungen](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-definition.pdf) · [Rekonstruktion der Kurven](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/3a8f97f861ac77903289316947adb1e7ddf62433/docs/C18_FIGURE_RECONSTRUCTION.md)
 
 <!-- Buchseite -->
 
@@ -11247,7 +11257,7 @@ Die Implementierungsangaben zur adaptiven Radau-Methode (Ordnung fünf, eingebet
 
 **Buch- und Rechenstand.** Grundlage sind das bisherige Manuskript, die eingereichten Kapitelentwürfe und der Projektstand `16f0f252`. Die Versuche mit dem kleinen D2Q9-Gitter, dem Scherwellenabklingen, dem gelernten Saitenpropagator und dem hergestellten nichtlinearen Operator wurden für diese Fassung gerechnet. Für Abschnitt 9.6 wurden drei Modengesetze an getrennten Wellenzahlen verglichen, die Wellengeschwindigkeit kalibriert und der Physikterm eines nichtlinearen FNO über fünf Rauschfolgen geprüft. Abschnitt 9.7 vergleicht auf denselben Daten einen fest eingebauten Wellenschritt mit und ohne Netzkorrektur. Weitere Kontrollläufe untersuchen halbzellige Ausbreitungswege und eine gedämpfte Saite. Zum Vergleich zitierte Zahlen der größeren CP2-Studie sind als Archivwerte gekennzeichnet. [Physikinformierte neuronale Operatoren][p9pino] · [D’Alembert-Lösung][p9dalembert] [Projektkapitel CP2 mit Daten und Kontrollen][t1proj16]
 
-Das Quellenpaket enthält den mathematischen Grundlagenteil, 18 Kapitel, vier Anhänge, 85 Abbildungen und ihre Druckfassungen. Zu den Kapiteln gehören Python- und C++-Versuche, Messdateien sowie die Zeichenvorgaben. Das Verzeichnis im Rechenlabor Bildprüfung nennt zu jeder Abbildung die Druckseite und die zugehörigen Dateien. Die Grundlagenbeispiele laufen mit der Python-Standardbibliothek. Jedes erweiterte Labor beschreibt seine wissenschaftlichen Pakete und seinen eigenen Rechenstand.
+Das Quellenpaket enthält den mathematischen Grundlagenteil, 18 Kapitel, vier Anhänge, 92 Abbildungen und ihre Druckfassungen. Zu den Kapiteln gehören Python- und C++-Versuche, Messdateien sowie die Zeichenvorgaben. Das Verzeichnis im Rechenlabor Bildprüfung nennt zu jeder Abbildung die Druckseite und die zugehörigen Dateien. Das frühere Zweimoden-Temperaturfeld ist ausschließlich im [Archiv, Abb. 4 auf S. 11](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/d2db4732cf20a491d9a2f13b105ff0392ebf0641/docs/ARGESIM_SOLVER_STUDY.pdf?raw=true#page=11) zu sehen. Die Grundlagenbeispiele laufen mit der Python-Standardbibliothek. Jedes erweiterte Labor beschreibt seine wissenschaftlichen Pakete und seinen eigenen Rechenstand.
 
 [lbm]: https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/08.tex
 [projekt]: https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/README.md
