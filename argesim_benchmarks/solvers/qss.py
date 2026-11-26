@@ -118,13 +118,23 @@ def _smallest_nonnegative_root(
     scaled_a = a / scale
     scaled_b = b / scale
     scaled_c = c / scale
-    discriminant = scaled_b * scaled_b - 4.0 * scaled_a * scaled_c
-    roundoff = 16.0 * sys.float_info.epsilon * (
-        scaled_b * scaled_b + abs(4.0 * scaled_a * scaled_c)
+    square_term = scaled_b * scaled_b
+    product_term = (4.0 * scaled_a) * scaled_c
+    # The relative error bound assumes normal intermediates. In the
+    # subnormal range even a nonzero term can have lost most of its digits.
+    # Test before using the discriminant's sign, including terms rounded to
+    # zero that arise from nonzero coefficients.
+    normal_min = sys.float_info.min
+    uncertain_scale = (
+        abs(scaled_a) < normal_min
+        or (b != 0.0 and abs(scaled_b) < normal_min)
+        or abs(scaled_c) < normal_min
+        or (b != 0.0 and square_term < normal_min)
+        or abs(product_term) < normal_min
     )
-    if discriminant < -roundoff:
-        return math.inf
-    if abs(discriminant) <= roundoff or scaled_a == 0.0 or scaled_c == 0.0:
+    discriminant = square_term - product_term
+    roundoff = 16.0 * sys.float_info.epsilon * (square_term + abs(product_term))
+    if uncertain_scale or abs(discriminant) <= roundoff:
         # Decide existence from the actual binary coefficients before taking
         # a rounded square root. The stable product avoids cancellation.
         exact = Fraction(b)**2 - 4 * Fraction(a) * Fraction(c)
@@ -137,6 +147,8 @@ def _smallest_nonnegative_root(
             product = -(db + sqrt_d.copy_sign(db)) / 2
             candidates = (product / Decimal(a), Decimal(c) / product)
             return float(min((r for r in candidates if r >= 0), default=math.inf))
+    if discriminant < 0.0:
+        return math.inf
     square_root = math.sqrt(discriminant)
     root_product = -0.5 * (
         scaled_b + math.copysign(square_root, scaled_b)
