@@ -5,8 +5,6 @@ from decimal import Decimal, localcontext
 
 from argesim_benchmarks import InitialValueProblem, solve_ivp
 from argesim_benchmarks.solvers._polynomial import first_positive_root
-
-
 from argesim_benchmarks.solvers.qss import _smallest_nonnegative_root
 
 
