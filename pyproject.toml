@@ -24,6 +24,31 @@ target-version = "py310"
 # The core supports Python 3.10 without third-party runtime dependencies.
 typing-extensions = false
 
+[tool.ruff.lint.per-file-ignores]
+# Legacy reference and book scripts keep their existing notation and bytes.
+# These file-specific exceptions do not change the rules for new files.
+"argesim_benchmarks/models/c07_constrained_pendulum.py" = ["E741"]
+"argesim_benchmarks/models/c11_scara_robot.py" = ["E701"]
+"argesim_benchmarks/models/c20_complex_production.py" = ["E741"]
+"argesim_benchmarks/models/c21_state_events.py" = ["E731", "E741"]
+"docs/lehrbuch/gesamtausgabe/abbildungen/vergleichsfiguren.py" = ["E701", "E702"]
+"docs/lehrbuch/gesamtausgabe/abbildungen/zeichnen.py" = ["E402", "E701", "E702", "E731", "E741"]
+"docs/lehrbuch/gesamtausgabe/abbildungen/zeichnen_fno_physik.py" = ["E402", "E702", "E731"]
+"docs/lehrbuch/gesamtausgabe/abbildungen/zeichnen_k01.py" = ["E702"]
+"docs/lehrbuch/gesamtausgabe/abbildungen/zeichnen_k03.py" = ["E402", "E701", "E702"]
+"docs/lehrbuch/gesamtausgabe/abbildungen/zeichnen_k05.py" = ["E402"]
+"docs/lehrbuch/gesamtausgabe/abbildungen/zeichnen_physiklayer.py" = ["E402", "E701", "E702"]
+"docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/cavity_pdes.py" = ["E701", "E702", "E741"]
+"docs/lehrbuch/gesamtausgabe/rechenlabor/qss_pruefung/messung/taylor_kontakt/baseline_runner.py" = ["E701", "E702"]
+"docs/lehrbuch/studienbuch/material/nachrechnen.py" = ["E731"]
+"scripts/c18_numerical_probe.py" = ["E402"]
+"scripts/c20_experiment.py" = ["E402"]
+"scripts/cp2_accuracy/rope_finetune.py" = ["E741"]
+"scripts/lehrbuch_abbildungen.py" = ["E402"]
+"scripts/render_solver_selection.py" = ["E402"]
+"scripts/update_status_docs.py" = ["E402"]
+"tests/test_advanced_qss.py" = ["E731"]
+
 [tool.setuptools.packages.find]
 include = ["argesim_benchmarks*", "nsa_devs*"]
 

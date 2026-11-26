@@ -38,3 +38,11 @@ The registry exposes 75 tasks across 24 families. Fifteen families have independ
 | Quantized solver comparison, event repair and residual DAE results | [Study and raw measurements](docs/SOLVER_COMPARISON.md) · [Method explanations](docs/SOLVER_METHODS.md) |
 | Introduction to each QSS method, classical baselines and the IDAS interface | [Start with the tank example and method guide](QSS_SOLVERS.md#how-to-read-a-qss-method-name) |
 | Optional native QSS1/QSS2 linear-decay comparison | [CIFASIS adapter](docs/CIFASIS_ORACLE.md) |
+
+## Pre-Commit für Python-Änderungen
+
+Einmal pro Checkout `pre-commit install` ausführen. Beim Commit prüft Ruff die
+gestagten Python-Dateien und wendet nur sichere Korrekturen an. Wenn der Hook
+Dateien geändert hat, den Diff prüfen, die Korrekturen stagen und erneut committen.
+Manuell: `pre-commit run`; für alle Dateien: `pre-commit run --all-files`.
+Die GitHub-CI prüft mit derselben Ruff-Version, ohne Dateien zu ändern.
