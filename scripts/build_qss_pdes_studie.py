@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import os
 import re
 import subprocess
@@ -73,7 +74,11 @@ def build(output):
         # The four main sections are also the natural reading breaks in print.
         markdown = re.sub(r'(?m)^## ([2-4]\. )', lambda m: '\\clearpage\n\n## ' + m[1], markdown)
         (work/'paper.md').write_text(markdown, encoding='utf-8')
-        (work/'header.tex').write_text(HEADER, encoding='utf-8')
+        # xdvipdfmx otherwise includes its temporary directory in the document ID.
+        inputs = markdown.encode() + svg.read_bytes() + HEADER.encode() + TABLES.encode()
+        identity = hashlib.sha256(inputs).hexdigest()[:32]
+        trailer = rf'\AtBeginDvi{{\special{{pdf:trailerid [<{identity}><{identity}>]}}}}'
+        (work/'header.tex').write_text(HEADER + trailer, encoding='utf-8')
         (work/'columns.lua').write_text(TABLES, encoding='utf-8')
         subprocess.run(['pandoc', 'paper.md', '-f', 'markdown+raw_tex', '--pdf-engine=xelatex',
                         '-V', 'mainfont=Noto Serif', '-V', 'sansfont=Noto Sans Display',
