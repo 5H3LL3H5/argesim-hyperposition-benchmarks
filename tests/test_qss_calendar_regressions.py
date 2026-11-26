@@ -7,6 +7,25 @@ from argesim_benchmarks.solvers._polynomial import first_positive_root
 
 
 class QssCalendarRegressionTests(unittest.TestCase):
+    def test_subnormal_coefficients_preserve_crossings_and_near_misses(self):
+        # t² - 3t + 2 crosses at 1 and 2; t² - 3t + 3 stays positive.
+        unit = math.ulp(0.0)
+        for scale in (unit, -unit, 1.0):
+            with self.subTest(scale=scale):
+                crossing = first_positive_root(
+                    [2 * scale, -3 * scale, scale], 3.0, time_tolerance=1e-13
+                )
+                self.assertAlmostEqual(crossing, 1.0, delta=1e-13)
+                self.assertEqual(first_positive_root(
+                    [3 * scale, -3 * scale, scale], 3.0, time_tolerance=1e-13
+                ), math.inf)
+
+    def test_reciprocal_horner_keeps_the_earliest_large_root(self):
+        # The represented quadratic has roots near 1e100 and 2e100.
+        coefficients = [9.88131291682493e-124, -1.4821969375237398e-223, 5e-324]
+        root = first_positive_root(coefficients, 3e100, time_tolerance=1e-13)
+        self.assertTrue(math.isclose(root, 1e100, rel_tol=2e-15), root)
+
     def test_early_event_is_independent_of_large_terminal_horizon(self):
         for degree, coefficient in ((3, 3492280.285107953), (4, 331313052.57113314)):
             polynomial = [-0.001, *([0.0] * (degree - 1)), coefficient]
