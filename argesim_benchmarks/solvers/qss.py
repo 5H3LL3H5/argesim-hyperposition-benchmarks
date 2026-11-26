@@ -80,6 +80,20 @@ def _finite_state(values: Sequence[float], *, method: str) -> list[float]:
     return result
 
 
+def _same_linear_hit(
+    crossing: float, elapsed: float, time_slack: float,
+    slope: float, state: float, quantum: float,
+) -> bool:
+    """Group time ties only if the linear state is also at its own boundary."""
+    if crossing == elapsed:
+        return True
+    delay = abs(crossing - elapsed)
+    if delay > time_slack:
+        return False
+    space_slack = min(1e-8 * quantum, 8.0 * max(math.ulp(state), math.ulp(quantum)))
+    return delay * abs(slope) <= space_slack
+
+
 def _smallest_nonnegative_root(
     a: float,
     b: float,
@@ -94,7 +108,7 @@ def _smallest_nonnegative_root(
         if b == 0.0:
             return 0.0 if c == 0.0 else math.inf
         root = -c / b
-        return max(0.0, root) if root >= -tolerance else math.inf
+        return root if root >= 0.0 else math.inf
 
     scale = max(abs(a), abs(b), abs(c))
     scaled_a = a / scale
@@ -117,7 +131,7 @@ def _smallest_nonnegative_root(
         )
     else:
         candidates.append(-scaled_b / (2.0 * scaled_a))
-    eligible = [max(0.0, root) for root in candidates if root >= -tolerance]
+    eligible = [root for root in candidates if root >= 0.0]
     return min(eligible, default=math.inf)
 
 
@@ -199,7 +213,7 @@ def qss1(
         due = [
             index
             for index, crossing in enumerate(crossings)
-            if abs(crossing - elapsed) <= threshold
+            if _same_linear_hit(crossing, elapsed, threshold, derivative[index], x[index], quanta[index])
         ]
         if not due:
             raise IntegrationError("qss1 failed to identify the imminent quantizer")
@@ -324,7 +338,7 @@ def cqss1(
         due = [
             index
             for index, crossing in enumerate(crossings)
-            if abs(crossing - elapsed) <= threshold
+            if _same_linear_hit(crossing, elapsed, threshold, derivative[index], x[index], quanta[index])
         ]
         if not due:
             raise IntegrationError("cqss1 failed to identify the imminent quantizer")

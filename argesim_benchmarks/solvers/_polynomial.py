@@ -56,85 +56,88 @@ def _normalise(coefficients: Sequence[float]) -> list[float]:
     values = [float(value) for value in coefficients]
     if not values or not all(math.isfinite(value) for value in values):
         raise IntegrationError("event polynomial contains non-finite coefficients")
-    scale = max(abs(value) for value in values)
-    if scale == 0.0:
-        return [0.0]
-    values = [value / scale for value in values]
-    cutoff = 64.0 * sys.float_info.epsilon
-    while len(values) > 1 and abs(values[-1]) <= cutoff:
+    while len(values) > 1 and values[-1] == 0.0:
         values.pop()
+    # A common power-of-two scale avoids overflow in the derivative and in
+    # Horner evaluation. Preserve small coefficients when scaling is unnecessary.
+    scale = max(abs(value) for value in values)
+    if scale > sys.float_info.max / (4 * len(values)):
+        values = [math.ldexp(value, -4) for value in values]
     return values
+
+
+def _event_value(coefficients: Sequence[float], t: float) -> float:
+    """Evaluate p(t), or p(t)/t**degree when t > 1. Both have the same sign."""
+    if t <= 1.0:
+        return evaluate_polynomial(coefficients, t)
+    reciprocal = 1.0 / t
+    value = 0.0
+    for coefficient in coefficients:
+        value = value * reciprocal + coefficient
+    return value
+
+
+def _bracketed_root(
+    coefficients: Sequence[float], left: float, right: float,
+    left_value: float, time_tolerance: float,
+) -> float:
+    while True:
+        width = right - left
+        middle = left + 0.5 * width
+        # Keep tiny positive roots distinguishable from the initial instant.
+        tolerance = min(time_tolerance, 1e-8 * middle)
+        if middle == left or middle == right or width <= tolerance:
+            return middle
+        value = _event_value(coefficients, middle)
+        if value == 0.0:
+            return middle
+        if (value > 0.0) == (left_value > 0.0):
+            left, left_value = middle, value
+        else:
+            right = middle
+
+
+def _interval_roots(
+    coefficients: Sequence[float], upper: float, time_tolerance: float,
+) -> list[float]:
+    """Isolate low-degree real roots in physical time, including tangencies."""
+    values = _normalise(coefficients)
+    if len(values) == 1:
+        return []
+    if values[0] == 0.0:
+        first = next(i for i, value in enumerate(values) if value != 0.0)
+        return [0.0, *_interval_roots(values[first:], upper, time_tolerance)]
+    if len(values) == 2:
+        root = -values[0] / values[1]
+        return [root] if 0.0 < root <= upper else []
+
+    extrema = _interval_roots(polynomial_derivative(values), upper, time_tolerance)
+    points = [0.0, *(t for t in extrema if 0.0 < t < upper), upper]
+    samples = [_event_value(values, t) for t in points]
+    crossings = [
+        (a < 0.0 < b) or (b < 0.0 < a) for a, b in zip(samples, samples[1:])
+    ]
+    magnitudes = [abs(value) for value in values]
+    roots = []
+    for i, crossing in enumerate(crossings):
+        right = points[i + 1]
+        if crossing:
+            roots.append(_bracketed_root(values, points[i], right, samples[i], time_tolerance))
+        # A multiple root may touch the threshold without changing sign.
+        # Its residual is relative to the local Horner terms at this extremum.
+        if samples[i + 1] == 0.0:
+            roots.append(right)
+        elif not crossing and (i + 1 == len(crossings) or not crossings[i + 1]):
+            roundoff = 16.0 * sys.float_info.epsilon * _event_value(magnitudes, right)
+            if abs(samples[i + 1]) <= roundoff:
+                roots.append(right)
+    return roots
 
 
 def _unit_interval_roots(
     coefficients: Sequence[float], interval_tolerance: float
 ) -> list[float]:
-    """Isolate every real root on ``[0, 1]`` for a low-degree polynomial."""
-
-    values = _normalise(coefficients)
-    degree = len(values) - 1
-    if degree <= 0:
-        return []
-    if degree == 1:
-        root = -values[0] / values[1]
-        if -interval_tolerance <= root <= 1.0 + interval_tolerance:
-            return [min(1.0, max(0.0, root))]
-        return []
-
-    critical = _unit_interval_roots(
-        polynomial_derivative(values), interval_tolerance
-    )
-    points = [0.0]
-    for point in critical:
-        if point > points[-1] + interval_tolerance:
-            points.append(point)
-    if 1.0 > points[-1] + interval_tolerance:
-        points.append(1.0)
-    elif points[-1] != 1.0:
-        points[-1] = 1.0
-
-    value_tolerance = 16.0 * sys.float_info.epsilon * sum(
-        abs(value) for value in values
-    )
-    roots: list[float] = []
-
-    def append_root(root: float) -> None:
-        bounded = min(1.0, max(0.0, root))
-        if not roots or abs(bounded - roots[-1]) > interval_tolerance:
-            roots.append(bounded)
-
-    point_values = [evaluate_polynomial(values, point) for point in points]
-    for point, point_value in zip(points, point_values):
-        if abs(point_value) <= value_tolerance:
-            append_root(point)
-
-    for left, right, left_value, right_value in zip(
-        points, points[1:], point_values, point_values[1:]
-    ):
-        if abs(left_value) <= value_tolerance or abs(right_value) <= value_tolerance:
-            continue
-        if (left_value > 0.0) == (right_value > 0.0):
-            continue
-        low = left
-        high = right
-        low_value = left_value
-        for _ in range(96):
-            middle = 0.5 * (low + high)
-            middle_value = evaluate_polynomial(values, middle)
-            if high - low <= interval_tolerance:
-                low = high = middle
-                break
-            if (middle_value > 0.0) == (low_value > 0.0):
-                low = middle
-                low_value = middle_value
-            else:
-                high = middle
-        append_root(0.5 * (low + high))
-    ordered: list[float] = []
-    for root in sorted(roots):
-        if not ordered or abs(root - ordered[-1]) > interval_tolerance:
-            ordered.append(root)
-    return ordered
+    return _interval_roots(coefficients, 1.0, interval_tolerance)
 
 
 def first_positive_root(
@@ -143,28 +146,11 @@ def first_positive_root(
     *,
     time_tolerance: float,
 ) -> float:
-    """Return the first strictly positive root no later than ``upper_bound``."""
-
+    """Return the first strictly positive root no later than upper_bound."""
     if not math.isfinite(upper_bound) or upper_bound <= 0.0:
         return math.inf
-    scaled: list[float] = []
-    power = 1.0
-    for coefficient in coefficients:
-        scaled_value = float(coefficient) * power
-        if not math.isfinite(scaled_value):
-            raise IntegrationError("event polynomial overflowed its time interval")
-        scaled.append(scaled_value)
-        power *= upper_bound
-    normalised_tolerance = max(
-        128.0 * sys.float_info.epsilon,
-        min(1.0e-6, time_tolerance / upper_bound),
-    )
-    roots = _unit_interval_roots(scaled, normalised_tolerance)
-    zero_guard = 128.0 * sys.float_info.epsilon
-    eligible = [root for root in roots if root > zero_guard]
-    if not eligible:
-        return math.inf
-    return min(eligible) * upper_bound
+    roots = _interval_roots(coefficients, upper_bound, time_tolerance)
+    return next((root for root in roots if root > 0.0), math.inf)
 
 
 def solve_linear_system(

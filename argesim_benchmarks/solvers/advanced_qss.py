@@ -94,12 +94,18 @@ def _rhs_taylor(
 
     coefficients = [[0.0] * order for _ in range(problem.dimension)]
     for state_index in range(problem.dimension):
-        for power in range(order):
-            numerator = sum(
-                inverse[power][sample_index] * sample[state_index]
+        centre = samples[radius][state_index]
+        coefficients[state_index][0] = centre
+        for power in range(1, order):
+            # Every derivative row annihilates a constant. Enforce this before
+            # differencing, especially for fast dynamics and very short stencils.
+            value = math.fsum(
+                inverse[power][sample_index] * (sample[state_index] - centre)
                 for sample_index, sample in enumerate(samples)
             )
-            coefficients[state_index][power] = numerator / step**power
+            for _ in range(power):
+                value /= step
+            coefficients[state_index][power] = value
     for state_coefficients in coefficients:
         _finite_state(state_coefficients, method="QSS Taylor expansion")
     return coefficients, len(samples)
