@@ -21,6 +21,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Compile
         run: python -m compileall -q .
+      - name: Install CP2 laboratory test dependency
+        run: python -m pip install numpy==2.2.6
       - name: Install IDAS and stiff-solver comparison dependencies
         if: matrix.python-version == '3.12'
         run: python -m pip install ".[dae]" scipy==1.17.0
@@ -32,5 +34,5 @@ jobs:
       - name: Ruff
         if: matrix.python-version == '3.13'
         run: |
-          python -m pip install ruff==0.17.5
-          ruff check .
+          python -m pip install ruff==0.15.21
+          ruff check --no-fix .

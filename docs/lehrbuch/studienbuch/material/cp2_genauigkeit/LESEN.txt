@@ -1,6 +1,16 @@
 CP2 · Genauigkeit von Fourier-Operatoren
 Im entpackten Rechenlabor: python cp2_genauigkeit/auswerten.py
-Benötigt wird NumPy. Der Aufruf berechnet die beiden Saitenprofile aus den Gewichten und prüft die Saitenreferenz unabhängig mit d’Alembert und kontrolliert die gedruckten Fehler. Zusätzlich berechnet der Aufruf die Kavitäts- und Literaturvergleiche.
+Benötigt wird NumPy. Der Aufruf berechnet die beiden Saitenprofile aus den Gewichten und prüft die Saitenreferenz unabhängig mit d’Alembert und kontrolliert die gedruckten Fehler. Zusätzlich prüft der Aufruf die Kavitäts- und Literaturvergleiche.
+
+Für das erste zurückgehaltene 17×17-Feld nach 16 Schritten gilt für die neue
+Vorhersage höchstens 0,05 % relativer Fehler der Geschwindigkeitsbeträge auf
+15×15 inneren Zellen (euklidische Feldnorm). Die ältere und die affine
+Vorhersage sind nur Vergleichswerte. Auf dem 257²-Gitter sind die RMS-
+Abweichungen an je sechs Ghia-Punkten separat begrenzt auf 0,010 (u/U) und
+0,003 (v/U). Die Grenzwerte sind endliche, aufgerundete Sollgrenzen für
+diese Kontrollfälle, keine Extrapolation auf andere Eingaben. Eine
+Überschreitung oder ein nichtendliches Ergebnis beendet das Skript mit
+Fehlerstatus und der betroffenen Messgröße.
 
 Die NPY/NPZ-Dateien bestehen aus numerischen Feldern, Gewichten und kurzen Spaltennamen. Sie werden mit allow_pickle=False geöffnet. saite_zeitreihen.npz enthält 2 376 Einzelmessungen. NaN in der letzten Spalte bedeutet, dass die Referenz praktisch null ist. kavitaet_stationaer.json dokumentiert auch die Massenänderung. kapitel.json, gegenproben.json und transport.json enthalten die Nachweise zu Temperatur, Ereignissen, Diodenast, räumlichem Transport und Solverwahl.
 

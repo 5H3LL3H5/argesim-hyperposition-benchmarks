@@ -31,10 +31,18 @@ The registry exposes 75 tasks across 24 families. Fifteen families have independ
 | Model reports, reproduction commands and dated studies | [Documentation index](docs/README.md) |
 | Outstanding reference discrepancies and input requirements | [Implementation audit](ARGESIM_AUDIT.md) |
 | Evidence gates, event ordering, performance measurements and provenance | [Benchmark methodology](METHODOLOGY.md) |
-| Learn numerical simulation with ARGESIM (German) | [Student textbook and worked solutions](docs/lehrbuch/README.md) · [Complete v9.21 textbook (PDF)](docs/ARGESIM_SOLVER_STUDY.pdf) · [QSS lab (ZIP)](docs/ARGESIM_Bachelor_Rechenlabor.zip) · [Full experiment data and weights](docs/lehrbuch/gesamtausgabe/Labor.md) |
+| Learn numerical simulation with ARGESIM (German) | [Student textbook and worked solutions](docs/lehrbuch/README.md) · [Complete v9.22 textbook (PDF)](docs/ARGESIM_SOLVER_STUDY.pdf) · [QSS lab (ZIP)](docs/ARGESIM_Bachelor_Rechenlabor.zip) · [Full experiment data and weights](docs/lehrbuch/gesamtausgabe/Labor.md) |
 | Python model callbacks, CP2 lattice Boltzmann and Fourier neural operators | [Train and test two field operators (German)](docs/CP2_NEURAL_OPERATORS.md) |
 | When to use QSS, Runge–Kutta or a stiff solver | [Selection guide and experimental results](docs/SOLVER_SELECTION.md) |
 | DEVS origins and low-order RK for stiff and nonstiff ODEs | [Event trace, new methods and comparison](docs/QSS_DEVS_HISTORY.md) |
 | Quantized solver comparison, event repair and residual DAE results | [Study and raw measurements](docs/SOLVER_COMPARISON.md) · [Method explanations](docs/SOLVER_METHODS.md) |
 | Introduction to each QSS method, classical baselines and the IDAS interface | [Start with the tank example and method guide](QSS_SOLVERS.md#how-to-read-a-qss-method-name) |
 | Optional native QSS1/QSS2 linear-decay comparison | [CIFASIS adapter](docs/CIFASIS_ORACLE.md) |
+
+## Pre-Commit für Python-Änderungen
+
+Einmal pro Checkout `pre-commit install` ausführen. Beim Commit prüft Ruff die
+gestagten Python-Dateien und wendet nur sichere Korrekturen an. Wenn der Hook
+Dateien geändert hat, den Diff prüfen, die Korrekturen stagen und erneut committen.
+Manuell: `pre-commit run`; für alle Dateien: `pre-commit run --all-files`.
+Die GitHub-CI prüft mit derselben Ruff-Version, ohne Dateien zu ändern.

@@ -96,7 +96,7 @@ Für die Probe $n$ erhält die Schicht die letzten 64 Verdickungswerte einschlie
 
 Im Labor ändern wir die zweite Hälfte des Eingangssignals und kontrollieren, dass alle Vorhersagen für die erste Hälfte bis auf Rundung gleich bleiben. Die Fourier-Auswertung wird zusätzlich gegen eine direkte inverse FFT und die Trainingsableitung gegen Differenzen geprüft. Für jede der beiden FNO-Varianten gibt es drei Initialisierungen. Die Auswahl erfolgt anhand des regularisierten Verlusts am ersten Muskel. Alle sechs Trainingsläufe erreichen das festgelegte Limit von 450 Optimierungsschritten. Die gemeldeten Ergebnisse verwenden die dort erhaltenen Gewichte.
 
-[Belič, Originaldefinition und Abbildungen](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-definition.pdf) · [Rekonstruktion der Kurven](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/main/docs/C18_FIGURE_RECONSTRUCTION.md)
+[Belič, Originaldefinition und Abbildungen](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-definition.pdf) · [Rekonstruktion der Kurven](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/3a8f97f861ac77903289316947adb1e7ddf62433/docs/C18_FIGURE_RECONSTRUCTION.md)
 
 <!-- Buchseite -->
 

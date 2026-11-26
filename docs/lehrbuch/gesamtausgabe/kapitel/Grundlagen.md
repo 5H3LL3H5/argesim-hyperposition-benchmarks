@@ -534,26 +534,34 @@ Setzen Sie $h=0{,}125$ und die Schrittzahl auf 8, damit die Endzeit identisch bl
 
 ## Wer ruft das Modell auf?
 
-**Lernziel.** Sie können dieselbe Modellfunktion an verschiedene Integratoren übergeben und erklären, was sich bei einem Gittermodell und bei einem trainierten Feldoperator an den Ein- und Ausgaben ändert.
+**Lernziel.** Übergeben Sie dieselbe Modellfunktion an mehrere Integratoren. Bei gleichen Daten müssen Unterschiede aus der Rechenregel kommen, nicht aus zwei verschiedenen Heizstabmodellen.
 
-Ein Heizstab startet auf Umgebungstemperatur. Ein Student baut für Euler einen „Euler-Heizstab“ und für Runge–Kutta einen zweiten Heizstab. Nach einer Änderung der Heizleistung liefern die Programme verschiedene Gleichgewichtstemperaturen. Wie müsste der Code aufgebaut sein, damit beide Versuche dieselbe physikalische Annahme prüfen?
+<a id="fb-heizstab-hand"></a>
 
-### Vom Bauteil zur Funktion
+### Handrechnung am Heizstab
 
-Der Temperaturüberschuss $\theta$ wird in Kelvin gemessen. Die Wärmekapazität des Stabes beträgt $120\,\mathrm{J/K}$, der Heizer liefert $10\,\mathrm{W}$, der Wärmeverlust beträgt $\theta/4$ Watt, wenn $\theta$ in Kelvin eingesetzt wird. Die Wärmebilanz liefert $\dot\theta=(10-\theta/4)/120$ in Kelvin pro Sekunde. Die Modellfunktion nimmt die aktuelle Zeit und den Zustand entgegen und gibt einen Vektor von Änderungsraten zurück.
+Für Wärmekapazität $C=120\,\mathrm{J/K}$, Heizleistung $10\,\mathrm W$ und Widerstand $R=4\,\mathrm{K/W}$ gilt $\dot\theta=(10-\theta/4)/120=(40-\theta)/480$. Setzen wir $z=40-\theta$, ergibt sich $\dot z=-z/480$ und $z(0)=40\,\mathrm K$. Folglich ist $\theta(t)=40(1-e^{-t/480})\,\mathrm K$. Bei $t=60\,\mathrm s$ speichern wir $C\theta=564{,}015\,\mathrm J$; die momentane Leistung ist $10\,\mathrm W-\theta/R=8{,}82497\,\mathrm W$.
+
+<a id="fb-heizstab-solver"></a>
+
+### Drei Solveraufrufe für dieselbe Bilanz
 
 ```python
+from argesim_benchmarks.ivp import InitialValueProblem
+from argesim_benchmarks.runtime import solve_ivp
+
 def heizstab(t, zustand):
     theta, = zustand
     return ((10.0 - theta / 4.0) / 120.0,)
+
+p = InitialValueProblem(heizstab, 0.0, (0.0,), 60.0)
+for methode, opts in (
+    ("euler", {"step": 60.0}), ("rk4", {"step": 60.0}),
+    ("rk45", {"initial_step": 60.0, "rtol": 1e-8, "atol": 1e-10}),
+):
+    print(methode, solve_ivp(p, methode, options=opts).final_state[0])
 ```
 
-Das Komma in einem Tupel mit einem Element ist wichtig. Ein Modell mit zwei Zuständen liefert entsprechend zwei Raten. Hier kann dieselbe Uhrzeit mit verschiedenen angenommenen Temperaturen aufgerufen werden. Das kommt bei Zwischenstufen tatsächlich vor.
+Euler ergibt $5{,}000000$, RK4 $4{,}700114$ und RK45 $4{,}700124\,\mathrm K$; exakt sind es $4{,}700123897\,\mathrm K$. Der Callback `heizstab` wird als Funktion übergeben. Das Komma erzeugt ein Tupel mit einer Rate. Bei $40\,\mathrm K$ muss diese Rate null sein.
 
-### Warum ohne Klammern?
-
-`heizstab` ist das Funktionsobjekt. Python kann es wie eine Zahl an eine andere Funktion übergeben. `heizstab(0.0, (0.0,))` führt die Funktion sofort aus und ergibt das Tupel $(1/12,)$ in K/s. In C kann ein Funktionszeiger dieselbe Rolle übernehmen. Im Projekt heißt die Python-Typangabe für diese aufrufbare rechte Seite `Rhs`.
-
-**Erst ausprobieren.** Setzen Sie $40\,\mathrm{K}$ in die rechte Seite ein. Die Rate muss null sein, unabhängig vom später gewählten Solver. Damit haben Sie bereits einen Test für das Modell.
-
-[Handrechnung am Heizstab](../lehrbuch_numerische_simulation.md#t1-k2) · [InitialValueProblem und Rhs](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/52f8a33e469d36514e7830db544b9fc27243a82c/argesim_benchmarks/ivp.py) · [Solveraufruf](../lehrbuch_numerische_simulation.md#t1-k2) · [Aufgaben](../lehrbuch_numerische_simulation.md#fb-ueb13).
+[Handrechnung](#fb-heizstab-hand) · [Solveraufrufe](#fb-heizstab-solver) · [Archivierter Stabtest, S. 31](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/ARGESIM_SOLVER_STUDY.pdf?raw=true#page=31) · [Aufgaben](../lehrbuch_numerische_simulation.md#fb-ueb13).

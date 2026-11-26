@@ -13,7 +13,7 @@
 \definecolor{rulegray}{HTML}{C2D4D3}
 \usepackage[unicode=true,bookmarksopen=true,bookmarksopenlevel=2,bookmarksnumbered=false,pdfdisplaydoctitle=true,colorlinks=true,linkcolor=sea,urlcolor=sea]{hyperref}
 \usepackage{bookmark}
-\hypersetup{pdftitle={Numerische Simulation dynamischer Systeme · Revision v9.21 · Druckfassung},pdfauthor={Christian Stenzel},pdfsubject={Druckfassung v9.21, mathematische Grundlagen, Kapitel 1 bis 18 und Anhänge A bis D},pdflang={de-DE}}
+\hypersetup{pdftitle={Numerische Simulation dynamischer Systeme · Revision v9.22 · Druckfassung},pdfauthor={Christian Stenzel},pdfsubject={Druckfassung v9.22, mathematische Grundlagen, Kapitel 1 bis 18 und Anhänge A bis D},pdflang={de-DE}}
 \setcounter{secnumdepth}{-1}\setcounter{tocdepth}{3}
 \pagestyle{fancy}\fancyhf{}
 \newcommand{\kopfteil}{}
@@ -23,7 +23,7 @@
 \fancyfoot[R]{{\sffamily\bfseries\small\color{sea}\thepage}}
 \renewcommand{\headrulewidth}{.35pt}
 \renewcommand{\headrule}{\hbox to\headwidth{\color{rulegray}\leaders\hrule height \headrulewidth\hfill}}
-\fancypagestyle{titel}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[L]{{\sffamily\fontsize{8.4}{10}\selectfont\color{slate}Revision v9.21 · Parallele QSS und Kavität im Vollgitter}}\fancyfoot[R]{{\sffamily\bfseries\small\color{sea}\thepage}}}
+\fancypagestyle{titel}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[L]{{\sffamily\fontsize{8.4}{10}\selectfont\color{slate}Revision v9.22 · Parallele QSS und Kavität im Vollgitter}}\fancyfoot[R]{{\sffamily\bfseries\small\color{sea}\thepage}}}
 \titleformat{\section}{\sffamily\bfseries\color{navy}\fontsize{25.5}{30.5}\selectfont}{}{0pt}{}
 \titleformat{\subsection}{\sffamily\bfseries\color{sea}\fontsize{17.4}{21.3}\selectfont}{}{0pt}{}
 \titleformat{\subsubsection}{\sffamily\bfseries\color{navy}\fontsize{14}{18}\selectfont}{}{0pt}{}
@@ -34,8 +34,8 @@
 \newcommand{\normalsatz}{\fontsize{11.1}{14.9}\selectfont}
 \newcommand{\kleinsatz}{\fontsize{10.5}{13.9}\selectfont}
 \newcommand{\buchseite}[1]{\clearpage\renewcommand{\kopfteil}{#1}}
-\newcommand{\buchtitel}{\pdfbookmark[0]{Numerische Simulation dynamischer Systeme · Revision v9.21 · Druckfassung}{buchanfang}{\sffamily\bfseries\color{navy}\fontsize{33}{37}\selectfont Numerische Simulation\\dynamischer Systeme\par}\vspace{4pt}}
-\newcommand{\autorenzeile}{{\sffamily\bfseries\large\color{sea}Christian Stenzel}\par\vspace{-2pt}{\sffamily\small\color{slate}Gesamtausgabe · Revision v9.21 · Parallele QSS und Kavität im Vollgitter · 18 Fachkapitel und vier Anhänge}\par\vspace{8pt}}
+\newcommand{\buchtitel}{\pdfbookmark[0]{Numerische Simulation dynamischer Systeme · Revision v9.22 · Druckfassung}{buchanfang}{\sffamily\bfseries\color{navy}\fontsize{33}{37}\selectfont Numerische Simulation\\dynamischer Systeme\par}\vspace{4pt}}
+\newcommand{\autorenzeile}{{\sffamily\bfseries\large\color{sea}Christian Stenzel}\par\vspace{-2pt}{\sffamily\small\color{slate}Gesamtausgabe · Revision v9.22 · Parallele QSS und Kavität im Vollgitter · 18 Fachkapitel und vier Anhänge}\par\vspace{8pt}}
 \newcommand{\tightlist}{\setlength{\itemsep}{4pt}\setlength{\parskip}{0pt}}
 \setlist[enumerate]{leftmargin=1.65em,labelsep=.5em,topsep=2pt}
 \newcommand{\bild}[2]{\par\addvspace{6pt}\noindent\includegraphics[width=0.99\linewidth]{#1}\par\nopagebreak\vspace{-2pt}{\sffamily\fontsize{9.4}{12}\selectfont\color{slate}#2\par}\addvspace{5pt}}
@@ -117,7 +117,7 @@ Die \hyperref[grundlagen]{mathematischen Grundlagen} führen die Rechenwerkzeuge
 
 \textbf{\hyperref[mp-kapitel]{17 · Zielgerichtete Messplanung.}\,\textnormal{\small(S.\,\pageref*{mp-kapitel})}} In allen 28 Messaufgaben bestimmt ein Fehlerbudget, welche Ablesungen nötig sind.
 
-\textbf{\hyperref[fb-neu17]{18 · Synthese und Methodenwahl.}\,\textnormal{\small(S.\,\pageref*{fb-neu17})}} Acht Modellfenster liefern je 57 Einstellungen. Erst wenn beobachtete Größe, Gitter, Ereignisbehandlung und Fehlerbudget vergleichbar sind, hat eine Rangfolge nach Rechenaufwand eine fachliche Bedeutung. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/48e43e2ce056395719f7e735832e57ac5b9f2ee3/docs/lehrbuch/gesamtausgabe/daten/qss-extension.csv}{Einzelmessungen}
+\textbf{\hyperref[fb-neu17]{18 · Synthese und Methodenwahl.}\,\textnormal{\small(S.\,\pageref*{fb-neu17})}} Acht Modellfenster liefern je 57 Einstellungen. Erst wenn beobachtete Größe, Gitter, Ereignisbehandlung und Fehlerbudget vergleichbar sind, hat eine Rangfolge nach Rechenaufwand eine fachliche Bedeutung. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/b065fe61f10faef9c9781473a89315abdd467c75/docs/lehrbuch/gesamtausgabe/rechenlabor/qss_pruefung/messung/kontakt_v919/extension.csv}{Einzelmessungen}
 
 \buchseite{Kapitelfahrplan}
 
@@ -147,7 +147,7 @@ Seit 1990 veröffentlicht ARGESIM in der Wiener Vergleichsreihe Modellaufgaben, 
 
 \subsubsection{Wie weit reichen die 456 Messungen?}\label{wie-weit-reichen-die-456-messungen}
 
-Das Raster umfasst C03, C05, C07, C09, C11, C12, C13 und C21-Ball. Pro Modellfenster ergeben 18 Bezeichnungen für QSS-Verfahren mit je drei Quantisierungen und drei klassische Einstellungen insgesamt \(18\cdot3+3=57\) Zeilen. Zwei Bezeichnungen der ersten Ordnung führen dieselbe mathematische Aktualisierung aus. Die archivierten 456 Zeilen enthalten 222 bestandene Konfigurationen, 151 Überschreitungen des Fehlerbudgets, 46 Zeitüberschreitungen, 20 Abweichungen bei der Ereigniszahl und 17 Solverfehler. C19R, C21-Diode und die CP2-Feldvergleiche besitzen eigene Nachweise. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/evidence/qss-extension.csv}{Historische Messdaten} · \hyperref[fb-matrix]{Aktuelle Synthese} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/48e43e2ce056395719f7e735832e57ac5b9f2ee3/docs/lehrbuch/gesamtausgabe/daten/qss-extension.csv}{Wiederholung}
+Das Raster umfasst C03, C05, C07, C09, C11, C12, C13 und C21-Ball. Pro Modellfenster ergeben 18 Bezeichnungen für QSS-Verfahren mit je drei Quantisierungen und drei klassische Einstellungen insgesamt \(18\cdot3+3=57\) Zeilen. Zwei Bezeichnungen der ersten Ordnung führen dieselbe mathematische Aktualisierung aus. Die archivierten 456 Zeilen enthalten 222 bestandene Konfigurationen, 151 Überschreitungen des Fehlerbudgets, 46 Zeitüberschreitungen, 20 Abweichungen bei der Ereigniszahl und 17 Solverfehler. C19R, C21-Diode und die CP2-Feldvergleiche besitzen eigene Nachweise. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/evidence/qss-extension.csv}{Historische Messdaten} · \hyperref[fb-matrix]{Aktuelle Synthese} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/b065fe61f10faef9c9781473a89315abdd467c75/docs/lehrbuch/gesamtausgabe/rechenlabor/qss_pruefung/messung/kontakt_v919/extension.csv}{Wiederholung}
 
 Die archivierten Projektstudien beziehen sich auf den Quellstand \texttt{16f0f252}. Die Zuordnung von Buchfassung, Laborrechnung und Messdatei steht im \hyperref[revision-q-01]{Quellenregister}.
 
@@ -593,29 +593,33 @@ Setzen Sie \(h=0{,}125\) und die Schrittzahl auf 8, damit die Endzeit identisch 
 
 \subsection{Wer ruft das Modell auf?}\label{fb-kap13}
 
-\textbf{Lernziel.} Sie können dieselbe Modellfunktion an verschiedene Integratoren übergeben und erklären, was sich bei einem Gittermodell und bei einem trainierten Feldoperator an den Ein- und Ausgaben ändert.
+\textbf{Lernziel.} Übergeben Sie dieselbe Modellfunktion an mehrere Integratoren. Bei gleichen Daten müssen Unterschiede aus der Rechenregel kommen, nicht aus zwei verschiedenen Heizstabmodellen.
 
-Ein Heizstab startet auf Umgebungstemperatur. Ein Student baut für Euler einen „Euler-Heizstab`` und für Runge--Kutta einen zweiten Heizstab. Nach einer Änderung der Heizleistung liefern die Programme verschiedene Gleichgewichtstemperaturen. Wie müsste der Code aufgebaut sein, damit beide Versuche dieselbe physikalische Annahme prüfen?
+\subsubsection{Handrechnung am Heizstab}\label{fb-heizstab-hand}
 
-\subsubsection{Vom Bauteil zur Funktion}\label{vom-bauteil-zur-funktion}
+Für Wärmekapazität \(C=120\,\mathrm{J/K}\), Heizleistung \(10\,\mathrm W\) und Widerstand \(R=4\,\mathrm{K/W}\) gilt \(\dot\theta=(10-\theta/4)/120=(40-\theta)/480\). Setzen wir \(z=40-\theta\), ergibt sich \(\dot z=-z/480\) und \(z(0)=40\,\mathrm K\). Folglich ist \(\theta(t)=40(1-e^{-t/480})\,\mathrm K\). Bei \(t=60\,\mathrm s\) speichern wir \(C\theta=564{,}015\,\mathrm J\); die momentane Leistung ist \(10\,\mathrm W-\theta/R=8{,}82497\,\mathrm W\).
 
-Der Temperaturüberschuss \(\theta\) wird in Kelvin gemessen. Die Wärmekapazität des Stabes beträgt \(120\,\mathrm{J/K}\), der Heizer liefert \(10\,\mathrm{W}\), der Wärmeverlust beträgt \(\theta/4\) Watt, wenn \(\theta\) in Kelvin eingesetzt wird. Die Wärmebilanz liefert \(\dot\theta=(10-\theta/4)/120\) in Kelvin pro Sekunde. Die Modellfunktion nimmt die aktuelle Zeit und den Zustand entgegen und gibt einen Vektor von Änderungsraten zurück.
+\subsubsection{Drei Solveraufrufe für dieselbe Bilanz}\label{fb-heizstab-solver}
 
 \begin{Verbatim}[fontsize=\small,formatcom=\color{navy},frame=leftline,framesep=8pt,xleftmargin=9pt,rulecolor=\color{sea}]
+from argesim_benchmarks.ivp import InitialValueProblem
+from argesim_benchmarks.runtime import solve_ivp
+
 def heizstab(t, zustand):
     theta, = zustand
     return ((10.0 - theta / 4.0) / 120.0,)
+
+p = InitialValueProblem(heizstab, 0.0, (0.0,), 60.0)
+for methode, opts in (
+    ("euler", {"step": 60.0}), ("rk4", {"step": 60.0}),
+    ("rk45", {"initial_step": 60.0, "rtol": 1e-8, "atol": 1e-10}),
+):
+    print(methode, solve_ivp(p, methode, options=opts).final_state[0])
 \end{Verbatim}
 
-Das Komma in einem Tupel mit einem Element ist wichtig. Ein Modell mit zwei Zuständen liefert entsprechend zwei Raten. Hier kann dieselbe Uhrzeit mit verschiedenen angenommenen Temperaturen aufgerufen werden. Das kommt bei Zwischenstufen tatsächlich vor.
+Euler ergibt \(5{,}000000\), RK4 \(4{,}700114\) und RK45 \(4{,}700124\,\mathrm K\); exakt sind es \(4{,}700123897\,\mathrm K\). Der Callback \texttt{heizstab} wird als Funktion übergeben. Das Komma erzeugt ein Tupel mit einer Rate. Bei \(40\,\mathrm K\) muss diese Rate null sein.
 
-\subsubsection{Warum ohne Klammern?}\label{warum-ohne-klammern}
-
-\texttt{heizstab} ist das Funktionsobjekt. Python kann es wie eine Zahl an eine andere Funktion übergeben. \texttt{heizstab(0.0,\ (0.0,))} führt die Funktion sofort aus und ergibt das Tupel \((1/12,)\) in K/s. In C kann ein Funktionszeiger dieselbe Rolle übernehmen. Im Projekt heißt die Python-Typangabe für diese aufrufbare rechte Seite \texttt{Rhs}.
-
-\textbf{Erst ausprobieren.} Setzen Sie \(40\,\mathrm{K}\) in die rechte Seite ein. Die Rate muss null sein, unabhängig vom später gewählten Solver. Damit haben Sie bereits einen Test für das Modell.
-
-\hyperref[t1-k2]{Handrechnung am Heizstab} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/52f8a33e469d36514e7830db544b9fc27243a82c/argesim_benchmarks/ivp.py}{InitialValueProblem und Rhs} · \hyperref[t1-k2]{Solveraufruf} · \hyperref[fb-ueb13]{Aufgaben}.
+\hyperref[fb-heizstab-hand]{Handrechnung} · \hyperref[fb-heizstab-solver]{Solveraufrufe} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/ARGESIM_SOLVER_STUDY.pdf?raw=true\#page=31}{Archivierter Stabtest, S. 31} · \hyperref[fb-ueb13]{Aufgaben}.
 
 \buchseite{Kapitel 1}
 
@@ -1376,7 +1380,7 @@ Am Ende können wir das Budget eines einzelnen Schritts, den Fehler der gesamten
 
 \subsection{2.1 Wie viel Bewegung steckt in einer Steigung?}\label{t1-k2}
 
-\hyperref[g-analysis]{Grundlagen · Ableitungen, Integrale und Taylorentwicklung}
+\hyperref[g-analysis]{Grundlagen · Ableitungen, Integrale und Taylorentwicklung} · \hyperref[fb-heizstab-hand]{Zum Heizstabversuch}
 
 Ein Temperaturfühler kühlt nach einem Wärmepuls ab. In der ersten Sekunde ändert sich seine Anzeige stark, später können mehrere Sekunden zwischen zwei Messungen liegen. Ein Integrator steht vor derselben Entscheidung. Mit der Anfangssteigung kann er den nächsten Wert sofort vorhersagen. Ob die Steigung bis zum Schrittende passt, lässt sich erst beurteilen, wenn man den Verlauf dazwischen betrachtet.
 
@@ -2233,7 +2237,7 @@ BDF & \(10^{-3}\) & 56 & 144 & 19 & \(5{,}40\cdot10^{-4}\) \\
 BDF & \(10^{-6}\) & 125 & 256 & 28 & \(1{,}07\cdot10^{-6}\) \\
 \bottomrule\end{tabularx}\par}\addvspace{4pt}
 
-Bei dem gemeinsamen Ziel von \(10^{-4}\) bestehen die drei Läufe mit der feineren Toleranz. Radau kommt dort mit 56 angenommenen Schritten aus, BDF benötigt 125. Zugleich hat BDF mit 256 Auswertungen von \(f\) und 28 Zerlegungen in diesen beiden Kostenmaßen die kleineren Zahlen. Wie viel Zeit eine Zerlegung tatsächlich kostet, hängt von Matrixgröße, Besetzungsmuster und Implementierung ab. Die vier festen Schrittweiten des neuen Labors wurden auf dem kürzeren Zeitfenster neu gerechnet. Seine Tabelle beantwortet die Frage nach der Genauigkeit innerhalb der Anfangsschicht.
+Beim Ziel von \(10^{-4}\) bestehen die drei Läufe mit der feineren Toleranz auf dem gemeinsamen Messraster, nicht mit einer nachgewiesenen Schranke zwischen dessen Punkten. Die festen Schritte oben unterscheiden ihrerseits Schrittenden vom Messraster; keine dieser Stichproben liefert ein Kontinuumsmaximum. Radau kommt dort mit 56 angenommenen Schritten aus, BDF benötigt 125. Zugleich hat BDF mit 256 Auswertungen von \(f\) und 28 Zerlegungen in diesen beiden Kostenmaßen die kleineren Zahlen. Wie viel Zeit eine Zerlegung tatsächlich kostet, hängt von Matrixgröße, Besetzungsmuster und Implementierung ab. Die vier festen Schrittweiten des neuen Labors wurden auf dem kürzeren Zeitfenster neu gerechnet. Seine Tabelle beantwortet die Frage nach der Genauigkeit innerhalb der Anfangsschicht.
 
 \textbf{Zwei weitere Bauformen.} Bei ESDIRK ist die erste Stufe explizit, die weiteren impliziten Stufen einer Stufe nach der anderen lösbar. Ihr gemeinsamer Diagonalkoeffizient \(\gamma\) erlaubt bei festgehaltenem \(J\) dieselbe Matrix \(I-h\gamma J\). Ein Rosenbrock--Euler-Schritt für ein autonomes System löst \((I-hJ_n)k=f(y_n)\) und setzt \(y_{n+1}=y_n+hk\). Er entspricht einer einzigen Linearisierung des impliziten Euler-Schritts am alten Zustand. Für affine autonome Gleichungen trifft er dessen diskreten Wert. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/03.tex}{Verfahrensvergleich im Projekt}
 
@@ -2684,7 +2688,7 @@ Bei einer tangentialen Berührung verschwindet die Durchtrittsrate. Zum Quadrat 
 
 Wir kennen zwei Zeiten \(a\) und \(b\), an denen die Wächterwerte verschiedene Vorzeichen haben. Die einfachste Frage lautet: Auf welcher Seite der Mitte liegt der Treffer? Sie kostet eine Auswertung und halbiert die Klammer. Bei einer Anfangsbreite \(w\) liegt die Mitte nach \(k\) Halbierungen höchstens \(w/2^{k+1}\) von einer eingeschlossenen Nullstelle entfernt. Die Steigung des Wächters muss der Algorithmus dafür nicht kennen.
 
-Eine Sekante durch zwei Funktionswerte liefert häufig einen besseren Vorschlag. Mit drei verschiedenen Werten lässt sich die \emph{inverse} Beziehung interpolieren. Wir behandeln die Zeit als Funktion des Wächterwerts, legen eine Parabel durch drei Paare \((\phi_i,t_i)\) und werten sie bei \(\phi=0\) aus. Gerät ein Vorschlag zu nahe an das ungünstige Ende oder verkürzt er die bisherigen Suchschritte zu wenig, kehrt Brent zur Bisektion zurück. Nach jeder Auswertung ersetzen wir den Rand mit demselben Vorzeichen. So bleibt die Nullstelle eingeschlossen. \href{https://maths-people.anu.edu.au/brent/pub/pub005.html}{Brents Originalarbeit}
+Eine Sekante durch zwei Funktionswerte liefert häufig einen besseren Vorschlag. Mit drei verschiedenen Werten lässt sich die \emph{inverse} Beziehung interpolieren. Wir behandeln die Zeit als Funktion des Wächterwerts, legen eine Parabel durch drei Paare \((\phi_i,t_i)\) und werten sie bei \(\phi=0\) aus. Gerät ein Vorschlag zu nahe an das ungünstige Ende oder verkürzt er die bisherigen Suchschritte zu wenig, kehrt Brent zur Bisektion zurück. Nach jeder Auswertung ersetzen wir den Rand mit demselben Vorzeichen. So bleibt die Nullstelle eingeschlossen. Sind die Ränder benachbarte Gleitkommazahlen, aber weiter auseinander als die verlangte Toleranz, meldet das Lehrlabor beide Zeiten und Wächterwerte mit der Diagnose \texttt{time\_resolution}. Es behauptet dann keinen genauer bestimmten Zeitpunkt. \href{https://maths-people.anu.edu.au/brent/pub/pub005.html}{Brents Originalarbeit}
 
 Im Programm enthält die Klammer stets die Nullstelle des \textbf{ausgewerteten} Wächters. Ein rechnerischer Funktionswert null beendet die Suche unmittelbar. Andernfalls beendet sie eine Breite von höchstens \(2\varepsilon_B\) und liefert die Mitte. Beim Vergleich zweier Vorzeichen verwendet der Code getrennte Vergleiche, denn das Produkt zweier kleiner Werte könnte bereits zu null unterlaufen. Kann die Maschinenarithmetik das Intervall vor Erreichen der gewünschten Auflösung nicht weiter teilen, meldet das Labor diesen Fall.
 
@@ -3126,7 +3130,7 @@ Für \(a=1\,\mathrm{s^{-1}}\), Startwert eins, eine Sekunde Simulationszeit und 
 
 Wir nehmen den Speicher aus Abschnitt 6.1 mit \(x(0)=q(0)=1\), \(\Delta=1/4\) und schreiben die seit dem Start verstrichene Zeit als Sekundenwert \(s\). QSS2 meldet hier \(q(s)=1-s\). Die Bewegung rechnet mit \(x'=-q\) und liefert \(x(s)=1-s+s^2/2\). Deshalb gilt \[
 x(s)-q(s)=s^2/2,\qquad s_*=\sqrt{1/2}=0{,}70710678\ldots .
-\] Bis dahin bleibt der Abstand im Band. Zum Meldetermin ist \(q\approx0{,}292893\) und \(x\approx0{,}542893\). Die Differenz beträgt genau ein Viertel. Der nächste Abschnitt beginnt mit einem neuen Meldepolynom. Eine vorher eintreffende Nachbarmeldung würde schon vorher eine neue Prognose erfordern.
+\] Bis dahin bleibt der Abstand im Band. Zum Meldetermin ist \(q\approx0{,}292893\) und \(x\approx0{,}542893\). Die Differenz beträgt genau ein Viertel. Der nächste Abschnitt beginnt mit einem neuen Meldepolynom. Eine frühere Nachbarmeldung erzwingt eine neue Prognose. \href{https://doi.org/10.1177/0037549702078002206}{Kofman: Originalarbeit zur QSS2-Terminbestimmung}.
 
 In einem gekoppelten QSS2-Abschnitt können die Koeffizienten von \(x-q\mp\Delta\) zu \(As^2+Bs+C=0\) führen. Auch \(B\) ist eine \textbf{Differenz} von Steigungen. Wenn \(\sqrt{B^2-4AC}\) im Betrag nahe an \(|B|\) liegt, kann die Subtraktion in der üblichen Wurzelformel die kleine Nullstelle auslöschen. Für zwei verschiedene reelle Wurzeln und \(A\ne0\) bildet man \[
 w=-\tfrac12\bigl(B+\operatorname{copysign}(\sqrt{B^2-4AC},B)\bigr),
@@ -3270,7 +3274,7 @@ Zwei fast gleiche Verläufe können verschiedene Meldungen auslösen. Schreiben 
 
 \bild{qss_kontakt.pdf}{Abbildung 6.8. Die Vergrößerung um das Minimum zeigt eine verfehlte Bandkante, eine Berührung und zwei Durchtritte. Die markierten Punkte sind die Nullstellen.}
 
-QSS2 entscheidet bei einer numerisch mehrdeutigen Diskriminante ihr Vorzeichen aus den gespeicherten Binärkoeffizienten. Der gemeinsame Isolator für höhere Ordnungen zählt in mehrdeutigen Fällen die verschiedenen reellen Wurzeln mit einer exakten Sturm-Folge des quadratfreien Polynoms. Die Zahl im Intervall \((a,b]\) ist die Differenz der Vorzeichenwechsel an beiden Enden. Durch Halbieren isolieren wir den ersten positiven Termin. Die Zeittoleranz begrenzt die Intervallbreite.
+QSS2 verwendet den schnellen Vorzeichentest nur, wenn alle ursprünglich von null verschiedenen Koeffizienten nach der Skalierung und ihre nichttrivialen Diskriminantenterme im normalen Binär64-Bereich bleiben. Wird ein solcher Wert subnormal oder zu null gerundet, bestimmt der exakte Pfad das Vorzeichen aus den ursprünglichen gespeicherten Binärkoeffizienten. Der gemeinsame Isolator für höhere Ordnungen zählt in mehrdeutigen Fällen die verschiedenen reellen Wurzeln mit einer exakten Sturm-Folge des quadratfreien Polynoms. Die Zahl im Intervall \((a,b]\) ist die Differenz der Vorzeichenwechsel an beiden Enden. Durch Halbieren isolieren wir den ersten positiven Termin. Die Zeittoleranz begrenzt die Intervallbreite.
 
 Welche Gleichung wurde dem Kalender übergeben? Das exakte Polynom \(1000s^3-1100s^2+320s-28\) berührt bei \(s=1/5\) und kreuzt bei \(7/10\). Rundet man seine durch 1000 geteilten Koeffizienten einzeln auf Binär64, verschwindet die Doppelwurzel. Der früheste Termin dieser Eingabe liegt dann nahe \(0{,}7\). Das Zertifikat bezieht sich auf das gespeicherte Segment. Für eine Aussage über die ursprüngliche Differentialgleichung kommt der Fehler der Taylor-Koeffizienten hinzu.
 
@@ -3324,7 +3328,7 @@ Für den konservativen C19R-Versuch starten alle Prozesse zum bestätigten Zeitp
 
 Nehmen wir an, die erste \textbf{grenzüberschreitende} Meldung liegt links bei 80 und rechts bei 120 Sekunden. Konservativ verarbeiten beide bis 80. Ein optimistischer Prozess kann bis 120 vorausrechnen, seinen Ausgangszustand sichern und nach Eintreffen der früheren Nachricht ab der Sicherung neu rechnen. Dieses Zurücksetzen heißt \textbf{Rollback}. Der Aufwand hängt davon ab, wie viele lokale Ereignisse dabei erneut ausgeführt werden.
 
-\textbf{Rechenprobe.} In C19R wurden bei acht Prozessen 65\,292 Ereignisse mit 11\,556 konservativen Freigaben bestätigt. Pro Freigabe fallen zusammen \(65\,292/11\,556=5{,}65\) Ereignisse an. Die gemessene Wandzeit stieg von 31,7 ms mit einem auf 353,9 ms mit acht Prozessen. Hier kostet die gemeinsame Freigabe mehr, als die Aufteilung der Arbeit einspart. Der konservative Lauf hat dabei null Rollbacks.
+\textbf{Rechenprobe.} In C19R wurden bei acht Prozessen 65\,292 Ereignisse mit 11\,556 konservativen Freigaben bestätigt. Pro Freigabe fallen zusammen \(65\,292/11\,556=5{,}65\) Ereignisse an. Drei Wiederholungen in \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/3a8f97f861ac77903289316947adb1e7ddf62433/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/PDES_Partitionierung_Messpaket.zip}{PDES\_Partitionierung\_Messpaket.zip}, Datei \texttt{c19\_paired.jsonl}, ergeben mediane Kernzeiten von 31,7 ms mit einem und 353,9 ms mit acht Prozessen. Damit ist \(S_8=0{,}090\) bezogen auf den Ein-Prozess-Lauf dieser Serie. Es gab null Rollbacks.
 
 \buchseite{Kapitel 6}
 
@@ -3344,7 +3348,7 @@ Die \hyperref[pdes-kavitaet]{Kavität in Kapitel 16} hat eine andere Kopplung. D
 
 \subsubsection{Was acht logische Prozesse im Grundwasser tatsächlich leisten}\label{pdes-lp-messung}
 
-In zehn simulierten Tagen bestätigt das nominale C19R-Modell 65\,292 QSS1-Ereignisse. Wir teilen die Domäne in ereignisgewichtete Streifen und führen jeden LP in einem eigenen MPI-Prozess aus. Pro Konfiguration liegen fünf Läufe vor. Die Reihenfolge innerhalb jeder Wiederholung wurde ausgelost. Die Tabelle verwendet die mediane Kernel-Wandzeit in Millisekunden. Beide Protokolle reproduzieren die acht Feldausgaben, die Ereigniszähler und die Ereignisprüfsummen jeder Zelle.
+In zehn simulierten Tagen bestätigt das nominale C19R-Modell 65\,292 QSS1-Ereignisse. Wir teilen die Domäne in ereignisgewichtete Streifen und führen jeden LP in einem eigenen MPI-Prozess aus. Die zweite Serie (\href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/3a8f97f861ac77903289316947adb1e7ddf62433/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip}{Skalierung\_Messdaten.zip}, \texttt{c19-scaling.jsonl}) enthält fünf Wiederholungen je Konfiguration in ausgeloster Reihenfolge. Die Tabelle zeigt mediane Kernzeiten; jeder Speedup verwendet die Ein-Prozess-Zeit derselben Serie und desselben Protokolls. Beide Protokolle reproduzieren die acht Feldausgaben, die Ereigniszähler und die Ereignisprüfsummen jeder Zelle.
 
 \par\addvspace{4pt}{\sffamily\fontsize{9.15}{11}\selectfont\renewcommand{\arraystretch}{1.14}\setlength{\tabcolsep}{3pt}\begin{tabularx}{\linewidth}{@{}l*{5}{>{\raggedleft\arraybackslash}X}@{}}
 \toprule
@@ -4929,7 +4933,7 @@ Zum Auftrag können außerdem die richtigen Ereigniskennungen, Reihenfolge, ein 
 
 \subsubsection{Welche Modellfunktion gehört in diesen Abnahmetest?}\label{revision-k10-01}\hypertarget{revision-k10-01}{}
 
-Der Integrator fragt die aktuelle Rate ab. Beim Heizstab übergibt er dafür die Zeit und einen Temperaturüberschuss. Die Funktion liefert \(\dot\theta=(10-\theta/4)/120\) in Kelvin pro Sekunde zurück. Bei \(40\,\mathrm K\) muss sie null ergeben. Diese Probe gilt für jeden Integrator, dem wir dieselbe Funktion übergeben. Den vollständigen Aufruf können Sie im \hyperref[fb-kap13]{vorangestellten Laborversuch} ausführen. Für den Kugelversuch reicht die Probe der Modellfunktion allein noch nicht. Erst die geordnete Liste der berührenden Paare bestimmt, welche gemessenen Zeiten im Abnahmetest miteinander verglichen werden dürfen.
+Der Integrator fragt die aktuelle Rate ab. Beim Heizstab übergibt er dafür die Zeit und einen Temperaturüberschuss. Die Funktion liefert \(\dot\theta=(10-\theta/4)/120\) in Kelvin pro Sekunde zurück. Bei \(40\,\mathrm K\) muss sie null ergeben. Diese Probe gilt für jeden Integrator, dem wir dieselbe Funktion übergeben. Den vollständigen Aufruf können Sie im \hyperref[fb-heizstab-solver]{vorangestellten Solverversuch} ausführen. Für den Kugelversuch reicht die Probe der Modellfunktion allein noch nicht. Erst die geordnete Liste der berührenden Paare bestimmt, welche gemessenen Zeiten im Abnahmetest miteinander verglichen werden dürfen.
 
 \buchseite{Kapitel 10}
 
@@ -5598,9 +5602,9 @@ Halten Sie \(L\) während jeder Integration fest. Stoppen Sie am gerichteten Wä
 3 & Kontakt & 2,590418 & 2,590338 & +0,080 \\
 4 & Ablösung & 2,990529 & 2,990403 & +0,126 \\
 5 & Kontakt & 4,542741 & 4,542705 & +0,036 \\
-6 & Ablösung & 4,867488 & 4,867492 & \$-\$0,004 \\
-7 & Kontakt & 6,648707 & 6,648731 & \$-\$0,024 \\
-8 & Ablösung & 6,720384 & 6,720995 & \$-\$0,611 \\
+6 & Ablösung & 4,867488 & 4,867492 & \ensuremath{-}0,004 \\
+7 & Kontakt & 6,648707 & 6,648731 & \ensuremath{-}0,024 \\
+8 & Ablösung & 6,720384 & 6,720995 & \ensuremath{-}0,611 \\
 \end{longtable}\endgroup
 
 \bild{studie_c07kurven.pdf}{Abbildung 13.1. Der Winkel bleibt am Stift stetig. Die Winkelgeschwindigkeit springt. Die Detailansicht hebt Kontakt 7 und Ablösung 8 aus der Tabelle hervor. Die kurze Phase dauert \(71{,}7\,\mathrm{ms}\).}
@@ -6035,7 +6039,7 @@ Für \(x=H-H_*,\ v=u-u_*\) liefert die Taylorentwicklung
 
 Das ungeregelte System hat eine Zeitkonstante von \(20\,\mathrm{s}\). Ein kontinuierlicher Regler \(v=-Kx,\ K=0{,}004\,\mathrm{m^2/s}\) verschiebt den Pol auf \(-(a+bK)=-0{,}15\,\mathrm{s^{-1}}\). Im Versuch wirkt die Pumpe nur in der Nähe des Arbeitspunktes linear.
 
-\subsubsection{Was ändert die digitale Abtastung?}\label{was-uxe4ndert-die-digitale-abtastung}
+\subsubsection{Was ändert die digitale Abtastung?}\label{fb-tank-abtastfaktor}
 
 Der Regler misst alle \(T_{\rm ab}\) Sekunden und hält \(v_n=-Kx_n\) dazwischen konstant. Die exakte Integration der linearen Streckengleichung bei konstantem Eingang ergibt
 
@@ -6048,7 +6052,7 @@ Für \(T_{\rm ab}=5\,\mathrm{s}\) ist der Faktor \(0{,}3364\), die Störung fäl
 
 \textbf{Modellzeit und Solverzeit.} Die Abtastzeit gehört zum Regelgesetz. Der Integrator darf innerhalb eines Takts beliebig viele geeignete Schritte ausführen, muss den Reglerwechsel aber am festgelegten Zeitpunkt behandeln. Selbst exakte Integration der Strecke kann die Instabilität einer zu langsam abgetasteten Rückkopplung abbilden.
 
-Eigenständiges Lehrmodell für Abtastung. Der ARGESIM-Fall C09 enthält zwei Tanks und einen anderen Regler, siehe \hyperref[fb-faelle]{Was die acht Anwendungsfälle tatsächlich prüfen}.
+Diese Herleitung ersetzt das frühere Aufgabenpaar zum Eintankregler. Für \(T_{\rm ab}=20\,\mathrm{s}\) ist der Faktor \(3/e-2\approx-0{,}89636\): Das Vorzeichen wechselt, der Betrag sinkt. Der ARGESIM-Fall C09 enthält zwei Tanks und einen anderen Regler, siehe \hyperref[fb-faelle]{Was die acht Anwendungsfälle tatsächlich prüfen}.
 
 \subsection{C09 · Den ersten Reglertakt selbst nachrechnen}\label{fb-c09takt}
 
@@ -6128,9 +6132,9 @@ Für jede Phase ist das eine \emph{affine} Gleichung \(\dot x=Ax+b\), mit einem 
 \midrule\endfirsthead
 \textbf{\(t\) {[}s{]}} & \textbf{\(q\) {[}m{]}} & \textbf{\(v\) {[}m/s{]}} & \textbf{\(\alpha\) {[}rad{]}} & \textbf{\(\omega\) {[}rad/s{]}} & \textbf{\(F\) {[}N{]}} \\
 \midrule\endhead\bottomrule\endfoot\bottomrule\endlastfoot
-4 & 10,6947 & 3,7124 & \$-\$0,10830 & +0,372565 & 159,99998 \\
-7 & 0,8437 & \$-\$10,1442 & \$-\$0,13276 & \$-\$0,409117 & 160,00000 \\
-15 & \$-\$47,6444 & 1,0016 & \$-\$0,09579 & \$-\$0,252605 & 160,00000 \\
+4 & 10,6947 & 3,7124 & \ensuremath{-}0,10830 & +0,372565 & 159,99998 \\
+7 & 0,8437 & \ensuremath{-}10,1442 & \ensuremath{-}0,13276 & \ensuremath{-}0,409117 & 160,00000 \\
+15 & \ensuremath{-}47,6444 & 1,0016 & \ensuremath{-}0,09579 & \ensuremath{-}0,252605 & 160,00000 \\
 \end{longtable}\endgroup
 
 Das Skript prüft alle fünf Zustände gegen eine gesondert formulierte DOP853-Rechnung. In der wiederholten Acht-Fälle-Studie erreicht der beste abgeschlossene QSS-Lauf zu C13 den Score 2,22. Eine genaue Zustandsbeobachtung an einem einzigen Lastzeitpunkt würde zur Methodenwahl für alle drei Zeitpunkte nicht ausreichen.
@@ -6157,7 +6161,7 @@ Für eine Handrechnung hat ein Tank die Fläche \(A=0{,}1\,\mathrm{m^2}\). Wir v
 
 Rechnet ein Programm die alte Phase bis \(1{,}1\,\mathrm s\) weiter, hat der Tank zu dieser Zeit noch den alten Pegel. Im vorgesehenen Modell ist der Pegel inzwischen um \(0{,}002\cdot0{,}1\,\mathrm m=0{,}2\,\mathrm{mm}\) gestiegen. Die Abweichung stammt aus dem zu spät aktualisierten Stellwert. Dass der Zeitintegrator auf beiden Teilintervallen die jeweils übergebene Gleichung exakt löst, kann daran nichts ändern.
 
-Für den tatsächlichen Tankversuch protokollieren wir deshalb am Takt zunächst den aus der alten Phase eintreffenden Pegel. Dann prüfen wir den daraus berechneten Stellwert und erst danach seine Wirkung auf den weiteren Verlauf. Ein einzelner Endwert würde weder den ersten falschen Takt noch seine Ursache benennen.
+\hyperref[fb-tank-abtastfaktor]{Zum exakten Abtastfaktor des Eintankmodells}. Für den tatsächlichen Tankversuch protokollieren wir deshalb am Takt zunächst den aus der alten Phase eintreffenden Pegel. Dann prüfen wir den daraus berechneten Stellwert und erst danach seine Wirkung auf den weiteren Verlauf. Ein einzelner Endwert würde weder den ersten falschen Takt noch seine Ursache benennen.
 
 \buchseite{Kapitel 14}
 
@@ -6824,7 +6828,7 @@ Zupfen Sie bei \(x=0{,}13L\). Auf der kurzen Seite steigt das Dreieck steiler an
 
 \bild{studie_fno_saite_moden.pdf}{Abbildung 16.3. Links variiert die Zupfposition auf 501 Knoten. Rechts bleibt der Zupfpunkt mittig. Jeder Punkt rechts ist der größte RMS-Fehler über 99 Zeiten. Kleinere zeitliche Stützabstände erlauben es, den Gewinn zusätzlicher räumlicher Moden zu nutzen.}
 
-Auf 501 Knoten bleibt der relative Fehler der neuen Schicht an den sechs Positionen nach 5 und 8 s unter \(0{,}065\,\%\); auf 65 Knoten reicht er bis \(0{,}492\,\%\). Der größte absolute RMS über alle 2\,376 Vergleiche beträgt \(68{,}21\,\mu\mathrm m\). Er tritt auf dem gröbsten Gitter bei außermittigem Zupfen auf. Die Werte im Diagramm rechts gelten für das feinste Gitter.
+Auf 501 Knoten bleibt der relative Fehler der neuen Schicht an den sechs Positionen nach 5 und 8 s unter \(0{,}065\,\%\); auf 65 Knoten reicht er bis \(0{,}492\,\%\). Der größte absolute RMS über alle 2\,376 Vergleiche beträgt \(68{,}21\,\mu\mathrm m\) (65 Knoten, Zupfpunkt \(0{,}13L\), \(t=2{,}693\,\mathrm s\)). Das ist ein Maximum auf dem ausgewerteten Raster, kein gemessenes Kontinuumsmaximum. Die Werte im Diagramm rechts gelten für das feinste Gitter.
 
 \subsubsection{Was geschieht beim Durchgang durch die Ruhelage?}\label{was-geschieht-beim-durchgang-durch-die-ruhelage}
 
@@ -6832,7 +6836,7 @@ Beim mittigen Dreieck sind alle geraden Sinusmoden null. Zum Zeitpunkt \(t=L/(2c
 
 \textbf{Versuch am Schreibtisch.} Speisen Sie auf 501 Knoten allein Mode 193 ein. Bei \(t=0\) liefert die auf 192 Moden begrenzte Schicht bis auf Rundung das Nullfeld. Der relative Fehler beträgt eins. Die Genauigkeit hängt also von der Klasse der Eingaben ab.
 
-\hyperref[t1-k9]{Beweis für eine festgelegte Klasse} · \texttt{saite\_zeitreihen.npz} enthält absolute und relative Fehler jeder Rechnung.
+\hyperref[druck-saite-modenschranke]{Modale Fehlerschranke und Eingabeklasse} · \texttt{saite\_zeitreihen.npz} enthält absolute und relative Fehler jeder Rechnung.
 
 \subsection{Kavität · Was trägt das Netz zusätzlich bei?}\label{fb-fnokav}
 
@@ -6932,7 +6936,7 @@ Was wäre ein fairer Anschlussversuch? Man verschiebt die Zupfstelle, friert Mod
 
 \textbf{Umfang der offiziellen Aufgabe.} CP2 umfasst Monte Carlo, Kavität und Saite sowie Fragen zur parallelen Ausführung. Der Maximalscore oben gehört zu zwei Beobachtungszeiten der Saitenstudie. Über die parallele Beschleunigung oder den stationären Strömungsfehler sagt er nichts aus.
 
-\hyperref[fb-refCP2]{Die drei Teilaufgaben} · \hyperref[t1-k9]{Fourier-Operator und analytische Kontrollschicht}.
+\hyperref[fb-refCP2]{Die drei Teilaufgaben} · \hyperref[druck-saite-analytische-kontrolle]{Analytische Kontrollrechnung mit gleichem Filter}.
 
 \subsection{Selbst prüfen · Den Versuch auf dem eigenen Rechner prüfen}\label{fb-ueb13}
 
@@ -6999,7 +7003,7 @@ Setzen Sie \(u(x,t)=a(t)\sin(k\pi x/L)\) in die Wellengleichung ein. Dann folgt 
 
 \subsubsection{Was sich für den Lehrfall beweisen lässt}\label{was-sich-fuxfcr-den-lehrfall-beweisen-luxe4sst}
 
-Li und Mitautoren untersuchten FNOs an parametrisierten PDE-Familien. Kovachki und Mitautoren analysierten die Approximation kontinuierlicher Operatoren unter mathematischen Voraussetzungen. Der \hyperref[t1-k9]{Satz zur Saite} spezialisiert die Fragestellung auf die hier gespeicherten Gewichte und eine festgelegte Eingabeklasse. Der Fall Mode 193 zeigt, welche Genauigkeit ohne Glattheitsannahme verloren geht.
+Li und Mitautoren untersuchten FNOs an parametrisierten PDE-Familien. Kovachki und Mitautoren analysierten die Approximation kontinuierlicher Operatoren unter mathematischen Voraussetzungen. Der \hyperref[druck-saite-modenschranke]{Satz zur Saite} spezialisiert die Fragestellung auf die hier gespeicherten Gewichte und eine festgelegte Eingabeklasse. Der Fall Mode 193 zeigt, welche Genauigkeit ohne Glattheitsannahme verloren geht.
 
 \href{https://www.jmlr.org/papers/v24/21-1524.html}{Kovachki u.\,a. (2023), Neural Operator} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/52f8a33e469d36514e7830db544b9fc27243a82c/tests/test_cp2_operators.py}{Ausführbare Gegenproben} · \hyperref[t1-k9]{Forschungsfragen} · \hyperref[fb-finalII]{Abschluss des Praktikums}.
 
@@ -7010,6 +7014,27 @@ Beim mittigen Zupfen auf 501 Knoten zeigt der Feldfehler nach fünf Sekunden dre
 Kapitel 9.7 stellt eine andere Frage. Dort transportiert ein eingebauter Wellenschritt die aufgelösten Moden, und ein ergänzendes Netz kann eine Korrektur lernen. Bei 113 Knoten und 3,5 Zellen Ausbreitungsweg betragen die Feldfehler des dortigen FNO 0,9935 Prozent, des Physik-Layers 0,05947 Prozent und des Layers mit Netzkorrektur 0,1205 Prozent. Die ergänzende Korrektur vergrößert in diesem Versuch den Fehler gegenüber der Physik allein. Gerade deshalb braucht ein Hybridmodell drei Messungen unter identischen Bedingungen. Die Prozentwerte dieses Tests und des CP2-Versuchs haben unterschiedliche Bezugslösungen und Anfangsdaten.
 
 \textbf{Rechenweg.} \texttt{rechenlabor/kapitelvergleich.py} liest die archivierten CP2-Werte. \texttt{beispiele/fno\_physiklayer.py} trainiert und prüft den separaten Lehrversuch. Die Definition der Feldnorm, die Anfangsdaten und die Kontrollen zur Phasenlage stehen in \hyperref[t1-k9]{Kapitel 9}.
+
+\buchseite{Kapitel 16}
+
+\subsection{Saitenoperator · Eine Schranke zwischen den Messzeiten}\label{druck-saite-modenschranke}\hypertarget{druck-saite-modenschranke}{}
+
+Wir betrachten die lineare Wellengleichung mit festen Enden, Anfangsgeschwindigkeit null, Länge \(L=0{,}5\,\mathrm m\) und Wellengeschwindigkeit \(c=0{,}06\,\mathrm{m/s}\). Aus den 501 Knoten bilden wir den Sinusinterpolanten \(g=\sum_{k=1}^{499}a_k e_k\), mit orthonormalen Funktionen \(e_k(x)=\sqrt{2/L}\sin(k\pi x/L)\). Die diskrete Sinustransformation liefert \(a_k=\Delta x\sum_{j=1}^{499}g_j e_k(j\Delta x)\) mit \(\Delta x=L/500\). Als Eingabeklasse verlangen wir \(\sum_{k=1}^{499} k^{2s}|a_k|^2\le R^2\) mit \(s>0\). Für \(s=1\) ist das die Ableitungsenergie des Interpolanten, skaliert mit \((L/\pi)^2\).
+
+\textbf{Abgeschnittene Moden.} Die exakte Entwicklung des Interpolanten multipliziert \(a_k\) mit \(f_k(t)=\cos(\omega_k t)\), \(\omega_k=ck\pi/L\). Für \(k\ge193\) gilt \(|f_k|\le1\) und \(k^{2s}\ge193^{2s}\). Orthogonalität liefert für den Rest \[
+\sqrt{\sum_{k\ge193}|a_k f_k(t)|^2}
+\le 193^{-s}\sqrt{\sum_{k\ge193}k^{2s}|a_k|^2}
+\le R/193^s .
+\] Für \(s=1\) sind das höchstens \(R/193\approx0{,}0051814R\).
+
+\textbf{Beibehaltene Moden.} Im Ausgabefenster \(0\le t\le8\,\mathrm s\) werden die gespeicherten Faktoren zwischen benachbarten Zeiten linear interpoliert. Ist \(h\) der größte Abstand, so liefert der Rest der linearen Interpolation wegen \(|f_k''|\le\omega_k^2\) höchstens \(\omega_k^2 h^2/8\) pro Faktor: Das Produkt der beiden Abstände zu den Intervallenden ist höchstens \(h^2/4\), der Rest enthält zusätzlich den Faktor \(1/2\). Den maximalen Fehler der gespeicherten Werte an den Stützzeiten nennen wir \(\epsilon_*\). Die linearen Gewichte sind nichtnegativ und summieren sich zu eins, daher addiert die Speicherung zwischen den Knoten höchstens \(\epsilon_*\). Für \(k\le192\) und \(s=1\) ergibt sich \[
+\left(\sum_{k\le192}|a_k|^2\,|\hat f_k(t)-f_k(t)|^2\right)^{1/2}
+\le \left[\epsilon_* + \tfrac{192}{8}(c\pi/L)^2 h^2\right]R .
+\] Mit \(h\le0{,}025000000000001\,\mathrm s\) und \(\epsilon_*<1{,}36\cdot10^{-13}\) ist dieser Beitrag kleiner als \(0{,}002132R\). Beide Fehler liegen in orthogonalen Modenräumen, ihre Quadrate addieren sich. Das ist eine absolute Schranke in exakter Arithmetik gegen die Entwicklung des Sinusinterpolanten, keine Schranke für Abtast- oder Rundungsfehler und kein relatives Budget nahe der Ruhelage.
+
+\subsubsection{Analytische Kontrollrechnung mit gleichem Filter}\label{druck-saite-analytische-kontrolle}\hypertarget{druck-saite-analytische-kontrolle}{}
+
+Im Rechenlabor ersetzt \texttt{python\ cp2\_genauigkeit/auswerten.py} die gespeicherten Faktoren durch \(f_k\) an denselben Stützzeiten. 192 Moden und lineare Zeitinterpolation bleiben unverändert. Gegen d'Alembert am ursprünglichen mittigen Dreieck liefern beide Varianten auf 501 Knoten \(0{,}04303\,\%\) (5 s) und \(0{,}01416\,\%\) (8 s). Die beiden Zeiten liegen auf Stützstellen; die Interpolationsschranke gilt auch dazwischen. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/3a8f97f861ac77903289316947adb1e7ddf62433/scripts/cp2_accuracy/operator_bounds.py}{Intervallprüfung der Stützwerte}.
 
 \buchseite{Kapitel 16}
 
@@ -7512,7 +7537,7 @@ Für einen kontrollierten Vergleich verarbeiten alle Varianten genau die ersten 
 
 Der Zwischenstand in den Skalierungsprotokollen umfasst bei QSS3 47\,807 Intervalle bis zum Äquivalent von 111,29 Takten. Bei QSS4 sind es 13\,197 Intervalle bis 42,88 Takte. Beide Rechnungen starteten mit ruhendem Fluid und dem Ziel 350\,000. Die erste vereinbarte Referenzausgabe liegt bei Takt 256. QSS3 hat sie im anschließenden Langlauf erreicht. Über das gesamte innere Geschwindigkeitsfeld beträgt der relative Abstand zu DOP853 dort 0,10323 \%, zu D2Q9 dagegen 15,755 \%. Der maximale lokale Abstand zu DOP853 beträgt 0,000537 Deckelgeschwindigkeiten. Dieses erste Feld ist im neueren Fortsetzungspunkt enthalten.
 
-Die angegebenen Taktäquivalente wandeln die kontinuierliche Modellzeit mit \(k=t^*\,256/0{,}1\) um. Die beiden individuellen Kalender sind jederzeit aus den gespeicherten kontinuierlichen und quantisierten Polynomen fortsetzbar. Für ihre Gesamtzeit und einen Speedup über die ganze CP2-Aufgabe benötigen wir das Feld bei Takt 350\,000. Die Anlaufzeiten in der Tabelle messen ein anderes, wesentlich kürzeres Experiment.
+Die Taktäquivalente sind \(k=t^*\,256/0{,}1\). Die Originalbytes des Messintegrators fehlen; sein Hash \texttt{422c69fa…} steht in \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/3a8f97f861ac77903289316947adb1e7ddf62433/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip}{Messmanifest und Zuständen}. Das Labor trennt die Fortsetzung mit \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/b9f58ba26978818e6c0cba8149f47221d2b68e51/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/qss_langlauf.py}{\texttt{b9f58ba}} und Modellstand \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/tree/eb1e5519c446d4b226006e30cadda6fda9d3dd76}{\texttt{eb1e551}} von der historischen Messung. Die Fortsetzungsprobe prüft genau ein Segment je Zustand. Gesamtzeit und Speedup bleiben ohne Einzelkalender-Endfeld bei Takt 350\,000 offen.
 
 \buchseite{Kapitel 16}
 
@@ -8091,13 +8116,13 @@ C21 · Ball & Freier Fall, starrer Boden und Rückprall. Zwei analytische Aufpra
 
 Die acht Fälle ergeben 456 Konfigurationen. Die ältere 399er-Reihe umfasste unter anderem C01, C15, C17R, CP1 und ein auf drei innere Knoten reduziertes CP2-Seil. Die spätere 520er-Auswahlstudie verbindet analytische Prüfmodelle mit gezielten Wiederholungen. Die 138er-Reihe ergänzt insbesondere RK23 und ESDIRK32. Solche Reihen haben verschiedene Versuchsraster und Nenner.
 
-Die vier wiederholten Matrizen sind im Quellenpaket unter \texttt{rechenlabor/qss\_pruefung/messung/} mit den unveränderten Studienbezeichnungen baseline, extension, selection und rk23 abgelegt.
+Im vollständigen Labor liegen \texttt{baseline.csv}, \texttt{extension.csv}, \texttt{selection.csv} und \texttt{rk23.csv} unter \texttt{rechenlabor/qss\_pruefung/messung/kontakt\_v919/}. Der übergeordnete Ordner \texttt{messung/} dokumentiert den v9.18-Vergleich.
 
 \subsection{Die vollständige Acht-Fälle-Matrix}\label{fb-matrix}
 
 Jede Zahl zählt bestandene Einstellungen. Für jeden QSS-Namen wurden drei Quantenfaktoren \(0{,}005,\ 0{,}001,\ 0{,}0002\) mal Komponentenskala geprüft. Euler, RK4 und RK45 haben hier je eine Einstellung pro Fall. Fettdruck kennzeichnet Zellen, in denen alle geprüften Einstellungen bestehen.
 
-\textbf{Versuchsbezug.} Acht-Fälle-Archiv. Je Modell 18 QSS-Verfahren zu drei Quanten und drei klassische Kontrollen. Bezugsfenster und Referenzen stehen in der vorangehenden Falltabelle.
+\textbf{Versuchsbezug.} \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/b065fe61f10faef9c9781473a89315abdd467c75/docs/lehrbuch/gesamtausgabe/rechenlabor/qss_pruefung/messung/kontakt_v919/extension.csv}{Primärdatei der Acht-Fälle-Matrix (456 Zeilen, 224 bestanden)}. Je Modell 18 QSS-Verfahren zu drei Quanten und drei klassische Kontrollen. Bezugsfenster und Referenzen stehen in der vorangehenden Falltabelle.
 
 \phantomsection\hypertarget{tab-k18-06}{}\label{tab-k18-06}
 
@@ -8160,7 +8185,7 @@ Ein Solver ist für eine neue Modellfamilie auszuwählen, bevor wir deren Zeiten
 
 \subsubsection{Was passiert am zurückgehaltenen Modell?}\label{was-passiert-am-zuruxfcckgehaltenen-modell}
 
-Je Durchgang bleiben sämtliche Zeilen eines Modells außen vor. Unter 17 gemeinsamen Einstellungen ergibt die Auswahl auf den jeweils sieben Trainingsmodellen 8 Mal RK45. Auf den acht zurückgehaltenen Fenstern erfüllt die gewählte Einstellung 7 Mal den Auftrag. Der Zeitfaktor bezieht sich hier auf die schnellste bestandene Einstellung aus der Schnittmenge des jeweiligen Modells. Laufzeit und Zeitüberschreitungen sind Eigenschaften dieser Messumgebung.
+Je Durchgang bleiben sämtliche Zeilen eines Modells außen vor. Unter 17 gemeinsamen Einstellungen ergibt die Auswahl auf den jeweils sieben Trainingsmodellen 8 Mal RK45. Auf den acht zurückgehaltenen Fenstern erfüllt die gewählte Einstellung 7 Mal den Auftrag. C05 ist der einzige außen beobachtete Fehllauf: RK45 erreicht dort das Integrationszeitlimit. Unter den 17 gemeinsamen Einstellungen für C05 besteht keine: 3 verfehlen das Genauigkeitsziel, 10 erreichen das Zeitlimit und 4 enden mit einem Solverfehler. C05 zählt bei den übrigen sieben Faltungen daher für jede Einstellung als ein Trainingsfehlschlag. Der Zeitfaktor bezieht sich hier auf die schnellste bestandene Einstellung aus der Schnittmenge des jeweiligen Modells. Laufzeit und Zeitüberschreitungen sind Eigenschaften dieser Messumgebung.
 
 \subsubsection{Zwei zusätzliche Systeme mit bekannten Lösungen}\label{zwei-zusuxe4tzliche-systeme-mit-bekannten-luxf6sungen}
 
@@ -8273,7 +8298,7 @@ C12 / C21 & Geschwindigkeitstausch bei zwei Kugeln. Für den idealen Ball mit \(
 C07 & Acht Wechsel in 10 s, unabhängige kartesische Rechnung und RATTLE (\hyperref[fb-befundereignis]{Ereignisse · Vier Fragen mit verschiedenen Antworten} und \hyperref[fb-befundrattle]{C07 · Zwei Bindungen in jedem Rechenschritt}). & Wie robust sind Kontaktzahl und Zeitgenauigkeit bei variiertem Stiftwinkel? \\
 C21-Diode & Bei Nullstart und Einvolt-Sinusquelle gilt \(z<0{,}1\,\mathrm{V}<z_*\) (\hyperref[fb-befunddiode]{C21 · Bleibt die Diodenspannung vor der Falte?}). & Welche höheren Quellamplituden bleiben sicher vor der Falte? \\
 C19R & Brunnen \((5,0)\,\mathrm m\), Tag 10, Referenz der unendlichen Ebene. Feste äußere Zentren bei 0,25 m: höchstens 0,95 \% Punktfehler. Erweitertes Gebiet bei 0,125 m: höchstens 0,16 \%. Feste Außenflächen bei 0,25 m: \(44\,134{,}39\) gegen \(45\,021{,}62\,\mathrm{mg/m^3}\), Score 1,97. & Weitere Orte und veränderte Quellen benötigen eigene Messungen. \hyperref[quelle-kontrolle]{Gitter und Sensor}. \\
-CP2 & Fehlerschranke für die lineare Saite aus Ruhelage mit \(\sum k^{2s}\vert a_k\vert ^2\le R^2\), \(s>0\), und linearem Fourier-Operator (\hyperref[t1-k9]{Kapitel 9}). & Andere Wellengeschwindigkeiten, Anfangsgeschwindigkeiten und nichtlineare Netze gesondert prüfen. \\
+CP2 & Fehlerschranke für die lineare Saite aus Ruhelage mit \(\sum k^{2s}\vert a_k\vert ^2\le R^2\), \(s>0\), und linearem Fourier-Operator (\hyperref[druck-saite-modenschranke]{Satz und Beweis}). & Andere Wellengeschwindigkeiten, Anfangsgeschwindigkeiten und nichtlineare Netze gesondert prüfen. \\
 \end{longtable}\endgroup
 
 \subsubsection{Eine weiterführende Abschlussarbeit}\label{eine-weiterfuxfchrende-abschlussarbeit}
@@ -8347,7 +8372,7 @@ Für jede Konfiguration verbinden wir Fall, Methodenname und Einstellung mit der
 
 \textbf{Basisreihe.} 399 Einstellungen, 167 bestanden. Zwei Statuswechsel gegenüber \texttt{c635504}.
 
-\textbf{Acht Modellfenster.} 456 Einstellungen, 224 bestanden. 15 Statuswechsel.
+\textbf{Acht Modellfenster.} Je 456 Einstellungen: 222 bestanden in der Vorauflage (\texttt{vorher/qss-extension.csv}), 209 im v9.18-Vergleich (\texttt{messung/extension.csv}) und 224 in der aktuellen Tabelle (\texttt{messung/kontakt\_v919/extension.csv}); alle Pfade ab \texttt{rechenlabor/qss\_pruefung/}. Die 15 Statuswechsel zählen den direkten Vergleich mit der Zwischenprobe \texttt{c635504} (227 bestanden).
 
 \textbf{Auswahlstudie.} 520 Einstellungen, 285 bestanden. 13 Statuswechsel.
 
@@ -9299,7 +9324,7 @@ Ankünfte gleich bediente, abgebrochene und verbliebene Kunden setzen und die bi
 
 Jedes der acht Modellfenster hat 57 Konfigurationen. Die Tabellen führen jedes Verfahren und jede Einstellung auf. Zur Zeile gehören in der CSV-Datei auch Arbeitszähler, neu gemessene Laufzeiten in Millisekunden und gegebenenfalls die Diagnose.
 
-Je Zelle stehen die Statuskennung und, sofern vorhanden, der auf drei signifikante Stellen gerundete gespeicherte Score. \textbf{B} bedeutet bestanden, \textbf{G} numerisches Budget überschritten, \textbf{T} Zeitlimit, \textbf{E} abweichende Zahl von Beobachtungen und \textbf{F} Solverfehler. Für abgeschlossene Bewertungen gilt der ungerundete CSV-Wert. Vier unvollständige Zeilen enthalten bereits einen Score aus dem Vorlauf. Die Statuskennung entscheidet über die Verwertbarkeit. Die Schreibweise 2,6e-5 entspricht 0,000026. Die Reihenfolge der Quanten ist grob, mittel, fein. Die drei klassischen Kontrollen besitzen jeweils eine feste Konfiguration. Messzeiten, Kosten und Fehlerdetails stehen für jede Zeile in \texttt{daten/qss-extension.csv}.
+Je Zelle stehen die Statuskennung und, sofern vorhanden, der auf drei signifikante Stellen gerundete gespeicherte Score. \textbf{B} bedeutet bestanden, \textbf{G} numerisches Budget überschritten, \textbf{T} Zeitlimit, \textbf{E} abweichende Zahl von Beobachtungen und \textbf{F} Solverfehler. Für abgeschlossene Bewertungen gilt der ungerundete CSV-Wert. Vier unvollständige Zeilen enthalten bereits einen Score aus dem Vorlauf. Die Statuskennung entscheidet über die Verwertbarkeit. Die Schreibweise 2,6e-5 entspricht 0,000026. Die Reihenfolge der Quanten ist grob, mittel, fein. Die drei klassischen Kontrollen besitzen jeweils eine feste Konfiguration. Messzeiten, Kosten und Fehlerdetails stehen in der \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/b065fe61f10faef9c9781473a89315abdd467c75/docs/lehrbuch/gesamtausgabe/rechenlabor/qss_pruefung/messung/kontakt_v919/extension.csv}{Primärdatei der Acht-Fälle-Matrix}.
 
 Die \hyperref[auflage-k18-01]{Methodenlegende direkt unter der Hauptmatrix} erklärt die Ordnungsziffer, die Schwellenwahl und den steifen Block.
 
@@ -9790,7 +9815,7 @@ Für die Probe \(n\) erhält die Schicht die letzten 64 Verdickungswerte einschl
 
 Im Labor ändern wir die zweite Hälfte des Eingangssignals und kontrollieren, dass alle Vorhersagen für die erste Hälfte bis auf Rundung gleich bleiben. Die Fourier-Auswertung wird zusätzlich gegen eine direkte inverse FFT und die Trainingsableitung gegen Differenzen geprüft. Für jede der beiden FNO-Varianten gibt es drei Initialisierungen. Die Auswahl erfolgt anhand des regularisierten Verlusts am ersten Muskel. Alle sechs Trainingsläufe erreichen das festgelegte Limit von 450 Optimierungsschritten. Die gemeldeten Ergebnisse verwenden die dort erhaltenen Gewichte.
 
-\href{https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-definition.pdf}{Belič, Originaldefinition und Abbildungen} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/main/docs/C18_FIGURE_RECONSTRUCTION.md}{Rekonstruktion der Kurven}
+\href{https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/C18/C18-definition.pdf}{Belič, Originaldefinition und Abbildungen} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/3a8f97f861ac77903289316947adb1e7ddf62433/docs/C18_FIGURE_RECONSTRUCTION.md}{Rekonstruktion der Kurven}
 
 \buchseite{Anhang C}
 
@@ -10476,7 +10501,7 @@ Die 24 bisherigen Versuchsprogramme, vier ergänzende Gegenproben in einem gemei
 
 \textbf{Projektquellen.} Gliederung, Autorenangabe und Benchmark-Umfang stammen aus \texttt{5H3LL3H5/\allowbreak argesim-hyperposition-\allowbreak benchmarks}, Commit \texttt{16f0f2528fcf77f16898ecd74ad952be2c09eac2}. Die Projektlinks sind auf diesen Stand festgelegt. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/README.md}{Buchgliederung} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/01.tex}{Kapitel 1 im Studienbuch}
 
-Die Aufteilung der Referenzblätter und der 456er-Matrix lässt sich bis zu jeder Familie und Tabellenzeile verfolgen. Die Zählung umfasst die archivierten Konfigurationen einschließlich aller Fehler- und Zeitüberschreitungsstatus. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/referenzen.tex}{Referenzblätter} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/17.tex}{Synthesekapitel} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/48e43e2ce056395719f7e735832e57ac5b9f2ee3/docs/lehrbuch/gesamtausgabe/daten/qss-extension.csv}{CSV der Konfigurationen}
+Die Aufteilung der Referenzblätter und der 456er-Matrix lässt sich bis zu jeder Familie und Tabellenzeile verfolgen. Die Zählung umfasst die archivierten Konfigurationen einschließlich aller Fehler- und Zeitüberschreitungsstatus. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/referenzen.tex}{Referenzblätter} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/17.tex}{Synthesekapitel} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/b065fe61f10faef9c9781473a89315abdd467c75/docs/lehrbuch/gesamtausgabe/rechenlabor/qss_pruefung/messung/kontakt_v919/extension.csv}{CSV der Konfigurationen}
 
 \textbf{Definitionen der Vergleichsaufgaben.} ARGESIM veröffentlicht Aufgabenbeschreibungen und Varianten. Die dortige Übersicht und der Projektkatalog haben unterschiedliche Umfänge. \href{https://www.argesim.org/benchmarks}{ARGESIM Benchmarks}
 
@@ -10536,6 +10561,6 @@ Die Implementierungsangaben zur adaptiven Radau-Methode (Ordnung fünf, eingebet
 
 \textbf{Buch- und Rechenstand.} Grundlage sind das bisherige Manuskript, die eingereichten Kapitelentwürfe und der Projektstand \texttt{16f0f252}. Die Versuche mit dem kleinen D2Q9-Gitter, dem Scherwellenabklingen, dem gelernten Saitenpropagator und dem hergestellten nichtlinearen Operator wurden für diese Fassung gerechnet. Für Abschnitt 9.6 wurden drei Modengesetze an getrennten Wellenzahlen verglichen, die Wellengeschwindigkeit kalibriert und der Physikterm eines nichtlinearen FNO über fünf Rauschfolgen geprüft. Abschnitt 9.7 vergleicht auf denselben Daten einen fest eingebauten Wellenschritt mit und ohne Netzkorrektur. Weitere Kontrollläufe untersuchen halbzellige Ausbreitungswege und eine gedämpfte Saite. Zum Vergleich zitierte Zahlen der größeren CP2-Studie sind als Archivwerte gekennzeichnet. \href{https://arxiv.org/abs/2111.03794}{Physikinformierte neuronale Operatoren} · \href{https://math.libretexts.org/Courses/Lake_Tahoe_Community_College/MAT-204\%3A_Differential_Equations_for_Science_\%28Lebl_and_Trench\%29/06\%3A_Fourier_series_and_PDEs/6.08\%3A_DAlembert_Solution_of_The_Wave_Equation}{D'Alembert-Lösung} \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/16.tex}{Projektkapitel CP2 mit Daten und Kontrollen}
 
-Das Quellenpaket enthält den mathematischen Grundlagenteil, 18 Kapitel, vier Anhänge, 85 Abbildungen und ihre Druckfassungen. Zu den Kapiteln gehören Python- und C++-Versuche, Messdateien sowie die Zeichenvorgaben. Das Verzeichnis im Rechenlabor Bildprüfung nennt zu jeder Abbildung die Druckseite und die zugehörigen Dateien. Die Grundlagenbeispiele laufen mit der Python-Standardbibliothek. Jedes erweiterte Labor beschreibt seine wissenschaftlichen Pakete und seinen eigenen Rechenstand.
+Das Quellenpaket enthält den mathematischen Grundlagenteil, 18 Kapitel, vier Anhänge, 92 Abbildungen und ihre Druckfassungen. Zu den Kapiteln gehören Python- und C++-Versuche, Messdateien sowie die Zeichenvorgaben. Das Verzeichnis im Rechenlabor Bildprüfung nennt zu jeder Abbildung die Druckseite und die zugehörigen Dateien. Das frühere Zweimoden-Temperaturfeld ist ausschließlich im \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/d2db4732cf20a491d9a2f13b105ff0392ebf0641/docs/ARGESIM_SOLVER_STUDY.pdf?raw=true\#page=11}{Archiv, Abb. 4 auf S. 11} zu sehen. Die Grundlagenbeispiele laufen mit der Python-Standardbibliothek. Jedes erweiterte Labor beschreibt seine wissenschaftlichen Pakete und seinen eigenen Rechenstand.
 
 \end{document}

@@ -26,6 +26,30 @@ class QssCalendarRegressionTests(unittest.TestCase):
             [4, 0, -4, 0, 1], 2, time_tolerance=1e-13
         ), math.sqrt(2), delta=1e-13)
 
+    def test_qss2_discriminant_underflow_does_not_change_the_root_sign(self):
+        # Common scaling puts c and both terms in the subnormal range.
+        a = 1e300
+        self.assertEqual(
+            _smallest_nonnegative_root(a, -5.2e138, 7e-24, 1e-13), math.inf
+        )
+        crossing = _smallest_nonnegative_root(a, -5.8e138, 8e-24, 1e-13)
+        self.assertTrue(math.isclose(crossing, 2.25968757626e-162, rel_tol=1e-8), crossing)
+        for c, b, expected in (
+            (7e-24, -5.2e138, math.inf),
+            (8e-24, -5.8e138, 2.25968757626e-162),
+        ):
+            root = first_positive_root([c, b, a], 1.0, time_tolerance=1e-13)
+            self.assertTrue(math.isclose(root, expected, rel_tol=1e-8), root)
+
+    def test_qss2_subnormal_discriminant_term_with_normal_coefficients(self):
+        # All coefficients are normal, but b² rounds to 0 in the fast path.
+        self.assertEqual(
+            _smallest_nonnegative_root(1.0, -1e-200, 1e-308 * 4, 1e-13), math.inf
+        )
+        # Here a*c rounds to 0 despite two nonzero normal coefficients.
+        crossing = _smallest_nonnegative_root(1e-200, -1.0, 1e-200, 1e-13)
+        self.assertTrue(math.isclose(crossing, 1e-200, rel_tol=1e-8), crossing)
+
     def test_subnormal_coefficients_preserve_crossings_and_near_misses(self):
         # t² - 3t + 2 crosses at 1 and 2; t² - 3t + 3 stays positive.
         unit = math.ulp(0.0)

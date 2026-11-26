@@ -34,6 +34,25 @@ def check_component_status(record):
         raise ValueError('Invalid component run status')
 
 
+def paired_c19_conservative():
+    archive_name, data_name = 'PDES_Partitionierung_Messpaket.zip', 'c19_paired.jsonl'
+    with zipfile.ZipFile(HERE/archive_name) as z:
+        samples = lines(z, data_name)
+    medians = []
+    for ranks in (1, 8):
+        rows = [r for r in samples if r['case'] == 'c19_nom' and r['mode'] == 'conservative'
+                and r['ranks'] == ranks and r['layout'] == ('one' if ranks == 1 else 'weighted')]
+        if sorted(r['repeat'] for r in rows) != [1, 2, 3] or not all(
+                r['window'] == 108000 and r['verified'] and r['committed'] == 65292
+                and r['rollbacks'] == 0 and math.isfinite(r['wall_s']) and r['wall_s'] > 0
+                and r['safe_cuts'] == (8 if ranks == 1 else 11556) for r in rows):
+            raise ValueError('Invalid paired C19R series')
+        medians.append(statistics.median(r['wall_s'] for r in rows))
+    return {'archive': archive_name, 'data': data_name, 'repeats': 3,
+            'rows': [{'ranks': ranks, 'median_s': wall, 'speedup': medians[0]/wall}
+                     for ranks, wall in zip((1, 8), medians, strict=True)]}
+
+
 def summaries():
     baseline = json.loads((HERE/'vollgitter.json').read_text())
     with zipfile.ZipFile(HERE/'Skalierung_Messdaten.zip') as z:
@@ -68,6 +87,9 @@ def summaries():
                 sparse[mode].append({'ranks':p,'median_s':statistics.median(r['wall_s'] for r in rows),
                                      'median_launcher_s':statistics.median(r['launcher_wall_s'] for r in rows),
                                      'rollbacks':rows[0]['rollbacks'],'mean_safe':rows[0]['safe_mean']})
+        for rows in sparse.values():
+            for row in rows:
+                row['speedup'] = rows[0]['median_s'] / row['median_s']
         prefix, groups, components = {}, {}, {}
         for order in (3,4):
             key = str(order)
@@ -112,7 +134,8 @@ def summaries():
                 raise ValueError('Invalid group comparisons')
             groups[order]['max_rel_l2_dop853'] = max(row['dop853']['relative_l2'] for row in checks)
             groups[order]['max_rel_l2_lbm'] = max(row['lbm']['relative_l2'] for row in checks)
-    return {'mpi': mpi,'c19': sparse,'component_prefix': prefix,'groups': groups,'component_status': components}
+    return {'mpi': mpi, 'c19': sparse, 'c19_paired_conservative': paired_c19_conservative(),
+            'component_prefix': prefix, 'groups': groups, 'component_status': components}
 
 
 def verify_field_archives():

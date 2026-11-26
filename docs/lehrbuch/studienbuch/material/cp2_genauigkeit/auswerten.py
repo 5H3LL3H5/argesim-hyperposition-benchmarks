@@ -6,6 +6,16 @@ import numpy as np
 
 DATA = Path(__file__).resolve().parent
 
+# Sollgrenzen nur für die ausgelieferten Kontrollfälle, keine Garantie
+# für andere Dichtefelder, Auflösungen oder Zeiten.
+KAVITAET_EINZELFELD_MAX_PROZENT = 0.05
+KAVITAET_PROFIL_RMS_MAX = {"u": 0.010, "v": 0.003}
+
+
+def pruefe_obergrenze(ist, soll, bezeichnung):
+    if not np.isfinite(ist) or not 0 <= ist <= soll:
+        raise ValueError(f"{bezeichnung}: {ist:.8g}; Sollgrenze {soll:.8g}")
+
 
 def fehler(x, y):
     return np.linalg.norm(x - y) / np.linalg.norm(y)
@@ -61,7 +71,7 @@ def saite(profil, zeit, *, analytisch=False):
     return np.fft.irfft(filt, n=2 * (len(profil) - 1))[: len(profil)]
 
 
-if __name__ == "__main__":
+def main():
     with np.load(DATA / "saite_beispiel.npz", allow_pickle=False) as d:
         x = np.linspace(0.0, 0.5, 501)
         np.testing.assert_array_equal(d["x"], x)
@@ -89,15 +99,27 @@ if __name__ == "__main__":
             )
     with np.load(DATA / "kavitaet_beispiel.npz", allow_pickle=False) as d:
         ref = np.linalg.norm(d["ref"], axis=0)[1:-1, 1:-1]
-        for name in ["old", "affine", "new"]:
+        for name in ("old", "affine", "new"):
             pred = d[name] if name == "old" else np.linalg.norm(d[name], axis=0)
-            print(
-                f"Kavität, erstes zurückgehaltenes Feld, {name}: {100 * fehler(pred[1:-1, 1:-1], ref):.5f} %"
-            )
+            ist = 100 * fehler(pred[1:-1, 1:-1], ref)
+            if name == "new":
+                pruefe_obergrenze(
+                    ist,
+                    KAVITAET_EINZELFELD_MAX_PROZENT,
+                    "Kavität Einzelfeldfehler (new, Prozent)",
+                )
+            print(f"Kavität, erstes zurückgehaltenes Feld, {name}: {ist:.5f} %")
     with np.load(DATA / "kavitaet_profile.npz", allow_pickle=False) as d:
         grid, u, v = d["profile_257"]
-        for name, vals in [("u", u), ("v", v)]:
+        for name, vals in (("u", u), ("v", v)):
             loc, ref = d["ghia_" + name].T
-            print(
-                f"257², {name}: RMS an sechs Literaturpunkten = {np.sqrt(np.mean((np.interp(loc, grid, vals) - ref) ** 2)):.6f}"
-            )
+            label = f"Kavität Profilfehler {name}/U (RMS, 257²)"
+            if not all(np.isfinite(a).all() for a in (grid, vals, loc, ref)):
+                raise ValueError(f"{label}: nichtendliche Profildaten")
+            ist = np.sqrt(np.mean((np.interp(loc, grid, vals) - ref) ** 2))
+            pruefe_obergrenze(ist, KAVITAET_PROFIL_RMS_MAX[name], label)
+            print(f"257², {name}: RMS an sechs Literaturpunkten = {ist:.6f}")
+
+
+if __name__ == "__main__":
+    main()

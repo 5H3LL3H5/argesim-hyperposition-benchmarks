@@ -1,5 +1,6 @@
 """Repeat the CP2 MPI and grouped full runs or the C19R and componentwise LP series."""
 import argparse
+import csv
 import hashlib
 import json
 import os
@@ -11,6 +12,8 @@ import zipfile
 from pathlib import Path
 
 import numpy as np
+
+from buchquellen import CAVITY_SOURCE, read_book_source
 
 HERE = Path(__file__).resolve().parent
 FLAGS = ['-std=c++20', '-O3', '-march=native', '-ffp-contract=off', '-Wall', '-Wextra', '-Werror']
@@ -24,24 +27,16 @@ def digest(path):
 
 def prepare(repo, work):
     work.mkdir(parents=True, exist_ok=True)
-    srcpath = 'rechenlabor/kavitaet_vollgitter/src/'
-    archive = repo / 'docs/lehrbuch/gesamtausgabe/pakete/Laborquellen.zip'
-    if archive.exists():
-        with zipfile.ZipFile(archive) as sources:
-            original = sources.read(srcpath + 'gruppen_qss.cpp').decode()
-            marks = sources.read(srcpath + 'zeitpunkte.txt')
-    else:
-        original = (repo / srcpath / 'gruppen_qss.cpp').read_text()
-        marks = (repo / srcpath / 'zeitpunkte.txt').read_bytes()
+    original = read_book_source(repo, CAVITY_SOURCE / 'gruppen_qss.cpp').decode('utf-8')
+    marks = read_book_source(repo, CAVITY_SOURCE / 'zeitpunkte.txt')
     grid = original[original.index('extern "C"'):original.index('inline double defect')]
     (work/'wirbel_gitter.hpp').write_text(grid)
     (work/'marks').write_bytes(marks)
     with zipfile.ZipFile(HERE/'PDES_Partitionierung_Messpaket.zip') as data:
         for name in data.namelist():
-            if name.startswith('c19_nom/') or name in ('sparse_pdes.cpp', 'cavity_pdes.py',
-                    'run_sparse.py', 'partitions.py', 'd2q9_halos.cpp', 'prepare_d2q9.py'):
+            if name.startswith('c19_nom/') or name in ('sparse_pdes.cpp', 'run_sparse.py', 'partitions.py', 'd2q9_halos.cpp'):
                 data.extract(name, work)
-    subprocess.run([sys.executable, 'prepare_d2q9.py', str(repo)], cwd=work, check=True)
+    subprocess.run([sys.executable, str(HERE/'prepare_d2q9.py'), str(repo)], cwd=work, check=True)
     subprocess.run(['mpicxx', '-DOMPI_SKIP_MPICXX', *FLAGS, '-fopenmp-simd',
                     'd2q9_halos.cpp', '-o', 'd2q9_halos'], cwd=work, check=True)
     subprocess.run(['mpicxx', '-DOMPI_SKIP_MPICXX', *FLAGS, 'sparse_pdes.cpp',
@@ -91,7 +86,7 @@ def c19(work):
 def prefix(repo, work):
     for order, layout in [(3,'rows'),(4,'tiles')]:
         with (work/f'qss{order}-lps.jsonl').open('w') as out:
-            subprocess.run([sys.executable, 'cavity_pdes.py', str(repo), '--order', str(order),
+            subprocess.run([sys.executable, str(HERE/'cavity_pdes.py'), str(repo), '--order', str(order),
                             '--segments','8','--ranks', *map(str, LP_COUNTS), '--modes','conservative',
                             '--layouts',layout,'--repeats','3'], cwd=work, stdout=out, check=True)
 
@@ -111,10 +106,56 @@ def groups(work):
         pending.replace(record)
 
 
+def smoke(repo, work):
+    # Fixed short horizons distinguish a functional probe from a timing study.
+    if len(os.sched_getaffinity(0)) < 2:
+        raise ValueError('The short MPI/LP probe requires two available CPUs')
+    fields = []
+    for ranks in (1, 2):
+        target = f'smoke-mpi-{ranks}'
+        proc = subprocess.run(['mpiexec', '--oversubscribe', '--bind-to', 'none',
+                               '-n', str(ranks), './d2q9_halos', '1', str(ranks),
+                               '16', target], cwd=work, check=True, text=True,
+                              capture_output=True, timeout=60)
+        row = json.loads(proc.stdout.splitlines()[-1])
+        field = work/f'{target}.fields'
+        if row['steps'] != 16 or row['ranks'] != ranks or field.stat().st_size != 3*257*257*8:
+            raise ValueError('Incomplete MPI smoke probe')
+        fields.append(digest(field))
+    if fields[0] != fields[1]:
+        raise ValueError('Two-rank MPI field differs from the one-rank field')
+
+    (work/'smoke-marks').write_text('16\n')
+    cpu = str(min(os.sched_getaffinity(0)))
+    for order in (3, 4):
+        target = f'smoke-gqss{order}'
+        subprocess.run(['taskset', '-c', cpu, './gq', '257', str(order), '0.001',
+                        'smoke-marks', target], cwd=work, check=True, timeout=60)
+        with (work/target/'history.csv').open(newline='') as source:
+            history = list(csv.DictReader(source))
+        field = work/target/'z_16.bin'
+        if (len(history) != 1 or int(history[0]['tick']) != 16
+                or field.stat().st_size != 255*255*8):
+            raise ValueError(f'Incomplete grouped QSS{order} smoke probe')
+        result = subprocess.run([sys.executable, str(HERE/'cavity_pdes.py'), str(repo),
+                                 '--order', str(order), '--segments', '1', '--ranks', '1', '2',
+                                 '--modes', 'conservative', '--layouts', 'rows', '--repeats', '1'],
+                                cwd=work, check=True, text=True, capture_output=True, timeout=90)
+        rows = [json.loads(line) for line in result.stdout.splitlines()]
+        if ({(row['ranks'], row['segments'], row['distinct_processes']) for row in rows}
+                != {(1, 1, 1), (2, 1, 2)} or len(rows) != 2
+                or any(row['digest'] != row['oracle_sha256'] for row in rows)):
+            raise ValueError(f'Incomplete LP QSS{order} smoke probe')
+        (work/f'{target}-lp.jsonl').write_text(result.stdout)
+    print(json.dumps({'mpi': {'tick': 16, 'ranks': [1, 2], 'field_sha256': fields[0]},
+                      'groups': {'tick': 16, 'orders': [3, 4]},
+                      'lp': {'segments': 1, 'ranks': [1, 2], 'orders': [3, 4]}}))
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['prepare','lbm','c19','prefix','groups'])
-    parser.add_argument('repo', type=Path, help='repository checkout containing the published book')
+    parser.add_argument('action', choices=['prepare','lbm','c19','prefix','groups','smoke'])
+    parser.add_argument('repo', type=Path, help='repository checkout or extracted full offline lab root')
     parser.add_argument('work', type=Path, help='a separate measurement directory')
     args = parser.parse_args()
     repo, work = args.repo.resolve(), args.work.resolve()
@@ -128,6 +169,8 @@ if __name__ == '__main__':
         lbm(work)
     elif args.action == 'groups':
         groups(work)
+    elif args.action == 'smoke':
+        smoke(repo, work)
     elif args.action == 'c19':
         c19(work)
     else:

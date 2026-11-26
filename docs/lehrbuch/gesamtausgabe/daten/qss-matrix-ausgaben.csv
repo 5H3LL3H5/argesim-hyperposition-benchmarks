@@ -1,0 +1,5 @@
+Messausgabe,Datei ab Paketwurzel,Zeilen,Bestanden,SHA-256
+Vorauflage (archivierte Buchmatrix),rechenlabor/qss_pruefung/vorher/qss-extension.csv,456,222,5bb6fb16c60380c0bed4541f86d535db202ff675ce00b9e9b861720dda81ec7b
+Vergleich v9.18,rechenlabor/qss_pruefung/messung/extension.csv,456,209,5e0d03e333689db69690fddb6d11615940562069cf3f1a14f5215a18d0fb1d3e
+Skalierungs-Gegenprobe c635504,rechenlabor/qss_pruefung/messung/skalenfix_c635504/extension.csv,456,227,0425d6a693a127e9b4a38463b7f79167a9934d36afa53e36fca63fa52062e917
+Kontaktwiederholung v9.19 (aktuelle Buchmatrix),rechenlabor/qss_pruefung/messung/kontakt_v919/extension.csv,456,224,56d65b536115049e39c7f1309deb899a07ee49c92f9d9ca75863c97d7c335802

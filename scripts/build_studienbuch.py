@@ -36,7 +36,7 @@ REPLAY = COMPARISON.parent / "skalenfix_c635504"
 MANUSCRIPT = "lehrbuch_numerische_simulation.md"
 CONTACT = COMPARISON.parent / "kontakt_v919"
 PDES = Path("rechenlabor/pdes_partitionierung")
-REVISION = "v9.21"
+REVISION = "v9.22"
 DATE = (2026, 11, 26, 0, 0, 0)
 
 
@@ -178,7 +178,7 @@ def core_lab(path):
             write_entry(
                 lab, source.relative_to(MATERIAL).as_posix(), source.read_bytes()
             )
-        write_entry(lab, "START_v9_21.md", (EDITION / "Labor.md").read_bytes())
+        write_entry(lab, "START_v9_22.md", (EDITION / "Labor.md").read_bytes())
         for name in ("kapitel/16.md", MANUSCRIPT):
             write_entry(lab, name, (EDITION / name).read_bytes())
         matrix = Path("daten/qss-extension.csv")
