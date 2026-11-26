@@ -7579,9 +7579,9 @@ Kapitel 9.7 stellt eine andere Frage. Dort transportiert ein eingebauter Wellens
 
 <a id="druck-saite-modenschranke"></a>
 
-## Saitenoperator · Eine Schranke für alle Zeiten
+## Saitenoperator · Eine Schranke zwischen den Messzeiten
 
-Wir betrachten die lineare Wellengleichung mit festen Enden, Anfangsgeschwindigkeit null, Länge $L=0{,}5,\mathrm m$ und Wellengeschwindigkeit $c=0{,}06\,\mathrm{m/s}$. Aus den 501 Knoten bilden wir den Sinusinterpolanten $g=\sum_{k=1}^{499}a_k e_k$, mit orthonormalen Funktionen $e_k(x)=\sqrt{2/L}\sin(k\pi x/L)$. Die Koeffizienten erhält die diskrete Sinustransformation mit dieser Normierung. Als Eingabeklasse verlangen wir $\sum_{k=1}^{499} k^{2s}|a_k|^2\le R^2$ mit $s>0$. Für $s=1$ ist das die Ableitungsenergie des Interpolanten, skaliert mit $(L/\pi)^2$.
+Wir betrachten die lineare Wellengleichung mit festen Enden, Anfangsgeschwindigkeit null, Länge $L=0{,}5\,\mathrm m$ und Wellengeschwindigkeit $c=0{,}06\,\mathrm{m/s}$. Aus den 501 Knoten bilden wir den Sinusinterpolanten $g=\sum_{k=1}^{499}a_k e_k$, mit orthonormalen Funktionen $e_k(x)=\sqrt{2/L}\sin(k\pi x/L)$. Die diskrete Sinustransformation liefert $a_k=\Delta x\sum_{j=1}^{499}g_j e_k(j\Delta x)$ mit $\Delta x=L/500$. Als Eingabeklasse verlangen wir $\sum_{k=1}^{499} k^{2s}|a_k|^2\le R^2$ mit $s>0$. Für $s=1$ ist das die Ableitungsenergie des Interpolanten, skaliert mit $(L/\pi)^2$.
 
 **Abgeschnittene Moden.** Die exakte Entwicklung des Interpolanten multipliziert $a_k$ mit $f_k(t)=\cos(\omega_k t)$, $\omega_k=ck\pi/L$. Für $k\ge193$ gilt $|f_k|\le1$ und $k^{2s}\ge193^{2s}$. Orthogonalität liefert für den Rest
 $$
@@ -7591,7 +7591,7 @@ $$
 $$
 Für $s=1$ sind das höchstens $R/193\approx0{,}0051814R$.
 
-**Beibehaltene Moden.** Die gespeicherten Faktoren werden zwischen benachbarten Zeiten linear interpoliert. Ist $h$ der größte Abstand, so liefert der Rest der linearen Interpolation wegen $|f_k''|\le\omega_k^2$ höchstens $\omega_k^2 h^2/8$ pro Faktor: Das Produkt der beiden Abstände zu den Intervallenden ist höchstens $h^2/4$, der Rest enthält zusätzlich den Faktor $1/2$. Den maximalen Fehler der gespeicherten Werte an den Stützzeiten nennen wir $\epsilon_*$. Die linearen Gewichte sind nichtnegativ und summieren sich zu eins, daher addiert die Speicherung zwischen den Knoten höchstens $\epsilon_*$. Für $k\le192$ und $s=1$ ergibt sich
+**Beibehaltene Moden.** Im Ausgabefenster $0\le t\le8\,\mathrm s$ werden die gespeicherten Faktoren zwischen benachbarten Zeiten linear interpoliert. Ist $h$ der größte Abstand, so liefert der Rest der linearen Interpolation wegen $|f_k''|\le\omega_k^2$ höchstens $\omega_k^2 h^2/8$ pro Faktor: Das Produkt der beiden Abstände zu den Intervallenden ist höchstens $h^2/4$, der Rest enthält zusätzlich den Faktor $1/2$. Den maximalen Fehler der gespeicherten Werte an den Stützzeiten nennen wir $\epsilon_*$. Die linearen Gewichte sind nichtnegativ und summieren sich zu eins, daher addiert die Speicherung zwischen den Knoten höchstens $\epsilon_*$. Für $k\le192$ und $s=1$ ergibt sich
 $$
 \left(\sum_{k\le192}|a_k|^2\,|\hat f_k(t)-f_k(t)|^2\right)^{1/2}
 \le \left[\epsilon_* + \tfrac{192}{8}(c\pi/L)^2 h^2\right]R .
