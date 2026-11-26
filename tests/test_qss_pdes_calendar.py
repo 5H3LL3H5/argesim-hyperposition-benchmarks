@@ -44,7 +44,7 @@ class PartitionedCalendarTests(unittest.TestCase):
                 self.assertIsNone(calendar.pop_bag())
 
     def test_confluence_snapshot_and_future_microstep(self):
-        for owners in ([0, 0, 0], [2, 0, 1]):
+        def check_layout(owners):
             states = [11, 17, 23]
             calls = []
             calendar = PartitionedCalendar(owners, max(owners) + 1)
@@ -65,6 +65,10 @@ class PartitionedCalendarTests(unittest.TestCase):
             ])
             self.assertEqual(calendar.pop_bag(), ((2.0, 1), (2,)))
             self.assertIsNone(calendar.peek())
+
+        for owners in ([0, 0, 0], [2, 0, 1]):
+            with self.subTest(owners=owners):
+                check_layout(owners)
 
     def test_book_sized_partitions_equal_the_same_serial_bags(self):
         # Manufactured event times only. Keep both string states on their node.
