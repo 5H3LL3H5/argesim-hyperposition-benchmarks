@@ -2,6 +2,10 @@
 
 Christian Stenzel · Gesamtausgabe · Revision v9.19
 
+## Nachtrag zur QSS3/4-Taylor-Kontaktprüfung
+
+Die veröffentlichte Messreihe v9.19 bleibt als historischer Stand erhalten. Der [Nachtrag mit 120 Vergleichsfällen und Rohdaten](rechenlabor/qss_pruefung/messung/taylor_kontakt/README.md) dokumentiert getrennt, welche Ergebnisse sich durch den korrigierten Taylor-Stencil ändern.
+
 ## Kontaktprüfung und Messreihen v9.19
 
 Die Druckfassung hat 493 Seiten, 18 Fachkapitel, vier Anhänge und 91 nummerierte Abbildungen. Die vier Messreihen umfassen 1.513 überprüfte Konfigurationen. Im Vergleich mit dem Skalierungsfix stimmen die 96 beidseitig vorliegenden QSS3/4-Fehlerwerte überein. Die neue Abbildung 6.8 erklärt, wann ein beinahe verschwindender Abstand tatsächlich eine Bandberührung bedeutet. [Aktuelle Primärdaten und Vergleich](rechenlabor/qss_pruefung/messung/kontakt_v919) · [Verfahren, Bild, Vertragsproben und Einzelbefunde](rechenlabor/qss_pruefung/messung/kontakt_v919/methodenregister.csv)

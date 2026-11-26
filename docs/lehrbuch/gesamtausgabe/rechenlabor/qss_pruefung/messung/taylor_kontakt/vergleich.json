@@ -1,0 +1,59 @@
+{
+  "baseline": {
+    "configurations": 42,
+    "paired_scores": 37,
+    "changed_scores": 37,
+    "max_absolute_delta": 0.00017773433114944047,
+    "status_changes": [
+      {
+        "case": "C01-A",
+        "solver": "qss3",
+        "level": 0.0002,
+        "before": "timeout",
+        "after": "pass"
+      },
+      {
+        "case": "C01-A",
+        "solver": "qss3",
+        "level": 0.005,
+        "before": "timeout",
+        "after": "accuracy_miss"
+      }
+    ],
+    "raw_sha256": {
+      "replay-control-baseline.csv": "b162d63f868a54e8a201ddbf513030d5e398dd4b7210cae03d3cd917ee6813a5",
+      "replay-baseline.csv": "df795183dcc88673372c92b9dcd90c605d2e9ddc12075ded83a2ac8304724ab0"
+    }
+  },
+  "extension": {
+    "configurations": 48,
+    "paired_scores": 36,
+    "changed_scores": 30,
+    "max_absolute_delta": 5.9728995884727425,
+    "status_changes": [],
+    "raw_sha256": {
+      "replay-control-extension.jsonl": "48ec7903f63770eda1f450798aafbf02a9e7ba7a793a23f2d2fa9c5c4db7d1c9",
+      "replay-extension.jsonl": "a4956bf595fc3cedc88f915471673f39439ccb2c17db84c435b706f81922c626"
+    }
+  },
+  "selection": {
+    "configurations": 30,
+    "paired_scores": 24,
+    "changed_scores": 24,
+    "max_absolute_delta": 0.051411886435793266,
+    "status_changes": [],
+    "raw_sha256": {
+      "replay-control-selection.jsonl": "4844284d7b297bd5246afdd611e8d38b5351da8ab974fd8c9170f488f867dd71",
+      "replay-selection.jsonl": "216bddd41d73ced247f999d41af4dc6b329e40d4d0d0a92bf1be79d012b7ad7e"
+    }
+  },
+  "provenance": {
+    "control_source_commit": "b065fe61f10faef9c9781473a89315abdd467c75",
+    "candidate_source_commit": "75377bcd9736183f7dcfbc141f17ecd288189715",
+    "integrated_source_commit": "02a8641760650ebdd765416d58b564298f54ebaa",
+    "candidate_solver_sha256": "ac4732d2a88886130daf8e9afbb4453b9b4c6c081d26cc839220325ed0de49dc",
+    "runtime": "CPython 3.12.14, NumPy 2.3.5, SciPy 1.17.0; OpenBLAS and OMP at one thread",
+    "timing_scope": "Concurrent suites on shared host, no performance or timeout-improvement claim",
+    "rows": "Only methods qss3/qss4; 42 baseline, 48 extension, 30 selection; all 120 v9.19 keys"
+  }
+}
