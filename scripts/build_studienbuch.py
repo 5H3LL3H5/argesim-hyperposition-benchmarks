@@ -179,6 +179,8 @@ def core_lab(path):
                 lab, source.relative_to(MATERIAL).as_posix(), source.read_bytes()
             )
         write_entry(lab, "START_v9_21.md", (EDITION / "Labor.md").read_bytes())
+        for name in ("kapitel/16.md", MANUSCRIPT):
+            write_entry(lab, name, (EDITION / name).read_bytes())
         matrix = Path("daten/qss-extension.csv")
         write_entry(lab, matrix.as_posix(), (EDITION / matrix).read_bytes())
         with zipfile.ZipFile(PACKAGES / "Laborquellen.zip") as source:

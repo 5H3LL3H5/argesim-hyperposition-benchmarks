@@ -97,8 +97,18 @@ def prefix(repo, work):
 
 
 def groups(work):
+    cpu = min(os.sched_getaffinity(0))
     for order in (3, 4):
-        subprocess.run(['./gq','257',str(order),'0.001','marks',f'gqss{order}'], cwd=work, check=True)
+        target = f'gqss{order}'
+        record = work / target / 'run.json'
+        record.unlink(missing_ok=True)
+        started = time.perf_counter()
+        subprocess.run(['taskset', '-c', str(cpu), './gq', '257', str(order),
+                        '0.001', 'marks', target], cwd=work, check=True)
+        elapsed = time.perf_counter() - started
+        pending = record.with_suffix('.tmp')
+        pending.write_text(json.dumps({'launcher_wall_s': elapsed, 'cpu_ids': [cpu]}) + '\n')
+        pending.replace(record)
 
 
 if __name__ == '__main__':

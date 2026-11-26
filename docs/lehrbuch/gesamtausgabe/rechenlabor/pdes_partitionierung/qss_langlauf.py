@@ -12,6 +12,7 @@ from pathlib import Path
 from zipimport import zipimporter
 
 import numpy as np
+import scipy
 from vollgitter import CHECKS, DT, END, PREFIX, RE, N
 
 QUANTUM = 0.001
@@ -23,7 +24,7 @@ STENCILS = {
 }
 
 
-def physics(repo):
+def physics_modules(repo):
     archive = repo / 'docs/lehrbuch/gesamtausgabe/pakete/Laborquellen.zip'
     member = PREFIX + 'basis/kavitaet.py'
     offline = repo / PREFIX / 'basis/original'
@@ -37,8 +38,50 @@ def physics(repo):
         raise ImportError(f'Missing cavity model in {member}')
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    from argesim_benchmarks.solvers.advanced_qss import _boundary_time
-    return module.Cavity(N, RE), _boundary_time
+    from argesim_benchmarks.solvers import advanced_qss
+    return module, advanced_qss
+
+
+def physics(repo):
+    model, solver = physics_modules(repo)
+    return model.Cavity(N, RE), solver._boundary_time
+
+
+def experiment_config(model, solver, order):
+    # Read the sources actually selected by the loaders, including ZIP members.
+    modules = {
+        'cavity': model,
+        'cp2': model.cp2,
+        'boundary': solver,
+        'polynomial': sys.modules[solver.first_positive_root.__module__],
+    }
+    sources = {
+        name: hashlib.sha256(module.__loader__.get_data(module.__file__)).hexdigest()
+        for name, module in modules.items()
+    }
+    sources['integrator'] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    return {
+        'grid': N, 'reynolds': RE, 'end_tick': END, 'tick_duration': DT,
+        'reference_ticks': list(CHECKS), 'quantum': QUANTUM, 'order': order,
+        'sources': sources, 'numpy': np.__version__, 'scipy': scipy.__version__,
+        'python': list(sys.version_info[:3]),
+    }
+
+
+def check_restart(stream, recorded, expected):
+    if recorded == expected:
+        return
+    # Older files did not record the model or root solver. Only the two
+    # published checkpoints have independently known bytes and provenance.
+    if isinstance(recorded, list):
+        manifest = Path(__file__).with_name('restart_kompatibilitaet.json')
+        legacy = json.loads(manifest.read_text())
+        order = expected['order']
+        if expected == {**legacy['experiment'], 'order': order}:
+            stream.seek(0)
+            if hashlib.sha256(stream.read()).hexdigest() == legacy['checkpoints'].get(str(order)):
+                return
+    raise ValueError('Restart belongs to a different or unverified experiment')
 
 
 def value(poly, dt):
@@ -123,12 +166,12 @@ def checkpoint(path, **state):
 
 
 def run(args):
-    cavity, root = physics(args.repo.resolve())
+    model, solver = physics_modules(args.repo.resolve())
+    cavity, root = model.Cavity(N, RE), solver._boundary_time
     directory = args.output
     directory.mkdir(parents=True, exist_ok=True)
     state_path = directory / 'restart.npz'
-    source_hash = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
-    configuration = json.dumps([N, RE, END, QUANTUM, args.order, source_hash])
+    configuration = experiment_config(model, solver, args.order)
     last_report = start = time.perf_counter()
     done = False
 
@@ -139,14 +182,8 @@ def run(args):
     signal.signal(signal.SIGTERM, stopping)
     signal.signal(signal.SIGINT, stopping)
     if args.resume:
-        with np.load(state_path, allow_pickle=False) as saved:
-            recorded = json.loads(str(saved['config']))
-            expected = json.loads(configuration)
-            if recorded != expected:
-                # Only verified bitwise-equivalent integrator revisions can share a checkpoint.
-                migrations = json.loads(Path(__file__).with_name('restart_kompatibilitaet.json').read_text())
-                if recorded[:-1] != expected[:-1] or [recorded[-1], source_hash] not in migrations:
-                    raise ValueError('Restart belongs to a different experiment')
+        with state_path.open('rb') as stream, np.load(stream, allow_pickle=False) as saved:
+            check_restart(stream, json.loads(str(saved['config'])), configuration)
             now, previous, spent = map(float, (saved['now'], saved['previous'], saved['wall_s']))
             segments, events, next_mark = map(int, (saved['segments'], saved['events'], saved['next_mark']))
             x, q = saved['x'], saved['q']
@@ -191,7 +228,7 @@ def run(args):
             done = done or (args.stop_after is not None and segments >= args.stop_after)
             if done or now == FINAL or stamp-last_report >= args.checkpoint_seconds or segments == 1:
                 wall = spent+stamp-start
-                checkpoint(state_path, config=configuration, now=now, previous=previous, segments=segments,
+                checkpoint(state_path, config=json.dumps(configuration), now=now, previous=previous, segments=segments,
                            events=events, next_mark=next_mark, wall_s=wall, x=x, q=q)
                 progress = {'order': args.order, 'segments': segments, 'events': events, 't_star': now,
                                 'equivalent_ticks': now/DT, 'target_ticks': END, 'wall_s': wall,

@@ -12,6 +12,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 COUNTS = [1, 2, 4, 8]
 TICKS = [256, 4096, 16384, 65536, 131072, 262144, 350000]
+TICK_DURATION = 0.1 / 256
+FINAL_TIME = TICKS[-1] * TICK_DURATION
 
 
 def sha(data):
@@ -20,6 +22,16 @@ def sha(data):
 
 def lines(z, name):
     return [json.loads(row) for row in z.read(name).splitlines()]
+
+
+def check_component_status(record):
+    t = record['t_star']
+    if (record['target_ticks'] != TICKS[-1] or not 0 <= t <= FINAL_TIME
+            or record['complete'] is not (t == FINAL_TIME)
+            or record['observations'] != sum(tick * TICK_DURATION <= t for tick in TICKS)
+            or not math.isclose(record['equivalent_ticks'], t / TICK_DURATION,
+                                rel_tol=1e-14, abs_tol=1e-14)):
+        raise ValueError('Invalid component run status')
 
 
 def summaries():
@@ -85,10 +97,9 @@ def summaries():
             groups[key] = {'kernel_s': float(last['kernel_s']), 'launcher_wall_s': launch,
                                'segments': int(last['segments']),'t_star': float(last['t_star'])}
             records = [r for r in lines(z,f'qss{order}-fortschritt.jsonl') if 'segments' in r]
-            result=records[-1]
-            if (not result['complete'] and result['t_star']>=136.71875) or result['target_ticks']!=350000:
-                raise ValueError('Invalid component run status')
-            components[key] = result
+            for record in records:
+                check_component_status(record)
+            components[key] = records[-1]
         control = lines(z,'gegenprobe.jsonl')
         if len(control)!=2 or not all(r['segments']==32 and r['max_abs_time']<2e-12
                                       and r['max_abs_z']<2e-9 for r in control):
@@ -130,6 +141,8 @@ def field_errors(repo):
     output = {'3':[],'4':[]}
     verify_field_archives()
     saved = json.loads((HERE / "Einzelkalender_Stand.json").read_text())
+    for status in saved.values():
+        check_component_status(status)
     with (zipfile.ZipFile(HERE / "QSS34_Fortsetzung.zip") as seed,
           zipfile.ZipFile(HERE/'Skalierung_Messdaten.zip') as z,
           zipfile.ZipFile(HERE/'D2Q9_Prueffelder.zip') as lbm_archive,
