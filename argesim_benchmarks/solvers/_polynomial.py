@@ -12,6 +12,7 @@ import math
 import sys
 from collections.abc import Sequence
 from functools import cache
+from itertools import pairwise
 
 from ..ivp import IntegrationError
 
@@ -58,9 +59,13 @@ def _normalise(coefficients: Sequence[float]) -> list[float]:
         raise IntegrationError("event polynomial contains non-finite coefficients")
     while len(values) > 1 and values[-1] == 0.0:
         values.pop()
-    # A common power-of-two scale avoids overflow in the derivative and in
-    # Horner evaluation. Preserve small coefficients when scaling is unnecessary.
+    # Rescaling by a common power of two preserves the roots. Lift small
+    # coefficients before reciprocal Horner can round an extremum to zero.
+    # Apply ldexp to each coefficient: the multiplier may exceed float range.
     scale = max(abs(value) for value in values)
+    if 0.0 < scale < 0.5:
+        _, exponent = math.frexp(scale)
+        return [math.ldexp(value, -exponent) for value in values]
     if scale > sys.float_info.max / (4 * len(values)):
         values = [math.ldexp(value, -4) for value in values]
     return values
@@ -115,7 +120,7 @@ def _interval_roots(
     points = [0.0, *(t for t in extrema if 0.0 < t < upper), upper]
     samples = [_event_value(values, t) for t in points]
     crossings = [
-        (a < 0.0 < b) or (b < 0.0 < a) for a, b in zip(samples, samples[1:])
+        (a < 0.0 < b) or (b < 0.0 < a) for a, b in pairwise(samples)
     ]
     magnitudes = [abs(value) for value in values]
     roots = []
