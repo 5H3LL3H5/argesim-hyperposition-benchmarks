@@ -15,7 +15,7 @@ Aus dem Checkout, mit Poppler (`pdfinfo`, `pdftotext`):
 ```sh
 python scripts/build_studienbuch.py --full-lab /tmp/ARGESIM_Rechenlabor.zip
 python scripts/pruefe_messregister.py --pdf docs/ARGESIM_SOLVER_STUDY.pdf \
-  --lab /tmp/ARGESIM_Rechenlabor.zip --edition v9.21
+  --lab /tmp/ARGESIM_Rechenlabor.zip --edition v9.22
 ```
 
 Bei neuer Druckfassung zuerst PDF und vollständiges Laborexport-ZIP bauen. Dann bei demselben Prüfaufruf die neue Ausgabe und zusätzlich `--update docs/lehrbuch/gesamtausgabe/daten/messregister.csv` angeben. Anschließend die Ausgaben und ihr Manifest erneut bauen und ohne `--update` prüfen. Die Abnahme vergleicht neben Hashes und PDF-Zielen die 168 Summenzellen in Kapitel 18 und alle 456 gerundeten Einzelwerte in Anhang B mit der aktuellen Primärdatei. Sie startet die archivierten Simulationen nicht erneut.
