@@ -1,6 +1,6 @@
 # PDES und die CP2-Kavität auf 257 × 257 Knoten
 
-Zum Nachvollziehen der [Lookahead-Rechenprobe in Kapitel 6](../../kapitel/06.md#pdes-vorausschau) und des [Vollgittervergleichs in Kapitel 16](../../kapitel/16.md#cp2-voll-direktvergleich). Die Experimente verwenden die Solver aus [eb1e5519](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/tree/eb1e5519c446d4b226006e30cadda6fda9d3dd76).
+Zum Nachvollziehen der [Lookahead-Rechenprobe in Kapitel 6](../../kapitel/06.md#pdes-vorausschau) und des [Vollgittervergleichs in Kapitel 16](../../kapitel/16.md#cp2-voll-direktvergleich). Die archivierten Experimente verwenden die Solver aus [eb1e5519](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/tree/eb1e5519c446d4b226006e30cadda6fda9d3dd76).
 
 ## Welche Daten beantworten welche Frage?
 
@@ -54,7 +54,21 @@ Die [Rohdaten der Skalierungsreihe](Skalierung_Messdaten.zip) enthalten vier D2Q
 
 Die erste MPI-Serie und die beiden auf CPU 0 gemessenen Gruppenläufe enthalten je einen Zeitwert pro Konfiguration. Die Rohdaten dokumentieren CPU, Affinität, Compiler, Rundungsoptionen und Softwareversionen. Die separat geprüfte Wiederholung der Gruppenläufe ergab an allen sieben Terminen bytegleiche Wirbelzustände. Die komponentenweisen Anlaufzeiten mit mehreren LPs beziehen den Prozessstart ein. Die beiden langen Einzelrechnungen teilten sich bei der ersten Sicherung eine logische CPU. Ihre bis dahin verstrichene Wandzeit dient der Fortschrittskontrolle.
 
-Die Befehle beginnen im Repository-Stamm. Für den MPI-Neulauf werden Open MPI mit Entwicklungskopfdateien, GCC mit C++20, FFTW3, Python mit NumPy und SciPy sowie acht zugängliche CPUs benötigt. Die Prüfung der gesicherten Zeiten und Hashes benötigt allein die Python-Standardbibliothek.
+Die Messreihen sind getrennt: Die konservative Nennfallserie in `PDES_Partitionierung_Messpaket.zip/c19_paired.jsonl` enthält drei Wiederholungen (1/8 Prozesse: 31,7/353,9 ms mediane Kernzeit; $S_8=0{,}090$). `Skalierung_Messdaten.zip/c19-scaling.jsonl` enthält fünf Wiederholungen (konservativ 1/8: 37,6/383,7 ms; $S_8=0{,}098$). Jeder Quotient verwendet den Ein-Prozess-Median derselben Serie.
+
+Die Befehle beginnen im Repository-Stamm oder im Wurzelverzeichnis des frisch entpackten **vollständigen** Offline-Labors. Für das Offline-Labor lautet `lab=rechenlabor/pdes_partitionierung`. Die Treiber lesen im Checkout aus `pakete/Laborquellen.zip`; im Export verwenden sie die entpackten Modell-, Solver- und C++-Quellen, nicht den Archivpfad des Checkouts. Der Build benötigt Linux mit `taskset`, Open MPI samt Entwicklungskopfdateien und `mpicxx`, GCC mit C++20, die FFTW3-Laufzeitbibliothek `libfftw3.so.3` und Python mit NumPy und SciPy. Für die unten dokumentierten vollen Skalierungsreihen braucht man acht zugängliche CPUs, für die Kurzprobe zwei. Die archivierten Zeiten und Hashes lassen sich mit der Python-Standardbibliothek prüfen.
+
+Zunächst nur vorbereiten und eine kurze Funktionsprobe ausführen:
+
+```bash
+lab=docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung  # im Checkout
+# Im entpackten vollständigen Offline-Labor: lab=rechenlabor/pdes_partitionierung
+work=$(mktemp -d)
+python "$lab/skalierung.py" prepare . "$work"
+python "$lab/skalierung.py" smoke . "$work"
+```
+
+Die Kurzprobe vergleicht bei Takt 16 die MPI-Felder von 1 und 2 Rängen bytegenau, erreicht Takt 16 mit beiden Gruppenverfahren und prüft ein Komponentenintervall je Ordnung mit 1 und 2 LPs gegen die serielle Spur. Das sind Funktionsprüfungen, keine Zeitmessungen für die Buchtabellen.
 
 ```bash
 lab=docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung
@@ -72,16 +86,15 @@ python "$lab/qss_gegenprobe.py" .
 
 Das [Protokoll des späteren Fortsetzungspunkts](Einzelkalender_Stand.json) enthält die erreichten Modellzeiten und den Feldvergleich an den bereits erreichten Prüfterminen.
 
-Der [Fortsetzungspunkt für beide Ordnungen](QSS34_Fortsetzung.zip) umfasst die kontinuierlichen und die quantisierten Polynome, Modellzeit, Arbeit, letzte Schrittweite und Ausgabeposition. Jede Sicherung ersetzt die letzte vollständig geschriebene Datei atomar. Das folgende Beispiel setzt die Rechnung bis zur Zielzeit fort. Ein SIGTERM oder SIGINT sichert den nächsten bestätigten Zustand. Die Laufzeit wird über die ausgeführten Rechenabschnitte addiert. Die Dauer zwischen zwei Ausführungen zählt separat zur Kalenderzeit des gesamten Auftrags.
+Der [Fortsetzungspunkt für beide Ordnungen](QSS34_Fortsetzung.zip) umfasst die kontinuierlichen und die quantisierten Polynome, Modellzeit, Arbeit, letzte Schrittweite und Ausgabeposition. Das historische [Messmanifest](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/3a8f97f861ac77903289316947adb1e7ddf62433/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip) (`platform.json`) und die beiden archivierten `restart.npz` nennen dieselbe SHA-256 des erzeugenden Integrators: `422c69fa5a45e9c4f5513af88331681847f2a76074d2bc192c895805396a0721`. Dessen Originalbytes liegen nicht vor; eine quellgenaue Wiederholung der historischen Laufzeit ist damit nicht belegt.
+
+Das getrennte [Fortsetzungsquellenpaket](CP2_Fortsetzungsquellen.zip) enthält die unveränderte Integratorfassung [`b9f58ba`](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/b9f58ba26978818e6c0cba8149f47221d2b68e51/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/qss_langlauf.py) sowie Modell und Solver aus [`eb1e551`](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/tree/eb1e5519c446d4b226006e30cadda6fda9d3dd76). Das [Quellen- und Laufzeitmanifest](fortsetzungsquellen.json) bindet alle Dateien und die Runtime **CPython 3.12.14, NumPy 2.3.5, SciPy 1.17.0**. Spätere Solverrevisionen sind für die historischen Checkpoints nicht freigegeben.
 
 ```bash
-python -m zipfile -e "$lab/QSS34_Fortsetzung.zip" "$work"
-python "$lab/qss_langlauf.py" . "$work/qss3" --order 3 --resume
-python "$lab/qss_langlauf.py" . "$work/qss4" --order 4 --resume
+python "$lab/fortsetzungsprobe.py"                # Hashes der Quellen und der beiden Zustände
+python "$lab/fortsetzungsprobe.py" --resume-one   # benötigt die exakt angegebene Runtime
 ```
 
-Die reguläre CI prüft die gespeicherten Messungen. Die komponentenweisen Vollgitterläufe auf GitHub wurden am 26. November 2026 wegen ihrer Laufzeit abgebrochen. Für beide Einzelkalender liegt ein Teilergebnis vor. Das dokumentierte Endfeld bei Takt 350 000 stammt bei QSS3 und QSS4 jeweils aus dem Gruppenverfahren.
-
-Ein lokales Rechenfenster lässt sich mit `python "$lab/rechenfenster.py" . "$work/qss3" --order 3 --seconds 60` auf eine Minute begrenzen. Beim Fortsetzen prüft der Solver das Kavitätsmodell, die Ereignissuche, die Integratorquellen, die numerische Laufzeitumgebung und die Ausgabezeiten. Die beiden veröffentlichten älteren Checkpoints sind über ihre SHA-256-Prüfsummen und den geprüften Modellstand zugeordnet. Sie verwenden CPython 3.12.14, NumPy 2.3.5 und SciPy 1.17.0.
+Die zweite Probe arbeitet auf temporären Kopien, lässt die Originale unverändert und akzeptiert nur genau ein neues bestätigtes Segment pro Ordnung mit steigender Modellzeit und endlichen Polynomen. Sie erzeugt kein Endfeld und misst keine historische Laufzeit. Die reguläre CI prüft die gespeicherten Messungen. Die komponentenweisen Vollgitterläufe auf GitHub wurden am 26. November 2026 wegen ihrer Laufzeit abgebrochen. Das dokumentierte Endfeld bei Takt 350 000 stammt bei QSS3 und QSS4 jeweils aus dem Gruppenverfahren.
 
 Der Workflow **CP2 QSS3-4 Langlauf** kann separat von Hand für ein einzelnes dreistündiges Rechenfenster gestartet werden. Die Eingabe `previous_run` wählt einen abgeschlossenen Lauf mit beiden Checkpoints. Der Wert `0` verwendet die veröffentlichten Ausgangsdaten. Ein Endfeld-Artefakt setzt die Zielzeit und alle sieben Prüffelder voraus.

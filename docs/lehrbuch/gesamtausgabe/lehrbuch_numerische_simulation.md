@@ -3554,7 +3554,7 @@ Für den konservativen C19R-Versuch starten alle Prozesse zum bestätigten Zeitp
 
 Nehmen wir an, die erste **grenzüberschreitende** Meldung liegt links bei 80 und rechts bei 120 Sekunden. Konservativ verarbeiten beide bis 80. Ein optimistischer Prozess kann bis 120 vorausrechnen, seinen Ausgangszustand sichern und nach Eintreffen der früheren Nachricht ab der Sicherung neu rechnen. Dieses Zurücksetzen heißt **Rollback**. Der Aufwand hängt davon ab, wie viele lokale Ereignisse dabei erneut ausgeführt werden.
 
-**Rechenprobe.** In C19R wurden bei acht Prozessen 65 292 Ereignisse mit 11 556 konservativen Freigaben bestätigt. Pro Freigabe fallen zusammen $65\,292/11\,556=5{,}65$ Ereignisse an. Die gemessene Wandzeit stieg von 31,7 ms mit einem auf 353,9 ms mit acht Prozessen. Hier kostet die gemeinsame Freigabe mehr, als die Aufteilung der Arbeit einspart. Der konservative Lauf hat dabei null Rollbacks.
+**Rechenprobe.** In C19R wurden bei acht Prozessen 65 292 Ereignisse mit 11 556 konservativen Freigaben bestätigt. Pro Freigabe fallen zusammen $65\,292/11\,556=5{,}65$ Ereignisse an. Drei Wiederholungen in [PDES_Partitionierung_Messpaket.zip](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/3a8f97f861ac77903289316947adb1e7ddf62433/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/PDES_Partitionierung_Messpaket.zip), Datei `c19_paired.jsonl`, ergeben mediane Kernzeiten von 31,7 ms mit einem und 353,9 ms mit acht Prozessen. Damit ist $S_8=0{,}090$ bezogen auf den Ein-Prozess-Lauf dieser Serie. Es gab null Rollbacks.
 
 <!-- Buchseite -->
 
@@ -3578,7 +3578,7 @@ Die [Kavität in Kapitel 16](#pdes-kavitaet) hat eine andere Kopplung. Dort ver�
 
 ### Was acht logische Prozesse im Grundwasser tatsächlich leisten
 
-In zehn simulierten Tagen bestätigt das nominale C19R-Modell 65 292 QSS1-Ereignisse. Wir teilen die Domäne in ereignisgewichtete Streifen und führen jeden LP in einem eigenen MPI-Prozess aus. Pro Konfiguration liegen fünf Läufe vor. Die Reihenfolge innerhalb jeder Wiederholung wurde ausgelost. Die Tabelle verwendet die mediane Kernel-Wandzeit in Millisekunden. Beide Protokolle reproduzieren die acht Feldausgaben, die Ereigniszähler und die Ereignisprüfsummen jeder Zelle.
+In zehn simulierten Tagen bestätigt das nominale C19R-Modell 65 292 QSS1-Ereignisse. Wir teilen die Domäne in ereignisgewichtete Streifen und führen jeden LP in einem eigenen MPI-Prozess aus. Die zweite Serie ([Skalierung_Messdaten.zip](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/3a8f97f861ac77903289316947adb1e7ddf62433/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip), `c19-scaling.jsonl`) enthält fünf Wiederholungen je Konfiguration in ausgeloster Reihenfolge. Die Tabelle zeigt mediane Kernzeiten; jeder Speedup verwendet die Ein-Prozess-Zeit derselben Serie und desselben Protokolls. Beide Protokolle reproduzieren die acht Feldausgaben, die Ereigniszähler und die Ereignisprüfsummen jeder Zelle.
 
 | LPs | konservativ (ms) | $S_p$ | optimistisch (ms) | $S_p$ | Rollbacks¹ |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -8104,7 +8104,7 @@ Für einen kontrollierten Vergleich verarbeiten alle Varianten genau die ersten 
 
 Der Zwischenstand in den Skalierungsprotokollen umfasst bei QSS3 47 807 Intervalle bis zum Äquivalent von 111,29 Takten. Bei QSS4 sind es 13 197 Intervalle bis 42,88 Takte. Beide Rechnungen starteten mit ruhendem Fluid und dem Ziel 350 000. Die erste vereinbarte Referenzausgabe liegt bei Takt 256. QSS3 hat sie im anschließenden Langlauf erreicht. Über das gesamte innere Geschwindigkeitsfeld beträgt der relative Abstand zu DOP853 dort 0,10323 %, zu D2Q9 dagegen 15,755 %. Der maximale lokale Abstand zu DOP853 beträgt 0,000537 Deckelgeschwindigkeiten. Dieses erste Feld ist im neueren Fortsetzungspunkt enthalten.
 
-Die angegebenen Taktäquivalente wandeln die kontinuierliche Modellzeit mit $k=t^*\,256/0{,}1$ um. Die beiden individuellen Kalender sind jederzeit aus den gespeicherten kontinuierlichen und quantisierten Polynomen fortsetzbar. Für ihre Gesamtzeit und einen Speedup über die ganze CP2-Aufgabe benötigen wir das Feld bei Takt 350 000. Die Anlaufzeiten in der Tabelle messen ein anderes, wesentlich kürzeres Experiment.
+Die Taktäquivalente sind $k=t^*\,256/0{,}1$. Die Originalbytes des Messintegrators fehlen; sein Hash `422c69fa…` steht in [Messmanifest und Zuständen](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/3a8f97f861ac77903289316947adb1e7ddf62433/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip). Das Labor trennt die Fortsetzung mit [`b9f58ba`](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/b9f58ba26978818e6c0cba8149f47221d2b68e51/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/qss_langlauf.py) und Modellstand [`eb1e551`](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/tree/eb1e5519c446d4b226006e30cadda6fda9d3dd76) von der historischen Messung. Die Fortsetzungsprobe prüft genau ein Segment je Zustand. Gesamtzeit und Speedup bleiben ohne Einzelkalender-Endfeld bei Takt 350 000 offen.
 
 <!-- Buchseite -->
 
