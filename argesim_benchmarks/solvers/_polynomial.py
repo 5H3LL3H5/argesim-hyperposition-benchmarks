@@ -11,10 +11,13 @@ from __future__ import annotations
 import math
 import sys
 from collections.abc import Sequence
+from fractions import Fraction
 from functools import cache
 from itertools import pairwise
 
 from ..ivp import IntegrationError
+
+_Coefficient = float | Fraction
 
 
 def evaluate_polynomial(coefficients: Sequence[float], value: float) -> float:
@@ -45,7 +48,7 @@ def shift_polynomial(
     return shifted
 
 
-def polynomial_derivative(coefficients: Sequence[float]) -> list[float]:
+def polynomial_derivative(coefficients: Sequence[_Coefficient]) -> list[_Coefficient]:
     """Return the derivative of an ascending-order polynomial."""
 
     if len(coefficients) <= 1:
@@ -53,7 +56,7 @@ def polynomial_derivative(coefficients: Sequence[float]) -> list[float]:
     return [power * coefficients[power] for power in range(1, len(coefficients))]
 
 
-def _normalise(coefficients: Sequence[float]) -> list[float]:
+def _normalise(coefficients: Sequence[_Coefficient]) -> list[_Coefficient]:
     values = [float(value) for value in coefficients]
     if not values or not all(math.isfinite(value) for value in values):
         raise IntegrationError("event polynomial contains non-finite coefficients")
@@ -65,14 +68,27 @@ def _normalise(coefficients: Sequence[float]) -> list[float]:
     scale = max(abs(value) for value in values)
     if 0.0 < scale < 0.5:
         _, exponent = math.frexp(scale)
-        return [math.ldexp(value, -exponent) for value in values]
-    if scale > sys.float_info.max / (4 * len(values)):
+        values = [math.ldexp(value, -exponent) for value in values]
+    elif scale > sys.float_info.max / (4 * len(values)):
+        if any(0.0 < abs(value) < 16 * sys.float_info.min for value in values):
+            return [Fraction(value) for value in values]
         values = [math.ldexp(value, -4) for value in values]
+    # With sufficiently disparate coefficients even a unit-scale polynomial
+    # can have a subnormal reciprocal residual. Evaluate those rare signs as
+    # exact dyadic rationals, including their derivative polynomials.
+    if any(0.0 < abs(value) < sys.float_info.min for value in values):
+        return [Fraction(value) for value in values]
     return values
 
 
-def _event_value(coefficients: Sequence[float], t: float) -> float:
+def _event_value(coefficients: Sequence[_Coefficient], t: float) -> _Coefficient:
     """Evaluate p(t), or p(t)/t**degree when t > 1. Both have the same sign."""
+    if isinstance(coefficients[0], Fraction):
+        argument = Fraction(t)
+        exact = coefficients[-1]
+        for coefficient in reversed(coefficients[:-1]):
+            exact = exact * argument + coefficient
+        return exact
     if t <= 1.0:
         return evaluate_polynomial(coefficients, t)
     reciprocal = 1.0 / t
@@ -83,8 +99,8 @@ def _event_value(coefficients: Sequence[float], t: float) -> float:
 
 
 def _bracketed_root(
-    coefficients: Sequence[float], left: float, right: float,
-    left_value: float, time_tolerance: float,
+    coefficients: Sequence[_Coefficient], left: float, right: float,
+    left_value: _Coefficient, time_tolerance: float,
 ) -> float:
     while True:
         width = right - left
@@ -103,26 +119,33 @@ def _bracketed_root(
 
 
 def _interval_roots(
-    coefficients: Sequence[float], upper: float, time_tolerance: float,
+    coefficients: Sequence[_Coefficient], upper: float, time_tolerance: float,
+    *, exact: bool = False,
 ) -> list[float]:
     """Isolate low-degree real roots in physical time, including tangencies."""
-    values = _normalise(coefficients)
+    # Derivatives and factors of an exact polynomial stay exact. The caller
+    # has already trimmed the polynomial in that case.
+    values = list(coefficients) if exact else _normalise(coefficients)
+    exact = isinstance(values[0], Fraction)
     if len(values) == 1:
         return []
     if values[0] == 0.0:
         first = next(i for i, value in enumerate(values) if value != 0.0)
-        return [0.0, *_interval_roots(values[first:], upper, time_tolerance)]
+        return [0.0, *_interval_roots(values[first:], upper, time_tolerance, exact=exact)]
     if len(values) == 2:
         root = -values[0] / values[1]
-        return [root] if 0.0 < root <= upper else []
+        return [float(root)] if 0.0 < root <= upper else []
 
-    extrema = _interval_roots(polynomial_derivative(values), upper, time_tolerance)
+    extrema = _interval_roots(polynomial_derivative(values), upper, time_tolerance, exact=exact)
     points = [0.0, *(t for t in extrema if 0.0 < t < upper), upper]
     samples = [_event_value(values, t) for t in points]
     crossings = [
         (a < 0.0 < b) or (b < 0.0 < a) for a, b in pairwise(samples)
     ]
     magnitudes = [abs(value) for value in values]
+    relative_roundoff: _Coefficient = 16.0 * sys.float_info.epsilon
+    if exact:
+        relative_roundoff = Fraction(relative_roundoff)
     roots = []
     for i, crossing in enumerate(crossings):
         right = points[i + 1]
@@ -133,7 +156,7 @@ def _interval_roots(
         if samples[i + 1] == 0.0:
             roots.append(right)
         elif not crossing and (i + 1 == len(crossings) or not crossings[i + 1]):
-            roundoff = 16.0 * sys.float_info.epsilon * _event_value(magnitudes, right)
+            roundoff = relative_roundoff * _event_value(magnitudes, right)
             if abs(samples[i + 1]) <= roundoff:
                 roots.append(right)
     return roots

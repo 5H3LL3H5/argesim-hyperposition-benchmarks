@@ -1,6 +1,7 @@
 """Scale and sign regressions for quantized-state event calendars."""
 import math
 import unittest
+from decimal import Decimal, localcontext
 
 from argesim_benchmarks import InitialValueProblem, solve_ivp
 from argesim_benchmarks.solvers._polynomial import first_positive_root
@@ -25,6 +26,15 @@ class QssCalendarRegressionTests(unittest.TestCase):
         coefficients = [9.88131291682493e-124, -1.4821969375237398e-223, 5e-324]
         root = first_positive_root(coefficients, 3e100, time_tolerance=1e-13)
         self.assertTrue(math.isclose(root, 1e100, rel_tol=2e-15), root)
+
+    def test_mixed_exponents_preserve_the_represented_polynomial(self):
+        coefficients = [2.0, -3e-161, 1e-322]
+        with localcontext() as context:
+            context.prec = 90
+            c, b, a = map(Decimal.from_float, coefficients)
+            reference = float(2 * c / (-b + (b*b - 4*a*c).sqrt()))
+        root = first_positive_root(coefficients, 3e161, time_tolerance=1e-13)
+        self.assertTrue(math.isclose(root, reference, rel_tol=2e-15), root)
 
     def test_early_event_is_independent_of_large_terminal_horizon(self):
         for degree, coefficient in ((3, 3492280.285107953), (4, 331313052.57113314)):
