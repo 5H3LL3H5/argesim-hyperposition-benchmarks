@@ -40,14 +40,16 @@ class Cp2PdesLabTests(unittest.TestCase):
                 self.assertEqual(timing['cpu_ids'], [min(os.sched_getaffinity(0))])
                 self.assertEqual(timing['cpu_ids'], json.loads((output / 'affinity').read_text()))
             executable.write_text('#!/bin/sh\nexit 1\n')
-            self.assertNotEqual(subprocess.run(command, capture_output=True).returncode, 0)
+            self.assertNotEqual(subprocess.run(command, check=False, capture_output=True).returncode, 0)
             self.assertFalse((root / 'gqss3/run.json').exists())
 
     def test_completion_requires_the_endpoint_and_every_observation(self):
         verifier = run_path(str(LAB / 'skalierung_pruefen.py'))
         check = verifier['check_component_status']
-        finish = dict(target_ticks=350000, equivalent_ticks=350000, complete=True,
-                      t_star=136.71875, observations=7)
+        finish = {
+            'target_ticks': 350000, 'equivalent_ticks': 350000, 'complete': True,
+            't_star': 136.71875, 'observations': 7,
+        }
         start = dict(finish, t_star=0, complete=False, equivalent_ticks=0, observations=0)
         check(start)
         check(finish)
@@ -69,7 +71,7 @@ class Cp2PdesLabTests(unittest.TestCase):
                     target = root / name
                     original = target.read_bytes()
                     target.write_text('Missing table')
-                    proc = subprocess.run(command, cwd=root, capture_output=True, text=True)
+                    proc = subprocess.run(command, cwd=root, check=False, capture_output=True, text=True)
                     self.assertNotEqual(proc.returncode, 0)
                     self.assertIn('Printed full-grid table differs', proc.stderr)
                     target.write_bytes(original)
@@ -92,7 +94,7 @@ class Cp2PdesLabTests(unittest.TestCase):
                 with self.subTest(file=path.name):
                     original = path.read_bytes()
                     path.write_bytes(original + b'\n# Different model source\n')
-                    proc = subprocess.run(resume, capture_output=True, text=True)
+                    proc = subprocess.run(resume, check=False, capture_output=True, text=True)
                     self.assertNotEqual(proc.returncode, 0)
                     self.assertIn('different or unverified experiment', proc.stderr)
                     path.write_bytes(original)
