@@ -1,0 +1,96 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[a4paper,left=19.5mm,right=19.5mm,top=22mm,bottom=22mm,headheight=15pt]{geometry}
+\usepackage{fontspec,amsmath,unicode-math,booktabs,tabularx,array,xcolor,graphicx,fancyhdr,hyperref,fancyvrb}
+\setmainfont{Noto Serif}\setsansfont{Noto Sans Display}\setmonofont[Scale=.86]{DejaVu Sans Mono}\setmathfont{Latin Modern Math}
+\definecolor{tinte}{HTML}{1D3240}\definecolor{gruen}{HTML}{00675E}\definecolor{grau}{HTML}{48616D}
+\hypersetup{pdflang=de-DE,pdfauthor={Christian Stenzel},colorlinks=true,urlcolor=gruen,linkcolor=gruen}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{\sffamily\small Numerische Simulation dynamischer Systeme}
+\fancyhead[R]{\sffamily\small Druckfassung v9.16}\fancyfoot[L]{\sffamily\small Christian Stenzel}
+\fancyfoot[R]{\sffamily\small\thepage}\renewcommand{\headrulewidth}{.35pt}
+\newcommand{\titel}[1]{{\sffamily\bfseries\fontsize{24}{27}\selectfont\color{tinte}#1\par}\vspace{5pt}}
+\newcommand{\absatz}[1]{\par\addvspace{6pt}{\sffamily\bfseries\large\color{gruen}#1}\par\nobreak}
+\newcommand{\unter}[1]{{\sffamily\color{grau}#1\par}\vspace{6pt}}
+\setlength{\parindent}{0pt}\setlength{\parskip}{4pt}\setlength{\emergencystretch}{2em}
+\renewcommand{\arraystretch}{1.18}\urlstyle{same}
+\hypersetup{pdftitle={Druckfahnenprotokoll · Numerische Simulation dynamischer Systeme v9.16}}
+\begin{document}\color{tinte}\raggedright
+\titel{Die vier Korrekturstellen}
+\unter{Druckfahnenprotokoll · Revision v9.16 · 25. November 2026}
+
+Die linke Seitenzahl bezeichnet die ausgelieferte Ausgangsfassung mit 472 Seiten. Die rechte bezeichnet die nach diesen Änderungen gesetzte Druckfassung mit 473 Seiten. Beide Ausgaben tragen vereinbarungsgemäß die Revisionsnummer v9.16.
+
+\begin{tabularx}{\linewidth}{@{}llr r X@{}}\toprule
+ID & Buchstelle & Ausgang & Druck & Gegenstand\\\midrule
+K04-01 & 4.3 & 112 & 113 & Dämpfung der Bindungsmode\\
+K06-01 & 6.2 & 146 & 147 & Kalender mit Version und Gleichzeitigkeit\\
+K09-04 & 9.21, Abb. 9.4 & 224 & 225 & Wandspuren und Innenfeld\\
+K15-02 & C19R, Quellverteilung & 312 & 313 & Quellenbreite am festen Messort\\\bottomrule\end{tabularx}
+
+\absatz{Baumgarte und der zusätzliche Eigenwert}
+Die kritische Bindungsmode hat die doppelte Nullstelle $-1/T_B$. Die Wahl $h=T_B$ ergibt für klassisches RK4 den Eigenfaktor $3/8$. Bei anfänglich ruhendem Bindungsfehler bleibt numerisch $17/24$ seines Betrags, analytisch $2/e$. Die Herleitung im Buch berücksichtigt den Jordan-Anteil. Die Schrittweitenverfeinerung hält die gewünschte physikalische Rückführzeit fest. \href{https://doi.org/10.1016/0045-7825(72)90018-7}{Baumgarte (1972)}
+
+\absatz{QSS und der erste gleichzeitig fällige Nachbar}
+Der abgedruckte Algorithmus wurde mit zwei entgegengesetzten Knotennummerierungen ausgeführt. Ein Termin verschob sich von $1/2$ auf $3/4$, ein weiterer entfiel bei $5/8$. Die bei $3/4$ anstehenden Meldungen erreichten in beiden Nummerierungen gemeinsam denselben Empfängerzustand. Der auslösende Quantisierer erhält auch ohne Selbstkante eine neue Prognose.
+
+\absatz{CP2-Kavität bei Re = 100}
+65² Zellen, normiert mit dem Deckeltempo. Die beiden größeren Maxima liegen an der rechten Wand bei $y/L=63{,}5/65$. Die Werte wurden aus den beiden Komponenten des archivierten Felds neu gewonnen.
+
+\begin{tabularx}{\linewidth}{@{}Xrr@{}}\toprule
+Feldzustand & Größter Wandfehler $/U$ & Relativer Fehler im Kern\\\midrule
+Affines Modell mit Fourier-Korrektur & $0{,}22449$ & $1{,}173\,\%$\\
+Nach Flussprojektion & $0{,}37603$ & $2{,}024\,\%$\\
+Nach Fluss- und Wandprojektion & $4{,}4\cdot10^{-16}$ & $2{,}151\,\%$\\\bottomrule\end{tabularx}
+
+\absatz{C19R am festen Sensor}
+Bei $h=0{,}25$ m, $\Delta t=7200$ s und zehn Tagen liefern bilineare und verbreiterte Quelle am Messort $(5,0)$ m erneut $44\,134{,}39$ und $42\,943{,}91\,\mathrm{mg/m^3}$. Die Differenz von $-1\,190{,}48\,\mathrm{mg/m^3}$ misst die Wirkung dieser Gewichtsänderung. Peacemans Beziehung wird in Kapitel 15 für Druck und Volumenförderrate hergeleitet. \href{https://doi.org/10.2118/6893-PA}{Peaceman (1978)}
+
+\newpage
+\titel{Stabilitätsgrenzen}
+\unter{Analytische Aussage, Geltungsbereich und numerische Gegenprobe}
+
+\absatz{Abklingende oder schwingende Einzelmode \hfill S.~66}
+Für $y'=-ay$, $a>0$, sei $x=ha$. Beschränktheit der skalaren Folge entspricht $|R(-x)|\le1$. Das Ende jedes Intervalls wird durch die angegebene algebraische Gleichung exakt festgelegt. Angezeigte Dezimalzahlen sind gerundet.
+
+\begin{tabularx}{\linewidth}{@{}l X l@{}}\toprule
+Formel & Rechtes Intervallende $x_*$ & $x_*$ numerisch\\\midrule
+Vorwärts-Euler & $1-x=-1$ & 2\\
+Bogacki--Shampine 3 & $x^3-3x^2+6x-12=0$ & $2{,}512745327$\\
+Klassisches RK4 & $x^3-4x^2+12x-24=0$ & $2{,}785293563$\\
+Dormand--Prince 5 & $x^5-5x^4+25x^3-100x^2+300x-600=0$ & $3{,}306567893$\\\bottomrule\end{tabularx}
+
+Jede Gleichung hat genau eine positive Nullstelle. Für die kubische fortgeschriebene BS-Formel ist der Grenzwert $R=-1$, für RK4 und DP5 ist er $+1$. Die drei Wurzeln wurden zusätzlich durch 70 Intervallhalbierungen mit exakten Brüchen eingeschlossen. Auf der imaginären Achse zeigt $|R_4(i\eta)|^2-1=\eta^6(\eta^2-8)/576$ die Grenze $|\eta|\le2\sqrt2$.
+
+\absatz{Anwendung auf C05 \hfill S.~258}
+Für die schnelle Mode mit $a=2{,}7\cdot10^6\,\mathrm{s^{-1}}$ ergibt die akzeptierte Dormand--Prince-Formel $h\le x_*/a\approx1{,}22465\,\mu\mathrm s$. Der Wert gehört zum festen Schritt und der eingefrorenen linearen Mode. Die Schrittfolge einer adaptiven Ereignisrechnung hängt zusätzlich vom Fehlerschätzer und den Schaltzeiten ab.
+
+\absatz{Wärmeleitung und Advektion \hfill S.~161, 165}
+Bei $N$ gleich langen Intervallen und festen Endtemperaturen beträgt die genaue Euler-Grenze in der diskreten $L^2$-Norm $r\le[2\cos^2(\pi/(2N))]^{-1}$, mit $r=\alpha h/\Delta x^2$. Bei $N=4$ ergibt das $r\le0{,}585786\ldots$. Nichtnegative Stencil-Gewichte verlangen $r\le1/2$. Für den expliziten Upwind-Schritt ist $|G|^2-1=-4\sigma(1-\sigma)\sin^2(\theta/2)$. Eine alternierende Mode wird bei $\sigma=1{,}25$ mit $-1{,}5$ multipliziert.
+
+\absatz{Saite und Pendel \hfill S.~337, 113}
+Für eine Saitenmode mit $\omega_h>0$ bleiben beliebige Störungen bei Störmer--Verlet für $0<\omega_h\Delta t<2$ beschränkt. Am Rand $2$ lässt die doppelte Wurzel $-1$ lineares Wachstum zu. Beim kritisch gedämpften Baumgarte-Block hat die Fehlermatrix ebenfalls einen Jordan-Anteil. Auch dort ist die strikte Grenze für beliebige Anfangsstörungen entscheidend.
+
+\absatz{Reproduktionsweg}
+Die Datei \texttt{rechenlabor/revisionspruefung/druckfahne.py} prüft die Polynomidentitäten, die rationalen Nullstellenintervalle, den gedruckten QSS-Kalender sowie die archivierten Laufquotienten. Mit den Optionen \texttt{--felder} und \texttt{--buch} wiederholt sie beide Feldrechnungen und liest die Linienzüge der gesetzten Buch-PDF. Einzelwerte, Protokoll und geprüfte Vektorkoordinaten stehen im Quellenpaket.
+
+\newpage
+\titel{Dolan--Moré in der Druckfahne}
+\unter{Abbildung 18.3 · Buchseite 385 · 456 archivierte Läufe · 57 feste Einstellungen · acht Modellfenster}
+\noindent\includegraphics[width=.99\linewidth]{bild_leistungsprofile.pdf}
+
+\absatz{Vier markierte Kurven an festen Zeitfaktoren}
+Jede Zahl ist der Zähler bei festem Nenner acht. Ein Zeitfaktor von zehn erlaubt höchstens das Zehnfache der schnellsten bestandenen Medianzeit desselben Fensters.
+
+\begin{tabularx}{\linewidth}{@{}Xrrrrr@{}}\toprule
+Einstellung & $\tau=1$ & $2$ & $10$ & $100$ & $5000$\\\midrule
+RK45 & 1 & 3 & 6 & 7 & 7\\
+RK4 & 0 & 0 & 5 & 7 & 7\\
+QSS2, $q=0{,}0002$ & 2 & 2 & 4 & 5 & 5\\
+LIQSS--BDF, $q=0{,}001$ & 0 & 0 & 0 & 2 & 5\\
+\bottomrule\end{tabularx}
+
+\absatz{Warum bei sieben Achteln Schluss ist}
+Über die Fenster C03, C05, C07, C09, C11, C12, C13 und C21 ergeben sich der Reihe nach 5, 0, 28, 46, 52, 53, 2 und 36 bestandene Einstellungen. Bei C05 hat keine der 57 Einstellungen die Prüfung bestanden. Für dieses Fenster bleibt die kleinste bestandene Zeit undefiniert. Jeder Lauf zählt dort für endliches $\tau$ null. Der spätere Zusatzversuch mit feinerem LIQSS--BDF-Quantum verwendet denselben Fehlervertrag und ist getrennt protokolliert.
+
+\absatz{Abgleich von Daten und Drucklinien}
+Die 222 bestandenen Zeilen bestimmen die Zeitquotienten. Die übrigen 234 Läufe tragen zu keiner endlichen Stufe bei. Aus exakten Verhältnissen der archivierten Dezimalzeiten wurden alle 272 Stützstellen nachgerechnet. Die vier beschrifteten Profile wurden einzeln, die 53 grauen als Gesamtheit der Linienzüge einschließlich ihrer Vielfachheiten verglichen. Alle 57 stimmen mit den Vektoren in der Druckvorlage und im gesetzten Buch überein. Die maximale Koordinatendifferenz im Buch liegt unter $0{,}001$ typographischen Punkten. Die verwendeten CPU-Zeiten stammen aus der ursprünglichen Messung. \href{https://doi.org/10.1007/s101070100263}{Dolan und Moré (2002)}
+\end{document}

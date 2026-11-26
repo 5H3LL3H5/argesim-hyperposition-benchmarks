@@ -1,0 +1,37 @@
+{
+  "source_sha256": "851500990049aaa26b9d9573d8cc6297d89a23545ea9c03c2fdd1429a57afd08",
+  "csv_sha256": "f890eac495f58da5b9c019bbe941322704f10e69cdf550d2a55c55c17a961e06",
+  "configurations": 138,
+  "profile": "rk23",
+  "seed": 73,
+  "warmups": 1,
+  "repetitions": 3,
+  "timeout_seconds": 2.0,
+  "environment": {
+    "python": "3.12.14",
+    "implementation": "CPython",
+    "os": "Linux",
+    "kernel": "6.18.57",
+    "machine": "x86_64",
+    "cpu_model": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+    "logical_cpus": 9,
+    "cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "cpu_governors": null
+  },
+  "numpy": "2.3.5",
+  "scipy": "1.17.0",
+  "threads": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  }
+}

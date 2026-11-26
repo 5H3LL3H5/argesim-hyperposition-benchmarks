@@ -1,0 +1,20 @@
+# Satzvorgaben zu den Leitbenchmarks
+
+Die SVG-Dateien dienen dem editierbaren Manuskript. Der Drucksatz nutzt Vektorgrafiken und erhält das Seitenverhältnis der Originale. Die elf Grafiken mit dem Präfix `studie_` stammen aus dem veröffentlichen Autorenversuch. Ihre Werte, Farbskalen, Markierungen und Legenden bleiben bei einem erneuten Satz mit der Quellenrevision verknüpft. Das Manifest `daten/quellrevisionen.json` enthält die Git-Blob-Identitäten der Originale. Die drei neuen Grafiken lassen sich mit `python3 abbildungen/vergleichsfiguren.py` neu zeichnen. Hierfür wird Matplotlib benötigt. Die Rechenversuche laufen ohne dieses Paket.
+
+| Abbildung und Datei | Abszisse, Ordinate und Messgröße | Darstellung und Leseschlüssel |
+|---|---|---|
+| 10.1 · pruefung_score.svg | Abszisse Zeitfehler geteilt durch das Ein-Millisekunden-Budget, Ordinate Kontakte 1–3 | Petrol für die Werte 0, 0 und 1,2, ausgefüllte Punkte bei null. Gestrichelte senkrechte Linie bei eins. |
+| 11.1 · studie_c05.svg | Links Zeit in s, rechts Zeit ab Start in µs. Ordinaten zeigen die Modellzustände. | Beide Phasen auf der Sekundenachse, Anfangsschicht auf eigener Mikrosekundenachse. Die Zustände nach Legende unterscheiden. |
+| 12.1 · studie_kontakte.svg | Zeit in s und um die aufsummierten Durchmesser verschobene Kugellage in m | Vier beschriftete Bahnen. Ein Schnitt benachbarter Linien bedeutet Kontakt. |
+| 12.2 · studie_ball.svg | Zeit seit dem ersten Stoß in s und Höhe in m | Scheitel markieren. Am Reset den ausgehenden Ast von der nächsten absteigenden Nullstelle ablesen. |
+| 13.1 · studie_c07kurven.svg | Zeit in s, Winkel in rad und Winkelgeschwindigkeit in rad/s | Eigenes Teilbild für den letzten Kontakt und die Ablösung. Lange und kurze Fadenlänge in der Legende angeben. |
+| 14.1 · pruefung_puls.svg | Zeit 0 bis 9 s, Lastkraft in N | Durchgezogene Stufen bei 4 und 7 s, gestrichelte Stufen des Linksabtastversuchs bei 6 und 9 s. Nulllinie und Marke bei −800 N gemeinsam verwenden. |
+| 15.1 · studie_c19impuls.svg | Ort in Strömungsrichtung in m, zweidimensionale Impulsdichte in 1/m² | Kurven nach 2, 5 und 8 Tagen. Zwischen normierter Impulsantwort und Konzentration bei konstanter Quelle unterscheiden. |
+| 16.1 · studie_cp2kavitaet.svg | Gitterspalte und -zeile, Betrag der Geschwindigkeit bezogen auf das Deckeltempo | D2Q9 und FNO auf identischer Farbskala. Der Betrag der Differenz der dargestellten Geschwindigkeitsbeträge erhält eine eigene Skala. |
+| 16.2 · studie_cp2seil.svg | Position in m, Auslenkung in mm | Referenz und FNO mit unterscheidbaren Linienstilen, getrennte Teilbilder für 5 s und 8 s. |
+| 16.3 · studie_fno_saite_moden.svg | Links Zupfposition bezogen auf die Länge, rechts Anzahl behaltener Moden. RMS-Fehler in µm. | Linke und rechte Teilgrafik stellen unterschiedliche Schnitte durch die Versuche dar. Rechts stehen die Fehlermaxima der 99 Prüfzeiten je Konfiguration. |
+| 16.4 · studie_fno_kavitaet_feld.svg | Gemeinsamer Innenraum, vorzeichenbehaftete Differenz der Geschwindigkeitsbeträge geteilt durch Deckeltempo | Drei Modellkarten auf derselben symmetrisch-logarithmischen Skala. Null, Vorzeichen und gemeinsame Skala beim Druck erhalten. |
+| 16.5 · studie_fno_kavitaet_transfer.svg | Vier Kombinationen aus Gitter, Deckeltempo und Ausgabeschritt. Relativer Vektorfehler in Prozent. | Logarithmische Ordinatenskala. Jedes Symbol mittelt zwölf neue Eingangsfelder. Reihen mit und ohne zusätzliche Referenzen unterscheiden. |
+| 16.6 · studie_fno_kavitaet_profile.svg | Links horizontales Tempo bezogen auf Deckeltempo gegen normierte Höhe, rechts normierte Position gegen vertikales Tempo bezogen auf Deckeltempo | Die zwei Mittellinien getrennt lassen. Referenzpunkte und numerische Profile mit verschiedenen Symbolen und Linien zeichnen. |
+| 17.1 · pruefung_matrix.svg | Abszisse Zahl der Konfigurationen von 0 bis 57, Ordinate acht Modellfenster | Gestapelte horizontale Balken. Petrol für bestanden, Ocker für Budgetüberschreitung. Zeitlimit, Beobachtungszahl und Solverfehler zusätzlich schraffiert. Zahlenwerte in B.1. |

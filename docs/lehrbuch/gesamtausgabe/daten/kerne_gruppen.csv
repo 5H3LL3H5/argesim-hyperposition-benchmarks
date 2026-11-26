@@ -1,0 +1,50 @@
+Versuch,Kern,Gruppe,Fälle,Bestanden,Kleinster Einzelwert S,Größter Einzelwert S,Datenquelle unter rechenlabor/
+CP1/B,Fourier,innen,16,16,0.00018484667436702296,0.02081638480578185,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Fourier,nominal,1,1,0.0005442515381837154,0.0005442515381837154,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Fourier,aussen,8,0,7.159045465837375,34.72152933736581,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Laplace,innen,16,16,8.968205751358482e-05,0.008316407150230631,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Laplace,nominal,1,1,0.00032191941260251156,0.00032191941260251156,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Laplace,aussen,8,0,6.505868721049319,25.574648432215923,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Wavelet,innen,16,16,0.00018990118540784806,0.024341916508063832,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Wavelet,nominal,1,1,0.000980947795925502,0.000980947795925502,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Wavelet,aussen,8,0,3.8368763249295057,45.47887912845539,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Hankel,innen,16,16,3.2841619788115395e-05,0.008477289692994106,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Hankel,nominal,1,1,0.00020773132924922777,0.00020773132924922777,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Hankel,aussen,8,0,5.7454024509650115,21.170113929535557,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Radon (1D),innen,16,16,0.00016898072430215905,0.02140671205500766,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Radon (1D),nominal,1,1,0.0032997541796664365,0.0032997541796664365,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Radon (1D),aussen,8,0,6.516043310525896,35.25643879887182,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Wavelet–Laplace,innen,16,16,1.5098824444059744e-05,0.016370315669007596,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Wavelet–Laplace,nominal,1,1,0.0004833814509908052,0.0004833814509908052,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Wavelet–Laplace,aussen,8,0,4.302590151193444,35.128860913903566,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Fourier–Mellin,innen,16,16,6.527911287967925e-05,0.01828405099933761,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Fourier–Mellin,nominal,1,1,0.00040022220257895924,0.00040022220257895924,cp_dynamik/messung/population_kerne_einzel.csv
+CP1/B,Fourier–Mellin,aussen,8,0,4.975589071849704,32.43635576964502,cp_dynamik/messung/population_kerne_einzel.csv
+CP2/2,Fourier,innen,16,12,0.5132811902221998,1.098296033105021,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Fourier,profile,4,2,0.8822115733777873,1.5463716805665593,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Fourier,aussen,8,0,1.419653520253199,3.631451358824083,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Laplace,innen,16,15,0.5429785288870963,1.1608503635996528,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Laplace,profile,4,1,0.814508358241248,1.9589877222036631,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Laplace,aussen,8,0,1.481575806405978,2.6485198891476665,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Wavelet,innen,16,15,0.445869909341748,1.3038131417561794,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Wavelet,profile,4,3,0.5709533146873341,1.7000049650277782,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Wavelet,aussen,8,1,0.5613897644958284,2.653900264614957,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Hankel,innen,16,16,0.24167759658257937,0.8288449456632296,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Hankel,profile,4,4,0.39303893822866315,0.7855823030723602,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Hankel,aussen,8,0,1.0736049195364208,1.9907947843240255,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Radon (1D),innen,16,16,0.3407379762441527,0.758142248377199,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Radon (1D),profile,4,3,0.7330229864806878,1.7801022033551785,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Radon (1D),aussen,8,0,1.0961095493022792,2.744940127386204,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Wavelet–Laplace,innen,16,15,0.46148930594610654,1.2167426555923204,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Wavelet–Laplace,profile,4,2,0.7892870071862774,1.8346036872120746,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Wavelet–Laplace,aussen,8,0,1.0716696954906937,2.8713625376032317,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Fourier–Mellin,innen,16,13,0.49793353005691804,1.2284866960468765,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Fourier–Mellin,profile,4,0,1.246803370432031,1.5217534013430598,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+CP2/2,Fourier–Mellin,aussen,8,0,1.8038220912191014,3.0768920756385545,cp_dynamik/messung/kavitaet_kerne_einzel.csv
+C19R,Fourier,Test,8,0,4.658776977948053,29.62481593924337,operator_vergleich/messung/operator_vergleich.json → cases.C19R.methods.fourier
+C19R,Laplace,Test,8,0,5.2149826506437735,15.122744853157505,operator_vergleich/messung/operator_vergleich.json → cases.C19R.methods.laplace
+C19R,Wavelet,Test,8,0,4.93489754044577,15.83747746026978,operator_vergleich/messung/operator_vergleich.json → cases.C19R.methods.wavelet
+C19R,Hankel,Test,8,0,4.830326386061793,16.281367824991687,operator_vergleich/messung/operator_vergleich.json → cases.C19R.methods.hankel
+C19R,Radon,Test,8,0,7.00117436397682,22.65434216145252,operator_vergleich/messung/operator_vergleich.json → cases.C19R.methods.radon
+C19R,Wavelet–Laplace,Test,8,0,5.162859046725581,28.596651244392024,operator_vergleich/messung/operator_vergleich.json → cases.C19R.methods.wavelet_laplace
+C19R,Fourier–Mellin,Test,8,0,5.285092140160834,21.83315186169064,operator_vergleich/messung/operator_vergleich.json → cases.C19R.methods.fourier_mellin

@@ -1,0 +1,12 @@
+test_close_times_do_not_merge_distant_cell_boundaries (test_qss_calendar_regressions.QssCalendarRegressionTests.test_close_times_do_not_merge_distant_cell_boundaries) ... ok
+test_early_event_is_independent_of_large_terminal_horizon (test_qss_calendar_regressions.QssCalendarRegressionTests.test_early_event_is_independent_of_large_terminal_horizon) ... ok
+test_excludes_initial_root_but_finds_later_tangency (test_qss_calendar_regressions.QssCalendarRegressionTests.test_excludes_initial_root_but_finds_later_tangency) ... ok
+test_mixed_exponents_preserve_the_represented_polynomial (test_qss_calendar_regressions.QssCalendarRegressionTests.test_mixed_exponents_preserve_the_represented_polynomial) ... ok
+test_negative_quadratic_root_cannot_schedule_a_zero_time_event (test_qss_calendar_regressions.QssCalendarRegressionTests.test_negative_quadratic_root_cannot_schedule_a_zero_time_event) ... ok
+test_reciprocal_horner_keeps_the_earliest_large_root (test_qss_calendar_regressions.QssCalendarRegressionTests.test_reciprocal_horner_keeps_the_earliest_large_root) ... ok
+test_subnormal_coefficients_preserve_crossings_and_near_misses (test_qss_calendar_regressions.QssCalendarRegressionTests.test_subnormal_coefficients_preserve_crossings_and_near_misses) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.008s
+
+OK

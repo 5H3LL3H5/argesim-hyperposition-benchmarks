@@ -1,0 +1,9 @@
+Prüfung,Stand v9.15,Reichweite
+O-01,Offen,Originaler NotebookLM-Export mit Zuordnung der früheren Nummern fehlt. Aktuelle Druckseiten und Buchanker sind verfügbar.
+O-02,Teilweise,456 Archivzeilen erneut ausgewertet. Die historischen Integrationen und CPU-Verteilungen aller vier Konfigurationsreihen sind nicht vollständig neu gemessen.
+O-03,Wiederholt,"IDAS mit neu geladener Bibliothek, dokumentiertem Nullstart und Toleranzen wiederholt. 75 960 Ausgaben, 149 Übergänge. Build- und Ergebnisdatei im Register."
+O-04,Teilweise,"Zwei unabhängig erzeugte Trainings-/Validierungs-/Testaufteilungen und zwei lange 421²-Referenzen mit neuen 65²-Startfeldern. Weitere Randgesetze, Re-Bereiche und Muskelrohdaten bleiben offen."
+O-05,Offen außerhalb des Lehrversuchs,"Unbekannte Quellen, verrauschte Kataloge und nicht beobachtete Ereignismuster benötigen eigene Annahmen und Daten. Die offiziellen CP-Parallelzeitmessungen sind gesonderte Aufgaben."
+O-06,Gezielte Primärbelege geprüft,"Stokes-Preprint und LBM-Review getrennt eingeordnet, Darstellungsäquivalenz mit Originalarbeit ergänzt. Systematische Literatursynthese zu adaptivem DG und zum 1D-/2D-Kerntransfer offen."
+O-07,"Kontrollversuch durchgeführt, Verallgemeinerung offen","Sechs Fourier-Breiten bei festem FV-Grundfeld, acht identischen Testquellen und identischer Projektion. Singulärwerte und Einzelfehler archiviert. Andere kompakte Kerne erfordern eigene Ablationen."
+O-08,Kontrollversuch durchgeführt,"Je drei feste Gitter, zwei massen- und ortstreue Quellverteilungen, gleicher RK4-Schritt und Sensor. Getrennte Punkt- und Zellmittel-Referenz. Keine allgemeine Ordnung daraus abgeleitet."

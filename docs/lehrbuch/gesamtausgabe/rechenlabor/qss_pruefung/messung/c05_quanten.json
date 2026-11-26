@@ -1,0 +1,75 @@
+{
+  "source_commit": "1824c9104152674b82de6cd84d53b0b4f68dca37",
+  "python": "3.12.14",
+  "window_s": 3.5,
+  "bdf_indices": [
+    0
+  ],
+  "component_scales": [
+    6.0,
+    6.0
+  ],
+  "expected_events_then_final_states": [
+    1.1083061677711283,
+    2.129685355154711,
+    3.054152906995714,
+    2.9747551949264803,
+    3.274754475623549
+  ],
+  "budgets": [
+    0.001,
+    0.001,
+    0.001,
+    0.006,
+    0.006
+  ],
+  "timeout_s_per_integration": 2.0,
+  "timed_repeats_after_first": 3,
+  "options_except_quantum": {
+    "max_events": 40000,
+    "bdf_partition": [
+      0
+    ],
+    "max_step": 0.07,
+    "rtol": 1e-05,
+    "atol": [
+      6.000000000000001e-08,
+      6.000000000000001e-08
+    ],
+    "max_steps": 40000
+  },
+  "results": [
+    {
+      "case": "C05",
+      "method": "liqss-bdf",
+      "quantum_factor": 0.0002,
+      "status": "timeout",
+      "detail": "per-integration time limit",
+      "completed_outputs": 0
+    },
+    {
+      "case": "C05",
+      "method": "liqss-bdf",
+      "quantum_factor": 4e-05,
+      "status": "timeout",
+      "detail": "per-integration time limit",
+      "completed_outputs": 0
+    },
+    {
+      "case": "C05",
+      "method": "liqss-bdf",
+      "quantum_factor": 8e-06,
+      "status": "timeout",
+      "detail": "per-integration time limit",
+      "completed_outputs": 0
+    },
+    {
+      "case": "C05",
+      "method": "liqss-bdf",
+      "quantum_factor": 1.6e-06,
+      "status": "timeout",
+      "detail": "per-integration time limit",
+      "completed_outputs": 0
+    }
+  ]
+}

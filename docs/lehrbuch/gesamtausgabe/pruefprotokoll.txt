@@ -1,0 +1,246 @@
+
+beispiele/ball.py
+Stoß 1: 0.638550857 s  -6.264183905 -> 5.324556320 m/s
+Stoß 2: 1.724087313 s  -5.324556320 -> 4.525872872 m/s
+Stoß 3: 2.646793301 s  -4.525872872 -> 3.846991941 m/s
+Ruhe ab 7.874510851 s nach 56 Stößen; Rest 0.000949717 s, 2.489e-08 m; Grenzzeit 7.875460567 s
+C21-Projektfall, Treffer in s: 1.427843123 3.997960744
+
+beispiele/bdf.py
+h=0.100 s  mit alter Historie 1.166666667 m/s  nach Neustart 0.000000000 m/s
+h=0.050 s  mit alter Historie 1.166666667 m/s  nach Neustart 0.000000000 m/s
+h=0.025 s  mit alter Historie 1.166666667 m/s  nach Neustart 0.000000000 m/s
+
+beispiele/benchmarkbilanz.py
+C03 {'accuracy_miss': 30, 'timeout': 21, 'pass': 3, 'solver_error': 3}
+C05 {'event_mismatch': 6, 'timeout': 44, 'accuracy_miss': 4, 'solver_error': 3}
+C07 {'pass': 21, 'timeout': 11, 'accuracy_miss': 25}
+C09 {'pass': 46, 'accuracy_miss': 11}
+C11 {'pass': 47, 'accuracy_miss': 4, 'timeout': 6}
+C12 {'timeout': 11, 'pass': 46}
+C13 {'timeout': 23, 'accuracy_miss': 29, 'solver_error': 3, 'pass': 2}
+C21 {'timeout': 8, 'accuracy_miss': 5, 'pass': 44}
+456 verschiedene Konfigurationen, 373 abgeschlossene Score-Bewertungen; zwei weitere Scorefelder bei Zeitlimit.
+Kontrollimpulse und beide rational eingeschlossenen Wurzeln bestätigt.
+
+beispiele/c05.py
++1 bei 1.108306168 s
+-1 bei 2.129685355 s
++1 bei 3.054152907 s
+Endzustand (2.97475519, 3.27475448)
+
+beispiele/dae_pendel.py
+RC: U1=0.238095238 V, I1=2.380952381 mA
+RATTLE h=0.1 s: Phasenfehler=0.00167421 rad, Budget=0.00169198
+RATTLE h=0.05 s: Phasenfehler=0.00041714 rad, Budget=0.00041823
+Nichtlinearer DAE-Schritt: y=0.390388203, z=0.780776406
+
+beispiele/detektion.py
+h=0.5000 s, Zeitfehler 3.934053e-04 s, analytisches Budget 2.035172e-03 s
+h=0.2500 s, Zeitfehler 2.382392e-05 s, analytisches Budget 1.216679e-04 s
+h=0.1250 s, Zeitfehler 1.902335e-06 s, analytisches Budget 7.431419e-06 s
+h=0.0625 s, Zeitfehler 8.755113e-08 s, analytisches Budget 4.590630e-07 s
+
+beispiele/federwagen.py
+Nach 1 s: 0.029605 J, Energiezuwachs 48.02%
+
+beispiele/fno_physik.py
+Modengesetze, Median des Validierungs-RMS auf geraden Moden [m/s²]: p=0: 1.62874 / p=2: 0.11403 / p=4: 1.72070
+Geschwindigkeit aus acht Kalibrierprofilen
+  Seed 11: c=1.2477721 m/s, Budget für c²=0.057340 m²/s²
+  Seed 23: c=1.2444268 m/s, Budget für c²=0.057340 m²/s²
+  Seed 37: c=1.2506673 m/s, Budget für c²=0.057340 m²/s²
+  Seed 53: c=1.2505730 m/s, Budget für c²=0.057340 m²/s²
+  Seed 71: c=1.2500195 m/s, Budget für c²=0.057340 m²/s²
+Dreieck N=65, t=0.19 s, Median freier/gekoppelter Fit/Referenzfilter [%]: 0.8390 / 0.6977 / 0.6961
+Dreieck N=257, t=0.19 s, Median freier/gekoppelter Fit/Referenzfilter [%]: 0.8448 / 0.7053 / 0.7039
+Dreieck N=65, t=0.83 s, Median freier/gekoppelter Fit/Referenzfilter [%]: 1.2437 / 0.4909 / 0.4864
+Dreieck N=257, t=0.83 s, Median freier/gekoppelter Fit/Referenzfilter [%]: 1.2507 / 0.4763 / 0.4733
+Nichtlinearer FNO, ein Schritt, Mittel über sechs unbenutzte Felder
+  Seed 11, 129 Punkte, Daten / PDE / falsches c [%]: 4.3971 / 0.2589 / 11.1243
+  Seed 23, 129 Punkte, Daten / PDE / falsches c [%]: 3.3120 / 0.3618 / 10.9080
+  Seed 37, 129 Punkte, Daten / PDE / falsches c [%]: 3.8427 / 0.2907 / 11.2246
+  Seed 53, 129 Punkte, Daten / PDE / falsches c [%]: 1.2286 / 0.1104 / 11.1275
+  Seed 71, 129 Punkte, Daten / PDE / falsches c [%]: 2.8715 / 0.2038 / 11.1171
+  Median [%]: 3.3120 / 0.2589 / 11.1243
+  Separates Dreiecksprofil, Median [%]: 1.1528 / 0.9847 / 2.8395
+
+beispiele/fno_physiklayer.py
+Mode 3 nach 32 Schritten: Zustand fortgeführt -1.0000000, Geschwindigkeit immer auf null gesetzt 0.2445207.
+Ideale Saite, relativer Feldfehler in Prozent. Reihenfolge wie im Tabellenkopf.
+Varianten: Daten-FNO | FNO mit Physikterm | Layer 6+1 | Layer alle Moden | Layer und FNO-Korrektur | Kontrolle mit wahrem c
+Seed 11, glatt  : 4.39713 / 0.258925 / 0.0132425 / 0.0132425 / 0.258937 / 3.27659e-14
+Seed 11, Dreieck: 1.53022 / 0.984671 / 0.990899 / 0.00508935 / 0.0771796 / 2.61448e-14
+Seed 23, glatt  : 3.31203 / 0.361839 / 0.0330866 / 0.0330866 / 0.361668 / 3.27659e-14
+Seed 23, Dreieck: 1.21795 / 0.986732 / 0.992521 / 0.0127225 / 0.110047 / 2.61448e-14
+Seed 37, glatt  : 3.84267 / 0.290713 / 0.00397039 / 0.00397039 / 0.290678 / 3.27659e-14
+Seed 37, Dreieck: 1.11548 / 0.988845 / 0.989518 / 0.0015252 / 0.172431 / 2.61448e-14
+Seed 53, glatt  : 1.22861 / 0.110369 / 0.00340958 / 0.00340958 / 0.110242 / 3.27659e-14
+Seed 53, Dreieck: 1.10501 / 0.979451 / 0.989563 / 0.00130979 / 0.055297 / 2.61448e-14
+Seed 71, glatt  : 2.87153 / 0.203824 / 0.000115818 / 0.000115818 / 0.203582 / 3.27659e-14
+Seed 71, Dreieck: 1.15279 / 0.980516 / 0.989825 / 4.44954e-05 / 0.146533 / 2.61448e-14
+Median smooth [%]: 3.31203 / 0.258925 / 0.00397039 / 0.00397039 / 0.258937 / 3.27659e-14
+Median triangle [%]: 1.15279 / 0.984671 / 0.989825 / 0.0015252 / 0.110047 / 2.61448e-14
+Dreieck bei gleichem h und eingefrorenen Gewichten: halbzellige Charakteristik
+N=113 Knoten, c*h in Zellen=3.5, Median [%]: 1.16589 / 0.993475 / 0.997986 / 0.0594686 / 0.12046 / 0.0594599
+N=241 Knoten, c*h in Zellen=7.5, Median [%]: 1.15758 / 0.995538 / 1.00078 / 0.012203 / 0.111052 / 0.012198
+Gedämpfte Saite, 0,8 s: beta [1/s], Schranke [1/s], Fehler ohne/mit Dämpfung [%]
+Seed 11: 0.601914 / 0.021511 / 62.14192 / 0.27266
+Seed 23: 0.597013 / 0.021511 / 62.07883 / 0.09568
+Seed 37: 0.598214 / 0.021511 / 62.15286 / 0.17780
+Seed 53: 0.601084 / 0.021511 / 62.15314 / 0.06122
+Seed 71: 0.595632 / 0.021511 / 62.15394 / 0.35873
+Median gedämpft [%]: 62.15286 / 0.17780
+
+beispiele/folgeregler.py
+   2   10000 µs  5.167874e-02  1.517325e-01  6.911104e-01
+  20    1000 µs  4.508713e-05  5.791231e-04  1.534242e-01
+ 200     100 µs  5.024871e-10  9.889026e-08  5.184340e-03
+2000      10 µs  1.099121e-14  1.099121e-14  7.032027e-05
+
+beispiele/fourier_operator.py
+Saite N=32 Intervalle: bandbegrenzt 6.688e-16, Dreieck 1.7057 %
+Saite N=128 Intervalle: bandbegrenzt 5.445e-16, Dreieck 1.6578 %
+Saite N=256 Intervalle: bandbegrenzt 6.083e-16, Dreieck 1.6541 %
+Nichtlinearer FNO N=24: RMS=1.83613e-10, Parameterbudget=1.97333e-09
+Nichtlinearer FNO N=96: RMS=1.83613e-10, Parameterbudget=1.97333e-09
+
+beispiele/gegenproben.py
+midpoint bestanden
+pendulum bestanden
+qss bestanden
+finite_volumes bestanden
+
+beispiele/kontakt.py
+18 Halbierungen, Stoß nach 0.451523781 s, Zeitfehler 0.140 µs
+
+beispiele/lbm_d2q9.py
+Scherwelle N=16: nu_eff=0.10083287, relative Abweichung=8.329e-03
+Scherwelle N=32: nu_eff=0.10020626, relative Abweichung=2.063e-03
+Couette: 704 Schritte, max|u/U-y/H|=1.1218e-05, Restbudget=1.227e-05
+Kavität halbweg: u_Mitte/U=-0.06694, rel. Massenänderung=4.619e-14, Feldänderung über 25 Schritte=5.926e-02
+Kavität zouhe: u_Mitte/U=-0.06809, rel. Massenänderung=9.971e-06, Feldänderung über 25 Schritte=5.033e-02
+
+beispiele/linienmethode.py
+N=8: Raumfehler 2.90245e-03, Zeitfehler 4.37196e-03, Schritte 8
+N=16: Raumfehler 7.27341e-04, Zeitfehler 1.09215e-03, Schritte 32
+N=32: Raumfehler 1.81943e-04, Zeitfehler 2.72985e-04, Schritte 128
+Transport: Masse 12.000000000, TV 1.944260, Werte [0.0000,0.9721]
+
+beispiele/newton.py
+Fest=False  Y=0.916079783100  |G|=0.00e+00  Korrekturen=3  Matrizen=3
+Fest=True   Y=0.916079783122  |G|=2.65e-11  Korrekturen=5  Matrizen=1
+Erschöpftes Iterationsbudget für h=10 erkannt.
+
+beispiele/ordnungsreduktion.py
+Ordnungen 1 und 3: alle Komponenten an der richtigen Stelle.
+
+beispiele/picard.py
+m=1: u=0.800000000, Fehler=1.873e-02, Taylor<=2.000e-02, Banach<=5.000e-02
+m=2: u=0.820000000, Fehler=1.269e-03, Taylor<=1.333e-03, Banach<=5.000e-03
+m=3: u=0.818666667, Fehler=6.409e-05, Taylor<=6.667e-05, Banach<=3.333e-04
+m=4: u=0.818733333, Fehler=2.580e-06, Taylor<=2.667e-06, Banach<=1.667e-05
+m=5: u=0.818730667, Fehler=8.641e-08, Taylor<=8.889e-08, Banach<=6.667e-07
+
+beispiele/qss_devs.py
+QSS1 D=0.1250: 9 Zeitpunkte, 4 alte Prognosen, x(2)=(0.08973214285714284, 0.09211309523809526)
+QSS1 D=0.0625: 19 Zeitpunkte, 10 alte Prognosen, x(2)=(0.1100911241536242, 0.10327382879466214)
+QSS1 skalar: 316 Meldungen, Endfehler 6.312e-04
+QSS2 skalar: 12 Meldungen, Endfehler 4.060e-04
+QSS3 skalar: 3 Meldungen, Endfehler 2.992e-04
+QSS4 skalar: 2 Meldungen, Endfehler 2.941e-04
+
+beispiele/radau_iia.py
+Endfehler für n=4,8,16: 1.091e-06 3.527e-08 1.124e-09
+Fehlerquotienten: 30.923 31.389
+
+beispiele/rc_kreis.py
+Inkonsistenter Start: 0.000000000 A, -4.000000 V
+Alter Strom bei neuer Quelle: 0.000000000 A, 2.000000 V
+
+beispiele/reaktionen.py
+Verfahren         Summe      Differenz  [mmol/L]
+exakt       0.988071713    0.000006144
+explizit    0.988053892   16.000000000
+implizit    0.988089463    0.003906250
+Maximaler Gitterfehler in d [mmol/L]: 1 ms 0.367879441, 1 µs 0.000184016
+
+beispiele/rk_adaptiv.py
+BS3(2): 38 angenommen, 2 verworfen, Endfehler 3.167e-07, Budget 8.419e-07
+DP5(4): 5 angenommen, 1 verworfen, Endfehler 5.890e-08, Budget 6.744e-07
+Prüfwagen: v(1)=0.455544526 m/s, Schwelle 0.48 m/s unterschritten
+
+beispiele/saltation.py
+Ball, d(q,v)/dH bei 0.8 s: -0.382251951 2.897185062
+Bewegte Schwelle, Sensitivität: -1.25
+
+beispiele/schalten.py
+C13-Eingang: Kraftstoß nach der zweiten Flanke −2400 N s
+C12-Einzelkontakt: 1.000000 s, auslaufender Spalt öffnet sich
+Gleiten: dy/dt=3 m/s; 32 bzw. 64 Schaltungen in 3 s
+
+beispiele/stabilitaet.py
+  -10 0.000045400 0.090909091 -0.666666667 0.051724138
+ -100 0.000000000 0.009900990 -0.960784314 0.025291224
+
+rechenlabor/kapitelproben.py
+ 1  Tank nach 4 s: 10 L; relative Fehler der Steigungen: 4.76%, 20.00%
+ 2  Euler-Zustand: 0.15 m und -0.65 m/s; dritte Ableitung: 4
+ 3  Anstieg: 0.05 K/s; Endüberschuss: 30 K; Zeitkonstante: 600 s
+ 4  Euler: 0; Heun: 0.5; exakt: 0.367879
+ 5  Rückwärts Euler: 3.2 V, 2.4 mA; beide Gleichungen erfüllt
+ 6  Innenpunkt: 14.4 °C; nach unpassender Verfeinerung: -6 °C; zwei Körper: 18 °C
+ 7  Thermostat: 1 und 5 min; Meldetermin mit Ratenwechsel: 0.3 s
+ 8  Zeit bis 1/e: 2.5 µs; bis auf 1 %: 11.51 µs
+ 9  Kontakte: 0.4, 1.1 s; Energieverlust im teilweise elastischen Stoß: 0.1875 J
+10  Nach Ablösung: 0.9 rad/s; Diodenspannungen: 0.8 V und 0.6 V
+11  Wasservolumen: 0.625 m³; Quellbeitrag: 16 mg/m³; Reisezeit: 5.79 Tage
+12  Wahl: A / B; Fallanteile bei Faktor 1,5: 75% und 50%
+13  Heizrate, D2Q9-Ruhegewichte und ungerade Saitenfortsetzung stimmen.
+
+rechenlabor/kapitelvergleich.py
+Kapitel  1  Abstand nach 1 s 0.01353 K, Normschranke 0.739 K
+Kapitel  2  Erneuter Versuch mit 0.045 s, vorhergesagter Fehler 0.729
+Kapitel  3  Radau-Faktor 0.05172414, exakter Faktor 0.00004540
+Kapitel  4  Rückwärts-Euler 3.428571 V und 0.857143 mA
+Kapitel  5  Ereigniszeitsensitivität 0.4999999 s/m
+Kapitel  6  Beide Einfügereihenfolgen ergeben an fünf Doppelterminen x3 = 0
+Kapitel  7  Minmod liefert an der rechten Zellfläche 1.5 auf der Rampe und 1 am Gipfel
+Kapitel  8  Bewegtes D2Q9-Gleichgewicht: Dichte 1, Impuls (0.1, 0)
+Kapitel  9  Relativer Fehler des Tiefpasses auf beiden Gittern 0.24253563
+Kapitel 10  Zu später dritter Stoß S = 1.2, vertauschte Kennungen ohne Score
+Kapitel 11  Enge C05-Lehrbudgets aus gerundeten Fehlern: Radau 0.00295, BDF 0.233
+Kapitel 12  Drei Kontakte bei null internen QSS2-Updates, 36 beziehungsweise 148 RHS-Aufrufe
+Kapitel 13  149 C21-Übergänge und maximaler C07-Score 1.58304 für die gewählte QSS2-Konfiguration
+Kapitel 14  C09-Kurzfenster 0.005843 mm, C09-Langzeitfenster 11.669 cm, C13-Score 33.68
+Kapitel 15  C19R-Brunnenscores bei festen Rändern 8.12, 7.88, 1.97
+Kapitel 16  Saitenfeld bei einem Prozent Budget: ursprünglicher FNO 3.00088, modal 0.04303
+Kapitel 17  209 bestandene von 456 begonnenen und 317 vollständig bewerteten Einstellungen
+
+rechenlabor/methodenlabor.py
+Upwind [0.0, 0.5, 1.0, 0.5] Lax–Wendroff [-0.125, 0.625, 1.125, 0.375]
+D2Q9 Ost 0.131111 → 0.121111, Dichte 1.000000
+Gewicht 0.80, Vorhersage 1.60, Verlust 0.180
+CP2-Saite, Verlet, 65 Knoten, 5 s: 2.4840 %
+CP2-Saite, Verlet, 65 Knoten, 8 s: 0.9306 %
+CP2-Saite, Verlet, 501 Knoten, 5 s: 0.2313 %
+CP2-Saite, Verlet, 501 Knoten, 8 s: 0.0946 %
+
+rechenlabor/rk4_vertrag.py
+RK4-Endfehler 3.67e-10, Budget 2.667e-09
+
+rechenlabor/auditproben.py
+RK4: y(0.5)=0.6067708333, Fehler mit zwei Schritten 1.2165986e-05
+QSS2: erster Termin 0.70710678 s, x=0.54289322, q=0.29289322
+D2Q9: Zeitschritt 0.000500 s, tau=0.65; Saiten-DFT geprüft
+DP5(4): reelle Stabilitätsgrenze -3.30656789263; Zeno-, Péclet- und CP2-Probe bestanden
+
+rechenlabor/grundlagen.py
+Skalierter Fühler: Überschuss bei halber Zeitkonstante 18.195920 K
+Euler: beobachtete Ordnungen 1.0314 und 1.0154; rationalisierte Differenz 2.775558e-17
+Schwache Ableitung des Dreiecks, modaler Fehler, Aliasing und Kleinste-Quadrate-Fit geprüft.
+
+rechenlabor/revisionspruefung/taktkalender.py
+Drei Taktindizes, vier Modellereignisse, zwei positive Zeitintervalle.
+
+33 Python-Prüfprogramme bestanden. Der C++20-Test wird separat übersetzt.

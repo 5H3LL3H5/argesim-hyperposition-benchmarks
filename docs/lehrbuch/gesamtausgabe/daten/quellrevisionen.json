@@ -1,0 +1,172 @@
+[
+  {
+    "datei": "10.tex",
+    "blob_sha1": "75dfb4c9215b4aea7fb01b6de758cb8294f0c696",
+    "projektpfad": "docs/lehrbuch/studienbuch/kapitel/10.tex"
+  },
+  {
+    "datei": "11.tex",
+    "blob_sha1": "75390540d4e980a97c534abd149b8d6793df30a2",
+    "projektpfad": "docs/lehrbuch/studienbuch/kapitel/11.tex"
+  },
+  {
+    "datei": "12.tex",
+    "blob_sha1": "3dca279883360f46f105b1e4a7ad60b41e02472d",
+    "projektpfad": "docs/lehrbuch/studienbuch/kapitel/12.tex"
+  },
+  {
+    "datei": "13.tex",
+    "blob_sha1": "44e5061ed7de6df9f197e519782161e84aa2824b",
+    "projektpfad": "docs/lehrbuch/studienbuch/kapitel/13.tex"
+  },
+  {
+    "datei": "14.tex",
+    "blob_sha1": "eb551dbd8d0d686d0379276c0dbdcb7545baaaf9",
+    "projektpfad": "docs/lehrbuch/studienbuch/kapitel/14.tex"
+  },
+  {
+    "datei": "15.tex",
+    "blob_sha1": "9399aab524dd08db42cb03564e5398a3c5b5733b",
+    "projektpfad": "docs/lehrbuch/studienbuch/kapitel/15.tex"
+  },
+  {
+    "datei": "16.tex",
+    "blob_sha1": "839e00e86723a654fff55097642eae052f55f00e",
+    "projektpfad": "docs/lehrbuch/studienbuch/kapitel/16.tex"
+  },
+  {
+    "datei": "17.tex",
+    "blob_sha1": "9301ee6e325d1dc88f215bd7a456e423c6f7c15a",
+    "projektpfad": "docs/lehrbuch/studienbuch/kapitel/17.tex"
+  },
+  {
+    "datei": "referenzen.tex",
+    "blob_sha1": "a2fe3da38dfba6cfe8206454bca74c119a429085",
+    "projektpfad": "docs/lehrbuch/studienbuch/kapitel/referenzen.tex"
+  },
+  {
+    "datei": "beweise.tex",
+    "blob_sha1": "a001f7eb9d83223d2650e95219630df89b1c164f",
+    "projektpfad": "docs/lehrbuch/studienbuch/kapitel/beweise.tex"
+  },
+  {
+    "datei": "qss-extension.csv",
+    "blob_sha1": "5c5bf981123f3efae64b33dcd3ac6d0ddb223437",
+    "projektpfad": "docs/evidence/qss-extension.csv"
+  },
+  {
+    "datei": "buch-readme.md",
+    "blob_sha1": "345339ddbe8fd48efd455ec28f70bf2a9dd3129f",
+    "projektpfad": "docs/lehrbuch/README.md"
+  },
+  {
+    "datei": "projekt-readme.md",
+    "blob_sha1": "c7bedc39b824321ff689e0c80c84ad971eb9f474",
+    "projektpfad": "README.md"
+  },
+  {
+    "datei": "ball.pdf",
+    "blob_sha1": "9f1f7e0a09cc68e81433631113704279fed49d80",
+    "projektpfad": "docs/lehrbuch/studienbuch/abbildungen/ball.pdf"
+  },
+  {
+    "datei": "c05.pdf",
+    "blob_sha1": "1525b0aa0767825f5fe4bb1de2cfd6991cb2894f",
+    "projektpfad": "docs/lehrbuch/studienbuch/abbildungen/c05.pdf"
+  },
+  {
+    "datei": "c07kurven.pdf",
+    "blob_sha1": "7bfac13a7b2d78fd09f1dac729e78e19636ee987",
+    "projektpfad": "docs/lehrbuch/studienbuch/abbildungen/c07kurven.pdf"
+  },
+  {
+    "datei": "c19impuls.pdf",
+    "blob_sha1": "61bc332e4ed9a45d14ff951e17bf7f4321f8d01a",
+    "projektpfad": "docs/lehrbuch/studienbuch/abbildungen/c19impuls.pdf"
+  },
+  {
+    "datei": "cp2kavitaet.pdf",
+    "blob_sha1": "e94035b869fcd719b75684d1fe169afcd8978d88",
+    "projektpfad": "docs/lehrbuch/studienbuch/abbildungen/cp2kavitaet.pdf"
+  },
+  {
+    "datei": "cp2seil.pdf",
+    "blob_sha1": "58c5227903607ec73df40e17b6313ec4c264e05a",
+    "projektpfad": "docs/lehrbuch/studienbuch/abbildungen/cp2seil.pdf"
+  },
+  {
+    "datei": "fno_kavitaet_feld.pdf",
+    "blob_sha1": "93998ccbec9830a125452cea3d4feda09b1b5427",
+    "projektpfad": "docs/lehrbuch/studienbuch/abbildungen/fno_kavitaet_feld.pdf"
+  },
+  {
+    "datei": "fno_kavitaet_profile.pdf",
+    "blob_sha1": "045ab6fba10bcdee4900963782f8f7a45ca3f9f9",
+    "projektpfad": "docs/lehrbuch/studienbuch/abbildungen/fno_kavitaet_profile.pdf"
+  },
+  {
+    "datei": "fno_kavitaet_transfer.pdf",
+    "blob_sha1": "f07c23de11ce87fffc08151f3bd5bdbc99f14c24",
+    "projektpfad": "docs/lehrbuch/studienbuch/abbildungen/fno_kavitaet_transfer.pdf"
+  },
+  {
+    "datei": "fno_saite_moden.pdf",
+    "blob_sha1": "9c782c58e46d0d2ac561a6ac249c72d8758325fb",
+    "projektpfad": "docs/lehrbuch/studienbuch/abbildungen/fno_saite_moden.pdf"
+  },
+  {
+    "datei": "kontakte.pdf",
+    "blob_sha1": "d6a82a6f96cca822f441cbc970d358d1d82bf68b",
+    "projektpfad": "docs/lehrbuch/studienbuch/abbildungen/kontakte.pdf"
+  },
+  {
+    "datei": "rk23-devs.csv",
+    "blob_sha1": "0c4594d9a9b02bd180641b35615950cb72edca91",
+    "projektpfad": "docs/evidence/rk23-devs.csv"
+  },
+  {
+    "datei": "qss-selection.csv",
+    "blob_sha1": "2833952d43d022a938c58fe57ced4f2217a97f09",
+    "projektpfad": "docs/evidence/qss-selection.csv"
+  },
+  {
+    "datei": "c21-idas.json",
+    "blob_sha1": "f97f91ae7ec20bea7411da396170a91bc6d6a4f7",
+    "projektpfad": "docs/evidence/c21-idas.json"
+  },
+  {
+    "datei": "autorenlabor/kapitelvergleich.py",
+    "blob_sha1": "90e2b0e6b140a0c1160cecd00876ea5a81419778",
+    "projektpfad": "docs/lehrbuch/studienbuch/material/kapitelvergleich.py"
+  },
+  {
+    "datei": "autorenlabor/kapitelproben.py",
+    "blob_sha1": "8889c93a397e062991e0ace03eaa57560fa19c2c",
+    "projektpfad": "docs/lehrbuch/studienbuch/material/kapitelproben.py"
+  },
+  {
+    "datei": "autorenlabor/methodenlabor.py",
+    "blob_sha1": "a45467f98ccfd1606ff3df0e01cbfe051f1e4c8c",
+    "projektpfad": "docs/lehrbuch/studienbuch/material/methodenlabor.py"
+  },
+  {
+    "datei": "autorenlabor/cp2_genauigkeit/transport_feste_raender.json",
+    "blob_sha1": "baf85eecd3833011281b89627f31589f758085f7",
+    "projektpfad": "docs/lehrbuch/studienbuch/material/cp2_genauigkeit/transport_feste_raender.json"
+  },
+  {
+    "datei": "autorenlabor/cp2_genauigkeit/saite.json",
+    "blob_sha1": "3e6181bfd5f29ee418dda36c04443637c2cbad96",
+    "projektpfad": "docs/lehrbuch/studienbuch/material/cp2_genauigkeit/saite.json"
+  },
+  {
+    "datei": "autorenlabor/cp2_feldlabor/rope/rope-metrics.json",
+    "blob_sha1": "fc7fb2b0df374e76bb0e8db0f44d9538b66d9762",
+    "projektpfad": "docs/lehrbuch/studienbuch/material/cp2_feldlabor/rope/rope-metrics.json"
+  },
+  {
+    "datei": "autorenlabor/cp2_feldlabor/cavity/cavity-metrics.json",
+    "blob_sha1": "4dfde523ab5eef61a304a141e11e19f24e3ece5c",
+    "projektpfad": "docs/lehrbuch/studienbuch/material/cp2_feldlabor/cavity/cavity-metrics.json"
+  }
+]

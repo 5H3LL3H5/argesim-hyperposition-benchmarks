@@ -3,9 +3,10 @@ on:
   pull_request:
     paths:
       - 'docs/lehrbuch/studienbuch/**'
+      - 'docs/lehrbuch/gesamtausgabe/**'
       - 'docs/ARGESIM_*'
       - 'docs/evidence/cp2-operators.json'
-      - 'scripts/build_studienbuch.py'
+      - 'scripts/build_studienbuch*.py'
       - 'scripts/cp2_accuracy/**'
       - 'argesim_benchmarks/experiments/cp2_*.py'
       - 'tests/test_cp2_accuracy.py'
@@ -14,9 +15,10 @@ on:
     branches: [main]
     paths:
       - 'docs/lehrbuch/studienbuch/**'
+      - 'docs/lehrbuch/gesamtausgabe/**'
       - 'docs/ARGESIM_*'
       - 'docs/evidence/cp2-operators.json'
-      - 'scripts/build_studienbuch.py'
+      - 'scripts/build_studienbuch*.py'
       - 'scripts/cp2_accuracy/**'
       - 'argesim_benchmarks/experiments/cp2_*.py'
       - 'tests/test_cp2_accuracy.py'
@@ -41,27 +43,20 @@ jobs:
           docker run --rm -i --volume "$GITHUB_WORKSPACE:/work:ro" --workdir /work debian:trixie-slim sh -se <<'BUILD'
           export DEBIAN_FRONTEND=noninteractive
           apt-get -qq update
-          apt-get install -y --no-install-recommends python3-venv ca-certificates texlive-xetex texlive-latex-extra texlive-lang-german texlive-fonts-recommended fonts-noto-core fonts-noto-extra fonts-dejavu-core fonts-lmodern
+          apt-get install -y --no-install-recommends python3-venv ca-certificates pandoc texlive-xetex texlive-latex-extra texlive-lang-german texlive-fonts-recommended fonts-noto-core fonts-noto-extra fonts-dejavu-core fonts-lmodern
           python3 -m venv /tmp/python
           /tmp/python/bin/pip -q install PyMuPDF==1.26.6
-          if ! /tmp/python/bin/python scripts/build_studienbuch.py --output-dir /tmp/studienbuch; then
-            /tmp/python/bin/python - <<'DIAGNOSE'
-          from pathlib import Path
-          import pymupdf
-          from scripts.build_studienbuch import typeset
-          output = Path('/tmp/diagnose')
-          output.mkdir()
-          typeset(output)
-          with pymupdf.open(output / 'text.pdf') as book:
-              marks = {page for _, _, page in book.get_toc()}
-              print(len(book), 'pages,', len(marks), 'distinct bookmark destinations')
-              for index, page in enumerate(book, start=1):
-                  if index not in marks:
-                      print('Unmarked page', index, repr(page.get_text()[:500]))
-          DIAGNOSE
-            exit 1
-          fi
+          /tmp/python/bin/python scripts/build_studienbuch.py --output-dir /tmp/studienbuch
           BUILD
+      - name: Assemble all published experiments and field data
+        run: python scripts/build_studienbuch.py --full-lab "$RUNNER_TEMP/ARGESIM_Rechenlabor_v9_18.zip"
+      - name: Attach the complete offline lab
+        uses: actions/upload-artifact@v4
+        with:
+          name: ARGESIM-Rechenlabor-v9.18
+          path: ${{ runner.temp }}/ARGESIM_Rechenlabor_v9_18.zip
+          compression-level: 0
+          if-no-files-found: error
       - name: Attach the verified repository edition
         uses: actions/upload-artifact@v4
         with:

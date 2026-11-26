@@ -1,0 +1,19 @@
+{
+  "methode": "qss3",
+  "gitter": 257,
+  "zustaende": 65025,
+  "quantum": 0.001,
+  "erster_termin": 0.0006591187041299351,
+  "letzter_termin": 0.0008944760331036355,
+  "reproduzierte_segmente": 84,
+  "kontrollfelder": 336,
+  "max_band_ende_in_quanten": 1.0000000006421252,
+  "max_bernstein_oberschranke_in_quanten": 1.0000000006421252,
+  "max_feldfehler_prozent": 0.01774615457473511,
+  "max_lokal_U": 1.4073572659277034e-05,
+  "letzter_feldfehler_prozent": 0.01774615457473511,
+  "letzter_lokal_U": 1.4073572659277034e-05,
+  "max_ref_abstand_prozent": 8.073513695802343e-10,
+  "max_ref_abstand_U": 2.3897923423563566e-12,
+  "erstes_feld_ausserhalb_budget": null
+}
