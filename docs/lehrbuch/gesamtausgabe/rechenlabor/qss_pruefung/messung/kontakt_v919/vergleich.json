@@ -1,0 +1,78 @@
+{
+  "baseline": {
+    "after_sha256": "37fd4e56e03a993f2f7197de4fc0c11c8d8a6dfaf980578524b7bd0366041430",
+    "before_sha256": "7da1e4169b80ce9a8c408673c3f6311c4bbb49056508848128b9e73c39651a99",
+    "configurations": 399,
+    "different_scores": 49,
+    "paired_scores": 366,
+    "qss34": 42,
+    "qss34_different_scores": 0,
+    "qss34_paired_scores": 36,
+    "qss34_status_changes": 1,
+    "status": {
+      "accuracy_miss": 199,
+      "pass": 167,
+      "solver_error": 18,
+      "timeout": 15
+    },
+    "status_changes": 2,
+    "timeout_changes": 2,
+    "work_changes": 0
+  },
+  "extension": {
+    "after_sha256": "56d65b536115049e39c7f1309deb899a07ee49c92f9d9ca75863c97d7c335802",
+    "before_sha256": "0425d6a693a127e9b4a38463b7f79167a9934d36afa53e36fca63fa52062e917",
+    "configurations": 456,
+    "different_scores": 46,
+    "paired_scores": 350,
+    "qss34": 48,
+    "qss34_different_scores": 0,
+    "qss34_paired_scores": 36,
+    "qss34_status_changes": 0,
+    "status": {
+      "accuracy_miss": 126,
+      "event_mismatch": 13,
+      "pass": 224,
+      "solver_error": 12,
+      "timeout": 81
+    },
+    "status_changes": 15,
+    "timeout_changes": 15,
+    "work_changes": 1
+  },
+  "rk23": {
+    "after_sha256": "4cf0047cf32853dc47b37e84e104c51874fbf0a10e1987d70bf6ecec82262501",
+    "before_sha256": "d370c9604d1b0f28ae1d6f853cac1217eadd672bd541d3a86a378e48a4d82d59",
+    "configurations": 138,
+    "different_scores": 4,
+    "paired_scores": 125,
+    "status": {
+      "accuracy_miss": 17,
+      "pass": 108,
+      "timeout": 13
+    },
+    "status_changes": 4,
+    "timeout_changes": 4,
+    "work_changes": 0
+  },
+  "selection": {
+    "after_sha256": "01e8b180ef66299120bc5eb35b126cf9b5ddf0ac5f06b10fdb3c1ed27d7d2eae",
+    "before_sha256": "a2f724eed081b4559f82b966d6ea8776746a0be36b8606c40806959d4393b7f8",
+    "configurations": 520,
+    "different_scores": 22,
+    "paired_scores": 431,
+    "qss34": 30,
+    "qss34_different_scores": 0,
+    "qss34_paired_scores": 24,
+    "qss34_status_changes": 0,
+    "status": {
+      "accuracy_miss": 147,
+      "pass": 285,
+      "solver_error": 34,
+      "timeout": 54
+    },
+    "status_changes": 13,
+    "timeout_changes": 13,
+    "work_changes": 3
+  }
+}

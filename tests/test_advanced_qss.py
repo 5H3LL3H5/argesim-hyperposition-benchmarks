@@ -50,12 +50,21 @@ class AdvancedQssTests(unittest.TestCase):
                 self.assertLess(fine, 2.0e-4)
 
     def test_low_degree_root_isolator_detects_tangential_roots(self) -> None:
-        # (t - 0.2)^2 * (t - 0.7)
-        coefficients = (-0.028, 0.32, -1.1, 1.0)
-        root = first_positive_root(
-            coefficients, 1.0, time_tolerance=1.0e-13
-        )
-        self.assertAlmostEqual(root, 0.2, places=10)
+        # The dyadic coefficients represent (t-1/4)^2 (t-3/4) exactly.
+        coeffs = (-3/64, 7/16, -5/4, 1.0)
+        self.assertAlmostEqual(first_positive_root(
+            coeffs, 1.0, time_tolerance=1e-13
+        ), 0.25, places=12)
+        # The intended decimal example retains its exact rational double
+        # root when the same coefficients are supplied in integer units.
+        self.assertAlmostEqual(first_positive_root(
+            (-28, 320, -1100, 1000), 1.0, time_tolerance=1e-13
+        ), 0.2, places=12)
+        # Rounding these decimal coefficients removes the supposed double
+        # root at 0.2. The represented cubic only crosses near 0.7.
+        self.assertAlmostEqual(first_positive_root(
+            (-0.028, 0.32, -1.1, 1.0), 1.0, time_tolerance=1e-13
+        ), 0.7, places=12)
 
     def test_root_isolator_keeps_a_simple_root_before_a_close_double_root(self) -> None:
         first = 0.4
