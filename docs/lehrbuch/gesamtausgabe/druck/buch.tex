@@ -13,7 +13,7 @@
 \definecolor{rulegray}{HTML}{C2D4D3}
 \usepackage[unicode=true,bookmarksopen=true,bookmarksopenlevel=2,bookmarksnumbered=false,pdfdisplaydoctitle=true,colorlinks=true,linkcolor=sea,urlcolor=sea]{hyperref}
 \usepackage{bookmark}
-\hypersetup{pdftitle={Numerische Simulation dynamischer Systeme · Revision v9.18 · Druckfassung},pdfauthor={Christian Stenzel},pdfsubject={Druckfassung v9.18, mathematische Grundlagen, Kapitel 1 bis 18 und Anhänge A bis D},pdflang={de-DE}}
+\hypersetup{pdftitle={Numerische Simulation dynamischer Systeme · Revision v9.19 · Druckfassung},pdfauthor={Christian Stenzel},pdfsubject={Druckfassung v9.19, mathematische Grundlagen, Kapitel 1 bis 18 und Anhänge A bis D},pdflang={de-DE}}
 \setcounter{secnumdepth}{-1}\setcounter{tocdepth}{3}
 \pagestyle{fancy}\fancyhf{}
 \newcommand{\kopfteil}{}
@@ -23,7 +23,7 @@
 \fancyfoot[R]{{\sffamily\bfseries\small\color{sea}\thepage}}
 \renewcommand{\headrulewidth}{.35pt}
 \renewcommand{\headrule}{\hbox to\headwidth{\color{rulegray}\leaders\hrule height \headrulewidth\hfill}}
-\fancypagestyle{titel}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[L]{{\sffamily\fontsize{8.4}{10}\selectfont\color{slate}Revision v9.18 · QSS-Verfahren und wiederholte Vergleichsstudien}}\fancyfoot[R]{{\sffamily\bfseries\small\color{sea}\thepage}}}
+\fancypagestyle{titel}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[L]{{\sffamily\fontsize{8.4}{10}\selectfont\color{slate}Revision v9.19 · QSS-Verfahren und wiederholte Vergleichsstudien}}\fancyfoot[R]{{\sffamily\bfseries\small\color{sea}\thepage}}}
 \titleformat{\section}{\sffamily\bfseries\color{navy}\fontsize{25.5}{30.5}\selectfont}{}{0pt}{}
 \titleformat{\subsection}{\sffamily\bfseries\color{sea}\fontsize{17.4}{21.3}\selectfont}{}{0pt}{}
 \titleformat{\subsubsection}{\sffamily\bfseries\color{navy}\fontsize{14}{18}\selectfont}{}{0pt}{}
@@ -34,8 +34,8 @@
 \newcommand{\normalsatz}{\fontsize{11.1}{14.9}\selectfont}
 \newcommand{\kleinsatz}{\fontsize{10.5}{13.9}\selectfont}
 \newcommand{\buchseite}[1]{\clearpage\renewcommand{\kopfteil}{#1}}
-\newcommand{\buchtitel}{\pdfbookmark[0]{Numerische Simulation dynamischer Systeme · Revision v9.18 · Druckfassung}{buchanfang}{\sffamily\bfseries\color{navy}\fontsize{33}{37}\selectfont Numerische Simulation\\dynamischer Systeme\par}\vspace{4pt}}
-\newcommand{\autorenzeile}{{\sffamily\bfseries\large\color{sea}Christian Stenzel}\par\vspace{-2pt}{\sffamily\small\color{slate}Gesamtausgabe · Revision v9.18 · QSS-Verfahren und wiederholte Vergleichsstudien · 18 Fachkapitel und vier Anhänge}\par\vspace{8pt}}
+\newcommand{\buchtitel}{\pdfbookmark[0]{Numerische Simulation dynamischer Systeme · Revision v9.19 · Druckfassung}{buchanfang}{\sffamily\bfseries\color{navy}\fontsize{33}{37}\selectfont Numerische Simulation\\dynamischer Systeme\par}\vspace{4pt}}
+\newcommand{\autorenzeile}{{\sffamily\bfseries\large\color{sea}Christian Stenzel}\par\vspace{-2pt}{\sffamily\small\color{slate}Gesamtausgabe · Revision v9.19 · QSS-Verfahren und wiederholte Vergleichsstudien · 18 Fachkapitel und vier Anhänge}\par\vspace{8pt}}
 \newcommand{\tightlist}{\setlength{\itemsep}{4pt}\setlength{\parskip}{0pt}}
 \setlist[enumerate]{leftmargin=1.65em,labelsep=.5em,topsep=2pt}
 \newcommand{\bild}[2]{\par\addvspace{6pt}\noindent\includegraphics[width=0.99\linewidth]{#1}\par\nopagebreak\vspace{-2pt}{\sffamily\fontsize{9.4}{12}\selectfont\color{slate}#2\par}\addvspace{5pt}}
@@ -117,7 +117,7 @@ Die \hyperref[grundlagen]{mathematischen Grundlagen} führen die Rechenwerkzeuge
 
 \textbf{\hyperref[mp-kapitel]{17 · Zielgerichtete Messplanung.}\,\textnormal{\small(S.\,\pageref*{mp-kapitel})}} In allen 28 Messaufgaben bestimmt ein Fehlerbudget, welche Ablesungen nötig sind.
 
-\textbf{\hyperref[fb-neu17]{18 · Synthese und Methodenwahl.}\,\textnormal{\small(S.\,\pageref*{fb-neu17})}} Acht Modellfenster liefern je 57 Einstellungen. Erst wenn beobachtete Größe, Gitter, Ereignisbehandlung und Fehlerbudget vergleichbar sind, hat eine Rangfolge nach Rechenaufwand eine fachliche Bedeutung. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/evidence/qss-extension.csv}{Einzelmessungen}
+\textbf{\hyperref[fb-neu17]{18 · Synthese und Methodenwahl.}\,\textnormal{\small(S.\,\pageref*{fb-neu17})}} Acht Modellfenster liefern je 57 Einstellungen. Erst wenn beobachtete Größe, Gitter, Ereignisbehandlung und Fehlerbudget vergleichbar sind, hat eine Rangfolge nach Rechenaufwand eine fachliche Bedeutung. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/48e43e2ce056395719f7e735832e57ac5b9f2ee3/docs/lehrbuch/gesamtausgabe/daten/qss-extension.csv}{Einzelmessungen}
 
 \buchseite{Kapitelfahrplan}
 
@@ -147,7 +147,7 @@ Seit 1990 veröffentlicht ARGESIM in der Wiener Vergleichsreihe Modellaufgaben, 
 
 \subsubsection{Wie weit reichen die 456 Messungen?}\label{wie-weit-reichen-die-456-messungen}
 
-Das Raster umfasst C03, C05, C07, C09, C11, C12, C13 und C21-Ball. Pro Modellfenster ergeben 18 Bezeichnungen für QSS-Verfahren mit je drei Quantisierungen und drei klassische Einstellungen insgesamt \(18\cdot3+3=57\) Zeilen. Zwei Bezeichnungen der ersten Ordnung führen dieselbe mathematische Aktualisierung aus. Die archivierten 456 Zeilen enthalten 222 bestandene Konfigurationen, 151 Überschreitungen des Fehlerbudgets, 46 Zeitüberschreitungen, 20 Abweichungen bei der Ereigniszahl und 17 Solverfehler. C19R, C21-Diode und die CP2-Feldvergleiche besitzen eigene Nachweise. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/17.tex}{Synthese} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/evidence/qss-extension.csv}{Messdaten}
+Das Raster umfasst C03, C05, C07, C09, C11, C12, C13 und C21-Ball. Pro Modellfenster ergeben 18 Bezeichnungen für QSS-Verfahren mit je drei Quantisierungen und drei klassische Einstellungen insgesamt \(18\cdot3+3=57\) Zeilen. Zwei Bezeichnungen der ersten Ordnung führen dieselbe mathematische Aktualisierung aus. Die archivierten 456 Zeilen enthalten 222 bestandene Konfigurationen, 151 Überschreitungen des Fehlerbudgets, 46 Zeitüberschreitungen, 20 Abweichungen bei der Ereigniszahl und 17 Solverfehler. C19R, C21-Diode und die CP2-Feldvergleiche besitzen eigene Nachweise. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/evidence/qss-extension.csv}{Historische Messdaten} · \hyperref[fb-matrix]{Aktuelle Synthese} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/48e43e2ce056395719f7e735832e57ac5b9f2ee3/docs/lehrbuch/gesamtausgabe/daten/qss-extension.csv}{Wiederholung}
 
 Die archivierten Projektstudien beziehen sich auf den Quellstand \texttt{16f0f252}. Die Zuordnung von Buchfassung, Laborrechnung und Messdatei steht im \hyperref[revision-q-01]{Quellenregister}.
 
@@ -3110,7 +3110,7 @@ Bei QSS2 muss nach einer externen Meldung auch das Zeitpolynom an die neue lokal
 
 \subsection{6.3 Höhere Ordnung und die nächste positive Wurzel}\label{huxf6here-ordnung-und-die-nuxe4chste-positive-wurzel}
 
-QSS2 gibt eine Gerade als Meldung aus, QSS3 eine Parabel und QSS4 ein kubisches Polynom. Der integrierte Zustand hat auf dem entsprechenden lokalen Taylor-Abschnitt einen Grad mehr. Für die nächste Meldung untersucht man \(x_i(s)-q_i(s)-\Delta_i\) und \(x_i(s)-q_i(s)+\Delta_i\), wobei \(s\) die seit der letzten Aktualisierung vergangene Zeit ist. Gesucht ist die früheste zulässige positive Grenze. Rein komplexe Wurzeln, die bereits verarbeitete Startnull und Wurzeln außerhalb eines durch äußere Ereignisse begrenzten Abschnitts sind eigene Fälle.
+QSS2 gibt eine Gerade als Meldung aus, QSS3 eine Parabel und QSS4 ein kubisches Polynom. Der integrierte Zustand hat auf dem entsprechenden lokalen Taylor-Abschnitt einen Grad mehr. Für die nächste Meldung untersucht man \(x_i(s)-q_i(s)-\Delta_i\) und \(x_i(s)-q_i(s)+\Delta_i\), wobei \(s\) die seit der letzten Aktualisierung vergangene Zeit ist. Gesucht ist die früheste zulässige positive Grenze. Rein komplexe Wurzeln, die bereits verarbeitete Startnull und Wurzeln außerhalb eines durch äußere Ereignisse begrenzten Abschnitts sind eigene Fälle. Eine fast verschwindende Restgröße am Extremum erfordert eine Wurzelzählung. \hyperref[qss-kontakt-nachweis]{Berührung und Fasttreffer}.
 
 Am skalaren linearen Speicher \(x'=-a q\) lässt sich die Konstruktion bis Ordnung vier ausrechnen. Bei einem eigenen Ereignis werde \(q=x_k\) neu aufgebaut. Das Taylorpolynom \(T_{p-1}(z)=\sum_{j=0}^{p-1}z^j/j!\) liefert die Meldung \(q(s)=x_k T_{p-1}(-as)\). Integration gibt \(x(s)=x_kT_p(-as)\). Ihre Differenz enthält nur den letzten Term. Daraus folgt der nächste Zeitabstand \[
  s_*=\frac1a\left(\frac{p!\Delta}{|x_k|}\right)^{1/p}.
@@ -3261,6 +3261,18 @@ Ein Zustand sinkt von acht auf eins. Ein festes Quantum von eins entspricht anf�
 \bild{qss_varianten.pdf}{Abbildung 6.7. A zeigt die Schwelle bei den Neuansätzen zweier Rechnungen von acht ausgehend mit relativem Quantum und absoluter Untergrenze. B zeigt an normierten Lehrpolynomen erster und zweiter Ordnung, warum eine schnellere Zelle die nächste Meldung einer Gruppe festlegt.}
 
 Die Gruppenkavität verwendet eine zweite, davon unabhängige Wahl. Sie führt alle Zellen auf denselben neuen Zeitpunkt, sobald eine Komponente ihre Schranke erreicht. Ein schneller und ein achtmal langsamerer linearer Defekt ergeben am ersten Gruppentermin die Werte \(\Delta\) und \(\Delta/8\). Eine quadratische lokale Entwicklung ändert die Berührungszeit, während das Minimum über die Zellen als Entscheidung bestehen bleibt. Die Gruppenimplementierung besitzt eine eigene Ereignissuche. Vier kleine Gittergegenproben prüfen sie mit DOP853 und zwei Quanten je Ordnung.
+
+\buchseite{Kapitel 6}
+
+\subsection{Berührt die Bahn den Rand des Quantenbands?}\label{qss-kontakt-nachweis}
+
+Zwei fast gleiche Verläufe können verschiedene Meldungen auslösen. Schreiben wir den Abstand zu einer Bandkante als \(p(s)=(s-1)^2+\eta\). Für \(\eta=2^{-52}\) bleibt selbst das Minimum positiv. Bei \(\eta=0\) berührt die Bahn den Rand bei \(s=1\). Für \(\eta=-2^{-52}\) liegen die Durchtritte bei \(1\pm2^{-26}\). Ein fester Restfehlertest am Minimum kann diese drei Fälle verwechseln.
+
+\bild{qss_kontakt.pdf}{Abbildung 6.8. Die Vergrößerung um das Minimum zeigt eine verfehlte Bandkante, eine Berührung und zwei Durchtritte. Die markierten Punkte sind die Nullstellen.}
+
+QSS2 entscheidet bei einer numerisch mehrdeutigen Diskriminante ihr Vorzeichen aus den gespeicherten Binärkoeffizienten. Der gemeinsame Isolator für höhere Ordnungen zählt in mehrdeutigen Fällen die verschiedenen reellen Wurzeln mit einer exakten Sturm-Folge des quadratfreien Polynoms. Die Zahl im Intervall \((a,b]\) ist die Differenz der Vorzeichenwechsel an beiden Enden. Durch Halbieren isolieren wir den ersten positiven Termin. Die Zeittoleranz begrenzt die Intervallbreite.
+
+Welche Gleichung wurde dem Kalender übergeben? Das exakte Polynom \(1000s^3-1100s^2+320s-28\) berührt bei \(s=1/5\) und kreuzt bei \(7/10\). Rundet man seine durch 1000 geteilten Koeffizienten einzeln auf Binär64, verschwindet die Doppelwurzel. Der früheste Termin dieser Eingabe liegt dann nahe \(0{,}7\). Das Zertifikat bezieht sich auf das gespeicherte Segment. Für eine Aussage über die ursprüngliche Differentialgleichung kommt der Fehler der Taylor-Koeffizienten hinzu.
 
 \buchseite{Kapitel 6}
 
@@ -7245,25 +7257,25 @@ Am ruhenden Rand misst die makroskopische Ausgabe nach dem Streaming zum Endzeit
 \toprule
 \textbf{QSS-Lauf} & \textbf{Ende \(t^*\)¹} & \textbf{CPU s¹} & \textbf{Felder²} & \textbf{CPU s²} & \textbf{Zeitfehler \%²} \\
 \midrule
-QSS1 & 8,48e-05 & 256,9 & 7/7 & 36,1 & 0,21 \\
-QSS2 & 0,000493 & 249,6 & 7/7 & 70,2 & 0,21 \\
-QSS3 & 0,000894 & 245,1 & 2/7 & 188,2 & -- \\
-QSS4 & 0,00185 & 258,2 & 3/7 & 180,9 & -- \\
-CQSS1 & 5,76e-05 & 249,7 & 0/7 & 1,5 & -- \\
-BQSS1 & 7,06e-06 & 13,5 & 7/7 & 4,1 & 86,11 \\
-LIQSS1 & 1,53e-05 & 243,8 & 5/7 & 180,7 & -- \\
-LIQSS2 & 0,000248 & 257,1 & 2/7 & 191,8 & -- \\
-LIQSS3 & 0,000981 & 249,4 & 4/7 & 180,9 & -- \\
-mLIQSS1 & 0 & 250,3 & 4/7 & 181,7 & -- \\
-mLIQSS2 & 0 & 254,9 & 3/7 & 185,4 & -- \\
-mLIQSS3 & 0 & 259,2 & 3/7 & 182,7 & -- \\
-eLIQSS1 & 3,07e-05 & 249,7 & 7/7 & 123,3 & 0,21 \\
-eLIQSS2 & 0,000499 & 251,1 & 6/7 & 184,9 & -- \\
-eLIQSS3 & 0,0019 & 244,6 & 4/7 & 180,4 & -- \\
-CheQSS1 & 3,07e-05 & 251,4 & 7/7 & 123,3 & 0,21 \\
-CheQSS2 & 0,000639 & 254,0 & 5/7 & 180,6 & -- \\
-CheQSS3 & 0,00287 & 250,9 & 3/7 & 181,9 & -- \\
-LIQSS--BDF & 0,000255 & 254,7 & 3/7 & 186,7 & -- \\
+QSS1 & 0,000187 & 238,6 & 7/7 & 14,2 & 0,21 \\
+QSS2 & 0,00129 & 239,3 & 7/7 & 50,0 & 0,21 \\
+QSS3 & 0,000895 & 239,3 & 3/7 & 179,4 & -- \\
+QSS4 & 0,00185 & 238,6 & 3/7 & 179,9 & -- \\
+CQSS1 & 0,000144 & 239,4 & 0/7 & 0,5 & -- \\
+BQSS1 & 7,06e-6 & 4,6 & 7/7 & 1,3 & 86,11 \\
+LIQSS1 & 1,53e-5 & 239,9 & 7/7 & 118,0 & 0,46 \\
+LIQSS2 & 0,000248 & 243,3 & 3/7 & 179,5 & -- \\
+LIQSS3 & 0,000981 & 248,9 & 4/7 & 183,0 & -- \\
+mLIQSS1 & 0 & 249,4 & 7/7 & 148,3 & 0,66 \\
+mLIQSS2 & 0 & 239,1 & 3/7 & 185,6 & -- \\
+mLIQSS3 & 0 & 238,8 & 4/7 & 179,1 & -- \\
+eLIQSS1 & 4,61e-5 & 237,8 & 7/7 & 49,3 & 0,21 \\
+eLIQSS2 & 0,0005 & 239,0 & 7/7 & 170,2 & 0,17 \\
+eLIQSS3 & 0,0019 & 237,0 & 5/7 & 179,3 & -- \\
+CheQSS1 & 4,61e-5 & 238,9 & 7/7 & 45,3 & 0,21 \\
+CheQSS2 & 0,000639 & 239,4 & 7/7 & 170,4 & 0,14 \\
+CheQSS3 & 0,00287 & 240,4 & 5/7 & 179,9 & -- \\
+LIQSS--BDF & 0,000255 & 254,7 & 4/7 & 179,6 & -- \\
 \bottomrule\end{tabularx}\par}\addvspace{4pt}
 
 ¹ Einzelkalender auf allen 65\,025 Zuständen, Quantum 0,001, Zielzeit 136,71875. Die CPU-Spalte enthält den tatsächlichen Verbrauch bis zum Abbruch. Das Signal war nach 240 CPU-Sekunden programmiert. Eine laufende Bibliotheksoperation kann den Abschluss verzögern. BQSS1 erreichte zuerst seine Ereignisgrenze. ² Dieselben Verfahren auf 24 skalierten Galerkin-Koordinaten, Quantum 0,003, einschließlich Feldrekonstruktion zu den erreichten Ausgabezeiten. Der Zeitfehler ist der größte relative Abstand zum eng integrierten \textbf{reduzierten} Modell. Ein Strich kennzeichnet einen fehlenden Gesamtwert. Status, Teilfehler, Wandzeiten und Arbeit bis zum Abbruch stehen je Versuch in der Methodenmatrix.
@@ -7274,9 +7286,9 @@ LIQSS--BDF & 0,000255 & 254,7 & 3/7 & 186,7 & -- \\
 
 Die offizielle CP2-Kavität umfasst 257 mal 257 Knoten und 350\,000 D2Q9-Takte. In der Wirbelformulierung bleiben 65\,025 innere Unbekannte. Schon die Änderung einer einzigen gemeldeten Wirbelstärke verändert über die Poisson-Gleichung das rekonstruierte Geschwindigkeitsfeld. Die dichte Rückkopplung und die globale Suche nach dem frühesten Termin kosten Rechenzeit. Das erste vereinbarte Vergleichsfeld liegt bei \(t^*=0{,}1\), das letzte bei \(136{,}71875\). \href{https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/CP/CP2-definition.pdf}{Offizielle Aufgabendefinition}.
 
-Mit derselben nominellen Schranke von 240 CPU-Sekunden erreicht QSS3 \(t^*=0,000894476\) und QSS4 \(t^*=0,00185014\). Bis dahin meldet der Lauf 84 beziehungsweise 62 akzeptierte Zeitabschnitte. Der korrigierte Kalender begrenzt den Defekt auf den nachgerechneten Segmenten. Wie viel Prozesszeit bis zum Ende nötig wäre, lässt sich aus diesem Anlauf allein nicht ableiten. Die ersten vier D2Q9-Takte werden zusätzlich mit dichter Ausgabe, unabhängig integrierter Wirbelgleichung und D2Q9 verglichen. Diese vier frühen Takte bilden eine andere Prüfreihe als die sieben veröffentlichten Lastzeitpunkte.
+Mit derselben nominellen Schranke von 240 CPU-Sekunden erreicht QSS3 \(t^*=0,000895183\) und QSS4 \(t^*=0,00185089\). Bis dahin meldet der Lauf 141 beziehungsweise 114 akzeptierte Zeitabschnitte. An vier Kontrollzeiten je Segment bleibt der relative Feldfehler gegenüber der unabhängigen Wirbelreferenz unter 0,01776 \% (QSS3) und 0,01323 \% (QSS4). Die Bernstein-Obergrenzen für den Segmentdefekt überschreiten ein Quantum relativ um höchstens \(9{,}3\cdot10^{-10}\). Wie viel Prozesszeit bis zum Ende nötig wäre, lässt sich aus diesem Anlauf allein nicht ableiten. Die ersten vier D2Q9-Takte werden zusätzlich mit dichter Ausgabe, unabhängig integrierter Wirbelgleichung und D2Q9 verglichen. Diese vier frühen Takte bilden eine andere Prüfreihe als die sieben veröffentlichten Lastzeitpunkte.
 
-Die Klein- und Kurzzeitserie enthält 221 Konfigurationen, darunter 28 mit QSS3 oder QSS4. In diesen 28 Rechnungen erreichen 22 sämtliche verlangten Ausgaben. Das begleitende Kavitätenlabor enthält die Rohfelder, Zeit- und Raumfehler sowie die Versuchsgrenzen.
+Die Klein- und Kurzzeitserie enthält 221 Konfigurationen, darunter 28 mit QSS3 oder QSS4. In diesen 28 Rechnungen erreichen 25 sämtliche verlangten Ausgaben. Das begleitende Kavitätenlabor enthält die Rohfelder, Zeit- und Raumfehler sowie die Versuchsgrenzen.
 
 \textbf{Den Befund selbst nachrechnen.} Lesen Sie das erste Wurzelpolynom in Kapitel 6, vergleichen Sie den ersten ausgegebenen Zeitpunkt und verfolgen Sie für dieselbe Zelle \(|x-q|/\Delta\). Eine zutreffende erste Meldung und ein vollständiges Strömungsfeld am letzten Takt beantworten zwei verschiedene Fragen. Die Methodenmatrix bewahrt für jede der 19 nativen Methoden sowohl die erreichte Zeit als auch den Abbruchstatus.
 
@@ -7284,11 +7296,11 @@ Die Klein- und Kurzzeitserie enthält 221 Konfigurationen, darunter 28 mit QSS3 
 
 \subsection{Was bleibt nach einer Modellreduktion vom Wirbel erhalten?}\label{cp2-voll-reduktion}
 
-Für ein zweites Experiment bilden wir aus zwei vollständigen Wirbelbahnen bei Re = 850 und 1150 eine räumliche POD-Basis. Bei Re = 950 erfüllt keiner der fünf geprüften Ränge beide Budgets. Rang 24 liefert den kleinsten Budgetquotienten und wird vor dem Test fixiert. Auf dem zurückgestellten Zielparameter Re = 1000 beträgt allein der Unterschied der engen reduzierten Radau-Lösung zur vollen AB2-Bahn über sieben Zeiten maximal 18,26\,\%. Ein QSS-Zeitfehler innerhalb des reduzierten Modells kommt hinzu. Die linke und die rechte Hälfte der vorherigen Tabelle vergleichen deshalb verschiedene Zustandsräume. Auf Rang 24 erreichen 5 von 19 Originalverfahren alle sieben Ausgaben.
+Für ein zweites Experiment bilden wir aus zwei vollständigen Wirbelbahnen bei Re = 850 und 1150 eine räumliche POD-Basis. Bei Re = 950 erfüllt keiner der fünf geprüften Ränge beide Budgets. Rang 24 liefert den kleinsten Budgetquotienten und wird vor dem Test fixiert. Auf dem zurückgestellten Zielparameter Re = 1000 beträgt allein der Unterschied der engen reduzierten Radau-Lösung zur vollen AB2-Bahn über sieben Zeiten maximal 18,26\,\%. Ein QSS-Zeitfehler innerhalb des reduzierten Modells kommt hinzu. Die linke und die rechte Hälfte der vorherigen Tabelle vergleichen deshalb verschiedene Zustandsräume. Auf Rang 24 erreichen 9 von 19 Originalverfahren alle sieben Ausgaben.
 
 Wie viel hilft ein bereits bekanntes Grundfeld? In einer weiteren Rechnung interpolieren wir zwei gespeicherte Wirbelfelder bei Re = 850 und 1150 zeitgleich. Eine glatte räumliche Korrekturmode erfüllt homogene Haftbedingungen. Ihre Amplitude folgt aus der Projektion der Wirbelgleichung. Eine zweite Koordinate beschreibt den Fortschritt im aktuellen Zeitabschnitt. Die Ausgabe enthält weiterhin beide Geschwindigkeitskomponenten auf allen \(257^2\) Knoten.
 
-Auf der einzelnen räumlichen Korrekturmode mit Phasenzustand erreichen 18 von 19 Verfahren alle Ausgaben. QSS2 benötigt 0,0412 CPU-Sekunden. Sein größter relativer Abstand zur vollen Wirbelreferenz beträgt 26,64 \%. Das Grundfeld allein weicht um 0,70 \% ab. Für CQSS1 ergeben vier Verschiebungen des Quantenrasters -0,25 Δ (5/7), 0 Δ (7/7), 0,25 Δ (4/7), 0,75 Δ (5/7). Im getrennten Rang-24-Lauf für QSS4 sind 3/7 Felder protokolliert. Sein maximaler relativer Zeitfehler auf diesen gespeicherten Feldern beträgt 0,005369 \%. Für den Zielzeitpunkt braucht es alle sieben Ausgaben.
+Auf der einzelnen räumlichen Korrekturmode mit Phasenzustand erreichen 18 von 19 Verfahren alle Ausgaben. QSS2 benötigt 0,0103 CPU-Sekunden. Sein größter relativer Abstand zur vollen Wirbelreferenz beträgt 26,64 \%. Das Grundfeld allein weicht um 0,70 \% ab. Für CQSS1 ergeben vier Verschiebungen des Quantenrasters -0,25 Δ (5/7), 0 Δ (7/7), 0,25 Δ (4/7), 0,75 Δ (5/7). Im getrennten Rang-24-Lauf für QSS4 sind 3/7 Felder protokolliert. Sein maximaler relativer Zeitfehler auf diesen gespeicherten Feldern beträgt 0,005369 \%. Für den Zielzeitpunkt braucht es alle sieben Ausgaben.
 
 \buchseite{Kapitel 16}
 
@@ -7861,7 +7873,7 @@ Die vier wiederholten Matrizen sind im Quellenpaket unter \texttt{rechenlabor/qs
 
 \subsection{Die vollständige Acht-Fälle-Matrix}\label{fb-matrix}
 
-Jede Zahl zählt bestandene Einstellungen. Für jeden QSS-Namen wurden drei Quantenfaktoren \(0{,}005,\ 0{,}001,\ 0{,}0002\) mal Komponentenskala geprüft. Euler, RK4 und RK45 haben hier je eine Einstellung pro Fall. Fettdruck bedeutet, dass alle geprüften Einstellungen dieser Zelle bestehen.
+Jede Zahl zählt bestandene Einstellungen. Für jeden QSS-Namen wurden drei Quantenfaktoren \(0{,}005,\ 0{,}001,\ 0{,}0002\) mal Komponentenskala geprüft. Euler, RK4 und RK45 haben hier je eine Einstellung pro Fall. Fettdruck kennzeichnet Zellen, in denen alle geprüften Einstellungen bestehen.
 
 \textbf{Versuchsbezug.} Acht-Fälle-Archiv. Je Modell 18 QSS-Verfahren zu drei Quanten und drei klassische Kontrollen. Bezugsfenster und Referenzen stehen in der vorangehenden Falltabelle.
 
@@ -7873,24 +7885,24 @@ Jede Zahl zählt bestandene Einstellungen. Für jeden QSS-Namen wurden drei Quan
 \midrule\endfirsthead
 \textbf{Verfahren} & \textbf{C03} & \textbf{C05} & \textbf{C07} & \textbf{C09} & \textbf{C11} & \textbf{C12} & \textbf{C13} & \textbf{C21} \\
 \midrule\endhead\bottomrule\endfoot\bottomrule\endlastfoot
-\texttt{qss1} & 0 & 0 & 0 & \textbf{3} & \textbf{3} & \textbf{1} & 0 & 0 \\
-\texttt{qss2} & 0 & 0 & \textbf{1} & \textbf{3} & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
-\texttt{qss3} & 0 & 0 & \textbf{1} & \textbf{3} & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
-\texttt{qss4} & 0 & 0 & \textbf{2} & \textbf{3} & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
-\texttt{cqss1} & 0 & 0 & \textbf{2} & \textbf{3} & \textbf{3} & \textbf{2} & 0 & \textbf{2} \\
-\texttt{liqss1} & 0 & 0 & 0 & \textbf{3} & \textbf{1} & \textbf{1} & 0 & 0 \\
-\texttt{liqss2} & 0 & 0 & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
-\texttt{liqss3} & 0 & 0 & \textbf{1} & \textbf{2} & \textbf{2} & \textbf{3} & 0 & \textbf{3} \\
-\texttt{mliqss1} & 0 & 0 & 0 & \textbf{3} & \textbf{1} & \textbf{1} & 0 & 0 \\
-\texttt{mliqss2} & 0 & 0 & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
-\texttt{mliqss3} & 0 & 0 & \textbf{1} & \textbf{2} & \textbf{2} & \textbf{3} & 0 & \textbf{3} \\
-\texttt{eliqss1} & 0 & 0 & \textbf{2} & \textbf{2} & \textbf{2} & \textbf{1} & 0 & \textbf{2} \\
-\texttt{eliqss2} & 0 & 0 & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
-\texttt{eliqss3} & \textbf{1} & 0 & \textbf{2} & \textbf{2} & \textbf{2} & \textbf{3} & 0 & \textbf{3} \\
-\texttt{cheqss1} & 0 & 0 & \textbf{2} & \textbf{2} & \textbf{2} & \textbf{1} & 0 & \textbf{2} \\
-\texttt{cheqss2} & 0 & 0 & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
-\texttt{cheqss3} & 0 & 0 & \textbf{1} & \textbf{2} & \textbf{2} & \textbf{3} & 0 & \textbf{3} \\
-\texttt{liqss-bdf} & 0 & 0 & 0 & \textbf{2} & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
+\texttt{qss1} & 0 & 0 & 1 & \textbf{3} & \textbf{3} & \textbf{3} & 0 & 1 \\
+\texttt{qss2} & 0 & 0 & 1 & \textbf{3} & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
+\texttt{qss3} & 0 & 0 & 1 & \textbf{3} & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
+\texttt{qss4} & 0 & 0 & 2 & \textbf{3} & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
+\texttt{cqss1} & 0 & 0 & \textbf{3} & \textbf{3} & \textbf{3} & 2 & 0 & \textbf{3} \\
+\texttt{liqss1} & 0 & 0 & 0 & \textbf{3} & 2 & 1 & 0 & 0 \\
+\texttt{liqss2} & 0 & 0 & 1 & 2 & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
+\texttt{liqss3} & 0 & 0 & 1 & 2 & 2 & \textbf{3} & 0 & \textbf{3} \\
+\texttt{mliqss1} & 0 & 0 & 0 & \textbf{3} & 2 & 2 & 0 & 0 \\
+\texttt{mliqss2} & 0 & 0 & 1 & 2 & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
+\texttt{mliqss3} & 0 & 0 & 1 & 2 & 2 & \textbf{3} & 0 & \textbf{3} \\
+\texttt{eliqss1} & 1 & 0 & 2 & 2 & 2 & 2 & 0 & 2 \\
+\texttt{eliqss2} & 0 & 0 & 1 & 2 & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
+\texttt{eliqss3} & 1 & 0 & 2 & 2 & 2 & \textbf{3} & 0 & \textbf{3} \\
+\texttt{cheqss1} & 0 & 0 & 2 & 2 & 2 & 2 & 0 & 2 \\
+\texttt{cheqss2} & 0 & 0 & 1 & 2 & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
+\texttt{cheqss3} & 0 & 0 & 1 & 2 & 2 & \textbf{3} & 0 & \textbf{3} \\
+\texttt{liqss-bdf} & 0 & 0 & \textbf{3} & 2 & \textbf{3} & \textbf{3} & 0 & \textbf{3} \\
 \texttt{euler} & 0 & 0 & 0 & \textbf{1} & \textbf{1} & \textbf{1} & 0 & 0 \\
 \texttt{rk4} & \textbf{1} & 0 & \textbf{1} & \textbf{1} & \textbf{1} & \textbf{1} & \textbf{1} & \textbf{1} \\
 \texttt{rk45} & \textbf{1} & 0 & \textbf{1} & \textbf{1} & \textbf{1} & \textbf{1} & \textbf{1} & \textbf{1} \\
@@ -7902,11 +7914,11 @@ Jede Zahl zählt bestandene Einstellungen. Für jeden QSS-Namen wurden drei Quan
 
 \texttt{liqss1–3} beziehen die lokale lineare Selbstkopplung ein. \texttt{mliqss1–3} (Modified LIQSS) behandeln bei Bedarf zwei gekoppelte Zustände gemeinsam. \texttt{eliqss1–3} (Extended LIQSS) nutzen das zulässige Fehlerband für die Prognose. \texttt{cheqss1–3} formen den Fehler mit verschobenen Tschebyscheff-Polynomen. In erster Ordnung stimmen die letzten beiden Regeln im Projekt überein. \texttt{liqss-bdf} koppelt einen LIQSS2-Teil an einen impliziten Block mit Euler-Start und BDF2-Fortsetzung. \texttt{euler}, \texttt{rk4} und \texttt{rk45} sind die drei zeitgesteuerten Kontrollen. In jeder Zelle zählt die Zahl die bestandenen Einstellungen. Die \hyperref[fb-runs]{Einzelwerte in B.1} unterscheiden zusätzlich Fehlsituationen. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/1824c9104152674b82de6cd84d53b0b4f68dca37/QSS_SOLVERS.md}{Implementierungsstand der Matrix}.
 
-Von 456 Läufen bestehen 209. Weitere 108 verfehlen das Fehlerbudget, 6 liefern eine andere Beobachtungszahl, 124 erreichen das Zeitlimit und 9 enden mit Solverfehler oder ausgeschöpftem Arbeitsbudget. Eine Null in der Tabelle zählt alle Einstellungen ohne Freigabe. Anhang B weist die Ursache je Eintrag aus.
+Von 456 Läufen bestehen 224. Weitere 126 verfehlen das Fehlerbudget, 13 liefern eine andere Beobachtungszahl, 81 erreichen das Zeitlimit und 12 enden mit Solverfehler oder ausgeschöpftem Arbeitsbudget. Eine Null in der Tabelle zählt alle Einstellungen ohne Freigabe. Anhang B weist die Ursache je Eintrag aus.
 
 Bei C13 beträgt der kleinste abgeschlossene QSS-Score 2,22 (QSS3, Quantenfaktor 0,0002). Die fünf Kranvariablen werden an drei Lastzeitpunkten verglichen. C09, C11 und C12 verlangen andere Beobachtungen, etwa das Verhalten am Reglertakt oder den Zeitpunkt eines Kontakts.
 
-Die Wiederholungsdaten stehen in \texttt{daten/qss-extension.csv}. Der Abgleich aller Einträge mit der Vorfassung steht in \texttt{rechenlabor/qss\_pruefung/messung/revisionsvergleich.csv}.
+Die Wiederholungsdaten stehen in \texttt{daten/qss-extension.csv}. Der paarweise Vergleich mit dem Solverstand \texttt{c635504} steht in der PDF-Beilage \texttt{QSS\_Kontaktvergleich\_v9\_19.csv}.
 
 \buchseite{Kapitel 18}
 
@@ -7950,7 +7962,7 @@ Zellen nennen \texttt{nfev}; Faktorisierungen stehen separat in der Datei. RK45 
 
 \textbf{Welche Frage verlangt Außendaten?} Genauigkeit und Sensorort (Kapitel 1) verlangen Messdaten vom Bauteil und eine kalibrierte Messkette.
 
-Die Faltauswahl und der vollständige Satz von 520 Einstellungen stehen in \texttt{rechenlabor/qss\_pruefung/messung/bilanz.json} und \texttt{daten/qss-selection.csv}.
+Die Faltauswahl und der vollständige Satz von 520 Einstellungen stehen in \texttt{rechenlabor/qss\_pruefung/messung/kontakt\_v919/bilanz.json} und \texttt{daten/qss-selection.csv}.
 
 \subsection{Aus 456 Zeilen eine Entscheidung nachrechnen}\label{fb-pruefung17}
 
@@ -7958,7 +7970,7 @@ Angenommen, Sie wählen einen Solver für eine neue Koppelstange mit Kontakt. Ei
 
 Wir halten den Quantenfaktor 0,001 fest. Beim Stiftpendel meldet QSS2 den Score 1,583, beim Zweitankmodell 0,01169. Dieselbe Schwelle führt bei den beiden unterschiedlichen Messaufträgen zu verschiedenen Entscheidungen.
 
-Von den 456 begonnenen Einstellungen liefern 317 eine abgeschlossene numerische Bewertung. Davon halten 209 das Budget ein und 108 überschreiten es. Die übrigen 139 Läufe behalten ihren Abbruch- oder Ereignisstatus. Wer nur abgeschlossene Läufe zählt, verändert den Nenner der Erfolgsquote.
+Von den 456 begonnenen Einstellungen liefern 350 eine abgeschlossene numerische Bewertung. Davon halten 224 das Budget ein und 126 überschreiten es. Die übrigen 106 Läufe behalten ihren Abbruch- oder Ereignisstatus. Wer nur abgeschlossene Läufe zählt, verändert den Nenner der Erfolgsquote.
 
 \textbf{Entscheidung am neuen Problem.} Legen Sie die Kontaktkennungen und die zulässigen Zeitfehler vorab fest. Rechnen Sie eine vereinfachte Bewegung exakt, prüfen Sie im vollen Modell eine unabhängige Referenz, zählen Sie verworfene Schritte und physikalische Kontakte einzeln. Vergleichen Sie anschließend ausschließlich innerhalb der erreichten Genauigkeitsklasse den Aufwand auf demselben Rechner.
 
@@ -8052,9 +8064,9 @@ Wählen Sie eine Zeile. Formulieren Sie eine Behauptung mit Quantoren, Parameter
 
 \bild{pruefung_matrix.pdf}{Abbildung 18.1. Status aller 57 Rechnungen je Modellfenster. Die Balken enthalten auch Zeitlimits, Solverfehler und Abweichungen bei der Zahl der Beobachtungen. Die vollständigen Werte stehen in Anhang B.1.}
 
-Die Ergebnisdatei enthält 318 befüllte Scorefelder. Für den Vergleich von Laufzeit und Fehler sind die 317 Zeilen mit abgeschlossener Bewertung zugelassen. Ein im Vorlauf gespeicherter Zahlenwert verliert bei einem späteren Abbruch seine Eignung für den Kostenvergleich.
+Die Ergebnisdatei enthält 354 befüllte Scorefelder. Für den Vergleich von Laufzeit und Fehler sind die 350 Zeilen mit abgeschlossener Bewertung zugelassen. Ein im Vorlauf gespeicherter Zahlenwert verliert bei einem späteren Abbruch seine Eignung für den Kostenvergleich.
 
-Bezogen auf alle begonnenen Läufe beträgt die Erfolgsquote 209/456 = 45,8 \%. Unter den numerisch vollständig bewerteten Läufen beträgt sie 209/317 = 65,9 \%. Der erste Nenner beantwortet die Frage nach der Zuverlässigkeit der gesamten Auswahl.
+Bezogen auf alle begonnenen Läufe beträgt die Erfolgsquote 224/456 = 49,1 \%. Unter den numerisch vollständig bewerteten Läufen beträgt sie 224/350 = 64,0 \%. Der erste Nenner beantwortet die Frage nach der Zuverlässigkeit der gesamten Auswahl.
 
 \buchseite{Kapitel 18}
 
@@ -8085,9 +8097,9 @@ Die 456 archivierten Einstellungen liefern Beispiele für diese Entscheidungen. 
 
 Jeder Punkt gehört zu einer bestimmten Konfiguration in genau einem Modellfenster. Links bedeuten kleinere Medianlaufzeiten, unten kleinere Budgetanteile. Eine Konfiguration liegt auf der grün markierten Pareto-Front, wenn keine andere mindestens ebenso schnell und mindestens ebenso genau ist und in einer der beiden Größen besser abschneidet.
 
-\bild{bild_arbeit_fehler.pdf}{Abbildung 18.2. 317 Zahlenpaare aus 456 Wiederholungen. Blaue Kreise erfüllen \(S\leq1\), orange Kreuze überschreiten das Budget. Grüne Rauten verbinden die nichtdominierten Beobachtungen. Die gestrichelte Linie markiert \(S=1\). Die Fehlerachsen sind je Fenster skaliert. Bei C12 wird die exakte Null gesondert auf der Achse dargestellt.}
+\bild{bild_arbeit_fehler.pdf}{Abbildung 18.2. 350 Zahlenpaare aus 456 Wiederholungen. Blaue Kreise erfüllen \(S\leq1\), orange Kreuze überschreiten das Budget. Grüne Rauten verbinden die nichtdominierten Beobachtungen. Die gestrichelte Linie markiert \(S=1\). Die Fehlerachsen sind je Fenster skaliert. Bei C12 wird die exakte Null gesondert auf der Achse dargestellt.}
 
-C05 liefert 4 abgeschlossene Zahlenpaare. Ein Punkt auf einer Pareto-Front kann oberhalb des Fehlerbudgets liegen. Für die 139 unvollständigen Bewertungen über alle acht Fenster zeigt Abb. 18.1 die Ursachen.
+C05 liefert 7 abgeschlossene Zahlenpaare. Ein Punkt auf einer Pareto-Front kann oberhalb des Fehlerbudgets liegen. Für die 106 unvollständigen Bewertungen über alle acht Fenster zeigt Abb. 18.1 die Ursachen.
 
 \buchseite{Kapitel 18}
 
@@ -8099,7 +8111,7 @@ Ein Ingenieur möchte eine Einstellung für mehrere Modelle verwenden. Für jede
 
 \phantomsection\hypertarget{druck-profilformel}{}\label{druck-profilformel}
 
-Sei \(m_p\) die kleinste Medianzeit eines bestandenen Laufs in Fenster \(p\). Ein bestandener Lauf der festen Einstellung \(s\) erhält \(r_{p,s}=t_{p,s}/m_p\), jeder Fehllauf \(r_{p,s}=+\infty\). Hat ein Fenster keinen Gewinner, setzen wir alle seine Quotienten auf \(+\infty\). Für endliches \(\tau\ge1\) zeigt die rechtsstetige Treppe \[\rho_s(\tau)=\tfrac18\sum_{p=1}^{8}\mathbf{1}\{r_{p,s}\le\tau\}.\] Bei Zeitfaktor eins werden auch geteilte Bestzeiten gezählt. Für RK45 ergeben sich bei den Faktoren 1, 10 und 5\,000 die Werte 1/8, 5/8, 7/8. Für QSS2 mit Quantenfaktor 0,0002 ergeben sich 1/8, 3/8, 5/8. Die Medianzeiten gehören zur angegebenen Messumgebung. \href{https://doi.org/10.1007/s101070100263}{Dolan und Moré}.
+Sei \(m_p\) die kleinste Medianzeit eines bestandenen Laufs in Fenster \(p\). Ein bestandener Lauf der festen Einstellung \(s\) erhält \(r_{p,s}=t_{p,s}/m_p\), jeder Fehllauf \(r_{p,s}=+\infty\). Hat ein Fenster keinen Gewinner, setzen wir alle seine Quotienten auf \(+\infty\). Für endliches \(\tau\ge1\) zeigt die rechtsstetige Treppe \[\rho_s(\tau)=\tfrac18\sum_{p=1}^{8}\mathbf{1}\{r_{p,s}\le\tau\}.\] Bei Zeitfaktor eins werden auch geteilte Bestzeiten gezählt. Für RK45 ergeben sich bei den Faktoren 1, 10 und 5\,000 die Werte 2/8, 6/8, 7/8. Für QSS2 mit Quantenfaktor 0,0002 ergeben sich 0/8, 3/8, 5/8. Die Medianzeiten gehören zur angegebenen Messumgebung. \href{https://doi.org/10.1007/s101070100263}{Dolan und Moré}.
 
 \phantomsection\hypertarget{auflage-k18-02}{}\label{auflage-k18-02}
 
@@ -8111,17 +8123,17 @@ Im Fenster C05 bestehen 0 von 57 Konfigurationen. Dieses Fenster bleibt im Nenne
 
 Für jede Konfiguration verbinden wir Fall, Methodenname und Einstellung mit der gleich bezeichneten Zeile der Vorfassung. Bei der 399er-Reihe wurde der historische Modellvertrag mit dem aktuellen Solver wiederholt. Die archivierten und die neuen Laufzeiten stammen aus verschiedenen Ausführungen. Ein Wechsel zum Zeitlimit erlaubt daher für sich allein keine Aussage über den mathematischen Fehler.
 
-\textbf{Basisreihe.} 399 Einstellungen, 162 bestanden, 45 Statuswechsel.
+\textbf{Basisreihe.} 399 Einstellungen, 167 bestanden. Zwei Statuswechsel gegenüber \texttt{c635504}.
 
-\textbf{Acht Modellfenster.} 456 Einstellungen, 209 bestanden, 90 Statuswechsel.
+\textbf{Acht Modellfenster.} 456 Einstellungen, 224 bestanden. 15 Statuswechsel.
 
-\textbf{Auswahlstudie.} 520 Einstellungen, 250 bestanden, 115 Statuswechsel.
+\textbf{Auswahlstudie.} 520 Einstellungen, 285 bestanden. 13 Statuswechsel.
 
-\textbf{Steifigkeitsstudie.} 138 Einstellungen, 99 bestanden, 17 Statuswechsel.
+\textbf{Steifigkeitsstudie.} 138 Einstellungen, 108 bestanden. Vier Statuswechsel.
 
-\textbf{Den Softwareeffekt isolieren.} Im Verstärker C03, QSS4, Quantenfaktor 0,005, ergibt ein unmittelbarer Vergleich beider Solverstände mit identischem Versuchsprogramm und 45 Sekunden Zeitlimit \(S=2{,}60\cdot10^{16}\) beziehungsweise \(S=10{,}50\). Das korrigierte Ergebnis verfehlt das Lehrbudget weiterhin. Für C12 treffen QSS3 und QSS4 mit Quantenfaktor 0,001 die analytische Kontaktfolge nun mit protokolliertem Score null. Bei C13 sinkt der beste Fehler durch die Korrektur nicht allgemein. Die verwendete Referenz und das Budget bleiben in jeder Zeile erkennbar.
+\textbf{Welche Unterschiede folgen aus der Rechnung?} Von 1\,272 beidseitig gespeicherten Fehlerwerten unterscheiden sich 121. Betroffen sind vor allem erweiterte und Tschebyscheff-basierte Quantisierer. Alle 34 Statuswechsel berühren ein Zeitlimit. Laufzeit, Ereigniszahl, Rohfehler und Grenzüberschreitung sind im Messprotokoll getrennt. Bei QSS3/4 stimmen alle 96 beidseitig verfügbaren Fehlerwerte der 120 Einstellungen überein. In C12 treffen beide Verfahren mit Faktor 0,001 die Kontaktfolge mit Score null. Im gezielten 45-Sekunden-Gegenlauf verfehlt C03/QSS4 mit Faktor 0,005 das Budget weiterhin.
 
-Die vollständige Gegenüberstellung steht unter \texttt{rechenlabor/qss\_pruefung/messung/revisionsvergleich.csv}. Dazu gehören unveränderte Resultate, numerische Abweichungen sowie Wechsel zwischen Zeitlimit, Solverfehler, Ereigniszahl und bestandener Aufgabe. Ein zweiter Gegenlauf wiederholt dieselben 1\,513 Einstellungen auf dem abschließenden Solverstand \texttt{c635504}. Die PDF-Beilage \texttt{QSS\_Gegenprobe\_c635504.csv} stellt seine Ergebnisse und Arbeitszähler dem ersten Kalenderstand \texttt{d656b6f} gegenüber. Von 1\,513 Konfigurationen lieferten 1\,176 auf beiden Ständen einen numerischen Fehlerwert. Alle 1\,176 Werte stimmen überein. Bei 135 früheren Zeitüberschreitungen erreichte der Gegenlauf einen anderen Status, darunter 68 bestandene Fälle. Die beiden Zeitmessungen stehen in getrennten Spalten.
+Die PDF-Anlage \texttt{QSS\_Kontaktvergleich\_v9\_19.csv} verbindet jede Einstellung mit ihrem Vorgänger. Zwei weitere Anlagen bewahren die früheren Vergleiche der Ausgabe v9.18. Alle vier Primärdateien und die Arbeitszähler liegen im Rechenlabor.
 
 \buchseite{Kapitel 18}
 
@@ -8141,7 +8153,7 @@ Die Frage aus der Einleitung lässt sich jetzt mit einer Zahl beantworten. Nach 
 
 \textbf{Wo entstand die Abweichung?} Beim Wagen zeigt die diskrete Energiebilanz auf den Schritt. Bei C05 unterscheidet die analytische Phase eine steife Mode von einer verschobenen Schaltung. In der Stoßkette prüft die Kontaktliste die Reihenfolge, in der Diode die Astprüfung die zulässige Fortsetzung. Bei einem Feld können Rand, Gitter, Zeit und Darstellung getrennt variiert werden. Die Gegenprobe erklärt, welche Änderung eine beobachtete Abweichung beeinflusst.
 
-\textbf{Woran erkennen wir eine belastbare Entscheidung?} Von 456 erneut gerechneten Einstellungen erfüllen 209 den jeweiligen Auftrag. Eine abweichende Ereigniszahl und ein Zeitlimit haben andere Ursachen als eine gemessene Abweichung über dem Budget. Für die geeigneten Läufe können wir dann Aufwand und Verlässlichkeit vergleichen. Für das nächste Modell beginnt die Auswahl wieder mit der beobachtbaren Aufgabe, einer unabhängigen Referenz und einem Versuch, der auch scheitern kann. \hyperref[buch-einleitung]{Zur Einleitung des Buchs}
+\textbf{Woran erkennen wir eine belastbare Entscheidung?} Von 456 erneut gerechneten Einstellungen erfüllen 224 den jeweiligen Auftrag. Eine abweichende Ereigniszahl und ein Zeitlimit haben andere Ursachen als eine gemessene Abweichung über dem Budget. Für die geeigneten Läufe können wir dann Aufwand und Verlässlichkeit vergleichen. Für das nächste Modell beginnt die Auswahl wieder mit der beobachtbaren Aufgabe, einer unabhängigen Referenz und einem Versuch, der auch scheitern kann. \hyperref[buch-einleitung]{Zur Einleitung des Buchs}
 
 Dieselben Entscheidungskriterien leiten den Vergleich gelernter Operatoren. Kapitel 9 zeigt an zehn Teilaufgaben den Beitrag des lernenden Teils. Der \hyperref[pr-verfahren]{Physik-Residual-Operator} prüft jede Ausgabe. Beim \hyperref[op-bilanz]{gelernten Fehlernachweis} entscheidet der Vergleich mit dem analytischen Filter darüber, wie viel der lernende Teil beiträgt. \hyperref[no-auswertung]{Auswertung in Kapitel 9} · \hyperref[no-vergleichsmatrix]{Messmatrix}
 
@@ -9065,7 +9077,7 @@ Ankünfte gleich bediente, abgebrochene und verbliebene Kunden setzen und die bi
 
 Jedes der acht Modellfenster hat 57 Konfigurationen. Die Tabellen führen jedes Verfahren und jede Einstellung auf. Zur Zeile gehören in der CSV-Datei auch Arbeitszähler, neu gemessene Laufzeiten in Millisekunden und gegebenenfalls die Diagnose.
 
-Je Zelle stehen die Statuskennung und, sofern vorhanden, der auf drei signifikante Stellen gerundete gespeicherte Score. \textbf{B} bedeutet bestanden, \textbf{G} numerisches Budget überschritten, \textbf{T} Zeitlimit, \textbf{E} abweichende Zahl von Beobachtungen und \textbf{F} Solverfehler. Für abgeschlossene Bewertungen gilt der ungerundete CSV-Wert. 1 unvollständige Zeilen enthalten bereits einen Score aus dem Vorlauf. Die Statuskennung entscheidet über die Verwertbarkeit. Die Schreibweise 2,6e-5 entspricht 0,000026. Die Reihenfolge der Quanten ist grob, mittel, fein. Die drei klassischen Kontrollen besitzen jeweils eine feste Konfiguration. Messzeiten, Kosten und Fehlerdetails stehen für jede Zeile in \texttt{daten/qss-extension.csv}.
+Je Zelle stehen die Statuskennung und, sofern vorhanden, der auf drei signifikante Stellen gerundete gespeicherte Score. \textbf{B} bedeutet bestanden, \textbf{G} numerisches Budget überschritten, \textbf{T} Zeitlimit, \textbf{E} abweichende Zahl von Beobachtungen und \textbf{F} Solverfehler. Für abgeschlossene Bewertungen gilt der ungerundete CSV-Wert. Vier unvollständige Zeilen enthalten bereits einen Score aus dem Vorlauf. Die Statuskennung entscheidet über die Verwertbarkeit. Die Schreibweise 2,6e-5 entspricht 0,000026. Die Reihenfolge der Quanten ist grob, mittel, fein. Die drei klassischen Kontrollen besitzen jeweils eine feste Konfiguration. Messzeiten, Kosten und Fehlerdetails stehen für jede Zeile in \texttt{daten/qss-extension.csv}.
 
 Die \hyperref[auflage-k18-01]{Methodenlegende direkt unter der Hauptmatrix} erklärt die Ordnungsziffer, die Schwellenwahl und den steifen Block.
 
@@ -9085,14 +9097,14 @@ CHEQSS1 & G 9,4 & G 1,22 & T \\
 CHEQSS2 & G 41,5 & G 8,37 & G 1,68 \\
 CHEQSS3 & G 19,9 & G 10,2 & G 2,16 \\
 CQSS1 & F & F & F \\
-ELIQSS1 & G 9,4 & G 1,22 & T \\
+ELIQSS1 & G 9,4 & G 1,22 & B 0,199 \\
 ELIQSS2 & G 28,6 & G 4,39 & G 1,11 \\
 ELIQSS3 & G 45 & G 5,15 & B 0,692 \\
 LIQSS-BDF & T & T & T \\
-LIQSS1 & G 77,2 & T & T \\
+LIQSS1 & G 77,2 & G 19,1 & T \\
 LIQSS2 & T & T & T \\
 LIQSS3 & G 72,9 & G 24,7 & G 4,59 \\
-MLIQSS1 & G 77,2 & T & T \\
+MLIQSS1 & G 77,2 & G 19,1 & T \\
 MLIQSS2 & T & T & T \\
 MLIQSS3 & G 72,9 & G 24,7 & G 4,59 \\
 QSS1 & G 96 & G 20,4 & G 4,19 \\
@@ -9101,9 +9113,9 @@ QSS3 & T & T & T \\
 QSS4 & T & T & T \\
 \end{longtable}\endgroup
 
-\textbf{Klassische Kontrollen.} EULER G 1,07, RK4 B 4,58e-11, RK45 B 1,06e-06.
+\textbf{Klassische Kontrollen.} EULER G 1,07, RK4 B 4,58e-11, RK45 B 1,06e-6.
 
-\textbf{Statusbilanz.} 3 bestanden, 30 über Budget, 21 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 3 mit Solverfehler.
+\textbf{Statusbilanz.} 4 bestanden, 32 über Budget, 18 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 3 mit Solverfehler.
 
 Am geschalteten Verstärker entscheidet das gewählte kurze Zeitfenster. Vergleichen Sie Spannungen und Ströme komponentenweise, bevor Sie die Zähler eines erfolgreichen Laufs interpretieren.
 
@@ -9120,28 +9132,28 @@ Am geschalteten Verstärker entscheidet das gewählte kurze Zeitfenster. Verglei
 \textbf{Verfahren} & \textbf{0,005} & \textbf{0,001} & \textbf{0,0002} \\
 \midrule\endhead\bottomrule\endfoot\bottomrule\endlastfoot
 CHEQSS1 & G 135 & G 16,2 & T \\
-CHEQSS2 & T & T & T \\
+CHEQSS2 & E & T & E \\
 CHEQSS3 & T & T & T \\
 CQSS1 & F & F & F \\
 ELIQSS1 & G 135 & G 16,2 & T \\
-ELIQSS2 & T & T & T \\
+ELIQSS2 & E & T & T \\
 ELIQSS3 & T & T & T \\
-LIQSS-BDF & T & T & T \\
-LIQSS1 & E & T & T \\
+LIQSS-BDF & G 191 & G 39,5 & G 7,57 \\
+LIQSS1 & E & E & T \\
 LIQSS2 & T & T & T \\
-LIQSS3 & T & E & E \\
-MLIQSS1 & E & T & T \\
+LIQSS3 & E & E & E \\
+MLIQSS1 & E & E & T \\
 MLIQSS2 & T & T & T \\
-MLIQSS3 & T & E & E \\
+MLIQSS3 & E & E & E \\
 QSS1 & T & T & T \\
 QSS2 & T & T & T \\
 QSS3 & T & T & T \\
 QSS4 & T & T & T \\
 \end{longtable}\endgroup
 
-\textbf{Klassische Kontrollen.} EULER T, RK4 T, RK45 T.
+\textbf{Klassische Kontrollen.} EULER F, RK4 T, RK45 F.
 
-\textbf{Statusbilanz.} 0 bestanden, 4 über Budget, 44 mit Zeitlimit, 6 mit abweichender Beobachtungszahl, 3 mit Solverfehler.
+\textbf{Statusbilanz.} 0 bestanden, 7 über Budget, 32 mit Zeitlimit, 13 mit abweichender Beobachtungszahl, 5 mit Solverfehler.
 
 Keine Einstellung der historischen Matrix erfüllt hier den Auftrag. Kapitel 11 beschreibt ein getrenntes Radau/BDF-Experiment mit korrekt lokalisierten Schaltungen. Es hat eigene Budgets.
 
@@ -9160,26 +9172,26 @@ Keine Einstellung der historischen Matrix erfüllt hier den Auftrag. Kapitel 11 
 CHEQSS1 & B 0,872 & B 0,0805 & T \\
 CHEQSS2 & G 7,71 & G 1,39 & B 0,238 \\
 CHEQSS3 & G 6,41 & G 1,28 & B 0,351 \\
-CQSS1 & B 0,249 & B 0,0123 & T \\
+CQSS1 & B 0,249 & B 0,0123 & B 0,000444 \\
 ELIQSS1 & B 0,872 & B 0,0805 & T \\
 ELIQSS2 & G 7,19 & G 1,65 & B 0,319 \\
 ELIQSS3 & G 3,81 & B 0,822 & B 0,166 \\
-LIQSS-BDF & T & T & T \\
-LIQSS1 & G 16,2 & T & T \\
+LIQSS-BDF & B 0,0121 & B 0,0121 & B 0,0121 \\
+LIQSS1 & G 16,2 & G 3 & T \\
 LIQSS2 & G 17,9 & G 3,35 & B 0,626 \\
 LIQSS3 & G 27,2 & G 5,18 & B 0,947 \\
-MLIQSS1 & G 16,2 & T & T \\
-MLIQSS2 & G 16,8 & G 3,35 & B 0,626 \\
+MLIQSS1 & G 16,2 & G 3 & T \\
+MLIQSS2 & G 15,7 & G 3,35 & B 0,626 \\
 MLIQSS3 & G 26,7 & G 5,18 & B 0,947 \\
-QSS1 & G 14,4 & G 2,88 & T \\
+QSS1 & G 14,4 & G 2,88 & B 0,566 \\
 QSS2 & G 8,36 & G 1,58 & B 0,295 \\
 QSS3 & G 7,13 & G 1,49 & B 0,269 \\
 QSS4 & G 3,29 & B 0,765 & B 0,217 \\
 \end{longtable}\endgroup
 
-\textbf{Klassische Kontrollen.} EULER G 4,19, RK4 B 3,78e-09, RK45 B 3,25e-06.
+\textbf{Klassische Kontrollen.} EULER G 4,19, RK4 B 3,78e-9, RK45 B 3,25e-6.
 
-\textbf{Statusbilanz.} 21 bestanden, 25 über Budget, 11 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
+\textbf{Statusbilanz.} 26 bestanden, 27 über Budget, 4 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
 
 Beim Stiftpendel ist eine kleine Zeitabweichung von einer falschen Kontaktfolge zu unterscheiden. Die kartesische Bindungsprüfung in Kapitel 13 ist ein zusätzlicher Versuchsaufbau.
 
@@ -9198,7 +9210,7 @@ Beim Stiftpendel ist eine kleine Zeitabweichung von einer falschen Kontaktfolge 
 CHEQSS1 & G 1,26 & B 0,0517 & B 0,00158 \\
 CHEQSS2 & G 2,37 & B 0,416 & B 0,0582 \\
 CHEQSS3 & G 2,3 & B 0,409 & B 0,0652 \\
-CQSS1 & B 0,038 & B 0,00194 & B 7,8e-05 \\
+CQSS1 & B 0,038 & B 0,00194 & B 7,8e-5 \\
 ELIQSS1 & G 1,26 & B 0,0517 & B 0,00158 \\
 ELIQSS2 & G 2,4 & B 0,44 & B 0,0714 \\
 ELIQSS3 & G 2,38 & B 0,451 & B 0,0816 \\
@@ -9212,10 +9224,10 @@ MLIQSS3 & G 2,58 & B 0,517 & B 0,103 \\
 QSS1 & B 0,539 & B 0,129 & B 0,0265 \\
 QSS2 & B 0,0117 & B 0,0117 & B 0,0117 \\
 QSS3 & B 0,00015 & B 0,00015 & B 0,00015 \\
-QSS4 & B 4,42e-06 & B 4,42e-06 & B 4,42e-06 \\
+QSS4 & B 4,42e-6 & B 4,42e-6 & B 4,42e-6 \\
 \end{longtable}\endgroup
 
-\textbf{Klassische Kontrollen.} EULER B 0,0265, RK4 B 2,19e-11, RK45 B 4,02e-09.
+\textbf{Klassische Kontrollen.} EULER B 0,0265, RK4 B 2,19e-11, RK45 B 4,02e-9.
 
 \textbf{Statusbilanz.} 46 bestanden, 11 über Budget, 0 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
 
@@ -9233,18 +9245,18 @@ Das Raster bewertet 16 Abtastzeiten. Für die langen Plateaus der veröffentlich
 \midrule\endfirsthead
 \textbf{Verfahren} & \textbf{0,005} & \textbf{0,001} & \textbf{0,0002} \\
 \midrule\endhead\bottomrule\endfoot\bottomrule\endlastfoot
-CHEQSS1 & B 0,494 & B 0,0255 & T \\
+CHEQSS1 & B 0,494 & B 0,0255 & T 0,00258 \\
 CHEQSS2 & B 0,302 & B 0,089 & B 0,0161 \\
 CHEQSS3 & G 1,32 & B 0,213 & B 0,0284 \\
 CQSS1 & B 0,287 & B 0,0309 & B 0,00262 \\
-ELIQSS1 & B 0,494 & B 0,0255 & T \\
+ELIQSS1 & B 0,494 & B 0,0255 & T 0,00258 \\
 ELIQSS2 & B 0,483 & B 0,116 & B 0,0186 \\
 ELIQSS3 & G 1,42 & B 0,266 & B 0,0468 \\
 LIQSS-BDF & B 0,000374 & B 0,000181 & B 0,000181 \\
-LIQSS1 & B 0,45 & T & T \\
+LIQSS1 & B 0,45 & B 0,084 & T \\
 LIQSS2 & B 0,999 & B 0,21 & B 0,04 \\
 LIQSS3 & G 1,52 & B 0,307 & B 0,0619 \\
-MLIQSS1 & B 0,45 & T & T \\
+MLIQSS1 & B 0,45 & B 0,084 & T \\
 MLIQSS2 & B 0,999 & B 0,21 & B 0,04 \\
 MLIQSS3 & G 1,52 & B 0,307 & B 0,0619 \\
 QSS1 & B 0,693 & B 0,167 & B 0,0371 \\
@@ -9253,9 +9265,9 @@ QSS3 & B 0,0576 & B 0,0437 & B 0,00488 \\
 QSS4 & B 0,00201 & B 0,00201 & B 0,00201 \\
 \end{longtable}\endgroup
 
-\textbf{Klassische Kontrollen.} EULER B 0,192, RK4 B 1,73e-11, RK45 B 1,71e-08.
+\textbf{Klassische Kontrollen.} EULER B 0,192, RK4 B 1,73e-11, RK45 B 1,71e-8.
 
-\textbf{Statusbilanz.} 47 bestanden, 4 über Budget, 6 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
+\textbf{Statusbilanz.} 49 bestanden, 4 über Budget, 4 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
 
 Bei LIQSS1 und dem kleinsten Quantum steht ein Zwischenwert von 0,0294 im Archiv. Das Zeitlimit beendet die Messung. Der Status T bleibt erhalten.
 
@@ -9271,21 +9283,21 @@ Bei LIQSS1 und dem kleinsten Quantum steht ein Zwischenwert von 0,0294 im Archiv
 \midrule\endfirsthead
 \textbf{Verfahren} & \textbf{0,005} & \textbf{0,001} & \textbf{0,0002} \\
 \midrule\endhead\bottomrule\endfoot\bottomrule\endlastfoot
-CHEQSS1 & B 1,78e-12 & T & T \\
+CHEQSS1 & B 1,78e-12 & B 1,78e-12 & T \\
 CHEQSS2 & B 0 & B 0 & B 0 \\
 CHEQSS3 & B 0 & B 0 & B 0 \\
-CQSS1 & B 0 & B 0 & T \\
-ELIQSS1 & B 1,78e-12 & T & T \\
+CQSS1 & B 0 & B 0 & T 2,59e-10 \\
+ELIQSS1 & B 1,78e-12 & B 1,78e-12 & T \\
 ELIQSS2 & B 0 & B 0 & B 0 \\
 ELIQSS3 & B 0 & B 0 & B 0 \\
 LIQSS-BDF & B 8,88e-13 & B 4,44e-13 & B 2,22e-13 \\
 LIQSS1 & B 1,78e-12 & T & T \\
 LIQSS2 & B 0 & B 0 & B 0 \\
 LIQSS3 & B 0 & B 0 & B 0 \\
-MLIQSS1 & B 1,78e-12 & T & T \\
+MLIQSS1 & B 1,78e-12 & B 1,78e-12 & T \\
 MLIQSS2 & B 0 & B 0 & B 0 \\
 MLIQSS3 & B 0 & B 0 & B 0 \\
-QSS1 & B 2,66e-12 & T & T \\
+QSS1 & B 2,66e-12 & B 2,66e-12 & B 3,27e-10 \\
 QSS2 & B 0 & B 0 & B 0 \\
 QSS3 & B 0 & B 0 & B 0 \\
 QSS4 & B 0 & B 0 & B 0 \\
@@ -9293,7 +9305,7 @@ QSS4 & B 0 & B 0 & B 0 \\
 
 \textbf{Klassische Kontrollen.} EULER B 2e-11, RK4 B 2e-11, RK45 B 0.
 
-\textbf{Statusbilanz.} 46 bestanden, 0 über Budget, 11 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
+\textbf{Statusbilanz.} 51 bestanden, 0 über Budget, 6 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
 
 Eine nahezu verschwindende Fehlerzahl passt zu den geradlinigen Flugbahnen im elastischen Fenster. Für unelastische oder zufallsabhängige Stöße ändern sich die Zielgrößen.
 
@@ -9310,28 +9322,28 @@ Eine nahezu verschwindende Fehlerzahl passt zu den geradlinigen Flugbahnen im el
 \textbf{Verfahren} & \textbf{0,005} & \textbf{0,001} & \textbf{0,0002} \\
 \midrule\endhead\bottomrule\endfoot\bottomrule\endlastfoot
 CHEQSS1 & G 20,1 & T & T \\
-CHEQSS2 & G 93,2 & G 27,3 & T \\
-CHEQSS3 & G 51,3 & G 11,1 & T 2,53 \\
+CHEQSS2 & G 93,2 & G 27,3 & G 6,2 \\
+CHEQSS3 & G 51,3 & G 11,1 & G 2,52 \\
 CQSS1 & F & F & F \\
 ELIQSS1 & G 20,1 & T & T \\
-ELIQSS2 & G 67,2 & G 28,9 & T \\
+ELIQSS2 & G 67,2 & G 28,9 & T 5,52 \\
 ELIQSS3 & G 92,4 & G 19,6 & G 2,74 \\
-LIQSS-BDF & T & T & T \\
-LIQSS1 & T & T & T \\
-LIQSS2 & G 181 & T & T \\
-LIQSS3 & G 474 & G 49,4 & T \\
-MLIQSS1 & T & T & T \\
-MLIQSS2 & G 139 & T & T \\
-MLIQSS3 & G 366 & G 35,8 & T \\
-QSS1 & G 130 & G 23,5 & T \\
+LIQSS-BDF & G 179 & T & T \\
+LIQSS1 & G 134 & T & T \\
+LIQSS2 & G 181 & G 77,1 & T \\
+LIQSS3 & G 474 & G 49,4 & G 7,45 \\
+MLIQSS1 & G 134 & T & T \\
+MLIQSS2 & G 139 & G 72,7 & T \\
+MLIQSS3 & G 366 & G 35,8 & G 7,21 \\
+QSS1 & G 130 & G 23,5 & F \\
 QSS2 & G 148 & G 33,7 & G 7,02 \\
 QSS3 & G 53,4 & G 10,1 & G 2,22 \\
 QSS4 & G 49,1 & G 19,5 & G 3,26 \\
 \end{longtable}\endgroup
 
-\textbf{Klassische Kontrollen.} EULER G 85,7, RK4 B 2,61e-05, RK45 B 2,06e-05.
+\textbf{Klassische Kontrollen.} EULER G 85,7, RK4 B 2,61e-5, RK45 B 2,06e-5.
 
-\textbf{Statusbilanz.} 2 bestanden, 29 über Budget, 23 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 3 mit Solverfehler.
+\textbf{Statusbilanz.} 2 bestanden, 38 über Budget, 13 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 4 mit Solverfehler.
 
 Hier bestehen zwei der drei klassischen Einstellungen. Das mittlere Quantum von CHEQSS1 enthält trotz Zeitlimit einen gespeicherten Zwischenwert. Die Abnahme erfordert das vollständige Pulsfenster.
 
@@ -9348,28 +9360,28 @@ Hier bestehen zwei der drei klassischen Einstellungen. Das mittlere Quantum von 
 \textbf{Verfahren} & \textbf{0,005} & \textbf{0,001} & \textbf{0,0002} \\
 \midrule\endhead\bottomrule\endfoot\bottomrule\endlastfoot
 CHEQSS1 & B 0,00885 & B 0,00171 & T \\
-CHEQSS2 & B 9,15e-10 & B 7,3e-10 & B 6,43e-10 \\
+CHEQSS2 & B 9,77e-10 & B 7,27e-10 & B 6,09e-10 \\
 CHEQSS3 & B 2,29e-10 & B 2,29e-10 & B 2,29e-10 \\
-CQSS1 & B 0,00456 & B 0,000499 & T \\
+CQSS1 & B 0,00456 & B 0,000499 & B 1,98e-5 \\
 ELIQSS1 & B 0,00885 & B 0,00171 & T \\
-ELIQSS2 & B 1,2e-09 & B 1,86e-10 & B 9,48e-10 \\
+ELIQSS2 & B 1,2e-9 & B 1,86e-10 & B 9,5e-10 \\
 ELIQSS3 & B 2,29e-10 & B 2,29e-10 & B 2,29e-10 \\
-LIQSS-BDF & B 2,02e-09 & B 5,85e-10 & B 2,27e-09 \\
-LIQSS1 & G 17,1 & T & T \\
-LIQSS2 & B 9,99e-11 & B 1,71e-09 & B 7,37e-11 \\
+LIQSS-BDF & B 2,02e-9 & B 5,85e-10 & B 2,27e-9 \\
+LIQSS1 & G 17,1 & G 3,42 & T \\
+LIQSS2 & B 9,99e-11 & B 1,71e-9 & B 7,37e-11 \\
 LIQSS3 & B 2,29e-10 & B 2,29e-10 & B 2,29e-10 \\
-MLIQSS1 & G 17,1 & T & T \\
-MLIQSS2 & B 9,99e-11 & B 1,71e-09 & B 7,37e-11 \\
+MLIQSS1 & G 17,1 & G 3,42 & T \\
+MLIQSS2 & B 9,99e-11 & B 1,71e-9 & B 7,37e-11 \\
 MLIQSS3 & B 2,29e-10 & B 2,29e-10 & B 2,29e-10 \\
-QSS1 & G 17,1 & G 3,43 & T \\
-QSS2 & B 4,05e-07 & B 1,68e-07 & B 7,06e-08 \\
+QSS1 & G 17,1 & G 3,43 & B 0,685 \\
+QSS2 & B 4,05e-7 & B 1,68e-7 & B 7,06e-8 \\
 QSS3 & B 2,29e-10 & B 2,29e-10 & B 2,29e-10 \\
-QSS4 & B 6,15e-06 & B 6,15e-06 & B 6,15e-06 \\
+QSS4 & B 6,15e-6 & B 6,15e-6 & B 6,15e-6 \\
 \end{longtable}\endgroup
 
 \textbf{Klassische Kontrollen.} EULER G 12, RK4 B 2,44e-11, RK45 B 1,17e-10.
 
-\textbf{Statusbilanz.} 44 bestanden, 5 über Budget, 8 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
+\textbf{Statusbilanz.} 46 bestanden, 7 über Budget, 4 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
 
 Dieser Tabellenausschnitt behandelt den springenden Ball. Der eigenständige Diodenvergleich und der Nachweis des algebraischen Lösungszweigs sind in Kapitel 13 zu finden.
 
@@ -10232,7 +10244,7 @@ Die Vollgitterstudie aus v9.17 stellt D2Q9, das klassische Wirbelmodell, Gruppen
 
 \phantomsection\hypertarget{rechenweg}{}\label{rechenweg}
 
-\textbf{Wie weit reichen die Wiederholungen?} In Revision v9.18 wurden alle 1\,513 Einstellungen der vier QSS-Vergleichsreihen neu ausgeführt, ebenso die nativen Kavitätenreihen. Laufprotokolle enthalten auch Zeitlimits und Solverabbruch. Die unabhängige D2Q9-Vollgitterrechnung und die gespeicherten Gewichte der neuronalen Operatoren stammen aus v9.17. Ihre Felder und Fehler dienen als Vergleichsdaten. Die Gegenproben und der Laufvergleich sind im Abschnitt zur \hyperref[qss-revisionsbilanz]{Revisionsbilanz} erläutert.
+\textbf{Wie weit reichen die Wiederholungen?} In Revision v9.19 wurden alle 1\,513 Einstellungen der vier QSS-Vergleichsreihen neu ausgeführt, ebenso die nativen Kavitätenreihen. Laufprotokolle enthalten auch Zeitlimits und Solverabbruch. Die unabhängige D2Q9-Vollgitterrechnung und die gespeicherten Gewichte der neuronalen Operatoren stammen aus v9.17. Ihre Felder und Fehler dienen als Vergleichsdaten. Die Gegenproben und der Laufvergleich sind im Abschnitt zur \hyperref[qss-revisionsbilanz]{Revisionsbilanz} erläutert.
 
 \subsection{Rechenlabor zur Gesamtausgabe}\label{rechenlabor-zur-gesamtausgabe}
 
@@ -10242,7 +10254,7 @@ Die 24 bisherigen Versuchsprogramme, vier ergänzende Gegenproben in einem gemei
 
 \textbf{Projektquellen.} Gliederung, Autorenangabe und Benchmark-Umfang stammen aus \texttt{5H3LL3H5/\allowbreak argesim-hyperposition-\allowbreak benchmarks}, Commit \texttt{16f0f2528fcf77f16898ecd74ad952be2c09eac2}. Die Projektlinks sind auf diesen Stand festgelegt. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/README.md}{Buchgliederung} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/01.tex}{Kapitel 1 im Studienbuch}
 
-Die Aufteilung der Referenzblätter und der 456er-Matrix lässt sich bis zu jeder Familie und Tabellenzeile verfolgen. Die Zählung umfasst die archivierten Konfigurationen einschließlich aller Fehler- und Zeitüberschreitungsstatus. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/referenzen.tex}{Referenzblätter} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/17.tex}{Synthesekapitel} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/evidence/qss-extension.csv}{CSV der Konfigurationen}
+Die Aufteilung der Referenzblätter und der 456er-Matrix lässt sich bis zu jeder Familie und Tabellenzeile verfolgen. Die Zählung umfasst die archivierten Konfigurationen einschließlich aller Fehler- und Zeitüberschreitungsstatus. \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/referenzen.tex}{Referenzblätter} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/17.tex}{Synthesekapitel} · \href{https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/48e43e2ce056395719f7e735832e57ac5b9f2ee3/docs/lehrbuch/gesamtausgabe/daten/qss-extension.csv}{CSV der Konfigurationen}
 
 \textbf{Definitionen der Vergleichsaufgaben.} ARGESIM veröffentlicht Aufgabenbeschreibungen und Varianten. Die dortige Übersicht und der Projektkatalog haben unterschiedliche Umfänge. \href{https://www.argesim.org/benchmarks}{ARGESIM Benchmarks}
 

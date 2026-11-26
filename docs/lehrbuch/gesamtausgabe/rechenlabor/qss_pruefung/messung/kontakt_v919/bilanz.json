@@ -1,0 +1,141 @@
+{
+  "baseline": {
+    "n": 399,
+    "alt": {
+      "pass": 151,
+      "accuracy_miss": 222,
+      "solver_error": 19,
+      "timeout": 1,
+      "event_mismatch": 6
+    },
+    "neu": {
+      "timeout": 15,
+      "pass": 167,
+      "accuracy_miss": 199,
+      "solver_error": 18
+    },
+    "statuswechsel": 33,
+    "qss34": 42,
+    "qss34_statuswechsel": 13
+  },
+  "extension": {
+    "n": 456,
+    "alt": {
+      "event_mismatch": 20,
+      "pass": 222,
+      "accuracy_miss": 151,
+      "timeout": 46,
+      "solver_error": 17
+    },
+    "neu": {
+      "event_mismatch": 13,
+      "timeout": 81,
+      "pass": 224,
+      "accuracy_miss": 126,
+      "solver_error": 12
+    },
+    "statuswechsel": 47,
+    "qss34": 48,
+    "qss34_statuswechsel": 10
+  },
+  "selection": {
+    "n": 520,
+    "alt": {
+      "pass": 292,
+      "accuracy_miss": 164,
+      "timeout": 15,
+      "solver_error": 49
+    },
+    "neu": {
+      "pass": 285,
+      "accuracy_miss": 147,
+      "timeout": 54,
+      "solver_error": 34
+    },
+    "statuswechsel": 51,
+    "qss34": 30,
+    "qss34_statuswechsel": 9,
+    "gemeinsame_kandidaten": 17,
+    "folds": [
+      {
+        "test": "C03",
+        "method": "rk45",
+        "level": "",
+        "status": "pass",
+        "relativ": 1.0
+      },
+      {
+        "test": "C05",
+        "method": "rk45",
+        "level": "",
+        "status": "timeout",
+        "relativ": null
+      },
+      {
+        "test": "C07",
+        "method": "rk45",
+        "level": "",
+        "status": "pass",
+        "relativ": 3.025752915986017
+      },
+      {
+        "test": "C09",
+        "method": "rk45",
+        "level": "",
+        "status": "pass",
+        "relativ": 4.069633820484402
+      },
+      {
+        "test": "C11",
+        "method": "rk45",
+        "level": "",
+        "status": "pass",
+        "relativ": 2.162887602936272
+      },
+      {
+        "test": "C12",
+        "method": "rk45",
+        "level": "",
+        "status": "pass",
+        "relativ": 2.8165291846067975
+      },
+      {
+        "test": "C13",
+        "method": "rk45",
+        "level": "",
+        "status": "pass",
+        "relativ": 1.0
+      },
+      {
+        "test": "C21",
+        "method": "rk45",
+        "level": "",
+        "status": "pass",
+        "relativ": 60.01745314655765
+      }
+    ],
+    "c05": {
+      "accuracy_miss": 3,
+      "timeout": 10,
+      "solver_error": 4
+    }
+  },
+  "rk23": {
+    "n": 138,
+    "alt": {
+      "pass": 108,
+      "accuracy_miss": 18,
+      "solver_error": 4,
+      "event_mismatch": 2,
+      "timeout": 6
+    },
+    "neu": {
+      "pass": 108,
+      "accuracy_miss": 17,
+      "timeout": 13
+    },
+    "statuswechsel": 7,
+    "qss34": 0,
+    "qss34_statuswechsel": 0
+  }
+}

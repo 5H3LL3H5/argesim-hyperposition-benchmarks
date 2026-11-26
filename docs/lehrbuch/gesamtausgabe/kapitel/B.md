@@ -8,7 +8,7 @@
 
 Jedes der acht Modellfenster hat 57 Konfigurationen. Die Tabellen führen jedes Verfahren und jede Einstellung auf. Zur Zeile gehören in der CSV-Datei auch Arbeitszähler, neu gemessene Laufzeiten in Millisekunden und gegebenenfalls die Diagnose.
 
-Je Zelle stehen die Statuskennung und, sofern vorhanden, der auf drei signifikante Stellen gerundete gespeicherte Score. **B** bedeutet bestanden, **G** numerisches Budget überschritten, **T** Zeitlimit, **E** abweichende Zahl von Beobachtungen und **F** Solverfehler. Für abgeschlossene Bewertungen gilt der ungerundete CSV-Wert. 1 unvollständige Zeilen enthalten bereits einen Score aus dem Vorlauf. Die Statuskennung entscheidet über die Verwertbarkeit. Die Schreibweise 2,6e-5 entspricht 0,000026. Die Reihenfolge der Quanten ist grob, mittel, fein. Die drei klassischen Kontrollen besitzen jeweils eine feste Konfiguration. Messzeiten, Kosten und Fehlerdetails stehen für jede Zeile in `daten/qss-extension.csv`.
+Je Zelle stehen die Statuskennung und, sofern vorhanden, der auf drei signifikante Stellen gerundete gespeicherte Score. **B** bedeutet bestanden, **G** numerisches Budget überschritten, **T** Zeitlimit, **E** abweichende Zahl von Beobachtungen und **F** Solverfehler. Für abgeschlossene Bewertungen gilt der ungerundete CSV-Wert. Vier unvollständige Zeilen enthalten bereits einen Score aus dem Vorlauf. Die Statuskennung entscheidet über die Verwertbarkeit. Die Schreibweise 2,6e-5 entspricht 0,000026. Die Reihenfolge der Quanten ist grob, mittel, fein. Die drei klassischen Kontrollen besitzen jeweils eine feste Konfiguration. Messzeiten, Kosten und Fehlerdetails stehen für jede Zeile in `daten/qss-extension.csv`.
 
 Die [Methodenlegende direkt unter der Hauptmatrix](../lehrbuch_numerische_simulation.md#auflage-k18-01) erklärt die Ordnungsziffer, die Schwellenwahl und den steifen Block.
 
@@ -27,14 +27,14 @@ Die [Methodenlegende direkt unter der Hauptmatrix](../lehrbuch_numerische_simula
 | CHEQSS2 | G 41,5 | G 8,37 | G 1,68 |
 | CHEQSS3 | G 19,9 | G 10,2 | G 2,16 |
 | CQSS1 | F | F | F |
-| ELIQSS1 | G 9,4 | G 1,22 | T |
+| ELIQSS1 | G 9,4 | G 1,22 | B 0,199 |
 | ELIQSS2 | G 28,6 | G 4,39 | G 1,11 |
 | ELIQSS3 | G 45 | G 5,15 | B 0,692 |
 | LIQSS-BDF | T | T | T |
-| LIQSS1 | G 77,2 | T | T |
+| LIQSS1 | G 77,2 | G 19,1 | T |
 | LIQSS2 | T | T | T |
 | LIQSS3 | G 72,9 | G 24,7 | G 4,59 |
-| MLIQSS1 | G 77,2 | T | T |
+| MLIQSS1 | G 77,2 | G 19,1 | T |
 | MLIQSS2 | T | T | T |
 | MLIQSS3 | G 72,9 | G 24,7 | G 4,59 |
 | QSS1 | G 96 | G 20,4 | G 4,19 |
@@ -42,9 +42,9 @@ Die [Methodenlegende direkt unter der Hauptmatrix](../lehrbuch_numerische_simula
 | QSS3 | T | T | T |
 | QSS4 | T | T | T |
 
-**Klassische Kontrollen.** EULER G 1,07, RK4 B 4,58e-11, RK45 B 1,06e-06.
+**Klassische Kontrollen.** EULER G 1,07, RK4 B 4,58e-11, RK45 B 1,06e-6.
 
-**Statusbilanz.** 3 bestanden, 30 über Budget, 21 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 3 mit Solverfehler.
+**Statusbilanz.** 4 bestanden, 32 über Budget, 18 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 3 mit Solverfehler.
 
 Am geschalteten Verstärker entscheidet das gewählte kurze Zeitfenster. Vergleichen Sie Spannungen und Ströme komponentenweise, bevor Sie die Zähler eines erfolgreichen Laufs interpretieren.
 
@@ -60,27 +60,27 @@ Am geschalteten Verstärker entscheidet das gewählte kurze Zeitfenster. Verglei
 | Verfahren | 0,005 | 0,001 | 0,0002 |
 |---|---|---|---|
 | CHEQSS1 | G 135 | G 16,2 | T |
-| CHEQSS2 | T | T | T |
+| CHEQSS2 | E | T | E |
 | CHEQSS3 | T | T | T |
 | CQSS1 | F | F | F |
 | ELIQSS1 | G 135 | G 16,2 | T |
-| ELIQSS2 | T | T | T |
+| ELIQSS2 | E | T | T |
 | ELIQSS3 | T | T | T |
-| LIQSS-BDF | T | T | T |
-| LIQSS1 | E | T | T |
+| LIQSS-BDF | G 191 | G 39,5 | G 7,57 |
+| LIQSS1 | E | E | T |
 | LIQSS2 | T | T | T |
-| LIQSS3 | T | E | E |
-| MLIQSS1 | E | T | T |
+| LIQSS3 | E | E | E |
+| MLIQSS1 | E | E | T |
 | MLIQSS2 | T | T | T |
-| MLIQSS3 | T | E | E |
+| MLIQSS3 | E | E | E |
 | QSS1 | T | T | T |
 | QSS2 | T | T | T |
 | QSS3 | T | T | T |
 | QSS4 | T | T | T |
 
-**Klassische Kontrollen.** EULER T, RK4 T, RK45 T.
+**Klassische Kontrollen.** EULER F, RK4 T, RK45 F.
 
-**Statusbilanz.** 0 bestanden, 4 über Budget, 44 mit Zeitlimit, 6 mit abweichender Beobachtungszahl, 3 mit Solverfehler.
+**Statusbilanz.** 0 bestanden, 7 über Budget, 32 mit Zeitlimit, 13 mit abweichender Beobachtungszahl, 5 mit Solverfehler.
 
 Keine Einstellung der historischen Matrix erfüllt hier den Auftrag. Kapitel 11 beschreibt ein getrenntes Radau/BDF-Experiment mit korrekt lokalisierten Schaltungen. Es hat eigene Budgets.
 
@@ -98,25 +98,25 @@ Keine Einstellung der historischen Matrix erfüllt hier den Auftrag. Kapitel 11 
 | CHEQSS1 | B 0,872 | B 0,0805 | T |
 | CHEQSS2 | G 7,71 | G 1,39 | B 0,238 |
 | CHEQSS3 | G 6,41 | G 1,28 | B 0,351 |
-| CQSS1 | B 0,249 | B 0,0123 | T |
+| CQSS1 | B 0,249 | B 0,0123 | B 0,000444 |
 | ELIQSS1 | B 0,872 | B 0,0805 | T |
 | ELIQSS2 | G 7,19 | G 1,65 | B 0,319 |
 | ELIQSS3 | G 3,81 | B 0,822 | B 0,166 |
-| LIQSS-BDF | T | T | T |
-| LIQSS1 | G 16,2 | T | T |
+| LIQSS-BDF | B 0,0121 | B 0,0121 | B 0,0121 |
+| LIQSS1 | G 16,2 | G 3 | T |
 | LIQSS2 | G 17,9 | G 3,35 | B 0,626 |
 | LIQSS3 | G 27,2 | G 5,18 | B 0,947 |
-| MLIQSS1 | G 16,2 | T | T |
-| MLIQSS2 | G 16,8 | G 3,35 | B 0,626 |
+| MLIQSS1 | G 16,2 | G 3 | T |
+| MLIQSS2 | G 15,7 | G 3,35 | B 0,626 |
 | MLIQSS3 | G 26,7 | G 5,18 | B 0,947 |
-| QSS1 | G 14,4 | G 2,88 | T |
+| QSS1 | G 14,4 | G 2,88 | B 0,566 |
 | QSS2 | G 8,36 | G 1,58 | B 0,295 |
 | QSS3 | G 7,13 | G 1,49 | B 0,269 |
 | QSS4 | G 3,29 | B 0,765 | B 0,217 |
 
-**Klassische Kontrollen.** EULER G 4,19, RK4 B 3,78e-09, RK45 B 3,25e-06.
+**Klassische Kontrollen.** EULER G 4,19, RK4 B 3,78e-9, RK45 B 3,25e-6.
 
-**Statusbilanz.** 21 bestanden, 25 über Budget, 11 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
+**Statusbilanz.** 26 bestanden, 27 über Budget, 4 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
 
 Beim Stiftpendel ist eine kleine Zeitabweichung von einer falschen Kontaktfolge zu unterscheiden. Die kartesische Bindungsprüfung in Kapitel 13 ist ein zusätzlicher Versuchsaufbau.
 
@@ -134,7 +134,7 @@ Beim Stiftpendel ist eine kleine Zeitabweichung von einer falschen Kontaktfolge 
 | CHEQSS1 | G 1,26 | B 0,0517 | B 0,00158 |
 | CHEQSS2 | G 2,37 | B 0,416 | B 0,0582 |
 | CHEQSS3 | G 2,3 | B 0,409 | B 0,0652 |
-| CQSS1 | B 0,038 | B 0,00194 | B 7,8e-05 |
+| CQSS1 | B 0,038 | B 0,00194 | B 7,8e-5 |
 | ELIQSS1 | G 1,26 | B 0,0517 | B 0,00158 |
 | ELIQSS2 | G 2,4 | B 0,44 | B 0,0714 |
 | ELIQSS3 | G 2,38 | B 0,451 | B 0,0816 |
@@ -148,9 +148,9 @@ Beim Stiftpendel ist eine kleine Zeitabweichung von einer falschen Kontaktfolge 
 | QSS1 | B 0,539 | B 0,129 | B 0,0265 |
 | QSS2 | B 0,0117 | B 0,0117 | B 0,0117 |
 | QSS3 | B 0,00015 | B 0,00015 | B 0,00015 |
-| QSS4 | B 4,42e-06 | B 4,42e-06 | B 4,42e-06 |
+| QSS4 | B 4,42e-6 | B 4,42e-6 | B 4,42e-6 |
 
-**Klassische Kontrollen.** EULER B 0,0265, RK4 B 2,19e-11, RK45 B 4,02e-09.
+**Klassische Kontrollen.** EULER B 0,0265, RK4 B 2,19e-11, RK45 B 4,02e-9.
 
 **Statusbilanz.** 46 bestanden, 11 über Budget, 0 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
 
@@ -167,18 +167,18 @@ Das Raster bewertet 16 Abtastzeiten. Für die langen Plateaus der veröffentlich
 
 | Verfahren | 0,005 | 0,001 | 0,0002 |
 |---|---|---|---|
-| CHEQSS1 | B 0,494 | B 0,0255 | T |
+| CHEQSS1 | B 0,494 | B 0,0255 | T 0,00258 |
 | CHEQSS2 | B 0,302 | B 0,089 | B 0,0161 |
 | CHEQSS3 | G 1,32 | B 0,213 | B 0,0284 |
 | CQSS1 | B 0,287 | B 0,0309 | B 0,00262 |
-| ELIQSS1 | B 0,494 | B 0,0255 | T |
+| ELIQSS1 | B 0,494 | B 0,0255 | T 0,00258 |
 | ELIQSS2 | B 0,483 | B 0,116 | B 0,0186 |
 | ELIQSS3 | G 1,42 | B 0,266 | B 0,0468 |
 | LIQSS-BDF | B 0,000374 | B 0,000181 | B 0,000181 |
-| LIQSS1 | B 0,45 | T | T |
+| LIQSS1 | B 0,45 | B 0,084 | T |
 | LIQSS2 | B 0,999 | B 0,21 | B 0,04 |
 | LIQSS3 | G 1,52 | B 0,307 | B 0,0619 |
-| MLIQSS1 | B 0,45 | T | T |
+| MLIQSS1 | B 0,45 | B 0,084 | T |
 | MLIQSS2 | B 0,999 | B 0,21 | B 0,04 |
 | MLIQSS3 | G 1,52 | B 0,307 | B 0,0619 |
 | QSS1 | B 0,693 | B 0,167 | B 0,0371 |
@@ -186,9 +186,9 @@ Das Raster bewertet 16 Abtastzeiten. Für die langen Plateaus der veröffentlich
 | QSS3 | B 0,0576 | B 0,0437 | B 0,00488 |
 | QSS4 | B 0,00201 | B 0,00201 | B 0,00201 |
 
-**Klassische Kontrollen.** EULER B 0,192, RK4 B 1,73e-11, RK45 B 1,71e-08.
+**Klassische Kontrollen.** EULER B 0,192, RK4 B 1,73e-11, RK45 B 1,71e-8.
 
-**Statusbilanz.** 47 bestanden, 4 über Budget, 6 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
+**Statusbilanz.** 49 bestanden, 4 über Budget, 4 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
 
 Bei LIQSS1 und dem kleinsten Quantum steht ein Zwischenwert von 0,0294 im Archiv. Das Zeitlimit beendet die Messung. Der Status T bleibt erhalten.
 
@@ -203,28 +203,28 @@ Bei LIQSS1 und dem kleinsten Quantum steht ein Zwischenwert von 0,0294 im Archiv
 
 | Verfahren | 0,005 | 0,001 | 0,0002 |
 |---|---|---|---|
-| CHEQSS1 | B 1,78e-12 | T | T |
+| CHEQSS1 | B 1,78e-12 | B 1,78e-12 | T |
 | CHEQSS2 | B 0 | B 0 | B 0 |
 | CHEQSS3 | B 0 | B 0 | B 0 |
-| CQSS1 | B 0 | B 0 | T |
-| ELIQSS1 | B 1,78e-12 | T | T |
+| CQSS1 | B 0 | B 0 | T 2,59e-10 |
+| ELIQSS1 | B 1,78e-12 | B 1,78e-12 | T |
 | ELIQSS2 | B 0 | B 0 | B 0 |
 | ELIQSS3 | B 0 | B 0 | B 0 |
 | LIQSS-BDF | B 8,88e-13 | B 4,44e-13 | B 2,22e-13 |
 | LIQSS1 | B 1,78e-12 | T | T |
 | LIQSS2 | B 0 | B 0 | B 0 |
 | LIQSS3 | B 0 | B 0 | B 0 |
-| MLIQSS1 | B 1,78e-12 | T | T |
+| MLIQSS1 | B 1,78e-12 | B 1,78e-12 | T |
 | MLIQSS2 | B 0 | B 0 | B 0 |
 | MLIQSS3 | B 0 | B 0 | B 0 |
-| QSS1 | B 2,66e-12 | T | T |
+| QSS1 | B 2,66e-12 | B 2,66e-12 | B 3,27e-10 |
 | QSS2 | B 0 | B 0 | B 0 |
 | QSS3 | B 0 | B 0 | B 0 |
 | QSS4 | B 0 | B 0 | B 0 |
 
 **Klassische Kontrollen.** EULER B 2e-11, RK4 B 2e-11, RK45 B 0.
 
-**Statusbilanz.** 46 bestanden, 0 über Budget, 11 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
+**Statusbilanz.** 51 bestanden, 0 über Budget, 6 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
 
 Eine nahezu verschwindende Fehlerzahl passt zu den geradlinigen Flugbahnen im elastischen Fenster. Für unelastische oder zufallsabhängige Stöße ändern sich die Zielgrößen.
 
@@ -240,27 +240,27 @@ Eine nahezu verschwindende Fehlerzahl passt zu den geradlinigen Flugbahnen im el
 | Verfahren | 0,005 | 0,001 | 0,0002 |
 |---|---|---|---|
 | CHEQSS1 | G 20,1 | T | T |
-| CHEQSS2 | G 93,2 | G 27,3 | T |
-| CHEQSS3 | G 51,3 | G 11,1 | T 2,53 |
+| CHEQSS2 | G 93,2 | G 27,3 | G 6,2 |
+| CHEQSS3 | G 51,3 | G 11,1 | G 2,52 |
 | CQSS1 | F | F | F |
 | ELIQSS1 | G 20,1 | T | T |
-| ELIQSS2 | G 67,2 | G 28,9 | T |
+| ELIQSS2 | G 67,2 | G 28,9 | T 5,52 |
 | ELIQSS3 | G 92,4 | G 19,6 | G 2,74 |
-| LIQSS-BDF | T | T | T |
-| LIQSS1 | T | T | T |
-| LIQSS2 | G 181 | T | T |
-| LIQSS3 | G 474 | G 49,4 | T |
-| MLIQSS1 | T | T | T |
-| MLIQSS2 | G 139 | T | T |
-| MLIQSS3 | G 366 | G 35,8 | T |
-| QSS1 | G 130 | G 23,5 | T |
+| LIQSS-BDF | G 179 | T | T |
+| LIQSS1 | G 134 | T | T |
+| LIQSS2 | G 181 | G 77,1 | T |
+| LIQSS3 | G 474 | G 49,4 | G 7,45 |
+| MLIQSS1 | G 134 | T | T |
+| MLIQSS2 | G 139 | G 72,7 | T |
+| MLIQSS3 | G 366 | G 35,8 | G 7,21 |
+| QSS1 | G 130 | G 23,5 | F |
 | QSS2 | G 148 | G 33,7 | G 7,02 |
 | QSS3 | G 53,4 | G 10,1 | G 2,22 |
 | QSS4 | G 49,1 | G 19,5 | G 3,26 |
 
-**Klassische Kontrollen.** EULER G 85,7, RK4 B 2,61e-05, RK45 B 2,06e-05.
+**Klassische Kontrollen.** EULER G 85,7, RK4 B 2,61e-5, RK45 B 2,06e-5.
 
-**Statusbilanz.** 2 bestanden, 29 über Budget, 23 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 3 mit Solverfehler.
+**Statusbilanz.** 2 bestanden, 38 über Budget, 13 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 4 mit Solverfehler.
 
 Hier bestehen zwei der drei klassischen Einstellungen. Das mittlere Quantum von CHEQSS1 enthält trotz Zeitlimit einen gespeicherten Zwischenwert. Die Abnahme erfordert das vollständige Pulsfenster.
 
@@ -276,27 +276,27 @@ Hier bestehen zwei der drei klassischen Einstellungen. Das mittlere Quantum von 
 | Verfahren | 0,005 | 0,001 | 0,0002 |
 |---|---|---|---|
 | CHEQSS1 | B 0,00885 | B 0,00171 | T |
-| CHEQSS2 | B 9,15e-10 | B 7,3e-10 | B 6,43e-10 |
+| CHEQSS2 | B 9,77e-10 | B 7,27e-10 | B 6,09e-10 |
 | CHEQSS3 | B 2,29e-10 | B 2,29e-10 | B 2,29e-10 |
-| CQSS1 | B 0,00456 | B 0,000499 | T |
+| CQSS1 | B 0,00456 | B 0,000499 | B 1,98e-5 |
 | ELIQSS1 | B 0,00885 | B 0,00171 | T |
-| ELIQSS2 | B 1,2e-09 | B 1,86e-10 | B 9,48e-10 |
+| ELIQSS2 | B 1,2e-9 | B 1,86e-10 | B 9,5e-10 |
 | ELIQSS3 | B 2,29e-10 | B 2,29e-10 | B 2,29e-10 |
-| LIQSS-BDF | B 2,02e-09 | B 5,85e-10 | B 2,27e-09 |
-| LIQSS1 | G 17,1 | T | T |
-| LIQSS2 | B 9,99e-11 | B 1,71e-09 | B 7,37e-11 |
+| LIQSS-BDF | B 2,02e-9 | B 5,85e-10 | B 2,27e-9 |
+| LIQSS1 | G 17,1 | G 3,42 | T |
+| LIQSS2 | B 9,99e-11 | B 1,71e-9 | B 7,37e-11 |
 | LIQSS3 | B 2,29e-10 | B 2,29e-10 | B 2,29e-10 |
-| MLIQSS1 | G 17,1 | T | T |
-| MLIQSS2 | B 9,99e-11 | B 1,71e-09 | B 7,37e-11 |
+| MLIQSS1 | G 17,1 | G 3,42 | T |
+| MLIQSS2 | B 9,99e-11 | B 1,71e-9 | B 7,37e-11 |
 | MLIQSS3 | B 2,29e-10 | B 2,29e-10 | B 2,29e-10 |
-| QSS1 | G 17,1 | G 3,43 | T |
-| QSS2 | B 4,05e-07 | B 1,68e-07 | B 7,06e-08 |
+| QSS1 | G 17,1 | G 3,43 | B 0,685 |
+| QSS2 | B 4,05e-7 | B 1,68e-7 | B 7,06e-8 |
 | QSS3 | B 2,29e-10 | B 2,29e-10 | B 2,29e-10 |
-| QSS4 | B 6,15e-06 | B 6,15e-06 | B 6,15e-06 |
+| QSS4 | B 6,15e-6 | B 6,15e-6 | B 6,15e-6 |
 
 **Klassische Kontrollen.** EULER G 12, RK4 B 2,44e-11, RK45 B 1,17e-10.
 
-**Statusbilanz.** 44 bestanden, 5 über Budget, 8 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
+**Statusbilanz.** 46 bestanden, 7 über Budget, 4 mit Zeitlimit, 0 mit abweichender Beobachtungszahl, 0 mit Solverfehler.
 
 Dieser Tabellenausschnitt behandelt den springenden Ball. Der eigenständige Diodenvergleich und der Nachweis des algebraischen Lösungszweigs sind in Kapitel 13 zu finden.
 

@@ -1,3 +1,13 @@
+# QSS-Prüflabor zur Ausgabe v9.19
+
+Der Kalenderstand `3e7c1a0` entscheidet mehrdeutige Kontakte am tatsächlich dargestellten Segment. Das Experiment mit ganzzahligen Koeffizienten meldet die doppelte Nullstelle bei 1/5. Bei den einzeln gerundeten Binär64-Koeffizienten derselben normierten Formel meldet es die einzige positive Wurzel nahe 0,7. Diese Unterscheidung gilt auch für die Interpretation numerisch geschätzter Taylor-Daten.
+
+Die aktuellen Primärprotokolle, alle 82 erfolgreichen Vertragsproben, zwölf 45-Sekunden-Gegenläufe, beide Vollgitter-Segmentprüfungen und der [paarweise Vergleich](messung/kontakt_v919/vergleich.csv) stehen in `messung/kontakt_v919/`. Vom entpackten Labor stellt `python kontaktvergleich.py` den Vergleich aus den vier Primärpaaren wieder her. Die vier Matrizen wurden auf identischen Einstellungsschlüsseln geprüft. 34 Statuspaare enthalten einen Wechsel zu oder von einer Zeitüberschreitung. 121 von 1.272 beidseitig protokollierten Fehlerwerten unterscheiden sich. Die Basisreihe benutzt einen Rohfehler mit fallbezogener Einheit, die übrigen Reihen einen normierten Score.
+
+In der Kavität wurden 221 Klein- und Kurzzeitversuche wiederholt. Alle 198 vollständigen Feldverläufe und alle 19 Quantisiererkontrollen wurden aus den gespeicherten Feldern geprüft. Auf dem Vollgitter wurden die 19 Einzelkalender in drei Anordnungen ausgeführt, dazu vier CQSS-Rasterverschiebungen. Das vollständige Labor enthält Messfelder und Zeitprotokolle. Spätere Vergleiche mit D2Q9 und Operatoren verwenden die archivierten unabhängigen Referenzen.
+
+Das vollständige Methodenregister der aktuellen Wiederholung liegt unter [messung/kontakt_v919/methodenregister.csv](messung/kontakt_v919/methodenregister.csv). Die folgenden Abschnitte beschreiben die älteren Vergleiche und die Versuchsbefehle. Die vier Studienprogramme und die dort festgelegten Quanten und Fenster gelten auch für die aktuelle Wiederholung.
+
 # QSS-Verfahrensprüfung zur Gesamtausgabe v9.18
 
 ## Welcher Code wurde geprüft?

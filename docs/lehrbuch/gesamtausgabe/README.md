@@ -1,10 +1,10 @@
 # Numerische Simulation dynamischer Systeme
 
-Christian Stenzel · Gesamtausgabe · Revision v9.18
+Christian Stenzel · Gesamtausgabe · Revision v9.19
 
-## Kalenderkorrektur und Messreihen v9.18
+## Kontaktprüfung und Messreihen v9.19
 
-Die Druckfassung umfasst 492 Seiten mit 18 Fachkapiteln, vier Anhängen und 90 nummerierten Abbildungen. Die Revisionsbilanz vergleicht 1.513 Konfigurationen. Ein vollständiger Gegenlauf auf dem geprüften Solverstand bestätigt alle 1.176 beidseitig verfügbaren Fehlerwerte. [Gegenlauf nach PR-Review](rechenlabor/qss_pruefung/messung/skalenfix_c635504/skalenvergleich.csv) Im Klein- und Kurzzeitlabor wurden 185 gespeicherte Feldverläufe aus 221 Einstellungen unabhängig nachgerechnet. Die übrigen Einstellungen bleiben mit ihrem Abbruchstatus im Datensatz. [Revisionsvergleich](rechenlabor/qss_pruefung/messung/revisionsvergleich.csv) · [Prüfprotokoll und Wiederholung](rechenlabor/qss_pruefung/README.md)
+Die Druckfassung hat 493 Seiten, 18 Fachkapitel, vier Anhänge und 91 nummerierte Abbildungen. Die vier Messreihen umfassen 1.513 überprüfte Konfigurationen. Im Vergleich mit dem Skalierungsfix stimmen die 96 beidseitig vorliegenden QSS3/4-Fehlerwerte überein. Die neue Abbildung 6.8 erklärt, wann ein beinahe verschwindender Abstand tatsächlich eine Bandberührung bedeutet. [Aktuelle Primärdaten und Vergleich](rechenlabor/qss_pruefung/messung/kontakt_v919) · [Verfahren, Bild, Vertragsproben und Einzelbefunde](rechenlabor/qss_pruefung/messung/kontakt_v919/methodenregister.csv)
 
 ## Archivierte Vollgitterstudie v9.17
 
@@ -44,7 +44,7 @@ Kapitel 9 (S. 233–234) vergleicht zehn Populationsverläufe bis t=100. Kapitel
 
 ## Abbildungen und Prüfdaten der Revision v9.13
 
-Die 90 Abbildungen der Gesamtausgabe v9.18 sind im [seitenbezogenen Verzeichnis](rechenlabor/bildpruefung/abbildungsverzeichnis.csv) erfasst. Die Revision v9.13 ergänzte neun Grafiken in den Kapiteln 10 bis 16 und 18. Die fünf neuen Abbildungen der Revision v9.18 stehen in Kapitel 6. Die [Versuchsanleitung](rechenlabor/bildpruefung/README.md) beschreibt die Neuberechnung, den Vergleich mit archivierten Feldern und die Leistungsprofile. Der [Prüfbericht](Pruefbericht_Gesamtlehrbuch.md) ordnet die gemeldeten Befunde der gedruckten Seite zu.
+Die 91 Abbildungen der Gesamtausgabe v9.19 sind im [seitenbezogenen Verzeichnis](rechenlabor/bildpruefung/abbildungsverzeichnis.csv) erfasst. Die Revision v9.13 ergänzte neun Grafiken in den Kapiteln 10 bis 16 und 18. Die fünf neuen Abbildungen der Revision v9.18 stehen in Kapitel 6. Die [Versuchsanleitung](rechenlabor/bildpruefung/README.md) beschreibt die Neuberechnung, den Vergleich mit archivierten Feldern und die Leistungsprofile. Der [Prüfbericht](Pruefbericht_Gesamtlehrbuch.md) ordnet die gemeldeten Befunde der gedruckten Seite zu.
 
 ## Rechenlabor
 
@@ -180,7 +180,7 @@ die kompakte und volle Auslese verglichen. Die Messdaten von v9.7 liegen unter
 
 ## Versuchsstand und Rohdaten
 
-`daten/qss-extension.csv` ist die vollständige historisch gemessene Matrix. Das CSV-Feld `case=C21` bezeichnet hier den Ball. Die anderen Studienfenster stehen in eigenen CSV- oder JSON-Dateien. `rechenlabor/cp2_genauigkeit/` enthält gespeicherte Gitter- und Saitenmessungen. `rechenlabor/cp2_feldlabor/` enthält die Archivmetriken für das ursprüngliche FNO. Die vollständigen historischen Solver-, Trainings- und Rohfeldversuche sind über den in den Kapiteln genannten Versionsstand erreichbar. `daten/quellrevisionen.json` dokumentiert 34 über Git-Blobs identifizierte Text-, Bild- und Datenquellen. Die zur unveränderten Ausführung des Autorenlabors zusätzlich im Laborordner vorhandenen zwei Datendateien sind bytegleich mit den Exemplaren unter `daten/`.
+`daten/qss-extension.csv` enthält die 456 aktuell vermessenen Einstellungen. Das CSV-Feld `case=C21` bezeichnet hier den Ball. Die anderen Studienfenster stehen in eigenen CSV- oder JSON-Dateien. `rechenlabor/cp2_genauigkeit/` enthält gespeicherte Gitter- und Saitenmessungen. `rechenlabor/cp2_feldlabor/` enthält die Archivmetriken für das ursprüngliche FNO. Die vollständigen historischen Solver-, Trainings- und Rohfeldversuche sind über den in den Kapiteln genannten Versionsstand erreichbar. `daten/quellrevisionen.json` dokumentiert 34 über Git-Blobs identifizierte Text-, Bild- und Datenquellen. Die zur unveränderten Ausführung des Autorenlabors zusätzlich im Laborordner vorhandenen zwei Datendateien sind bytegleich mit den Exemplaren unter `daten/`.
 
 Die erneute Auswertung von Archivzahlen ist im Prüfbericht von den hier neu ausgeführten numerischen Versuchen getrennt. `pruefprotokoll.txt` enthält die Ausgabe der Python-Prüfprogramme und den Befund zum C++20-Programm. `Pruefbericht_Gesamtlehrbuch.md` führt die Kapitel mit Seiten und Prüfgrenzen auf.
 

@@ -1,3 +1,7 @@
+## Messstand der Ausgabe v9.19
+
+Die aktuelle [Methodenmatrix](daten/methodenmatrix.csv) stammt aus der Wiederholung mit dem Solver `3e7c1a0`. Im vollständigen Labor gehören die aktuellen Rohfelder und Einzelprotokolle zu derselben Wiederholung. Der folgende ursprüngliche Versuchsaufbau dokumentiert auch frühere Messstände.
+
 # Ergänzungsstudie v9.17
 
 Die erweiterte Studie enthält die Kleinserie und den Vollgittervergleich. [257 × 257 Knoten](vollgitter/README.md) · [Methodenmatrix](vollgitter/daten/methodenmatrix_voll.csv)
