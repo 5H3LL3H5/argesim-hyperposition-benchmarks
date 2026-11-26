@@ -43,6 +43,43 @@ class Cp2PdesLabTests(unittest.TestCase):
             self.assertNotEqual(subprocess.run(command, check=False, capture_output=True).returncode, 0)
             self.assertFalse((root / 'gqss3/run.json').exists())
 
+    def test_c19_archives_keep_distinct_repetitions_and_speedup_baselines(self):
+        verify = run_path(str(LAB / 'skalierung_pruefen.py'))
+        result = verify['summaries']()
+        paired = result['c19_paired_conservative']
+        scaling = result['c19']['conservative']
+        self.assertEqual((paired['archive'], paired['data'], paired['repeats']),
+                         ('PDES_Partitionierung_Messpaket.zip', 'c19_paired.jsonl', 3))
+        for rows, times in ((paired['rows'], [31.7, 353.9]), (scaling, [37.6, 383.7])):
+            one, eight = rows[0], rows[-1]
+            self.assertEqual([one['ranks'], eight['ranks']], [1, 8])
+            self.assertEqual([round(r['median_s'] * 1000, 1) for r in (one, eight)], times)
+            self.assertEqual(eight['speedup'], one['median_s'] / eight['median_s'])
+
+    def test_frozen_restart_sources_and_seed_hashes(self):
+        check = run_path(str(LAB / 'fortsetzungsprobe.py'))
+        manifest = check['verify_manifest']()
+        self.assertNotEqual(manifest['historical_integrator_sha256'],
+                            manifest['continuation_integrator_sha256'])
+        self.assertFalse(manifest['historical_integrator_bytes_available'])
+        self.assertEqual(manifest['runtime'], {'python': '3.12.14', 'numpy': '2.3.5', 'scipy': '1.17.0'})
+
+    def test_mpi_kernel_preparation_works_without_checkout_archive(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            offline, output1, output2 = (root / name for name in ('offline', 'a', 'b'))
+            for path in (offline, output1, output2):
+                path.mkdir()
+            source = 'rechenlabor/kavitaet_vollgitter/src/d2q9.cpp'
+            with zipfile.ZipFile(book.PACKAGES / 'Laborquellen.zip') as archive:
+                archive.extract(source, offline)
+            self.assertFalse((offline / 'docs').exists())
+            command = [sys.executable, str(LAB / 'prepare_d2q9.py')]
+            subprocess.run([*command, str(book.ROOT)], cwd=output1, check=True, capture_output=True)
+            subprocess.run([*command, str(offline)], cwd=output2, check=True, capture_output=True)
+            for name in ('d2q9_book.cpp', 'kernel_local.hpp'):
+                self.assertEqual((output1 / name).read_bytes(), (output2 / name).read_bytes())
+
     def test_completion_requires_the_endpoint_and_every_observation(self):
         verifier = run_path(str(LAB / 'skalierung_pruefen.py'))
         check = verifier['check_component_status']
