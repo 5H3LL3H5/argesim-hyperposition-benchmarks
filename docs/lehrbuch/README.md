@@ -12,6 +12,12 @@ Im Revisionsvergleich sind die Ergebnisse von 399 Basisfällen, 456 erweiterten 
 
 [1.513 Vergleichszeilen (CSV)](gesamtausgabe/rechenlabor/qss_pruefung/messung/revisionsvergleich.csv) · [Wiederholungsprotokoll](gesamtausgabe/rechenlabor/qss_pruefung/README.md) · [QSS-Prüflabor und Bachelor-Übungen (ZIP)](../ARGESIM_Bachelor_Rechenlabor.zip?raw=true) · [Vollständiges Labor mit Messfeldern und Modellgewichten](gesamtausgabe/Labor.md)
 
+## Forschungsstudie zur Parallelisierung von QSS
+
+Wann darf ein logischer Prozess bis zur nächsten vorhergesagten Schwelle vorausrechnen? Die Studie zu Kapitel 6 leitet sichere Zeitgrenzen und die Bedingungen für lokale Rollbacks her. Sie enthält einen ausführbaren partitionierten Kalender und den Versuchsplan für C19R und CP1/C mit vier und acht Prozessen.
+
+[QSS und parallele Ereignissimulation](QSS_PDES_Studie.md) · [Python-Referenz](../../argesim_benchmarks/qss_pdes_calendar.py) · [Kalender- und Kausalitätstests](../../tests/test_qss_pdes_calendar.py)
+
 ## Druckausgabe und Nachweise
 
 `python scripts/build_studienbuch.py --check` prüft die Ausgaben und ihre Eingaben mit der Python-Standardbibliothek. Der Drucksatz verwendet Pandoc, XeLaTeX und PyMuPDF. Der Build prüft das erzeugte TeX gegen das Manuskript und überprüft die PDF-Navigation. Der Aktionslauf **Studienbuch** liefert zusätzlich das vollständige Labor als ein ZIP-Archiv.
