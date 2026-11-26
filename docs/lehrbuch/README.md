@@ -16,7 +16,7 @@ Im Revisionsvergleich sind die Ergebnisse von 399 Basisfällen, 456 erweiterten 
 
 Wann darf ein logischer Prozess bis zur nächsten vorhergesagten Schwelle vorausrechnen? Die Studie zu Kapitel 6 leitet sichere Zeitgrenzen und die Bedingungen für lokale Rollbacks her. Sie enthält einen ausführbaren partitionierten Kalender und den Versuchsplan für C19R und CP1/C mit vier und acht Prozessen.
 
-[QSS und parallele Ereignissimulation](QSS_PDES_Studie.md) · [Python-Referenz](../../argesim_benchmarks/qss_pdes_calendar.py) · [Kalender- und Kausalitätstests](../../tests/test_qss_pdes_calendar.py)
+[Forschungsstudie als PDF](QSS_PDES_Studie.pdf) · [Text und Quellen](QSS_PDES_Studie.md) · [Messwerte der seriellen Kontrollläufe](QSS_PDES_Referenzen.json) · [Python-Referenz](../../argesim_benchmarks/qss_pdes_calendar.py) · [Kalender- und Kausalitätstests](../../tests/test_qss_pdes_calendar.py)
 
 ## Druckausgabe und Nachweise
 
