@@ -70,19 +70,34 @@ def _automatic_derivative_step(q: Sequence[Sequence[float]], order: int) -> floa
     return step
 
 
+# Positive-node integer weights of the centred interpolation rows.
+# Pair by parity to cancel symmetric or antisymmetric samples before weighting.
+_CENTRED_TAYLOR_STENCILS = {
+    2: ((12, (8, -1)), (24, (16, -1))),
+    3: ((60, (45, -9, 1)), (360, (270, -27, 2)), (48, (-13, 8, -1))),
+}
+
+
 def _rhs_taylor(
     problem: InitialValueProblem,
     time: float,
     q: Sequence[Sequence[float]],
     order: int,
     derivative_step: float | None,
+    *,
+    symmetric_stencil: bool = False,
 ) -> tuple[list[list[float]], int]:
     """Estimate coefficients of ``f(q(time+s))`` through degree ``order-1``."""
 
     radius = order - 1
-    nodes = tuple(range(-radius, radius + 1))
-    inverse = interpolation_inverse(radius)
+    stencil = _CENTRED_TAYLOR_STENCILS[radius] if symmetric_stencil else None
     step = derivative_step or _automatic_derivative_step(q, order)
+    if symmetric_stencil and derivative_step is None:
+        # Keep the automatic step within a factor of two of its error-balance
+        # estimate, but avoid rounding the grid for dyadic trajectories.
+        _, exponent = math.frexp(step)
+        step = math.ldexp(1.0, exponent - 1)
+    nodes = range(-radius, radius + 1)
     samples: list[tuple[float, ...]] = []
     for node in nodes:
         elapsed = node * step
@@ -99,10 +114,32 @@ def _rhs_taylor(
         for power in range(1, order):
             # Every derivative row annihilates a constant. Enforce this before
             # differencing, especially for fast dynamics and very short stencils.
-            value = math.fsum(
-                inverse[power][sample_index] * (sample[state_index] - centre)
-                for sample_index, sample in enumerate(samples)
-            )
+            value = None
+            if stencil is not None:
+                denominator, weights = stencil[power - 1]
+                if power % 2:
+                    pairs = [
+                        samples[radius + j][state_index]
+                        - samples[radius - j][state_index]
+                        for j in range(1, radius + 1)
+                    ]
+                else:
+                    pairs = [
+                        (samples[radius + j][state_index] - centre)
+                        + (samples[radius - j][state_index] - centre)
+                        for j in range(1, radius + 1)
+                    ]
+                weighted = [weight * pair for weight, pair in zip(weights, pairs)]
+                if all(abs(term) < sys.float_info.max / radius for term in weighted):
+                    value = math.fsum(weighted) / denominator
+            if value is None:
+                # Retain the normalized weights for samples large enough to
+                # overflow the integer-weight formulation.
+                row = interpolation_inverse(radius)[power]
+                value = math.fsum(
+                    weight * (sample[state_index] - centre)
+                    for weight, sample in zip(row, samples)
+                )
             for _ in range(power):
                 value /= step
             coefficients[state_index][power] = value
@@ -127,19 +164,23 @@ def _bootstrap_explicit_polynomials(
     values: Sequence[float],
     order: int,
     derivative_step: float | None,
+    *,
+    symmetric_stencil: bool = False,
 ) -> tuple[list[list[float]], list[list[float]], int]:
     q = [[float(value)] + [0.0] * (order - 1) for value in values]
     evaluations = 0
     x: list[list[float]] = []
     for _ in range(order):
         rhs_coefficients, used = _rhs_taylor(
-            problem, time, q, order, derivative_step
+            problem, time, q, order, derivative_step, symmetric_stencil=symmetric_stencil
         )
         evaluations += used
         x = _state_polynomials(values, rhs_coefficients, order)
         for state_index in range(problem.dimension):
             q[state_index][1:] = x[state_index][1:order]
-    rhs_coefficients, used = _rhs_taylor(problem, time, q, order, derivative_step)
+    rhs_coefficients, used = _rhs_taylor(
+        problem, time, q, order, derivative_step, symmetric_stencil=symmetric_stencil
+    )
     evaluations += used
     return q, _state_polynomials(values, rhs_coefficients, order), evaluations
 
@@ -190,7 +231,7 @@ def _qss_high_order(
     quanta = _quantum_vector(quantum, problem.dimension)
     time = problem.t0
     q, x, evaluations = _bootstrap_explicit_polynomials(
-        problem, time, problem.y0, order, finite_difference_step
+        problem, time, problem.y0, order, finite_difference_step, symmetric_stencil=True
     )
     times = [time]
     states = [tuple(problem.y0)]
@@ -239,7 +280,7 @@ def _qss_high_order(
             q[index][:] = x[index][:order]
 
         rhs_coefficients, used = _rhs_taylor(
-            problem, time, q, order, finite_difference_step
+            problem, time, q, order, finite_difference_step, symmetric_stencil=True
         )
         evaluations += used
         x = _state_polynomials(
