@@ -39,8 +39,8 @@
       "Kavitaet_Kleingitter_Felder.zip.006",
       "Kavitaet_Kleingitter_Felder.zip.007"
     ],
-    "sha256": "10df78251af534418e1fc766580efb63f1e6dbf14bce1e44d1b9433a89fe037c",
-    "size": 18899322
+    "sha256": "c15d3a06358bb55cbb1cd6bc481106076754cbf6e8712aa760f3146e30aa9434",
+    "size": 19215583
   },
   "Kavitaet_Operatorfelder_Korrektur.zip": {
     "parts": [
@@ -99,8 +99,8 @@
       "Kavitaet_Vollgitter_Felder.zip.008",
       "Kavitaet_Vollgitter_Felder.zip.009"
     ],
-    "sha256": "0f42be83be1b1411c47f2e07dd418f96647f9ec1ca0fcf171ecd28c7fd762114",
-    "size": 25974656
+    "sha256": "8d59bcec95de6c29df7626df01e35cf9125e4d6c704777ded3bb885883b51697",
+    "size": 25978510
   },
   "Kavitaet_basis_direkt.zip": {
     "parts": [

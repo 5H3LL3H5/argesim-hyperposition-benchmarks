@@ -1,6 +1,6 @@
 # Abbildungen prüfen und nachrechnen
 
-Christian Stenzel · Numerische Simulation dynamischer Systeme · Register und Bildatlas der Druckfassung v9.18
+Christian Stenzel · Numerische Simulation dynamischer Systeme · Register und Bildatlas der Druckfassung v9.19
 
 Die Tafeln zu CP-Dynamik entstehen im [Labor für CP-Dynamik](../cp_dynamik/README.md). Der neue Fühlervergleich und die zwei ergänzten Tafeln sind im [Revisionslabor](../revisionspruefung/README.md) beschrieben.
 

@@ -1,8 +1,8 @@
 # Numerische Simulation dynamischer Systeme
 
-**Christian Stenzel · Gesamtausgabe v9.18 · 18 Fachkapitel und vier Anhänge**
+**Christian Stenzel · Gesamtausgabe v9.19 · 18 Fachkapitel und vier Anhänge**
 
-Die mathematischen Grundlagen führen von Fehlermaßen und Stabilität zu Zeitintegration, Ereignissen und räumlicher Diskretisierung. Kapitel 6 erklärt die Kalender der QSS-Familie. Kapitel 16 prüft die Verfahren an der CP2-Kavität. Kapitel 18 vergleicht ihre Entscheidungen an den ARGESIM-Modellfenstern. Die Ausgabe enthält 90 nummerierte Abbildungen.
+Die mathematischen Grundlagen führen von Fehlermaßen und Stabilität zu Zeitintegration, Ereignissen und räumlicher Diskretisierung. Kapitel 6 erklärt die Kalender der QSS-Familie. Kapitel 16 prüft die Verfahren an der CP2-Kavität. Kapitel 18 vergleicht ihre Entscheidungen an den ARGESIM-Modellfenstern. Die Ausgabe enthält 91 nummerierte Abbildungen.
 
 [Lehrbuch öffnen (PDF)](../ARGESIM_SOLVER_STUDY.pdf) · [PDF herunterladen](../ARGESIM_SOLVER_STUDY.pdf?raw=true) · [Volltext und Kapitelfahrplan](gesamtausgabe/lehrbuch_numerische_simulation.md) · [Einzelkapitel](gesamtausgabe/kapitel)
 
@@ -10,7 +10,7 @@ Die mathematischen Grundlagen führen von Fehlermaßen und Stabilität zu Zeitin
 
 Im Revisionsvergleich sind die Ergebnisse von 399 Basisfällen, 456 erweiterten Einstellungen, 520 Auswahlversuchen und 138 RK23-Vergleichen paarweise zugeordnet. Die ergänzende Skalierungsprüfung enthält 82 Vertragsproben sowie zwölf direkte Gegenläufe. Die Vollgitterstudie dokumentiert auch die bis zum Zeitlimit erreichten Zustände.
 
-[1.513 Vergleichszeilen (CSV)](gesamtausgabe/rechenlabor/qss_pruefung/messung/revisionsvergleich.csv) · [Wiederholungsprotokoll](gesamtausgabe/rechenlabor/qss_pruefung/README.md) · [QSS-Prüflabor und Bachelor-Übungen (ZIP)](../ARGESIM_Bachelor_Rechenlabor.zip?raw=true) · [Vollständiges Labor mit Messfeldern und Modellgewichten](gesamtausgabe/Labor.md)
+[1.513 Vergleichszeilen (CSV)](gesamtausgabe/rechenlabor/qss_pruefung/messung/kontakt_v919/vergleich.csv) · [Wiederholungsprotokoll](gesamtausgabe/rechenlabor/qss_pruefung/README.md) · [QSS-Prüflabor und Bachelor-Übungen (ZIP)](../ARGESIM_Bachelor_Rechenlabor.zip?raw=true) · [Vollständiges Labor mit Messfeldern und Modellgewichten](gesamtausgabe/Labor.md)
 
 ## Forschungsstudie zur Parallelisierung von QSS
 
@@ -26,7 +26,7 @@ Wann darf ein logischer Prozess bis zur nächsten vorhergesagten Schwelle voraus
 
 ## Kompaktfassung zum Nachschlagen
 
-Die folgenden Markdown-Kapitel bilden die frühere Kurzfassung. Die Gesamtausgabe v9.18 steht oben.
+Die folgenden Markdown-Kapitel bilden die frühere Kurzfassung. Die Gesamtausgabe v9.19 steht oben.
 
 | Kapitel | Leitfrage |
 |---|---|

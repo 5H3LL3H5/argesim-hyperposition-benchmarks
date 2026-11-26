@@ -1,0 +1,15 @@
+{
+  "explizite_nullstellenfaelle": 25,
+  "deterministische_faktorpolynome": 400,
+  "einheitsintervall_mit_startwurzel": true,
+  "oszillator_endwertfehler": {
+    "qss3": 0.0003029285496665759,
+    "qss4": 0.0002323418298293083,
+    "liqss1": 0.0006681091475714379,
+    "liqss2": 0.0008610719026424212,
+    "liqss3": 0.000963064370580322,
+    "eliqss1": 8.216369257575968e-06,
+    "eliqss2": 0.00045499175355346173,
+    "eliqss3": 0.0002887312337006591
+  }
+}

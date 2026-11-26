@@ -1,0 +1,16 @@
+{
+  "regular_configurations": 221,
+  "regular_statuses": {
+    "IntegrationError": 11,
+    "ok": 198,
+    "TimeoutError": 12
+  },
+  "regular_models": {
+    "NS": 186,
+    "map": 35
+  },
+  "completed_field_rechecks": 198,
+  "quantized_controls_verified": 19,
+  "quantized_controls_incomplete": 0,
+  "surrogate_model_case_pairs": 280
+}

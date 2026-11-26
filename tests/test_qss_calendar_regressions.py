@@ -7,7 +7,27 @@ from argesim_benchmarks import InitialValueProblem, solve_ivp
 from argesim_benchmarks.solvers._polynomial import first_positive_root
 
 
+from argesim_benchmarks.solvers.qss import _smallest_nonnegative_root
+
+
 class QssCalendarRegressionTests(unittest.TestCase):
+    def test_threshold_contacts_are_real_roots_of_the_represented_polynomial(self):
+        for sign in (-1, 1):
+            for tail in ([], [0.0, 0.0]):
+                def root(c, horizon=2.0, sign=sign, tail=tail):
+                    return first_positive_root(
+                        [sign * c, -2 * sign, sign, *tail], horizon, time_tolerance=1e-13
+                    )
+                self.assertEqual(_smallest_nonnegative_root(sign, -2*sign, sign*(1+2**-52), 1e-13), math.inf)
+                self.assertEqual(root(1 + 2**-52), math.inf)
+                self.assertEqual(root(1), 1)
+                self.assertAlmostEqual(root(1 - 2**-52), 1 - 2**-26, delta=1e-13)
+                self.assertEqual(root(1, math.nextafter(1, 0)), math.inf)
+        # An irrational repeated root must survive exact square-free reduction.
+        self.assertAlmostEqual(first_positive_root(
+            [4, 0, -4, 0, 1], 2, time_tolerance=1e-13
+        ), math.sqrt(2), delta=1e-13)
+
     def test_subnormal_coefficients_preserve_crossings_and_near_misses(self):
         # t² - 3t + 2 crosses at 1 and 2; t² - 3t + 3 stays positive.
         unit = math.ulp(0.0)

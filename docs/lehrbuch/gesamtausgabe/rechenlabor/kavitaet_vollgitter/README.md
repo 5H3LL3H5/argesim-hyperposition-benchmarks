@@ -1,3 +1,7 @@
+## Messstand der Ausgabe v9.19
+
+Die aktuelle [Methodenmatrix](daten/methodenmatrix_voll.csv) stammt aus der Wiederholung mit dem Solver `3e7c1a0`. Im vollständigen Labor gehören die aktuellen Rohfelder und Einzelprotokolle zu derselben Wiederholung. Der folgende ursprüngliche Versuchsaufbau dokumentiert auch frühere Messstände.
+
 # Die CP2-Kavität auf 257 × 257 Gitterknoten
 ## Messauftrag
 

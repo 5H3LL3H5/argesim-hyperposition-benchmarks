@@ -260,3 +260,9 @@ reuse on rejected trials. The RHS must be deterministic for each `(time, state)`
 known discontinuities belong in separate integration segments. Each solver
 invocation starts with a fresh cache. See the
 [bounded solver review](docs/SOLVER_REVIEW_2026-09-28.md) for regressions and limits.
+
+## Reproducing a high-order boundary contact
+
+The calendar operates on the polynomial represented by its input coefficients. A small residual at an extremum triggers root counting for ambiguous contacts. It does not establish a root. If the physical coefficients are uncertain, evaluate that uncertainty separately from the time tolerance. The three variants of the parabola and the rounded cubic in the regression suite distinguish the two questions.
+
+[Illustrated derivation](docs/lehrbuch/gesamtausgabe/kapitel/06.md#qss-kontakt-nachweis) · [Registry of implementations, tests and figures](docs/lehrbuch/gesamtausgabe/rechenlabor/qss_pruefung/messung/kontakt_v919/methodenregister.csv)

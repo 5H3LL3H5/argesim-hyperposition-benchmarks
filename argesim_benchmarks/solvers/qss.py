@@ -5,6 +5,8 @@ from __future__ import annotations
 import math
 import sys
 from collections.abc import Sequence
+from decimal import Decimal, localcontext
+from fractions import Fraction
 
 from ..ivp import (
     InitialValueProblem,
@@ -110,6 +112,8 @@ def _smallest_nonnegative_root(
         root = -c / b
         return root if root >= 0.0 else math.inf
 
+    if c == 0.0:
+        return 0.0
     scale = max(abs(a), abs(b), abs(c))
     scaled_a = a / scale
     scaled_b = b / scale
@@ -120,7 +124,20 @@ def _smallest_nonnegative_root(
     )
     if discriminant < -roundoff:
         return math.inf
-    square_root = math.sqrt(max(0.0, discriminant))
+    if abs(discriminant) <= roundoff or scaled_a == 0.0 or scaled_c == 0.0:
+        # Decide existence from the actual binary coefficients before taking
+        # a rounded square root. The stable product avoids cancellation.
+        exact = Fraction(b)**2 - 4 * Fraction(a) * Fraction(c)
+        if exact < 0:
+            return math.inf
+        with localcontext() as context:
+            context.prec = 64
+            sqrt_d = (Decimal(exact.numerator) / Decimal(exact.denominator)).sqrt()
+            db = Decimal(b)
+            product = -(db + sqrt_d.copy_sign(db)) / 2
+            candidates = (product / Decimal(a), Decimal(c) / product)
+            return float(min((r for r in candidates if r >= 0), default=math.inf))
+    square_root = math.sqrt(discriminant)
     root_product = -0.5 * (
         scaled_b + math.copysign(square_root, scaled_b)
     )

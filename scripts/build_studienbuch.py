@@ -9,6 +9,7 @@ import io
 import json
 import os
 import re
+import runpy
 import shutil
 import subprocess
 import sys
@@ -33,7 +34,8 @@ AUDIT = Path("rechenlabor/qss_pruefung")
 COMPARISON = AUDIT / "messung/revisionsvergleich.csv"
 REPLAY = COMPARISON.parent / "skalenfix_c635504"
 MANUSCRIPT = "lehrbuch_numerische_simulation.md"
-REVISION = "v9.18"
+CONTACT = COMPARISON.parent / "kontakt_v919"
+REVISION = "v9.19"
 DATE = (2026, 11, 26, 0, 0, 0)
 
 
@@ -98,6 +100,18 @@ def verify_measurements():
             raise ValueError(
                 f"Replay manifest does not match the primary measurements for {suite}."
             )
+    compare = runpy.run_path(str(EDITION / AUDIT / "kontaktvergleich.py"))["compare"]
+    paired, totals = compare(EDITION / REPLAY, EDITION / CONTACT)
+    current = EDITION / CONTACT
+    with (current / "vergleich.csv").open(encoding="utf-8", newline="") as stream:
+        if list(csv.DictReader(stream)) != paired:
+            raise ValueError("Contact comparison differs from the primary measurements.")
+    if totals != json.loads((current / "vergleich.json").read_text()):
+        raise ValueError("Contact summary differs from the primary measurements.")
+    for suite in totals:
+        name = "rk23-devs" if suite == "rk23" else "qss-" + suite
+        if sha256(EDITION / "daten" / (name + ".csv")) != totals[suite]["after_sha256"]:
+            raise ValueError(f"Current textbook matrix differs from the replay: {suite}")
     with zipfile.ZipFile(PACKAGES / "Laborquellen.zip") as sources:
         for name in ("_polynomial.py", "advanced_qss.py", "qss.py"):
             path = Path("argesim_benchmarks/solvers") / name
@@ -159,13 +173,15 @@ def core_lab(path):
             write_entry(
                 lab, source.relative_to(MATERIAL).as_posix(), source.read_bytes()
             )
-        write_entry(lab, "START_v9_18.md", (EDITION / "Labor.md").read_bytes())
+        write_entry(lab, "START_v9_19.md", (EDITION / "Labor.md").read_bytes())
+        matrix = Path("daten/qss-extension.csv")
+        write_entry(lab, matrix.as_posix(), (EDITION / matrix).read_bytes())
         with zipfile.ZipFile(PACKAGES / "Laborquellen.zip") as source:
             for name in sorted(source.namelist()):
                 if name.startswith((AUDIT.as_posix() + "/", "beispiele/")):
                     write_entry(lab, name, source.read(name))
         for source in sorted((EDITION / AUDIT).rglob("*")):
-            if source.is_file():
+            if source.is_file() and "__pycache__" not in source.parts:
                 write_entry(
                     lab, source.relative_to(EDITION).as_posix(), source.read_bytes()
                 )
@@ -334,6 +350,10 @@ def publish_pdf(stage):
     attachments["QSS_Gegenprobe_c635504.csv"] = (
         EDITION / REPLAY / "skalenvergleich.csv"
     ).read_bytes()
+    for name in ("qss-extension.csv", "rk23-devs.csv"):
+        attachments["Archiv_" + name] = attachments.pop(name)
+        attachments[name] = (EDITION / "daten" / name).read_bytes()
+    attachments["QSS_Kontaktvergleich_v9_19.csv"] = (EDITION / CONTACT / "vergleich.csv").read_bytes()
     with pymupdf.open(stage / "text.pdf") as book:
         verify_navigation(book)
         if (
