@@ -3,6 +3,7 @@ import hashlib
 import json
 import math
 import zipfile
+from itertools import pairwise
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -48,7 +49,7 @@ def verify(edition):
                 or [r["step"] for r in run["comparisons"]] != TICKS):
             raise ValueError(f"Incomplete trajectory: {name}")
         times = [0.0, *(r["wall_s"] for r in hist)]
-        if any(not a < b for a, b in zip(times, times[1:])):
+        if any(not a < b for a, b in pairwise(times)):
             raise ValueError(f"Invalid cumulative timing: {name}")
         for r in run["comparisons"]:
             for reference in ("vs_lbm", "vs_ab2_s2", "vs_dop853"):

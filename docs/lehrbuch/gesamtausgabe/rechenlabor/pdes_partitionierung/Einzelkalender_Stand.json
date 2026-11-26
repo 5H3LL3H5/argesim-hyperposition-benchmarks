@@ -1,0 +1,39 @@
+{
+  "3": {
+    "order": 3,
+    "segments": 177404,
+    "events": 177404,
+    "t_star": 0.10091484902629141,
+    "equivalent_ticks": 258.342013507306,
+    "target_ticks": 350000,
+    "wall_s": 3555.92763025,
+    "observations": 1,
+    "complete": false,
+    "comparisons": [
+      {
+        "tick": 256,
+        "sha256": "9d32e3a03b37eb87309c7c7445942f94b9bdfa88783a89e9812d48fbf532f53b",
+        "vs_dop853": {
+          "relative_l2": 0.0010322722213551914,
+          "max_vector_U": 0.0005366538432083532
+        },
+        "vs_d2q9": {
+          "relative_l2": 0.15754980428732346,
+          "max_vector_U": 0.2919386066728361
+        }
+      }
+    ]
+  },
+  "4": {
+    "order": 4,
+    "segments": 53456,
+    "events": 53457,
+    "t_star": 0.040299190638921005,
+    "equivalent_ticks": 103.16592803563776,
+    "target_ticks": 350000,
+    "wall_s": 3513.5764763500047,
+    "observations": 0,
+    "complete": false,
+    "comparisons": []
+  }
+}

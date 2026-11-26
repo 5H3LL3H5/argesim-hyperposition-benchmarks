@@ -1,7 +1,7 @@
 # Numerische Simulation dynamischer Systeme
 
 **Christian Stenzel**  
-Gesamtausgabe · Revision v9.20 · Parallele QSS und Kavität im Vollgitter · 18 Fachkapitel und vier Anhänge
+Gesamtausgabe · Revision v9.21 · Parallele QSS und Kavität im Vollgitter · 18 Fachkapitel und vier Anhänge
 
 <a id="buch-einleitung"></a>
 
@@ -3502,9 +3502,41 @@ Schreiben wir die Wirbelgleichung als $z'=F(z)$ und setzen wir am Gruppenereigni
 
 <!-- Buchseite -->
 
+<a id="pdes-grundbegriffe"></a>
+
+## 6.7 Vom seriellen Ereignis zur parallelen Simulation
+
+Im Grundwassermodell steigt nahe dem Brunnen die Konzentration. Eine weit entfernte Zelle hat seit Stunden keinen neuen Wert gemeldet. Ein serieller QSS-Solver kann trotzdem nur einen Übergang nach dem anderen bearbeiten. Könnten zwei Rechenkerne verschiedene Teile des Aquifers gleichzeitig fortschreiben? Das geht, solange die Rechnung rechts keine Meldung von links verpasst, die dort den nächsten Übergang ändern würde. Diese Abhängigkeit ist die Leitfrage der **parallelen diskreten Ereignissimulation** (PDES).
+
+Ein **logischer Prozess** (*logical process*, LP) besitzt einen Teil des Modellzustands, lokale Ereignistermine und eine lokale Simulationsuhr. Eine **Partitionierung** ordnet jede Modellkomponente genau einem LP zu. Benötigt ein anderer LP den neuen quantisierten Wert, erhält er eine Nachricht mit dem Zeitstempel des Übergangs. Im Grundwasserbeispiel sind das Zellen an der Grenze zweier Teilgebiete. Ein Linux-Prozess kann mehrere LPs ausführen. In den folgenden MPI-Versuchen übernimmt jeder MPI-Rang genau einen LP. Beim OpenMP-Vergleich teilen sich mehrere Threads den Adressraum eines Linux-Prozesses.
+
+Die **Granularität** lässt sich am Rechner beobachten. Wie viel lokale Arbeit erledigt ein LP zwischen zwei Abstimmungen? Bearbeitet er fünf Ereignisse in zehn Mikrosekunden und kostet die Abstimmung ebenfalls zehn Mikrosekunden, entfällt bereits die Hälfte der Zeit auf die Abstimmung. Bearbeitet er in derselben Zeitspanne der Modelluhr fünfzig derartige Ereignisse, verteilt sich derselbe Aufwand auf mehr Arbeit. Eine feinere räumliche Aufteilung kann zugleich die Zahl der Grenzmeldungen erhöhen. Die beiden Partitionskarten dieses Kapitels zeigen, weshalb die Aktivität der Grenzzellen stärker ins Gewicht fallen kann als ihre Anzahl.
+
+Ein **konservatives Verfahren** bestätigt einen Übergang erst, wenn keine frühere Eingangsnachricht mehr eintreffen kann. Ein **optimistisches Verfahren** berechnet ihn vorläufig. Kommt eine frühere Nachricht, stellt der LP seinen gesicherten Zustand wieder her und spielt die betroffenen Ereignisse erneut ab. In Time Warp können bereits versandte Wirkungen durch Antinachrichten zurückgenommen werden. Unser C19R-Versuch sichert begrenzte Zeitfenster und ersetzt überholte Nachrichtenfolgen. Die folgenden Beispiele machen den Preis beider Entscheidungen messbar. [Fujimoto, Einführung in PDES](https://doi.org/10.1145/76738.76741) · [Jefferson, Virtual Time](https://doi.org/10.1145/3916.3988)
+
+<!-- Buchseite -->
+
+<a id="pdes-amdahl"></a>
+
+### Zwei Uhren und Amdahls Gesetz
+
+Eine Modelluhr kann in einer Sekunde Wandzeit zehn simulierte Tage durchlaufen. Der **Speedup** fragt nach einer anderen Größe. Für dieselbe Aufgabe, dieselbe Endzeit und dieselben Ausgaben seien $T_1$ und $T_p$ die gemessenen Wandzeiten mit einem und mit $p$ Arbeitern. Dann sind $S_p=T_1/T_p$ der Speedup, $E_p=S_p/p$ die parallele Effizienz und $T_1-T_p$ die eingesparte Wandzeit. Einen Quotienten aus der AB2-Zeit und der QSS-Zeit bezeichnen wir als Verfahrensvergleich. Für den parallelen Speedup eines Solvers brauchen wir seine eigene serielle Basis.
+
+Denken wir uns die serielle Arbeit in zwei Anteile zerlegt. Der Anteil $f$ benötigt weiterhin $fT_1$ Sekunden. Der übrige Anteil verteilt sich im Idealfall gleichmäßig und beansprucht $(1-f)T_1/p$. Daraus folgt Amdahls Gesetz für eine feste Problemgröße,
+
+$$S_p^{\mathrm{ideal}}=\frac{1}{f+(1-f)/p}.$$
+
+Bei $f=0{,}1$ ergeben acht Arbeiter höchstens Faktor $4{,}71$. Selbst mit beliebig vielen Arbeitern nähert sich der Faktor zehn. In einer Messung kommen Nachrichten, Speicherzugriffe, ungleiche Last und Wartezeiten hinzu. Rechnet man aus einem gemessenen $S_p$ einen effektiven seriellen Anteil zurück, gehen auch diese Kosten ein. [Amdahl, Originalarbeit](https://www-inst.eecs.berkeley.edu/~n252/paper/Amdahl.pdf)
+
+**Zeitversatz (Lag).** Liegen zwei lokale virtuelle Uhren bei 80 und 120 simulierten Sekunden, ist ihr momentaner Abstand 40 simulierte Sekunden. Für mehrere LPs ist die Spannweite $\max_i t_i-\min_i t_i$. Dieser Abstand sagt für sich allein nichts über die Wartezeit an einer Rechnerbarriere aus. Auch der Zeitpunkt des letzten lokalen Ereignisses kann weit zurückliegen, obwohl die Uhr eines inaktiven LP bereits bis zur gemeinsamen Freigabe vorgerückt ist.
+
+**Rechenprobe mit der Kavität.** Ein MPI-Prozess benötigt für den kompletten D2Q9-Lauf 49,39 s, acht Prozesse benötigen 19,35 s. Daraus ergeben sich $S_8=2{,}55$, $E_8=31{,}9\,\%$ und eine Zeitersparnis von 30,04 s. Umgekehrt wäre die Beschleunigung einer Kalenderoperation, die 0,04 % der seriellen CPU-Zeit ausmacht, selbst bei verschwindenden Kosten auf $1/(1-0{,}0004)\approx1{,}0004$ begrenzt. Dieser letzte Grenzwert betrifft ausschließlich das gemessene Anlaufprofil.
+
+<!-- Buchseite -->
+
 <a id="pdes-vorausschau"></a>
 
-## 6.7 Wie weit darf ein Nachbar schon rechnen?
+### Wie weit darf ein Nachbar schon rechnen?
 
 Zwei Prozesse berechnen zwei Hälften eines Grundwassergebiets. Im linken Teilgebiet erreicht eine Zelle ihre nächste Konzentrationsschwelle nach 80 simulierten Sekunden. Im rechten Teilgebiet wäre das nächste lokale Ereignis erst nach 120 Sekunden fällig. Darf der rechte Prozess 120 Sekunden vorlaufen? Dafür müssen wir wissen, ob er vor diesem Termin einen neuen Zufluss von links erhält.
 
@@ -3531,6 +3563,31 @@ Für einen vertikalen Schnitt zwischen Spalten $c-1$ und $c$ summieren wir die g
 **Übung mit Lösung.** Beim Doppelpuls und vier Prozessen erhält Karte A 16 350 bestätigte Exporte und 52,82 s mittleren sicheren Fortschritt. Karte B liefert 16 516 Exporte und 67,79 s. Welche Karte wählen Sie für möglichst wenige übertragene Zustände? A. Für möglichst große konservative Schritte? B. Im optimistischen Betrieb wurden für A 1 774 und für B 2 681 Fenster zurückgesetzt. Das Quellprofil, das Protokoll und die Zielgröße bestimmen gemeinsam, was „optimal“ bedeutet. Beide Rechnungen reproduzieren das serielle Ergebnis. Das physikalische Feldbudget der unabhängigen Green-Referenz verfehlen bei diesem Quantum beide Quellprofile.
 
 Die [Kavität in Kapitel 16](#pdes-kavitaet) hat eine andere Kopplung. Dort verändert eine einzelne Wirbelstärke über die Poisson-Gleichung die rekonstruierte Strömung im ganzen Gebiet.
+
+<!-- Buchseite -->
+
+<a id="pdes-lp-messung"></a>
+
+### Was acht logische Prozesse im Grundwasser tatsächlich leisten
+
+In zehn simulierten Tagen bestätigt das nominale C19R-Modell 65 292 QSS1-Ereignisse. Wir teilen die Domäne in ereignisgewichtete Streifen und führen jeden LP in einem eigenen MPI-Prozess aus. Pro Konfiguration liegen fünf Läufe vor. Die Reihenfolge innerhalb jeder Wiederholung wurde ausgelost. Die Tabelle verwendet die mediane Kernel-Wandzeit in Millisekunden. Beide Protokolle reproduzieren die acht Feldausgaben, die Ereigniszähler und die Ereignisprüfsummen jeder Zelle.
+
+| LPs | konservativ (ms) | $S_p$ | optimistisch (ms) | $S_p$ | Rollbacks¹ |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1 | 37,6 | 1,00 | 26,2 | 1,00 | 0 |
+| 2 | 64,2 | 0,59 | 131,1 | 0,20 | 700 |
+| 4 | 100,0 | 0,38 | 221,0 | 0,12 | 1479 |
+| 8 | 383,7 | 0,10 | 501,3 | 0,05 | 2284 |
+
+¹ Zurückgesetzte lokale Fenster des optimistischen Laufs. Konservativ gab es bei jeder Prozesszahl null Rollbacks.
+
+Im konservativen Versuch sinkt der mittlere sichere Fortschritt von 340,83 simulierten Sekunden bei zwei LPs auf 74,77 bei acht LPs. Jeder zusätzliche Schnitt kann die Zeit bis zur ersten möglichen Grenzmeldung verkürzen. Der Vergleich in der Partitionskarte stellt eine andere Frage. Dort bleibt die Zahl der LPs bei acht, während die Schnittlinien verlegt werden. So können Gewichtung und zusätzliche Partitionen entgegengesetzte Wirkungen haben.
+
+Der optimistische Versuch lässt unabhängig von der LP-Zahl dieselbe Spekulationsweite von 13 500 simulierten Sekunden zu. Mit acht LPs werden 2 284 lokale Fenster zurückgesetzt. Die Zahl hängt von der Fenstergröße ab. Die zuvor untersuchte Karte mit 2 988 Rücksetzungen verwendete ein Fenster von 6 750 Sekunden. Die verworfene Arbeit pro Fenster und die Zahl der Übertragungen entscheiden mit über die Laufzeit.
+
+Am letzten gemeinsamen Ausgabepunkt stehen die bestätigten LP-Uhren bei 864 000 s. Der Zeitversatz dieser Uhren beträgt null. Liest man dagegen nur den Zeitstempel der letzten eigenen Zellmeldung jedes LP aus der seriellen Ereignisspur, liegen der früheste und der späteste bei acht Streifen 22 218,91 simulierte Sekunden auseinander. Eine ruhende Zelle kann also einen alten Meldestempel tragen und trotzdem bis zur aktuellen Ausgabe korrekt berechnet sein.
+
+**Übung mit Lösung.** Warum unterscheiden sich die beiden seriellen Zeiten, obwohl die acht Felder identisch sind? Beim konservativen und beim optimistischen Programm unterscheiden sich Fenstergrenzen und Verwaltungsoperationen schon mit einem LP. Für den Speedup wird die Zeit des jeweiligen Ein-LP-Programms durch die Zeit desselben Programms mit mehreren LPs geteilt. Im Anwendungsbetrieb kommt der Programmstart hinzu. Für acht LPs betrugen die medianen Gesamtzeiten 0,651 s und 0,773 s.
 
 <!-- Buchseite -->
 
@@ -7862,6 +7919,67 @@ Die beiden D2Q9-Läufe liefern 37 bytegleiche Felder. Vier Threads gewinnen hier
 
 <!-- Buchseite -->
 
+<a id="cp2-mpi-skalierung"></a>
+
+### Eine Aufgabe, vier Prozesszahlen
+
+Im seriellen D2Q9-Programm lebt die gesamte Kavität in einem Adressraum. Für die MPI-Fassung teilen wir sie in Rechtecke. Nach der Kollision wandert jede Population genau um einen Gittervektor. Überschreitet sie eine Partitionsgrenze, übergibt der Eigentümer sie an den Nachbarn. Ein horizontaler Schnitt muss daher auch die schräg gestreamten Populationen berücksichtigen. Die Form der Kopplung bestimmt, welche Zahlen unterwegs sind. Die vollständige Strömung verlangt in allen vier Rechnungen 350 000 Kollisionen und Streaming-Schritte pro Knoten.
+
+| MPI-Prozesse | Karte | Kern (s) | Gesamt (s) | $S_p$ | $E_p$ (%) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1 | 1 × 1 | 49,39 | 49,66 | 1,00 | 100,0 |
+| 2 | 1 × 2 | 28,46 | 28,73 | 1,74 | 86,8 |
+| 4 | 2 × 2 | 22,00 | 22,28 | 2,25 | 56,1 |
+| 8 | 2 × 4 | 19,35 | 19,67 | 2,55 | 31,9 |
+
+Die beiden Längen der Karte zählen Gebiete in horizontaler und vertikaler Richtung. Der MPI-Kern beginnt nach der Anfangsbarriere und endet nach der letzten gemeinsamen Barriere. Die Gesamtzeit umfasst zusätzlich den Programmstart, das Einsammeln des Endfelds und dessen Dateiausgabe. Jede Zeile steht für einen gemessenen Lauf. Bei allen vier Aufteilungen sind die gespeicherten Endwerte für Dichte und beide Geschwindigkeitskomponenten an allen 257 × 257 Knoten bytegleich mit der seriellen D2Q9-Referenz.
+
+Mit acht Prozessen wandern 6 140 Gleitkommazahlen pro Takt über die Grenzen. Bei acht Byte pro Zahl summiert sich das auf 17,19 GB über den gesamten Versuch. Von vier auf acht Prozesse sinkt die Kernzeit um 2,65 s. Die doppelte Prozesszahl verdoppelt zugleich fast das Volumen der Grenzdaten. Abbildung 16.13 zeigt das zugehörige Endfeld. In der vorherigen OpenMP-Reihe führten vier Threads den Lauf in 23,35 s aus. Sowohl der MPI-Speedup als auch der OpenMP-Speedup beziehen sich jeweils auf die eigene Ein-Prozess- bzw. Ein-Thread-Messung. [CP2-Definition, Fallstudie 2](https://www.sne-journal.org/fileadmin/user_upload_sne/benchmarks/CP/CP2-definition.pdf) · [MPI-Referenzstudie von Jammer und Kollegen](https://www.sne-journal.org/fileadmin/user_upload_sne/SNE_Issues_OA/SNE_33_2/articles/sne.33.2.10646.bncp2.OA.pdf)
+
+<!-- Buchseite -->
+
+<a id="cp2-sequenzielle-laufzeit"></a>
+
+### Von der Modelluhr zur seriellen Laufzeit
+
+Nach 350 000 D2Q9-Takten ist die dimensionslose Zeit $t^*=350\,000\cdot0{,}1/256=136{,}71875$ erreicht. In dieser Zeit legt der bewegte Deckel rechnerisch gut 136 Kavitätsbreiten zurück. Um daraus physikalische Sekunden zu erhalten, braucht man die Kantenlänge $L$ und die Deckelgeschwindigkeit $U$ in physikalischen Einheiten. Zur Messung der Rechenzeit dient dagegen die Wanduhr des Rechners.
+
+| Serieller Aufruf | Kern (s) | Gesamt (s) | Arbeit bis zum gemeinsamen Endfeld |
+| --- | ---: | ---: | --- |
+| D2Q9, 1 Thread | 58,71 | 58,92 | 350 000 Gittertakte |
+| MoL, AB2 mit vier Takten | 91,44 | 91,53 | 87 500 feste Schritte |
+| MoL, AB2 mit zwei Takten | 180,26 | 180,34 | 175 000 feste Schritte |
+| MoL, DOP853 | 205,46 | 205,54 | 11 218 adaptive Schritte |
+| MoL, Gruppen-QSS1 | 42,77 | 42,85 | Schwellenkontakte der Vektorgruppe |
+| MoL, Gruppen-QSS2 | 89,64 | 89,70 | Schwellenkontakte der Vektorgruppe |
+| MoL, Gruppen-QSS3 | 113,46 | 113,58 | 28 529 Gruppenintervalle |
+| MoL, Gruppen-QSS4 | 140,06 | 140,12 | 25 734 Gruppenintervalle |
+
+Die Gesamtspalte erfasst bei den nativen Programmen Start, Initialisierung und Feldausgabe. Beim SciPy-Lauf reicht die Messung von der Solverinitialisierung bis zur letzten Ausgabe. Insgesamt speichert jeder Aufruf 37 Felder. Bei der MoL-Formulierung berechnet jede Auswertung der rechten Seite die Geschwindigkeit aus der diskreten Poisson-Gleichung. Dies erklärt, weshalb 11 218 Runge-Kutta-Schritte trotz geringerer Schrittzahl länger dauern können als 87 500 AB2-Schritte. DOP853 benötigte einschließlich dichter Ausgabe 135 074 Auswertungen der rechten Seite.
+
+Die **Zeitersparnis gegenüber einem seriellen Verfahren** lässt sich direkt ablesen. Gegenüber feinem AB2 spart Gruppen-QSS1 in dieser Reihe 137,49 s Kernzeit. An den sieben Prüfterminen steigt dabei der maximale relative Abstand zu DOP853 von 0,0012 % auf 0,2152 %. Wer ein Verfahren für einen neuen Lastfall auswählt, muss zusammen mit der Zeitersparnis festlegen, welchen Feldfehler die Anwendung zulässt.
+
+<!-- Buchseite -->
+
+<a id="cp2-gruppen-hoehere-ordnung"></a>
+
+### Wie genau ist ein gemeinsamer Termin höherer Ordnung?
+
+Für die Linienmethode (Method of Lines, MoL) bleibt nach der räumlichen Diskretisierung ein Anfangswertproblem für $z=h\omega$ mit 65 025 inneren Wirbelwerten. Die diskrete Poisson-Gleichung liefert die Geschwindigkeit aus dem gesamten Feld. Für den neuen Versuch bilden alle Wirbelwerte eine Quantisierungsgruppe. Jedes Mal, wenn eine Komponente das Band erreicht, erneuert die Gruppe ihre Polynome gemeinsam.
+
+Am bestätigten Zeitpunkt sei $s$ die seitdem verstrichene Modellzeit. Bei Ordnung $r$ setzt die Gruppe $q(s)=\sum_{j=0}^{r-1}a_js^j$ und $x(s)=q(s)+a_rs^r$. Die Diffusion ist linear, die Advektion ist ein Produkt aus Geschwindigkeit und Wirbelgradient. Durch Koeffizientenvergleich in $x'=F(q)$ erhält man $(j+1)a_{j+1}=[s^j]F(q(s))$. Der Poisson-Löser wird auf jede benötigte Koeffizientenschicht angewandt. Die bewegte Wand geht allein in den konstanten Term ein. Das nächste Ereignis liegt bei $s=(\Delta/\|a_r\|_\infty)^{1/r}$, sofern vorher die Endzeit nicht erreicht wird. Verschwindet der letzte Koeffizient, bleibt der Defekt in diesem lokalen Polynom null.
+
+| Verfahren | Kern (s) | Gesamt (s) | zu DOP853 (%) | zu D2Q9 (%) |
+| --- | ---: | ---: | ---: | ---: |
+| Gruppen-QSS3 | 113,46 | 113,58 | 0,005267 | 15,771 |
+| Gruppen-QSS4 | 140,06 | 140,12 | 0,000391 | 15,773 |
+
+Angegeben sind Sekunden Wandzeit und der größte relative Geschwindigkeitsfeldabstand in Prozent über sieben Prüfzeiten. Beide Gruppenläufe verwenden $\Delta=0{,}001$, speichern 37 Felder und erreichen $t^*=136{,}71875$. Die Maximalwerte des modellinternen Fehlers liegen bei 0,00527 % und 0,000391 %. Die feinere AB2-Rechnung braucht 180,26 s für einen entsprechenden Abstand von 0,0012 %. Für die kinetische D2Q9-Bahn liegen beide Gruppenmethoden rund 15,77 % auseinander. Eine höhere zeitliche Ordnung kann die Differenz der Raum- und Wandmodelle nur in dem Umfang beeinflussen, in dem auch ein Zeitfehler beteiligt ist.
+
+**Rechenfrage.** Warum reicht eine kleine Quantisierungsschwelle allein als Genauigkeitsbeleg nicht aus? Sie begrenzt hier den lokalen Unterschied der beiden Polynome. Den Geschwindigkeitsfehler über die ganze Bahn prüfen wir deshalb an unabhängigen DOP853-Feldern. Die 28 529 bzw. 25 734 gemeinsamen Intervalle bezeichnen Termine der ganzen Gruppe. Die Einzelkalender der nächsten Rechnung können zwischen zwei solchen Terminen zahlreiche Ereignisse haben.
+
+<!-- Buchseite -->
+
 <a id="cp2-voll-komponenten"></a>
 
 ## Was leisten die 19 vorhandenen QSS-Verfahren?
@@ -7925,6 +8043,29 @@ Alle geprüften Zeitstempel und vollständigen Wirbelfelder stimmen bytegenau mi
 Beim D2Q9-Streaming benötigt eine Zelle nur Populationen ihrer direkten und diagonalen Nachbarn. Im MPI-Versuch über 1 024 Gittertakte übertrugen acht Kacheln nur 6 140 Populationen pro Takt, acht Zeilenstreifen dagegen 10 766. Die Kacheln bedienten 32 gerichtete Prozesspaare, die Streifen nur 14. Die Streifen erreichten Faktor 1,34, die beiden Kachelanordnungen 1,06 und 1,13. Wer nur Bytes zählt, übersieht die Kosten der einzelnen Nachrichten.
 
 **Was kostet der Kalender?** Im seriellen Profil beansprucht die Auswahl des Minimums aus den bereits berechneten Kandidaten 0,03–0,04 Prozent der CPU-Zeit. Die Kandidaten selbst kosten 25–27 Prozent, das Verschieben der Polynome 25–28 Prozent und die Taylor-Koeffizienten 37–43 Prozent. Ein schnelleres Minimum lässt die Kosten dieser Arbeiten bestehen. Für QSS3 über 32 Abschnitte transportierte der zentrale Poisson-Pfad in Zeilen 159,22 MB und in Kacheln 159,13 MB. Bei gleich vielen Zellen auf dem koordinierenden Prozess ist dieses Volumen für alle Aufteilungen identisch. Die [lokale Kopplung in Kapitel 6](#pdes-schnitt) erklärt, wann günstig gelegte Schnitte deutlich mehr bewirken.
+
+<!-- Buchseite -->
+
+<a id="cp2-komponenten-langlauf"></a>
+
+### Was der Langlauf mit einem Quantisierer je Zelle misst
+
+Beim komponentenweisen QSS behält jede der 65 025 Zellen ihr eigenes gemeldetes Polynom. Beim ersten Bandkontakt übernehmen die fälligen Zellen ihre neuen Koeffizienten. Alle übrigen behalten ihre Meldung. Dadurch können sich zwei Zellen an derselben Wand zu sehr dicht aufeinanderfolgenden Zeiten melden. Die gemeinsame Poisson-Lösung koppelt ihre Vorhersagen über das ganze Gebiet. Welchen Teil dieser Arbeit können mehrere LPs gleichzeitig ausführen?
+
+| LPs | QSS3 (s) | $S_p$ | QSS4 (s) | $S_p$ |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 8,76 | 1,00 | 12,79 | 1,00 |
+| 2 | 4,31 | 2,03 | 6,08 | 2,10 |
+| 4 | 2,67 | 3,28 | 3,41 | 3,75 |
+| 8 | 2,40 | 3,65 | 3,36 | 3,81 |
+
+Für einen kontrollierten Vergleich verarbeiten alle Varianten genau die ersten acht Ereignisintervalle. Angegeben sind die Mediane dreier Wandzeiten einschließlich Prozessstart und Rückgabe der Prüffelder. QSS3 verwendet Zeilen. Bei QSS4 werden die Gebiete in zwei Reihen von Kacheln zerlegt, sobald mindestens zwei LPs beteiligt sind. Für jeden der 24 Läufe stimmen alle neun Zeitstempel und die zugehörigen vollständigen Zustandsvektoren bytegenau mit dem jeweiligen seriellen Referenzsolver überein. Die Spalte mit einem LP ist die Bezugszeit dieses Versuchs.
+
+**Der Auftrag bis zum Endfeld.** Für den langen seriellen Lauf werden nur die benötigten Felder und die aktuellen Polynomkoeffizienten aufbewahrt. Vor der Wurzelsuche schließt eine Dreiecksabschätzung Zellen aus, die das Band im betrachteten Zeitfenster sicher einhalten. Die verbleibenden Zellen benutzen denselben berührungssensitiven Wurzelisolator wie der Referenzsolver. Auch ein Aufsetzen auf die Schwelle ohne Vorzeichenwechsel löst ein Ereignis aus. Über die ersten 32 Intervalle beträgt die größte absolute Abweichung in $z$ gegenüber der unabhängigen Referenzausführung $3{,}9\cdot10^{-15}$ bei QSS3 und $1{,}74\cdot10^{-13}$ bei QSS4.
+
+Der Zwischenstand in den Skalierungsprotokollen umfasst bei QSS3 47 807 Intervalle bis zum Äquivalent von 111,29 Takten. Bei QSS4 sind es 13 197 Intervalle bis 42,88 Takte. Beide Rechnungen starteten mit ruhendem Fluid und dem Ziel 350 000. Die erste vereinbarte Referenzausgabe liegt bei Takt 256. QSS3 hat sie im anschließenden Langlauf erreicht. Über das gesamte innere Geschwindigkeitsfeld beträgt der relative Abstand zu DOP853 dort 0,10323 %, zu D2Q9 dagegen 15,755 %. Der maximale lokale Abstand zu DOP853 beträgt 0,000537 Deckelgeschwindigkeiten. Dieses erste Feld ist im neueren Fortsetzungspunkt enthalten.
+
+Die angegebenen Taktäquivalente wandeln die kontinuierliche Modellzeit mit $k=t^*\,256/0{,}1$ um. Die beiden individuellen Kalender sind jederzeit aus den gespeicherten kontinuierlichen und quantisierten Polynomen fortsetzbar. Für ihre Gesamtzeit und einen Speedup über die ganze CP2-Aufgabe benötigen wir das Feld bei Takt 350 000. Die Anlaufzeiten in der Tabelle messen ein anderes, wesentlich kürzeres Experiment.
 
 <!-- Buchseite -->
 

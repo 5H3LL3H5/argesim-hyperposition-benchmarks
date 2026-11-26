@@ -36,7 +36,7 @@ REPLAY = COMPARISON.parent / "skalenfix_c635504"
 MANUSCRIPT = "lehrbuch_numerische_simulation.md"
 CONTACT = COMPARISON.parent / "kontakt_v919"
 PDES = Path("rechenlabor/pdes_partitionierung")
-REVISION = "v9.20"
+REVISION = "v9.21"
 DATE = (2026, 11, 26, 0, 0, 0)
 
 
@@ -62,6 +62,9 @@ def edition_files():
 
 def verify_measurements():
     compact.verify_measurements()
+    scaling = runpy.run_path(str(EDITION / PDES / "skalierung_pruefen.py"))
+    scaling["summaries"]()
+    scaling["verify_field_archives"]()
     runpy.run_path(str(EDITION / PDES / "nachweis.py"))["verify"](EDITION)
     with (EDITION / COMPARISON).open(encoding="utf-8", newline="") as stream:
         rows = list(csv.DictReader(stream))
@@ -175,15 +178,16 @@ def core_lab(path):
             write_entry(
                 lab, source.relative_to(MATERIAL).as_posix(), source.read_bytes()
             )
-        write_entry(lab, "START_v9_20.md", (EDITION / "Labor.md").read_bytes())
+        write_entry(lab, "START_v9_21.md", (EDITION / "Labor.md").read_bytes())
         matrix = Path("daten/qss-extension.csv")
         write_entry(lab, matrix.as_posix(), (EDITION / matrix).read_bytes())
         with zipfile.ZipFile(PACKAGES / "Laborquellen.zip") as source:
             for name in sorted(source.namelist()):
                 if name.startswith((AUDIT.as_posix() + "/", "beispiele/")):
                     write_entry(lab, name, source.read(name))
+        separate_fields = {"D2Q9_Prueffelder.zip", "Gruppen_QSS34_Prueffelder.zip", "QSS34_Fortsetzung.zip"}
         for source in sorted((EDITION / PDES).iterdir()):
-            if source.is_file():
+            if source.is_file() and source.name not in separate_fields:
                 write_entry(lab, source.relative_to(EDITION).as_posix(), source.read_bytes())
         for source in sorted((EDITION / AUDIT).rglob("*")):
             if source.is_file() and "__pycache__" not in source.parts:

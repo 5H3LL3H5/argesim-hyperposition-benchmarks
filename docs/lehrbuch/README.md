@@ -1,6 +1,6 @@
 # Numerische Simulation dynamischer Systeme
 
-**Christian Stenzel · Gesamtausgabe v9.20 · 18 Fachkapitel und vier Anhänge**
+**Christian Stenzel · Gesamtausgabe v9.21 · 18 Fachkapitel und vier Anhänge**
 
 Die mathematischen Grundlagen führen von Fehlermaßen und Stabilität zu Zeitintegration, Ereignissen und räumlicher Diskretisierung. Kapitel 6 erklärt die Kalender der QSS-Familie. Kapitel 16 prüft die Verfahren an der CP2-Kavität. Kapitel 18 vergleicht ihre Entscheidungen an den ARGESIM-Modellfenstern. Die Ausgabe enthält 92 nummerierte Abbildungen.
 
@@ -26,7 +26,7 @@ Wann darf ein logischer Prozess bis zur nächsten vorhergesagten Schwelle voraus
 
 ## Kompaktfassung zum Nachschlagen
 
-Die folgenden Markdown-Kapitel bilden die frühere Kurzfassung. Die Gesamtausgabe v9.20 steht oben.
+Die folgenden Markdown-Kapitel bilden die frühere Kurzfassung. Die Gesamtausgabe v9.21 steht oben.
 
 | Kapitel | Leitfrage |
 |---|---|

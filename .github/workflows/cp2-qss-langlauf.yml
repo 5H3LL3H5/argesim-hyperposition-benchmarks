@@ -1,0 +1,74 @@
+name: CP2 QSS3-4 Langlauf
+on:
+  push:
+    branches: [book/pdes-cp2-vollgitter]
+    paths:
+      - '.github/cp2-qss34-run.json'
+      - '.github/workflows/cp2-qss-langlauf.yml'
+      - 'docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/qss_langlauf.py'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: cp2-qss-langlauf-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  integrieren:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 210
+    strategy:
+      fail-fast: false
+      matrix:
+        order: [3, 4]
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      NUMEXPR_NUM_THREADS: '1'
+      LAB: docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install numerical runtime
+        run: python -m pip install numpy==2.3.5 scipy==1.17.0
+      - id: ticket
+        name: Read preceding measurement run
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          n = json.loads(Path('.github/cp2-qss34-run.json').read_text())['previous_run']
+          assert type(n) is int and n >= 0
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              print(f'run_id={n}', file=f)
+          PY
+      - uses: actions/download-artifact@v4
+        if: steps.ticket.outputs.run_id != '0'
+        with:
+          name: cp2-qss${{ matrix.order }}-checkpoint
+          run-id: ${{ steps.ticket.outputs.run_id }}
+          github-token: ${{ github.token }}
+          path: work/qss${{ matrix.order }}
+      - name: Verify downloaded continuation
+        if: steps.ticket.outputs.run_id != '0'
+        run: test -s "work/qss${{ matrix.order }}/restart.npz"
+      - name: Integrate the componentwise quantizers
+        id: integrate
+        run: python "$LAB/rechenfenster.py" . "work/qss${{ matrix.order }}" --order "${{ matrix.order }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cp2-qss${{ matrix.order }}-checkpoint
+          path: work/qss${{ matrix.order }}/
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: steps.integrate.outputs.complete == 'true'
+        with:
+          name: cp2-qss${{ matrix.order }}-endfelder
+          path: |
+            work/qss${{ matrix.order }}/z_*.bin
+            work/qss${{ matrix.order }}/rechenfenster.jsonl
+          if-no-files-found: error
+          retention-days: 60

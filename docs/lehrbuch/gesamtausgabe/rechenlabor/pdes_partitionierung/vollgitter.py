@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-from contextlib import nullcontext
 import csv
 import hashlib
 import importlib.metadata
@@ -14,6 +13,7 @@ import subprocess
 import sys
 import time
 import zipfile
+from contextlib import nullcontext
 from pathlib import Path
 
 import numpy as np
@@ -101,7 +101,7 @@ def native(work, method, cpus):
     args = [str(work / program), str(N), str(RE), *options,
             str(directory), str(work / "src/zeitpunkte.txt")]
     env = dict(os.environ, OMP_NUM_THREADS=str(expected), OMP_DYNAMIC="FALSE",
-               OMP_PROC_BIND="TRUE", OMP_PLACES=",".join("{%d}" % cpu for cpu in cpus))
+               OMP_PROC_BIND="TRUE", OMP_PLACES=",".join(f"{{{cpu}}}" for cpu in cpus))
     start = time.perf_counter()
     subprocess.run(args, env=env, check=True)
     save_run(directory, cpus, time.perf_counter() - start)

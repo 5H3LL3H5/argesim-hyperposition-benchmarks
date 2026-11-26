@@ -1,16 +1,17 @@
 """Draw the measured C19R cell activity and the two eight-rank partitions."""
-from pathlib import Path
 import json
 import sys
+from itertools import pairwise
+from pathlib import Path
 from zipfile import ZipFile
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.colors import BoundaryNorm, ListedColormap
+import numpy as np
 from matplotlib.collections import PatchCollection
+from matplotlib.colors import BoundaryNorm, ListedColormap
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch, Rectangle
-import numpy as np
 
 
 def draw(archive, target):
@@ -24,7 +25,7 @@ def draw(archive, target):
     rectangles = [[] for _ in colors]
     for y, row in enumerate(bands):
         edges = np.r_[0, np.flatnonzero(np.diff(row)) + 1, len(row)]
-        for left, right in zip(edges[:-1], edges[1:], strict=True):
+        for left, right in pairwise(edges):
             if row[left] > 0:
                 rectangles[row[left]].append(Rectangle((left - .5, y - .5), right-left, 1))
     mpl.rcParams.update({"font.family": "DejaVu Sans", "svg.fonttype": "none", "svg.hashsalt": "C19R-v920"})
