@@ -2350,7 +2350,7 @@ Die Projektquelle untersucht denselben Folgeregler über **zwei Sekunden** mit a
 | BDF | $10^{-3}$ | 56 | 144 | 19 | $5{,}40\cdot10^{-4}$ |
 | BDF | $10^{-6}$ | 125 | 256 | 28 | $1{,}07\cdot10^{-6}$ |
 
-Bei dem gemeinsamen Ziel von $10^{-4}$ bestehen die drei Läufe mit der feineren Toleranz. Radau kommt dort mit 56 angenommenen Schritten aus, BDF benötigt 125. Zugleich hat BDF mit 256 Auswertungen von $f$ und 28 Zerlegungen in diesen beiden Kostenmaßen die kleineren Zahlen. Wie viel Zeit eine Zerlegung tatsächlich kostet, hängt von Matrixgröße, Besetzungsmuster und Implementierung ab. Die vier festen Schrittweiten des neuen Labors wurden auf dem kürzeren Zeitfenster neu gerechnet. Seine Tabelle beantwortet die Frage nach der Genauigkeit innerhalb der Anfangsschicht.
+Beim Ziel von $10^{-4}$ bestehen die drei Läufe mit der feineren Toleranz auf dem gemeinsamen Messraster, nicht mit einer nachgewiesenen Schranke zwischen dessen Punkten. Die festen Schritte oben unterscheiden ihrerseits Schrittenden vom Messraster; keine dieser Stichproben liefert ein Kontinuumsmaximum. Radau kommt dort mit 56 angenommenen Schritten aus, BDF benötigt 125. Zugleich hat BDF mit 256 Auswertungen von $f$ und 28 Zerlegungen in diesen beiden Kostenmaßen die kleineren Zahlen. Wie viel Zeit eine Zerlegung tatsächlich kostet, hängt von Matrixgröße, Besetzungsmuster und Implementierung ab. Die vier festen Schrittweiten des neuen Labors wurden auf dem kürzeren Zeitfenster neu gerechnet. Seine Tabelle beantwortet die Frage nach der Genauigkeit innerhalb der Anfangsschicht.
 
 **Zwei weitere Bauformen.** Bei ESDIRK ist die erste Stufe explizit, die weiteren impliziten Stufen einer Stufe nach der anderen lösbar. Ihr gemeinsamer Diagonalkoeffizient $\gamma$ erlaubt bei festgehaltenem $J$ dieselbe Matrix $I-h\gamma J$. Ein Rosenbrock–Euler-Schritt für ein autonomes System löst $(I-hJ_n)k=f(y_n)$ und setzt $y_{n+1}=y_n+hk$. Er entspricht einer einzigen Linearisierung des impliziten Euler-Schritts am alten Zustand. Für affine autonome Gleichungen trifft er dessen diskreten Wert. [Verfahrensvergleich im Projekt][k3projekt]
 
@@ -2844,7 +2844,7 @@ Bei einer tangentialen Berührung verschwindet die Durchtrittsrate. Zum Quadrat 
 
 Wir kennen zwei Zeiten $a$ und $b$, an denen die Wächterwerte verschiedene Vorzeichen haben. Die einfachste Frage lautet: Auf welcher Seite der Mitte liegt der Treffer? Sie kostet eine Auswertung und halbiert die Klammer. Bei einer Anfangsbreite $w$ liegt die Mitte nach $k$ Halbierungen höchstens $w/2^{k+1}$ von einer eingeschlossenen Nullstelle entfernt. Die Steigung des Wächters muss der Algorithmus dafür nicht kennen.
 
-Eine Sekante durch zwei Funktionswerte liefert häufig einen besseren Vorschlag. Mit drei verschiedenen Werten lässt sich die *inverse* Beziehung interpolieren. Wir behandeln die Zeit als Funktion des Wächterwerts, legen eine Parabel durch drei Paare $(\phi_i,t_i)$ und werten sie bei $\phi=0$ aus. Gerät ein Vorschlag zu nahe an das ungünstige Ende oder verkürzt er die bisherigen Suchschritte zu wenig, kehrt Brent zur Bisektion zurück. Nach jeder Auswertung ersetzen wir den Rand mit demselben Vorzeichen. So bleibt die Nullstelle eingeschlossen. [Brents Originalarbeit][k5brent]
+Eine Sekante durch zwei Funktionswerte liefert häufig einen besseren Vorschlag. Mit drei verschiedenen Werten lässt sich die *inverse* Beziehung interpolieren. Wir behandeln die Zeit als Funktion des Wächterwerts, legen eine Parabel durch drei Paare $(\phi_i,t_i)$ und werten sie bei $\phi=0$ aus. Gerät ein Vorschlag zu nahe an das ungünstige Ende oder verkürzt er die bisherigen Suchschritte zu wenig, kehrt Brent zur Bisektion zurück. Nach jeder Auswertung ersetzen wir den Rand mit demselben Vorzeichen. So bleibt die Nullstelle eingeschlossen. Sind die Ränder benachbarte Gleitkommazahlen, aber weiter auseinander als die verlangte Toleranz, meldet das Lehrlabor beide Zeiten und Wächterwerte mit der Diagnose `time_resolution`. Es behauptet dann keinen genauer bestimmten Zeitpunkt. [Brents Originalarbeit][k5brent]
 
 Im Programm enthält die Klammer stets die Nullstelle des **ausgewerteten** Wächters. Ein rechnerischer Funktionswert null beendet die Suche unmittelbar. Andernfalls beendet sie eine Breite von höchstens $2\varepsilon_B$ und liefert die Mitte. Beim Vergleich zweier Vorzeichen verwendet der Code getrennte Vergleiche, denn das Produkt zweier kleiner Werte könnte bereits zu null unterlaufen. Kann die Maschinenarithmetik das Intervall vor Erreichen der gewünschten Auflösung nicht weiter teilen, meldet das Labor diesen Fall.
 
@@ -3484,7 +3484,7 @@ Zwei fast gleiche Verläufe können verschiedene Meldungen auslösen. Schreiben 
 
 ![Abbildung 6.8. Die Vergrößerung um das Minimum zeigt eine verfehlte Bandkante, eine Berührung und zwei Durchtritte. Die markierten Punkte sind die Nullstellen.](abbildungen/qss_kontakt.svg)
 
-QSS2 entscheidet bei einer numerisch mehrdeutigen Diskriminante ihr Vorzeichen aus den gespeicherten Binärkoeffizienten. Der gemeinsame Isolator für höhere Ordnungen zählt in mehrdeutigen Fällen die verschiedenen reellen Wurzeln mit einer exakten Sturm-Folge des quadratfreien Polynoms. Die Zahl im Intervall $(a,b]$ ist die Differenz der Vorzeichenwechsel an beiden Enden. Durch Halbieren isolieren wir den ersten positiven Termin. Die Zeittoleranz begrenzt die Intervallbreite.
+QSS2 verwendet den schnellen Vorzeichentest nur, wenn alle skalierungsbedingt von null verschiedenen Koeffizienten und ihre nichttrivialen Diskriminantenterme im normalen Binär64-Bereich bleiben. Wird ein solcher Wert subnormal oder zu null gerundet, bestimmt der exakte Pfad das Vorzeichen aus den ursprünglichen gespeicherten Binärkoeffizienten. Der gemeinsame Isolator für höhere Ordnungen zählt in mehrdeutigen Fällen die verschiedenen reellen Wurzeln mit einer exakten Sturm-Folge des quadratfreien Polynoms. Die Zahl im Intervall $(a,b]$ ist die Differenz der Vorzeichenwechsel an beiden Enden. Durch Halbieren isolieren wir den ersten positiven Termin. Die Zeittoleranz begrenzt die Intervallbreite.
 
 Welche Gleichung wurde dem Kalender übergeben? Das exakte Polynom $1000s^3-1100s^2+320s-28$ berührt bei $s=1/5$ und kreuzt bei $7/10$. Rundet man seine durch 1000 geteilten Koeffizienten einzeln auf Binär64, verschwindet die Doppelwurzel. Der früheste Termin dieser Eingabe liegt dann nahe $0{,}7$. Das Zertifikat bezieht sich auf das gespeicherte Segment. Für eine Aussage über die ursprüngliche Differentialgleichung kommt der Fehler der Taylor-Koeffizienten hinzu.
 
@@ -6081,9 +6081,9 @@ Halten Sie $L$ während jeder Integration fest. Stoppen Sie am gerichteten Wäch
 | 3 | Kontakt | 2,590418 | 2,590338 | +0,080 |
 | 4 | Ablösung | 2,990529 | 2,990403 | +0,126 |
 | 5 | Kontakt | 4,542741 | 4,542705 | +0,036 |
-| 6 | Ablösung | 4,867488 | 4,867492 | $-$0,004 |
-| 7 | Kontakt | 6,648707 | 6,648731 | $-$0,024 |
-| 8 | Ablösung | 6,720384 | 6,720995 | $-$0,611 |
+| 6 | Ablösung | 4,867488 | 4,867492 | −0,004 |
+| 7 | Kontakt | 6,648707 | 6,648731 | −0,024 |
+| 8 | Ablösung | 6,720384 | 6,720995 | −0,611 |
 
 ![Abbildung 13.1. Der Winkel bleibt am Stift stetig. Die Winkelgeschwindigkeit springt. Die Detailansicht hebt Kontakt 7 und Ablösung 8 aus der Tabelle hervor. Die kurze Phase dauert $71{,}7\,\mathrm{ms}$.](abbildungen/studie_c07kurven.svg)
 
@@ -8730,7 +8730,7 @@ Ein Solver ist für eine neue Modellfamilie auszuwählen, bevor wir deren Zeiten
 
 ### Was passiert am zurückgehaltenen Modell?
 
-Je Durchgang bleiben sämtliche Zeilen eines Modells außen vor. Unter 17 gemeinsamen Einstellungen ergibt die Auswahl auf den jeweils sieben Trainingsmodellen 8 Mal RK45. Auf den acht zurückgehaltenen Fenstern erfüllt die gewählte Einstellung 7 Mal den Auftrag. Der Zeitfaktor bezieht sich hier auf die schnellste bestandene Einstellung aus der Schnittmenge des jeweiligen Modells. Laufzeit und Zeitüberschreitungen sind Eigenschaften dieser Messumgebung.
+Je Durchgang bleiben sämtliche Zeilen eines Modells außen vor. Unter 17 gemeinsamen Einstellungen ergibt die Auswahl auf den jeweils sieben Trainingsmodellen 8 Mal RK45. Auf den acht zurückgehaltenen Fenstern erfüllt die gewählte Einstellung 7 Mal den Auftrag. C05 ist der einzige außen beobachtete Fehllauf: RK45 erreicht dort das Integrationszeitlimit. Unter den 17 gemeinsamen Einstellungen für C05 besteht keine: 3 verfehlen das Genauigkeitsziel, 10 erreichen das Zeitlimit und 4 enden mit einem Solverfehler. C05 zählt bei den übrigen sieben Faltungen daher für jede Einstellung als ein Trainingsfehlschlag. Der Zeitfaktor bezieht sich hier auf die schnellste bestandene Einstellung aus der Schnittmenge des jeweiligen Modells. Laufzeit und Zeitüberschreitungen sind Eigenschaften dieser Messumgebung.
 
 ### Zwei zusätzliche Systeme mit bekannten Lösungen
 
