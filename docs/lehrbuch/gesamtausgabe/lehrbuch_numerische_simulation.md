@@ -1,7 +1,7 @@
 # Numerische Simulation dynamischer Systeme
 
 **Christian Stenzel**  
-Gesamtausgabe · Revision v9.21 · Parallele QSS und Kavität im Vollgitter · 18 Fachkapitel und vier Anhänge
+Gesamtausgabe · Revision v9.22 · Parallele QSS und Kavität im Vollgitter · 18 Fachkapitel und vier Anhänge
 
 <a id="buch-einleitung"></a>
 

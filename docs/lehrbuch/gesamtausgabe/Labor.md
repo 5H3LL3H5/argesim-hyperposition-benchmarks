@@ -1,4 +1,4 @@
-# Rechenlabor zur Gesamtausgabe v9.21
+# Rechenlabor zur Gesamtausgabe v9.22
 
 [Neue Skalierungsdaten](rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip) · [Wiederaufnahme der komponentenweisen QSS-Läufe](rechenlabor/pdes_partitionierung/QSS34_Fortsetzung.zip)
 
@@ -11,12 +11,12 @@ Die vier Primärdateien und der zeilenweise Vergleich mit `c635504` liegen in [k
 
 ## Das vollständige Labor öffnen
 
-Beim GitHub-Actions-Lauf **Studienbuch** entsteht die Datei `ARGESIM_Rechenlabor_v9_21.zip` mit allen Quelltexten, Modellgewichten, Feldmessungen und Druckvorlagen. Sie lässt sich auch aus einem Checkout der veröffentlichten Revision mit der Python-Standardbibliothek erzeugen.
+Beim GitHub-Actions-Lauf **Studienbuch** entsteht die Datei `ARGESIM_Rechenlabor_v9_22.zip` mit allen Quelltexten, Modellgewichten, Feldmessungen und Druckvorlagen. Sie lässt sich auch aus einem Checkout der veröffentlichten Revision mit der Python-Standardbibliothek erzeugen.
 
 ```bash
 python scripts/build_studienbuch.py --check
-python scripts/build_studienbuch.py --full-lab ARGESIM_Rechenlabor_v9_21.zip
-python -m zipfile -e ARGESIM_Rechenlabor_v9_21.zip labor
+python scripts/build_studienbuch.py --full-lab ARGESIM_Rechenlabor_v9_22.zip
+python -m zipfile -e ARGESIM_Rechenlabor_v9_22.zip labor
 cd labor
 python pruefen.py
 ```

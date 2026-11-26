@@ -72,7 +72,7 @@ header = r"""\documentclass[11pt,a4paper]{article}
 \definecolor{rulegray}{HTML}{C2D4D3}
 \usepackage[unicode=true,bookmarksopen=true,bookmarksopenlevel=2,bookmarksnumbered=false,pdfdisplaydoctitle=true,colorlinks=true,linkcolor=sea,urlcolor=sea]{hyperref}
 \usepackage{bookmark}
-\hypersetup{pdftitle={Numerische Simulation dynamischer Systeme · Revision v9.21 · Druckfassung},pdfauthor={Christian Stenzel},pdfsubject={Druckfassung v9.21, mathematische Grundlagen, Kapitel 1 bis 18 und Anhänge A bis D},pdflang={de-DE}}
+\hypersetup{pdftitle={Numerische Simulation dynamischer Systeme · Revision v9.22 · Druckfassung},pdfauthor={Christian Stenzel},pdfsubject={Druckfassung v9.22, mathematische Grundlagen, Kapitel 1 bis 18 und Anhänge A bis D},pdflang={de-DE}}
 \setcounter{secnumdepth}{-1}\setcounter{tocdepth}{3}
 \pagestyle{fancy}\fancyhf{}
 \newcommand{\kopfteil}{}
@@ -82,7 +82,7 @@ header = r"""\documentclass[11pt,a4paper]{article}
 \fancyfoot[R]{{\sffamily\bfseries\small\color{sea}\thepage}}
 \renewcommand{\headrulewidth}{.35pt}
 \renewcommand{\headrule}{\hbox to\headwidth{\color{rulegray}\leaders\hrule height \headrulewidth\hfill}}
-\fancypagestyle{titel}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[L]{{\sffamily\fontsize{8.4}{10}\selectfont\color{slate}Revision v9.21 · Parallele QSS und Kavität im Vollgitter}}\fancyfoot[R]{{\sffamily\bfseries\small\color{sea}\thepage}}}
+\fancypagestyle{titel}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[L]{{\sffamily\fontsize{8.4}{10}\selectfont\color{slate}Revision v9.22 · Parallele QSS und Kavität im Vollgitter}}\fancyfoot[R]{{\sffamily\bfseries\small\color{sea}\thepage}}}
 \titleformat{\section}{\sffamily\bfseries\color{navy}\fontsize{25.5}{30.5}\selectfont}{}{0pt}{}
 \titleformat{\subsection}{\sffamily\bfseries\color{sea}\fontsize{17.4}{21.3}\selectfont}{}{0pt}{}
 \titleformat{\subsubsection}{\sffamily\bfseries\color{navy}\fontsize{14}{18}\selectfont}{}{0pt}{}
@@ -93,8 +93,8 @@ header = r"""\documentclass[11pt,a4paper]{article}
 \newcommand{\normalsatz}{\fontsize{11.1}{14.9}\selectfont}
 \newcommand{\kleinsatz}{\fontsize{10.5}{13.9}\selectfont}
 \newcommand{\buchseite}[1]{\clearpage\renewcommand{\kopfteil}{#1}}
-\newcommand{\buchtitel}{\pdfbookmark[0]{Numerische Simulation dynamischer Systeme · Revision v9.21 · Druckfassung}{buchanfang}{\sffamily\bfseries\color{navy}\fontsize{33}{37}\selectfont Numerische Simulation\\dynamischer Systeme\par}\vspace{4pt}}
-\newcommand{\autorenzeile}{{\sffamily\bfseries\large\color{sea}Christian Stenzel}\par\vspace{-2pt}{\sffamily\small\color{slate}Gesamtausgabe · Revision v9.21 · Parallele QSS und Kavität im Vollgitter · 18 Fachkapitel und vier Anhänge}\par\vspace{8pt}}
+\newcommand{\buchtitel}{\pdfbookmark[0]{Numerische Simulation dynamischer Systeme · Revision v9.22 · Druckfassung}{buchanfang}{\sffamily\bfseries\color{navy}\fontsize{33}{37}\selectfont Numerische Simulation\\dynamischer Systeme\par}\vspace{4pt}}
+\newcommand{\autorenzeile}{{\sffamily\bfseries\large\color{sea}Christian Stenzel}\par\vspace{-2pt}{\sffamily\small\color{slate}Gesamtausgabe · Revision v9.22 · Parallele QSS und Kavität im Vollgitter · 18 Fachkapitel und vier Anhänge}\par\vspace{8pt}}
 \newcommand{\tightlist}{\setlength{\itemsep}{4pt}\setlength{\parskip}{0pt}}
 \setlist[enumerate]{leftmargin=1.65em,labelsep=.5em,topsep=2pt}
 \newcommand{\bild}[2]{\par\addvspace{6pt}\noindent\includegraphics[width=0.99\linewidth]{#1}\par\nopagebreak\vspace{-2pt}{\sffamily\fontsize{9.4}{12}\selectfont\color{slate}#2\par}\addvspace{5pt}}
@@ -111,7 +111,7 @@ frag = frag.replace(
 )
 frag = frag.replace(
     r"\textbf{Christian Stenzel}\\"
-    + "\nGesamtausgabe · Revision v9.21 · Parallele QSS und Kavität im Vollgitter · 18 Fachkapitel und vier Anhänge",
+    + "\nGesamtausgabe · Revision v9.22 · Parallele QSS und Kavität im Vollgitter · 18 Fachkapitel und vier Anhänge",
     r"\autorenzeile",
 )
 frag = re.sub(
