@@ -46,10 +46,17 @@ jobs:
           apt-get install -y --no-install-recommends python3-venv ca-certificates pandoc texlive-xetex texlive-latex-extra texlive-lang-german texlive-fonts-recommended fonts-noto-core fonts-noto-extra fonts-dejavu-core fonts-lmodern
           python3 -m venv /tmp/python
           /tmp/python/bin/pip -q install PyMuPDF==1.26.6
+          /tmp/python/bin/python scripts/build_studienbuch.py --verify-pdf
           /tmp/python/bin/python scripts/build_studienbuch.py --output-dir /tmp/studienbuch
           BUILD
       - name: Assemble all published experiments and field data
         run: python scripts/build_studienbuch.py --full-lab "$RUNNER_TEMP/ARGESIM_Rechenlabor_v9_22.zip"
+      - name: Run the shipped lab outside the repository
+        run: |
+          lab="$(mktemp -d "$RUNNER_TEMP/argesim-lab.XXXXXX")"
+          python -I -B -m zipfile -e "$RUNNER_TEMP/ARGESIM_Rechenlabor_v9_22.zip" "$lab"
+          cd "$lab"
+          env -u PYTHONPATH -u PYTHONHOME python -I -B pruefen.py
       - name: Attach the complete offline lab
         uses: actions/upload-artifact@v4
         with:
