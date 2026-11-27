@@ -7279,7 +7279,7 @@ CP2 umfasst offiziell drei Parallelaufgaben. Die erste ist eine Monte-Carlo-Para
 
 Uns interessieren die Fehler im Inneren und die Frage, woher eine Verbesserung tatsächlich kommt. Mehr Knoten, weiteres Training und das bekannte Wellengesetz verändern verschiedene Teile des Versuchs. Deshalb halten wir Eingabe, Beobachtungszeit und Fehlermaß innerhalb eines Vergleichs fest. Der Aufwand der offiziellen parallelen Programme ist eine eigene Messaufgabe. Auch bei einer gelernten Vorhersage müssen wir zuerst wissen, welcher Feldfehler zu welchem Gitter und welchem Zeitpunkt gehört. [Kapitel 9 · Gemeinsamer Prüfaufbau](#no-auswertung)
 
-[Zum Schluss dieses Kapitels](#kap16-schluss) · [Kavität mit wechselndem Antrieb](#cp2b-lidverfahren)
+[Zum Schluss dieses Kapitels](#kap16-schluss) · [Speedup, Overhead und CPU-Belegung](#cp2-skalierung-auswertung) · [Kavität mit wechselndem Antrieb](#cp2b-lidverfahren)
 
 <!-- Buchseite -->
 
@@ -8268,6 +8268,192 @@ Wenn nur die Reynolds-Zahl neu ist und beide Referenzläufe bei 950 und 1050 auc
 **Übung.** Ein Auftrag verlangt den amtlichen CP2-Endzustand, ein anderer verlangt eine QSS-Bahn der inkompressiblen Wirbelgleichung. Weshalb kann dieselbe Rechnung nur den zweiten Auftrag erfüllen, obwohl beide eine kreisende Strömung zeigen?
 
 **Lösung.** Die Prüfung des ersten Auftrags bindet Randregel, Gitterzeit und Ausgabe an D2Q9. Beim zweiten bestimmt die Wirbelgleichung die Referenz. Die QSS-Schwelle steuert die Differenz zwischen gemeldetem und fortgeschriebenem Zustand. Eine kleinere Schwelle kann den Zeitfehler senken. Die räumliche Behandlung des Deckels und der Unterschied zwischen inkompressiblem und kinetischem Modell bleiben Teil des beobachteten Abstands. Ein Geschwindigkeitsvergleich braucht deshalb vorab dieselbe Zielgröße und dasselbe Fehlerbudget.
+
+<!-- Buchseite -->
+
+<a id="cp2-skalierung-auswertung"></a>
+
+## Wie schnell wird die Kavität mit acht Prozessen?
+
+<a id="druck-cp2-skalierung"></a>
+
+Unter dem bewegten Deckel eines quadratischen Behälters bildet sich ein Wirbel. Wir wollen wissen, wie schnell der Rechner sein Geschwindigkeitsfeld bestimmt. Dazu teilen wir dasselbe Gitter auf immer mehr Prozesse auf. Wenn die Teilgebiete halb so groß werden, warum halbiert sich die Laufzeit dann nur anfangs?
+
+#### Welche Rechnung hält die Stoppuhr fest?
+
+Die CP2-Kavität hat $257 \times 257$ Knoten und die Reynolds-Zahl 1 000. Bei D2Q9 umfasst der Auftrag 350 000 Gittertakte. Das entspricht der dimensionslosen Endzeit $t^*=136{,}71875$. Ein MPI-Rang führt auf seinem Teilgebiet Kollision und Streaming aus. Die gemessene Zeit reicht vom Ende der Anfangsbarriere bis zum Ende der Schlussbarriere. Das langsamste Rangintervall bestimmt die Kernzeit. Alle vier Endfelder aus Dichte und beiden Geschwindigkeitskomponenten stimmen byteweise mit der seriellen D2Q9-Referenz überein.
+
+Beim komponentenweisen QSS hat jede der 65 025 inneren Wirbelstärken ein eigenes Quantisierungspolynom. Ein *logischer Prozess* (LP) bearbeitet eine Gruppe dieser Zustände in einem eigenen Betriebssystemprozess. Die kurze Skalierungsreihe endet nach acht akzeptierten Ereignisintervallen. Ihr Timer umfasst auch den Start und die Rückgabe der Prüffelder. Alle 24 Läufe reproduzieren für ihre Ordnung neun Zeitstempel mit den zugehörigen Zustandsvektoren. [Messprotokolle](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip)
+
+| Verfahren und Messumfang | 1 | 2 | 4 | 8 | Läufe je Punkt |
+|:--|--:|--:|--:|--:|--:|
+| **Voll** · D2Q9-MPI, Kernzeit | 49,39 | 28,46 | 22,00 | 19,35 | 1 |
+| **Präfix** · QSS3, Zeilen, Wandzeit | 8,76 | 4,31 | 2,67 | 2,40 | 3 |
+| **Präfix** · QSS4, Kacheln¹, Wandzeit | 12,79 | 6,08 | 3,41 | 3,36 | 3 |
+
+*Alle Zeiten in Sekunden. Spaltenköpfe geben die Anzahl der MPI-Ränge beziehungsweise LPs an. Bei QSS steht der Median. ¹ Ein LP besitzt das gesamte Gebiet. Ab zwei LPs hat die QSS4-Karte zwei Kachelreihen.*
+
+#### Warum der Endpunkt mit in die Abbildung gehört
+
+Nach acht Intervallen erreicht QSS3 $t^*=0{,}000894215$, QSS4 $0{,}001849914$. Der erste reguläre Feldvergleich liegt bei $0{,}1$. In den **separaten seriellen Fortsetzungsständen** erreicht QSS3 das Äquivalent von 258,34 Takten mit einem regulären Prüffeld, QSS4 103,17 Takte mit keinem. Beide Datensätze tragen den Status „unvollständig“. Die Ereignisdichte ändert sich mit der Strömung. Eine Endzeit oder ein Speedup bis Takt 350 000 lässt sich daraus nicht bestimmen. Vollständiges **Gruppen-QSS** hat eine andere Arbeitsteilung und erreicht bei Ordnung 3 bzw. 4 auf einem Prozess 113,46 bzw. 140,06 s Kernzeit. [Fortsetzungsstände](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Einzelkalender_Stand.json) · [Gruppenläufe](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip)
+
+<!-- Buchseite -->
+
+### Speedup und Effizienz lesen
+
+Beim *Strong Scaling* bleiben Problemgröße, Verfahren und Endkriterium einer Reihe fest. Wir teilen ihre Wandzeit $T_1$ durch die Wandzeit $T_p$ bei $p$ Arbeitern. Ein Speedup von 2 bedeutet, dass sich die Wartezeit halbiert. Teilt man den Speedup noch einmal durch $p$, erhält man die **parallele Effizienz**.
+
+$$S_p=\frac{T_1}{T_p},\qquad E_p=\frac{S_p}{p}=\frac{T_1}{pT_p}.$$
+
+![Abbildung 16.15. Links steht die vollständige D2Q9-Bahn, rechts der Präfix jeder QSS-Ordnung. Gestrichelt sind $S_p=p$ und $E_p=100\,\%$. Die gepunktete Linie oben markiert gleiche Laufzeit wie mit einem Arbeiter. Die vertikalen Spannen zeigen Minimum und Maximum von $T_{1,\rm med}/T_{p,i}$ bei festem Ein-LP-Median. Sie beschreiben die drei Beobachtungen. Für den D2Q9-Einzelwert pro Konfiguration fehlt eine Streuungsschätzung.](abbildungen/cp2_skalierung.svg)
+
+| Speedup / Effizienz | 2 Arbeiter | 4 Arbeiter | 8 Arbeiter |
+|:--|--:|--:|--:|
+| D2Q9 · Voll | 1,736 / 86,8 % | 2,245 / 56,1 % | 2,553 / 31,9 % |
+| QSS3 · Präfix | 2,032 / 101,6 % | 3,280 / 82,0 % | 3,649 / 45,6 % |
+| QSS4 · Präfix | 2,102 / 105,1 % | 3,750 / 93,7 % | 3,805 / 47,6 % |
+
+**Beispiel D2Q9.** Von vier auf acht Ränge spart die Rechnung 2,65 s. Das sind 12,1 % der Vier-Rang-Zeit. Der zusätzliche Speedup beträgt $T_4/T_8=1{,}137$, also 13,7 % Zuwachs. Die Nenner beider Prozentwerte unterscheiden sich. Von der Ein-Rang-Basis aus erreicht die Kurve $S_8=2{,}553$ und $E_8=31{,}9\,\%$.
+
+**Wie genau ist das QSS4-Plateau?** Bei vier LPs liegen die Einzelzeiten zwischen 3,349 und 3,848 s, bei acht zwischen 3,222 und 4,176 s. Der Median sinkt um 0,0496 s. Das entspricht 1,48 % mehr Speedup. Die Spannen überlappen so stark, dass die drei Wiederholungen keinen stabilen Vorteil der Achterkonfiguration erkennen lassen. QSS3 gewinnt beim gleichen Schritt 11,25 % Speedup. [Einzelmessungen](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip)
+
+<!-- Buchseite -->
+
+### Wie groß ist der Abstand zum Ideal?
+
+Bei idealer Teilung wäre D2Q9 nach $49{,}3893/8=6{,}174$ s fertig. Gemessen sind 19,346 s. Die **Mehrzeit** $\Delta_p=T_p-T_1/p$ beträgt also 13,173 s auf der Wanduhr. Der **Parallelisierungsoverhead** $H_p=pT_p-T_1=p\Delta_p$ beträgt 105,38 Arbeitersekunden. Er zählt die verfügbare Arbeiterzeit. Verbrauchte CPU-Zeit wird separat gemessen.
+
+Auflösen von $T_p/T_1=f+(1-f)/p$ nach $f$ ergibt den effektiven Serialisierungsanteil nach Karp und Flatt. Er erfasst auch Wartezeit und Mehrarbeit. [A. H. Karp und H. P. Flatt, *Measuring Parallel Processor Performance*, CACM 33 (1990), 539–543](https://doi.org/10.1145/78607.78614)
+
+$$f_p=\frac{1/S_p-1/p}{1-1/p}
+     =\frac{pT_p-T_1}{(p-1)T_1},\qquad p>1.$$
+
+![Abbildung 16.16. Null ist in jeder Tafel das Ideal. Die oberen beiden Reihen haben je Spalte eigene Werteskalen, die untere hat eine gemeinsame Prozentskala. Bei einem Arbeiter ist $f_p$ undefiniert. Gezeigt sind Einzelwert bzw. Median wie in Abb. 16.15.](abbildungen/cp2_overhead_karp_flatt.svg)
+
+D2Q9 ergibt 15,23/26,05/30,48 % bei 2/4/8 Rängen. Ein konstantes $f=f_2$ würde bei acht Rängen 12,76 s ergeben, 6,59 s unter der Messung. Bei zwei LPs gilt für QSS3/QSS4 rechnerisch $f_2=-1{,}59\,\%$ bzw. $-4{,}86\,\%$. Ihre Median-Speedups sind überlinear. Mögliche Gründe sind Streuung, Cache und Takt.
+
+<!-- Buchseite -->
+
+### D2Q9 · Was kostet die Grenze zwischen zwei Teilgebieten?
+
+Bei der Kollision hat ein Rang alle neun Populationen seiner Zelle zur Hand. Beim Streaming kann die Zielzelle einem anderen Rang gehören. Der Kern packt die betreffenden Werte, ruft bei mehr als einem Rang in jedem Takt einmal je Rang `MPI_Alltoallv` auf und entpackt die Empfangspuffer. Das ergibt 350 000 gemeinsame Austauschvorgänge im Vollversuch. Die Zähler geben die Nutzdaten der Anwendung an. [MPI-Kern und Karten](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/PDES_Partitionierung_Messpaket.zip)
+
+| Ränge · Karte $p_x\times p_y$ | Populationen über Grenzen je Takt | Gerichtete Rangpaare | Nutzlast im Lauf (GB) | Durchsatz (MLUPS) |
+|:--|--:|--:|--:|--:|
+| 1 · 1 × 1 | 0 | 0 | 0,00 | 468 |
+| 2 · 1 × 2 | 1 538 | 2 | 4,31 | 812 |
+| 4 · 2 × 2 | 3 072 | 12 | 8,60 | 1 051 |
+| 8 · 2 × 4 | 6 140 | 32 | 17,19 | 1 195 |
+
+*MLUPS zählt Millionen Gitterknoten-Aktualisierungen je Sekunde. GB sind dezimale Gigabyte. Gezählt wird jede gesendete Population einmal. Aus der Zahl gerichteter Rangpaare folgt keine Paketanzahl auf einem physischen Netzwerk.*
+
+**Kommunikation und Synchronisation.** Von vier auf acht Ränge steigt das Nutzvolumen um den Faktor 2,00 und die Zahl aktiver gerichteter Paare von 12 auf 32. Jede gezählte Population umfasst acht Byte. Damit ergeben sich $6\,140 \cdot 8 \cdot 350\,000=17\,192\,000\,000$ Byte. Wie viel Wandzeit Packen, Kopieren und Warten kosten, bleibt offen. Die Zeitmessung enthält die Schlussbarriere. Ein blockierendes Kollektiv kann durch spät eintreffende Ränge verzögert werden. Die MPI-Spezifikation garantiert für einen gewöhnlichen kollektiven Austausch keine Barriere. [Rohdaten](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip) · [MPI-Standard](https://www.mpi-forum.org/docs/mpi-2.1/mpi21-report.pdf)
+
+**Bandbreite und Speicheranordnung.** Modelliert man pro Knoten und Takt neun gelesene und neun geschriebene `double`-Werte, ergibt das 144 Byte pro Aktualisierung. Der berechnete Anwendungsdurchsatz steigt von 67,4 über 117,0 und 151,3 auf 172,1 GB/s. Cache-Treffer, Schreiballokation und Halo-Kopien verändern den DRAM-Verkehr. Eine Sättigung ließe sich mit Speichercontroller-Zählern und einer Bandbreitenreferenz unter gleicher Bindung prüfen.
+
+**Gegenprobe am selben Gitter.** Über 1 024 Takte tauschen acht Zeilenstreifen und acht Spaltenstreifen exakt 10 766 Werte je Takt zwischen 14 gerichteten Paaren. Trotzdem erreichen sie $S_8=1{,}343$ und $0{,}774$ (je drei Läufe). Die innere Schleife durchläuft Zeilen. Zeilenstreifen erhalten die langen zusammenhängenden Abschnitte. Der Vergleich zeigt, wie wenig das Bytevolumen allein vorhersagt. Eine Zuordnung zu Cache, Vektorisierung oder Wartezeit erfordert Phasen- und Hardwarezähler. [Partitionsversuch](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/PDES_Partitionierung_Messpaket.zip)
+
+**Last und Programmstart.** Bei der 2 × 4-Karte besitzt das größte Gebiet 8 385 Zellen, nur 1,56 % mehr als der Mittelwert. Unterschiedliche Kosten für Randzellen und Wartezeiten bleiben möglich. Der Abstand von äußerer Gesamtzeit zu Kernzeit steigt von 0,268 s bei einem auf 0,328 s bei acht Rängen. Er umfasst Start, Initialisierung, Einsammeln und Schreiben des Endfelds. Der reine Prozessstart wurde nicht separat gestoppt. Diese äußeren Abschnitte liegen außerhalb des ausgewiesenen Kern-Speedups. [Messuhren](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip)
+
+<!-- Buchseite -->
+
+### QSS · Gleich große Gebiete können verschieden viel Arbeit haben
+
+Eine Zelle am bewegten Deckel erreicht ihre Quantisierungsschwelle. Alle LPs suchen den frühesten lokalen Bandkontakt und einigen sich über das globale Minimum auf den nächsten Zeitpunkt. Anders als beim lokalen D2Q9-Streaming benötigt die Rekonstruktion der Geschwindigkeit hier das gesamte Wirbelfeld. Die Implementierung verwendet Python-Prozesse mit Pipes. Rang 0 sammelt die Teilfelder, löst bei jeder Auswertung der rechten Seite das globale Poisson-Problem und schickt die Ergebnisanteile zurück. [Implementierung](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/PDES_Partitionierung_Messpaket.zip)
+
+| Acht Intervalle | Rechte-Seite-Aufrufe | Poisson-Nutzlast 4 $\to$ 8 LPs | Feldnachrichten 4 $\to$ 8 LPs | $f_4$ $\to$ $f_8$ |
+|:--|--:|--:|--:|--:|
+| QSS3 · Zeilen | 55 | 42,86 $\to$ 50,04 MB | 330 $\to$ 770 | 7,31 $\to$ 17,03 % |
+| QSS4 · Kacheln | 84 | 65,37 $\to$ 76,38 MB | 504 $\to$ 1 176 | 2,23 $\to$ 15,75 % |
+
+**Warum wächst das Volumen?** Bezeichne $n_0$ die auf Rang 0 liegenden Zellen und $R$ die Zahl der Aufrufe einschließlich Initialisierung. Pro fremder Zelle gehen acht Byte hin und acht zurück. Das ergibt $16(65\,025-n_0)R$ Byte und $2(p-1)R$ Feldnachrichten. Für QSS4 mit $n_0=8\,192$ und $R=84$ sind das 76 383 552 Byte. Hinzu kommen bei acht LPs 112 skalare Nachrichten für acht Ereignisminima, 336 für die Schrittmaßbestimmung und 4,09 MB zur Validierung der Felder. Die konservative Reihe hat null Rollbacks. [Zähler und Einzelzeiten](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip)
+
+**Warum stehen im Kapitel auch andere Achterzeiten?** Die frühere Partitionsreihe vergleicht mehrere Karten. Dort benötigt QSS3 in Zeilen 8,90/1,77 s mit einem/acht LPs, QSS4 auf Kacheln 11,84/2,23 s. Diese eigenständige Messserie besitzt eine eigene Ein-LP-Basis. Für Abbildung 16.15 stammen alle vier Punkte je Ordnung aus demselben Skalierungsprotokoll. [Partitionsreihe](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/PDES_Partitionierung_Messpaket.zip) · [Skalierungsreihe](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip)
+
+**Welche Arbeit ist konzentriert?** QSS3 verteilt 7 905 bis 8 160 Zellen je LP. Alle acht Bandkontakte treten im letzten Zeilenstreifen auf. Bei QSS4 verteilen sich die acht Kontakte auf die LPs 4, 5 und 7 im Verhältnis 4 : 3 : 1 (Nummerierung ab null). Die anderen LPs berechnen dennoch lokale Prognosen und verschieben Polynome. Allein aus der Zahl ausgelöster Ereignisse lässt sich ihr Rechenzeitanteil nicht ableiten.
+
+**Was misst das Profil?** Im separaten seriellen Präfix entfallen bei QSS3/QSS4 26,95/25,34 % der CPU-Zeit auf Kandidaten, 27,78/24,97 % auf das Verschieben und 36,56/42,61 % auf Taylor-Koeffizienten. Darin ist die reine Poisson-Rechnung mit 0,78/0,86 % bereits enthalten. Das lokale Minimum kostet 0,037/0,029 %. Hinzu kommen im Parallelprogramm die Transfers und das Warten auf Rang 0. Für deren Anteil am kritischen Pfad fehlen Rangzeitlinien. Die serielle Profilierung liefert folglich keine Aufteilung der 15,75 % von Karp–Flatt bei QSS4. [Serielles Phasenprofil](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/CP2_Kavitaet_257_QSS_Profil_eb1e551.zip)
+
+**Lässt sich das Plateau allein dem Start zuschreiben?** Je Lauf kann man die längste innere Arbeiterzeit von der äußeren Wandzeit abziehen. Bei QSS4 wächst der Median dieser Differenzen von 22,8 auf 28,8 ms (vier $\to$ acht LPs). Die inneren Mediane liegen bereits bei 3,387 und 3,332 s. Das Plateau ist damit schon im inneren Zeitfenster sichtbar. Dieses Fenster enthält auch Prüffeldtransport, Hashbildung auf Rang 0 und die Schlussbarriere. Für eine isolierte Startlatenz wäre eine eigene Zeitmarke nötig. [Messprogramm](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/PDES_Partitionierung_Messpaket.zip) · [Zeitpaare](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip)
+
+<!-- Buchseite -->
+
+### Vier Threads, längere Laufzeit
+
+Auf dem Intel Xeon Platinum 8370C liefern ein und vier Threads 37 identische Felder. Die Kernzeiten betragen 296,33 und 748,52 s. Das ergibt $S_4=0{,}396$. Der Anwender wartet auf vier Threads **2,53-mal so lange**. Die Prozess-CPU-Zeit steigt von 281,78 auf 1 266,11 s, also auf das 4,49-Fache. Auf eine Wandsekunde kommen im Vier-Thread-Lauf 1,69 CPU-Sekunden. Das Maß kann aktives Warten einschließen. [Historische Einzelprotokolle](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/pakete/Laborquellen.zip)
+
+![Abbildung 16.17. Jeder Punkt vergleicht vier Threads mit der eigenen Ein-Thread-Basis. Oben stehen vollständige Rechnungen, unten kurze Zeitfenster. „Gesamt“ umfasst den eigenständigen Intel-Lauf mit sieben Dateiausgaben. Für die beiden Lastbedingungen liegen bei 4 096 Takten je fünf Paare vor. Der Punkt zeigt den Median der fünf gepaarten Quotienten, der Strich ihre Spannweite. Für die vollständige EPYC-Gegenprobe sind beide Paarwerte einzeln dargestellt.](abbildungen/cp2_openmp_last.svg)
+
+**Ein zeitliches Indiz.** Schon in den ersten 1 024 Takten des historischen Hauptlaufs beträgt der Speedup nur 0,225. Ein gesonderter Pilot über ebenso viele Takte erreicht 1,970 und 3,97 CPU-Sekunden je Wandsekunde auf vier Threads. Das frühe Auseinanderlaufen spricht gegen eine Erklärung allein durch die lange Simulationsdauer. Damals liefen zeitweise weitere Aufgaben. Bindungen, Quoten und individuelle Wartezeiten wurden für diesen Lauf nicht erfasst. [Historischer Aufbau](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/pakete/Laborquellen.zip)
+
+**Ein kontrollierter Eingriff.** Auf dem EPYC erhält jeder der vier Threads eine eigene logische CPU. Drei konkurrierende Prozesse belasten gezielt CPU 3. Die Vier-Thread-Medianzeit wächst von 0,270 auf 1,111 s, die Ein-Thread-Zeit auf CPU 0 von 0,688 auf 0,703 s. Der Median der gepaarten Speedups fällt von 2,542 auf 0,633. Jeder OpenMP-Takt endet mit einer Barriere. Ein verzögerter Thread kann so das Team aufhalten. Der Eingriff belegt den Effekt asymmetrischer Konkurrenz auf dem EPYC. Die damalige Intel-Last bleibt offen. [Vollpaare und Lastgegenprobe](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/CP2_D2Q9_Ursache_Slowdown_257.zip)
+
+<!-- Buchseite -->
+
+### Zwei weitere Slowdowns mit unterschiedlicher Ursache
+
+Beim konservativen PDES-Verfahren darf ein LP nur so weit fortschreiten, wie der früheste mögliche Eingang eines anderen LPs erlaubt. Beim optimistischen Verfahren darf er vorauseilen. Eine zu spät bekannt werdende Grenzmeldung kann ihn zum Wiederherstellen eines früheren Zustands zwingen. Ein Vergleich aus Grundwasser und Saite zeigt, was diese Regeln kosten können. Jede Kurve wird mit ihrem eigenen Ein-Rang-Lauf normiert.
+
+![Abbildung 16.18. Links steht der vollständige C19R-Nennfall (fünf Kernzeiten je Punkt, Spanne bei festem Ein-Rang-Median). Rechts steht der viersekündige Saitenpilot CP1/C (eine Kernzeit je Konfiguration). Für die Saite fehlen Zwei-Rang-Messungen. Die gestrichelte Referenz zeigt $S_p=p$, die gepunktete $S_p=1$. Die Speedup-Achse ist logarithmisch.](abbildungen/pdes_c19r_saite_skalierung.svg)
+
+**C19R, zehn Modelltage.** Das konservative Protokoll bestätigt dieselben 65 292 Ereignisse. Von einem auf acht Ränge wächst die Zahl der Freigaben von 8 auf 11 556. Nun entfallen nur 5,65 bestätigte Ereignisse auf eine Freigabe über alle Ränge, zusätzlich fallen 297 710 Probeereignisse an. Die Medianzeit steigt von 37,60 auf 383,67 ms ($S_8=0{,}098$). Beim optimistischen Protokoll werden 726 381 von 791 673 bearbeiteten Ereignissen verworfen. 2 284 Rollbacks und 844 Abstimmungsrunden ergeben 501,26 ms gegenüber 26,23 ms ($S_8=0{,}052$). Die Ereigniszähler belegen Mehrarbeit. Die Sekunden für diese Mehrarbeit sind ungemessen. [C19R-Skalierungsreihe](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip)
+
+**Wie robust ist die Richtung?** Die getrennte Partitionsreihe mit drei Wiederholungen liefert für den C19R-Nennfall $S_8=0{,}090/0{,}076$ (konservativ/optimistisch) und für den Doppelpuls $0{,}087/0{,}069$. Die optimistischen Fenster dieser Reihe betragen 6 750 simulierte Sekunden, in der Fünferreihe 13 500. Jede Reihe behält ihr eigenes Protokoll und ihre eigene Basis. [Partitionsmessungen](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/PDES_Partitionierung_Messpaket.zip)
+
+**CP1/C, vier Modellsekunden.** Auf vier ereignisgewichteten Gebieten entfallen 99,93 % der bestätigten Ereignisse auf das aktivste Gebiet, bei acht noch 75,79 %. Von vier auf acht steigen die konservativen Grenzmeldungen von 1 773 auf 24 861. Trotz gleichmäßigerer Ereignislast fällt $S_4=0{,}970$ auf $S_8=0{,}425$. Im optimistischen Achterlauf kommen 28,77 Mio. verworfene auf 4,66 Mio. bestätigte Ereignisse ($S_8=0{,}271$). Beim Frequenzfall (2,6 rad/s) liegen die Achterwerte bei 0,615 bzw. 0,121. Für den kompletten nominellen Saitenlauf über 30 s liegt nur eine serielle Messung vor. [Saitenspur und Ranglast](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/PDES_Partitionierung_Messpaket.zip)
+
+<!-- Buchseite -->
+
+### Auf welchen CPUs liefen die Prozesse?
+
+Eine Rangzahl zählt Softwareprozesse. Für die physische Platzierung brauchen wir zusätzlich die Bindungsmaske sowie die Zuordnung jeder erlaubten logischen CPU zu Sockel und Kern.
+
+| Versuch | Protokoll und Bindung | Was offenbleibt |
+|:--|:--|:--|
+| **D2Q9-MPI, vollständig** | AMD EPYC 9V45 „96-Core Processor“, Linux 6.18.57, GCC 14.2, Open MPI 5.0.7. Laut Manifest belegt Rang $r$ die $r$-te erlaubte logische CPU, ab CPU 0. | Die Rangprotokolle enthalten Zeiten und Rangzahl. Individuell zurückgelesene Masken und Hosttopologie fehlen. |
+| **Komponenten-QSS, 8 Intervalle** | EPYC 9V45. 1/2/4/8 verschiedene Prozess-IDs. `cpu_ids` enthält `[0]`, `[0,1]`, `[0,…,3]` bzw. `[0,…,7]`. Jeder Worker setzt eine Ein-CPU-Affinität. | Zeitgleiche CPU-Residenz und SMT-Geschwister wurden nicht aufgezeichnet. |
+| **OpenMP, Hauptlauf** | Intel Xeon Platinum 8370C, Linux 6.18.57. Ein bzw. vier Threads, zeitweise parallele Last. | Thread-Bindung, CPU-Quote und Identität der konkurrierenden Aufgaben fehlen. |
+| **OpenMP, Gegenprobe** | EPYC 9V45. `taskset` und feste OpenMP-Plätze. Ein Thread auf CPU 0, vier auf 0–3. Drei Lastprozesse auf CPU 3. | Gemessen ist Konkurrenz um dieselbe logische CPU. Die physischen Kerne bleiben unbekannt. |
+
+Der MPI-Starter erlaubt mit `--oversubscribe` eine Überbuchung und überlässt mit `--bind-to none` die Bindung dem Programm. Der C++-Kern prüft die Zahl erlaubter CPUs und bricht bei einem Bindungsfehler ab. Die separaten seriellen QSS-Langläufe teilten sich beim ersten Sicherungsstand die logische CPU 8. [Plattformmanifest](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip) · [MPI- und LP-Kerne](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/PDES_Partitionierung_Messpaket.zip) · [Intel-Umgebung](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/pakete/Laborquellen.zip)
+
+**Liefen acht physische Kerne auf poi?** Die Messarchive nennen keinen Hostnamen `poi`. Die CPU-Modellbezeichnung allein verrät die Belegung der Kerne nicht. Vier Kerne mit je zwei SMT-Kontexten und acht getrennte Kerne sind mit acht logischen IDs vereinbar. In einer VM kann die Platzierung auf dem Host zusätzlich wechseln.
+
+**Wie groß ist der Einfluss der verfügbaren CPUs?** Eine eigene EPYC-Probe hält vier Threads und 1 024 Takte fest. Bei der Standard-Wartepolitik ergeben sich mit vier erlaubten logischen CPUs $S_4=2{,}72$, mit zwei noch $1{,}48$ (Median fünf gepaarter Quotienten). Das belegt einen Platzierungseffekt für diesen Versuch. Zur Bezifferung des SMT-Effekts müsste man bei gleicher Arbeiterzahl gezielt getrennte Kerne und bekannte SMT-Geschwister vergleichen. [Bindungsversuch](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/CP2_D2Q9_Ursache_Slowdown_257.zip)
+
+**Welche Angaben fehlen dafür?** Zum Startzeitpunkt Hostkennung, `lscpu -e=CPU,CORE,SOCKET,NODE`, Geschwisterlisten, effektives cpuset und CPU-Quote sichern. Nach der Bindung pro Worker PID/TID und `sched_getaffinity` protokollieren. Für Aussagen über physische Kerne eines virtualisierten Hosts ist auch die Hypervisor-Zuordnung nötig. [Linux-Topologie](https://docs.kernel.org/admin-guide/cputopology.html) · [CPU-Affinität](https://man7.org/linux/man-pages/man2/sched_getaffinity.2.html)
+
+<!-- Buchseite -->
+
+### Rechenlabor und Lesetest
+
+Das [Rechenlabor zur Skalierung](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/tree/main/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/skalierungsanalyse) verarbeitet die Originalmessungen offline. Die Quellenliste bezieht sich auf den am 27. November 2026 geprüften Buchstand `4e8e40d3`. [Kapitelquelle](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/kapitel/16.md) · [PR 88](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/pull/88)
+
+#### Vom Rohprotokoll zur Abbildung
+
+Im Laborverzeichnis `skalierungsanalyse` genügen Python 3, NumPy und Matplotlib. Der Aufruf schreibt die Ausgaben ins angegebene Zielverzeichnis.
+
+```sh
+python3 auswerten.py --ausgabe /tmp/cp2-auswertung
+```
+
+Die Auswertung prüft die Prüfsummen der Quellen und gleicht die archivierten Feld-Hashes ab. Aus den Zeitlisten einer vergleichbaren Konfiguration berechnet dieser Python-Ausschnitt die Kennzahlen.
+
+```python
+from statistics import median
+t1, tp = median(zeiten_1), median(zeiten_p)
+speedup = t1 / tp
+effizienz, overhead = speedup / p, p * tp - t1
+karp_flatt = None if p == 1 else overhead / ((p - 1) * t1)
+```
+
+OpenMP-Lastpaare werden vor der Medianbildung dividiert. Die Ausgaben umfassen CSV, Vektorgrafiken (PDF, SVG) und PNG mit 300 dpi.
+
+#### Drei Fragen zum Nachrechnen
+
+1. **Wann ist der Overhead so groß, dass Parallelisierung bremst?** Setzen Sie $S_p=1$ in die Formeln ein. Dann ist $T_p=T_1$, also $H_p=(p-1)T_1$ und $f_p=1$. Für $S_p<1$ gilt $H_p>(p-1)T_1$ und $f_p>1$. Beim historischen Intel-Kern ergeben sich $f_4=303{,}5\,\%$. Der Wert ist als Diagnose zulässig. Er wäre als Anteil serieller Quellcodezeilen sinnlos.
+2. **Würden weniger Halo-Bytes das D2Q9-Ergebnis erklären?** Vergleichen Sie bei acht MPI-Rängen die Zeilen- mit der Spaltenkarte über 1 024 Takte. Die Bytes und die Zahl gerichteter Paare sind gleich, die Mediane unterscheiden sich um den Faktor $1{,}343/0{,}774\approx1{,}73$. Um die Ursache einzugrenzen, müssten bei identischer Karte und Bindung Packen, Kollektiv, Entpacken und lokale Zellarbeit pro Rang getrennt erfasst werden. DRAM- und Cache-Zähler prüfen die Speicherhypothese.
+3. **Welches Messergebnis würde die Poisson-Hypothese stützen?** Markieren Sie auf Rang 0 Feldsammlung, numerische Lösung und Rückgabe. Auf den übrigen LPs markieren Sie Sendezeit, lokale Arbeit und Warten auf das Ergebnis. Wächst der zeitlich zugeordnete Warteabschnitt von vier auf acht LPs, während der Löser auf Rang 0 arbeitet, lässt sich dessen Beitrag zum kritischen Pfad beziffern. Summierte Wartezeiten über alle LPs können dieselben Wandzeitintervalle mehrfach enthalten.
 
 <!-- Buchseite -->
 
@@ -11374,7 +11560,7 @@ Die Implementierungsangaben zur adaptiven Radau-Methode (Ordnung fünf, eingebet
 
 **Buch- und Rechenstand.** Grundlage sind das bisherige Manuskript, die eingereichten Kapitelentwürfe und der Projektstand `16f0f252`. Die Versuche mit dem kleinen D2Q9-Gitter, dem Scherwellenabklingen, dem gelernten Saitenpropagator und dem hergestellten nichtlinearen Operator wurden für diese Fassung gerechnet. Für Abschnitt 9.6 wurden drei Modengesetze an getrennten Wellenzahlen verglichen, die Wellengeschwindigkeit kalibriert und der Physikterm eines nichtlinearen FNO über fünf Rauschfolgen geprüft. Abschnitt 9.7 vergleicht auf denselben Daten einen fest eingebauten Wellenschritt mit und ohne Netzkorrektur. Weitere Kontrollläufe untersuchen halbzellige Ausbreitungswege und eine gedämpfte Saite. Zum Vergleich zitierte Zahlen der größeren CP2-Studie sind als Archivwerte gekennzeichnet. [Physikinformierte neuronale Operatoren][p9pino] · [D’Alembert-Lösung][p9dalembert] [Projektkapitel CP2 mit Daten und Kontrollen][t1proj16]
 
-Das Quellenpaket enthält den mathematischen Grundlagenteil, 18 Kapitel, vier Anhänge, 92 Abbildungen und ihre Druckfassungen. Zu den Kapiteln gehören Python- und C++-Versuche, Messdateien sowie die Zeichenvorgaben. Das Verzeichnis im Rechenlabor Bildprüfung nennt zu jeder Abbildung die Druckseite und die zugehörigen Dateien. Das frühere Zweimoden-Temperaturfeld ist ausschließlich im [Archiv, Abb. 4 auf S. 11](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/d2db4732cf20a491d9a2f13b105ff0392ebf0641/docs/ARGESIM_SOLVER_STUDY.pdf?raw=true#page=11) zu sehen. Die Grundlagenbeispiele laufen mit der Python-Standardbibliothek. Jedes erweiterte Labor beschreibt seine wissenschaftlichen Pakete und seinen eigenen Rechenstand.
+Das Quellenpaket enthält den mathematischen Grundlagenteil, 18 Kapitel, vier Anhänge, 96 Abbildungen und ihre Druckfassungen. Zu den Kapiteln gehören Python- und C++-Versuche, Messdateien sowie die Zeichenvorgaben. Das Verzeichnis im Rechenlabor Bildprüfung nennt zu jeder Abbildung die Druckseite und die zugehörigen Dateien. Das frühere Zweimoden-Temperaturfeld ist ausschließlich im [Archiv, Abb. 4 auf S. 11](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/d2db4732cf20a491d9a2f13b105ff0392ebf0641/docs/ARGESIM_SOLVER_STUDY.pdf?raw=true#page=11) zu sehen. Die Grundlagenbeispiele laufen mit der Python-Standardbibliothek. Jedes erweiterte Labor beschreibt seine wissenschaftlichen Pakete und seinen eigenen Rechenstand.
 
 [lbm]: https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/studienbuch/kapitel/08.tex
 [projekt]: https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/16f0f2528fcf77f16898ecd74ad952be2c09eac2/docs/lehrbuch/README.md
