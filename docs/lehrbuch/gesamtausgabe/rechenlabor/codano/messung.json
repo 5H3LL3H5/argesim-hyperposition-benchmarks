@@ -1,0 +1,207 @@
+{
+  "neuraloperator": "2.0.0",
+  "torch": "2.8.0+cpu",
+  "problem": {
+    "rate": 1.25,
+    "diffusivity": [
+      0.03,
+      0.06
+    ],
+    "horizon": 0.4
+  },
+  "epochs": 40,
+  "threads": 1,
+  "counts": [
+    96,
+    24,
+    32
+  ],
+  "rows": [
+    {
+      "model": "FNO",
+      "seed": 2027,
+      "selected_epoch": 40,
+      "seconds": 8.187256372002594,
+      "real_parameter_count": 10914,
+      "test": {
+        "13": {
+          "mean_relative_l2_by_field": [
+            0.02729463391005993,
+            0.034073539078235626
+          ],
+          "max_absolute_by_field": [
+            0.1480259895324707,
+            0.04277610778808594
+          ]
+        },
+        "25": {
+          "mean_relative_l2_by_field": [
+            0.02730686217546463,
+            0.0340828038752079
+          ],
+          "max_absolute_by_field": [
+            0.15008163452148438,
+            0.04391521215438843
+          ]
+        }
+      },
+      "counterfactual_relative_l2_u": 0.07071884721517563,
+      "boundary_max_abs": 0.0
+    },
+    {
+      "model": "CoDA-NO",
+      "seed": 2027,
+      "selected_epoch": 38,
+      "seconds": 69.06378904400117,
+      "real_parameter_count": 1051,
+      "test": {
+        "13": {
+          "mean_relative_l2_by_field": [
+            0.4792259633541107,
+            0.4840303957462311
+          ],
+          "max_absolute_by_field": [
+            0.8212668895721436,
+            0.3835877478122711
+          ]
+        },
+        "25": {
+          "mean_relative_l2_by_field": [
+            0.5743932127952576,
+            0.6601505279541016
+          ],
+          "max_absolute_by_field": [
+            0.8264034986495972,
+            0.5434627532958984
+          ]
+        }
+      },
+      "counterfactual_relative_l2_u": 1.9114985466003418,
+      "boundary_max_abs": 0.0
+    },
+    {
+      "model": "FNO",
+      "seed": 73,
+      "selected_epoch": 40,
+      "seconds": 8.942814632999216,
+      "real_parameter_count": 10914,
+      "test": {
+        "13": {
+          "mean_relative_l2_by_field": [
+            0.02558239921927452,
+            0.029699526727199554
+          ],
+          "max_absolute_by_field": [
+            0.11268818378448486,
+            0.03505527973175049
+          ]
+        },
+        "25": {
+          "mean_relative_l2_by_field": [
+            0.025584913790225983,
+            0.029703404754400253
+          ],
+          "max_absolute_by_field": [
+            0.11269080638885498,
+            0.035056084394454956
+          ]
+        }
+      },
+      "counterfactual_relative_l2_u": 0.0228000208735466,
+      "boundary_max_abs": 0.0
+    },
+    {
+      "model": "CoDA-NO",
+      "seed": 73,
+      "selected_epoch": 40,
+      "seconds": 78.64577773099882,
+      "real_parameter_count": 1051,
+      "test": {
+        "13": {
+          "mean_relative_l2_by_field": [
+            0.4531797170639038,
+            0.6021791100502014
+          ],
+          "max_absolute_by_field": [
+            0.8871262669563293,
+            0.5500820279121399
+          ]
+        },
+        "25": {
+          "mean_relative_l2_by_field": [
+            0.5381550192832947,
+            0.5752004384994507
+          ],
+          "max_absolute_by_field": [
+            0.9193967580795288,
+            0.7142060995101929
+          ]
+        }
+      },
+      "counterfactual_relative_l2_u": 1.045249104499817,
+      "boundary_max_abs": 0.0
+    },
+    {
+      "model": "FNO",
+      "seed": 3917,
+      "selected_epoch": 40,
+      "seconds": 8.603514610000275,
+      "real_parameter_count": 10914,
+      "test": {
+        "13": {
+          "mean_relative_l2_by_field": [
+            0.035870734602212906,
+            0.025400608777999878
+          ],
+          "max_absolute_by_field": [
+            0.18396532535552979,
+            0.05042064189910889
+          ]
+        },
+        "25": {
+          "mean_relative_l2_by_field": [
+            0.03587140142917633,
+            0.025400925427675247
+          ],
+          "max_absolute_by_field": [
+            0.18788933753967285,
+            0.05042064189910889
+          ]
+        }
+      },
+      "counterfactual_relative_l2_u": 0.03217430040240288,
+      "boundary_max_abs": 0.0
+    },
+    {
+      "model": "CoDA-NO",
+      "seed": 3917,
+      "selected_epoch": 38,
+      "seconds": 68.99239984399901,
+      "real_parameter_count": 1051,
+      "test": {
+        "13": {
+          "mean_relative_l2_by_field": [
+            0.5919827222824097,
+            0.7421688437461853
+          ],
+          "max_absolute_by_field": [
+            0.8778222799301147,
+            0.7250819206237793
+          ]
+        },
+        "25": {
+          "mean_relative_l2_by_field": [
+            0.6724772453308105,
+            0.8789625763893127
+          ],
+          "max_absolute_by_field": [
+            0.8878310918807983,
+            0.8190745711326599
+          ]
+        }
+      },
+      "counterfactual_relative_l2_u": 1.0045990943908691,
+      "boundary_max_abs": 0.0
+    }
+  ]
+}

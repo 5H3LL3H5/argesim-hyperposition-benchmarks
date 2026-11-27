@@ -35,3 +35,7 @@ PYTHONPATH=quellen:programme python -m unittest -v test_qss_calendar_regressions
 ```
 
 Im historischen Skalierungsvergleich ergeben die 82 ergänzenden Vertragsproben dieselbe Ergebnistabelle vor und nach dem Skalierungsfix. Für C03, C05, C12, C13 und C21 stimmen in den zwölf direkten Gegenläufen Status, numerischer Score sowie die aufgezeichneten Schritt- und RHS-Zähler überein. Die Laufzeiten stehen separat im jeweiligen Protokoll.
+
+## CoDA-NO: Zwei gekoppelte Diffusionsfelder
+
+Der [Mehrfeldversuch zu Kapitel 9](rechenlabor/codano/README.md) vergleicht FNO und CoDA-NO am selben analytischen Referenzproblem. Das optionale Training läuft auf der CPU; die Messdaten liegen im vollständigen Labor.
