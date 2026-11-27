@@ -206,6 +206,11 @@ def gesamt_tabelle(m):
     first_row = raw[first:].split(r"\midrule", 1)[0]
     for label, spec in (
         ("Verfahren und Messumfang", r"@{}Xrrrrr@{}"),
+        ("Modell bei Re", r"@{}>{\raggedright\arraybackslash}Xr>{\raggedright\arraybackslash}Xr@{}"),
+        ("Kontrolle bei Re", r"@{}>{\raggedright\arraybackslash}Xrr@{}"),
+        ("Max. lokaler Vektorfehler", r"@{}l*{3}{>{\raggedleft\arraybackslash}X}@{}"),
+        ("Größte lokale Änderung", r"@{}X*{2}{>{\raggedleft\arraybackslash}X}@{}"),
+        ("D2Q9, Median", r"@{}l*{3}{>{\raggedleft\arraybackslash}X}@{}"),
         ("Speedup / Effizienz", r"@{}Xrrr@{}"),
         ("Populationen über Grenzen", r"@{}*{5}{>{\raggedright\arraybackslash}X}@{}"),
         ("Feldnachrichten", r"@{}*{5}{>{\raggedright\arraybackslash}X}@{}"),
@@ -436,10 +441,18 @@ frag = roadmap + r"\section{Mathematische Grundlagen}" + rest
 
 # Provide named PDF destinations for the revision findings that are also section labels.
 frag = re.sub(
-    r"(\\(?:sub)*section\{[^\n]*?\}\\label\{((?:revision|auflage|druck)-[^}]+)\})",
+    r"(\\(?:sub)*section\{[^\n]*?\}\\label\{((?:revision|auflage|druck|verlauf)-[^}]+)\})",
     lambda m: m[1] + r"\hypertarget{" + m[2] + r"}{}",
     frag,
 )
+for title, size in (
+    ("Wann trifft ein Modell den ganzen Anfahrverlauf?", r"\kleinsatz"),
+    ("Schluss · Im Innenfeld und an der Phase wird der Auftrag geprüft", r"\normalsatz"),
+):
+    section = r"\subsection{" + title + "}"
+    assert frag.count(section) == 1
+    frag = frag.replace(section, size + "\n" + section)
+
 counts = (
     frag.count(r"\bild{"),
     table_count,
@@ -448,5 +461,5 @@ counts = (
     mess_tabelle_count,
     studien_tabelle_count,
 )
-assert counts == (96, 55, 1, 6, 4, 1), counts
+assert counts == (98, 55, 1, 6, 4, 1), counts
 (tex / "buch.tex").write_text(header + frag + "\n" + r"\end{document}" + "\n")

@@ -1,0 +1,17 @@
+{
+  "n": 257,
+  "re": 975,
+  "outputs": 315,
+  "last_step": 350000,
+  "threads": 1,
+  "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "affinity": [
+    3
+  ],
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "wall_limit_s": 480,
+  "process_wall_s": 145.34957797399966,
+  "process_cpu_s": 139.240499,
+  "kernel_wall_s": 143.497798388,
+  "kernel_cpu_s": 137.457792
+}

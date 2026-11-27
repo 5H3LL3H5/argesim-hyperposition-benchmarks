@@ -1,0 +1,12 @@
+{
+  "calibration_re": 1000,
+  "prospective_re": 975,
+  "method": "D2Q9(257) from rest through k=32768 inclusive, followed by frozen korrektur_hankel outputs on top of D2Q9(65) from rest",
+  "switch_inclusive_k": 32768,
+  "switch_basis": "At Re=1000 both budgets were met at all sampled k >=16384. Use twice that tick as the boundary and freeze before computing Re=975.",
+  "positive_checkpoints": 315,
+  "relative_L2_limit": 0.01,
+  "pointwise_vector_limit_U": 0.01,
+  "initial_condition": "interior at rest, moving lid prescribed",
+  "selection": "use the archived main-series Hankel correction without retraining, adjustment or blending on 975. Ground truth at neither target is a model input after the switch. All 315 positive samples must pass."
+}

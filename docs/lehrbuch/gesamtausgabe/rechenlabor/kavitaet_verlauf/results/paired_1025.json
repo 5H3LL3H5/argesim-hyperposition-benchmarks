@@ -1,0 +1,28 @@
+{
+  "re": 1025,
+  "affinity": [
+    2
+  ],
+  "outputs": 316,
+  "rows": [
+    {
+      "method": "smooth",
+      "wall_s": 25.950179847999607,
+      "cpu_s": 25.828560648,
+      "max_abs_component_end_delta": 0.013568784660462185
+    },
+    {
+      "method": "D2Q9",
+      "wall_s": 131.28129882800022,
+      "cpu_s": 130.90824005899998,
+      "max_abs_component_end_delta": 0.0
+    },
+    {
+      "method": "smooth",
+      "wall_s": 25.66107775399996,
+      "cpu_s": 25.626719495000003,
+      "max_abs_component_end_delta": 0.013568784660462185
+    }
+  ],
+  "speedup": 5.087312533260728
+}

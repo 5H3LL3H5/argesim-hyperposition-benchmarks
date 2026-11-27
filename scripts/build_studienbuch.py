@@ -36,6 +36,7 @@ REPLAY = COMPARISON.parent / "skalenfix_c635504"
 MANUSCRIPT = "lehrbuch_numerische_simulation.md"
 CONTACT = COMPARISON.parent / "kontakt_v919"
 PDES = Path("rechenlabor/pdes_partitionierung")
+TRAJECTORY = Path("rechenlabor/kavitaet_verlauf")
 REVISION = "v9.22"
 DATE = (2026, 11, 26, 0, 0, 0)
 
@@ -212,7 +213,9 @@ def core_lab(path):
             "abbildungen/pdes_c19r_saite_skalierung.svg",
         ):
             write_entry(lab, name, (EDITION / name).read_bytes())
-        for source in sorted((EDITION / AUDIT).rglob("*")):
+        for source in sorted(
+            path for directory in (AUDIT, TRAJECTORY) for path in (EDITION / directory).rglob("*")
+        ):
             if source.is_file() and "__pycache__" not in source.parts:
                 write_entry(
                     lab, source.relative_to(EDITION).as_posix(), source.read_bytes()
@@ -392,6 +395,8 @@ def expected_attachments():
     attachments["CP2_Vollgitter_v9_20.json"] = (
         EDITION / PDES / "vollgitter.json"
     ).read_bytes()
+    for name in ("vergleich.csv", "smooth_vergleich.csv", "smooth_fenster.csv"):
+        attachments["CP2_Verlaufspruefung_" + name] = (EDITION / TRAJECTORY / "results" / name).read_bytes()
     return attachments
 
 
@@ -409,6 +414,8 @@ def verify_published_pdf(path, attachments):
         for name, words in (
             ("druck-beleglegende", ("Beweis", "Gegenprobe", "Messung")),
             ("druck-c05-entscheidung", ("C05", "Aufwand", "BDF")),
+            ("verlauf-laufzeit", ("Rechenzeit", "Überblendung", "4,73")),
+            ("verlauf-ueberblendung", ("442", "309")),
             ("druck-cp2-skalierung", ("Kavität", "Ereignisintervalle", "D2Q9")),
         ):
             dest = targets.get(name)
