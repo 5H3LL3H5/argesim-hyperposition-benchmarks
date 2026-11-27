@@ -266,7 +266,7 @@ def finding_checks(root: Path, book) -> list[Result]:
                 path,
                 problems or (passed,),
             )
-        except (OSError, ValueError, KeyError, BadZipFile) as exc:
+        except (ArithmeticError, OSError, ValueError, KeyError, BadZipFile) as exc:
             result = Result(ident, "error", criterion, path, (str(exc),))
         results.append(replace(result, pdf_page=pages.get(title)))
     return results

@@ -59,6 +59,20 @@ class FindingTest(unittest.TestCase):
         self.assertEqual(len(problems), 2)
         self.assertTrue(all(str(2**55) in failure for failure in problems))
 
+    def test_brent_iteration_limit_is_reported_without_aborting_other_checks(self):
+        message = "Brent-Dekker hat seine Iterationsgrenze erreicht"
+        with (
+            patch.object(audit, "check_brent", side_effect=ArithmeticError(message)),
+            patch.object(audit, "check_pdf_names", return_value=()),
+            patch.object(audit, "check_measurement_sources", return_value=()),
+        ):
+            results = audit.finding_checks(Path("."), SimpleNamespace(outline=[]))
+        self.assertEqual(
+            {result.id: result.outcome for result in results},
+            {"R90-K-01": "error", "R90-PDF-01": "pass", "R91-LAB-01": "pass"},
+        )
+        self.assertEqual(results[0].evidence, (message,))
+
     def test_measurement_commit_and_script_hash_are_both_required(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
