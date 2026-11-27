@@ -1,0 +1,23 @@
+name: CP2-Laborarchiv bereitstellen
+on:
+  push:
+    branches: [studie/cp2-kavitaet-verlauf]
+    paths: ['.github/workflows/cp2-labor-publikation.yml', '.cp2-labor.patch']
+permissions:
+  contents: write
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Geprüftes ZIP auf dem Studienbranch bereitstellen
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive=docs/ARGESIM_Bachelor_Rechenlabor.zip
+          git apply --binary --include="$archive" .cp2-labor.patch
+          test "$(git hash-object "$archive")" = bcee8f6f3bc7b8e3de771b3e2f7ec3141224cc5f
+          git add -- "$archive"
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Stelle das verifizierte Rechenlabor auf dem Studienbranch bereit'
+          git push origin HEAD:refs/heads/studie/cp2-kavitaet-verlauf
