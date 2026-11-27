@@ -205,6 +205,11 @@ def gesamt_tabelle(m):
     first = raw.index(r"\toprule")
     first_row = raw[first:].split(r"\midrule", 1)[0]
     for label, spec in (
+        ("Verfahren und Messumfang", r"@{}Xrrrrr@{}"),
+        ("Speedup / Effizienz", r"@{}Xrrr@{}"),
+        ("Populationen über Grenzen", r"@{}*{5}{>{\raggedright\arraybackslash}X}@{}"),
+        ("Feldnachrichten", r"@{}*{5}{>{\raggedright\arraybackslash}X}@{}"),
+        ("Protokoll und Bindung", r"@{}>{\raggedright\arraybackslash}p{.21\linewidth}*{2}{>{\raggedright\arraybackslash}X}@{}"),
         ("konservativ (ms)", r"@{}l*{5}{>{\raggedleft\arraybackslash}X}@{}"),
         ("MPI-Prozesse", r"@{}l*{5}{>{\raggedleft\arraybackslash}X}@{}"),
         ("Serieller Aufruf", r"@{}lrrX@{}"),
@@ -443,5 +448,5 @@ counts = (
     mess_tabelle_count,
     studien_tabelle_count,
 )
-assert counts == (92, 55, 1, 6, 4, 1), counts
+assert counts == (96, 55, 1, 6, 4, 1), counts
 (tex / "buch.tex").write_text(header + frag + "\n" + r"\end{document}" + "\n")

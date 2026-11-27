@@ -196,11 +196,22 @@ def core_lab(path):
             "Gruppen_QSS34_Prueffelder.zip",
             "QSS34_Fortsetzung.zip",
         }
-        for source in sorted((EDITION / PDES).iterdir()):
-            if source.is_file() and source.name not in separate_fields:
+        for source in sorted((EDITION / PDES).rglob("*")):
+            if (
+                source.is_file()
+                and source.name not in separate_fields
+                and "__pycache__" not in source.parts
+            ):
                 write_entry(
                     lab, source.relative_to(EDITION).as_posix(), source.read_bytes()
                 )
+        for name in (
+            "abbildungen/cp2_skalierung.svg",
+            "abbildungen/cp2_overhead_karp_flatt.svg",
+            "abbildungen/cp2_openmp_last.svg",
+            "abbildungen/pdes_c19r_saite_skalierung.svg",
+        ):
+            write_entry(lab, name, (EDITION / name).read_bytes())
         for source in sorted((EDITION / AUDIT).rglob("*")):
             if source.is_file() and "__pycache__" not in source.parts:
                 write_entry(
@@ -228,7 +239,8 @@ def full_lab(target):
                     write_entry(lab, "druck/" + name, figures.read(name))
             with zipfile.ZipFile(PACKAGES / "Laborquellen.zip") as core:
                 for name in core.namelist():
-                    write_entry(lab, name, core.read(name))
+                    if name != "rechenlabor/bildpruefung/buchatlas.py":
+                        write_entry(lab, name, core.read(name))
             index = json.loads(
                 (PACKAGES / "Feldpakete.json").read_text(encoding="utf-8")
             )
@@ -397,6 +409,7 @@ def verify_published_pdf(path, attachments):
         for name, words in (
             ("druck-beleglegende", ("Beweis", "Gegenprobe", "Messung")),
             ("druck-c05-entscheidung", ("C05", "Aufwand", "BDF")),
+            ("druck-cp2-skalierung", ("Kavität", "Ereignisintervalle", "D2Q9")),
         ):
             dest = targets.get(name)
             if dest is None or not 0 <= dest["page"] < len(book):

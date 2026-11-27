@@ -1,6 +1,6 @@
 # Abbildungen prüfen und nachrechnen
 
-Christian Stenzel · Numerische Simulation dynamischer Systeme · Register und Bildatlas der Druckfassung v9.21
+Christian Stenzel · Numerische Simulation dynamischer Systeme · Register und Bildatlas der aktuellen Druckfassung
 
 Abb. 6.9 entsteht aus den Ereigniszahlen und Schnittkarten des [PDES-Labors](../pdes_partitionierung/README.md). Die Tafeln zu CP-Dynamik entstehen im [Labor für CP-Dynamik](../cp_dynamik/README.md). Der neue Fühlervergleich und die zwei ergänzten Tafeln sind im [Revisionslabor](../revisionspruefung/README.md) beschrieben.
 
@@ -17,7 +17,7 @@ python3 -B rechenlabor/bildpruefung/bestand.py
 python3 -B rechenlabor/bildpruefung/test_bilder.py -v
 ```
 
-Benötigt werden Python ab 3.10, NumPy, SciPy, Matplotlib, PyMuPDF und für zwei überarbeitete SVG-Druckvorlagen Inkscape. Die tatsächlich geprüften Versionen stehen in `umgebung.txt`. Alle Eingabedaten liegen bei. Die wissenschaftlichen Kurven und Kartendaten werden unabhängig von der PDF-Seitenfolge erzeugt. Das seitenbezogene Verzeichnis enthält die 92 Abbildungen der Druckausgabe v9.21. Wer nur ein Teilbild ablesen möchte, findet die neun neuen Druckvorlagen im Ordner `druck/` unter dem Namen `bild_*.pdf`.
+Benötigt werden Python ab 3.10, NumPy, SciPy, Matplotlib, PyMuPDF und für zwei überarbeitete SVG-Druckvorlagen Inkscape. Die tatsächlich geprüften Versionen stehen in `umgebung.txt`. Alle Eingabedaten liegen bei. Die wissenschaftlichen Kurven und Kartendaten werden unabhängig von der PDF-Seitenfolge erzeugt. Das seitenbezogene Verzeichnis enthält die 96 Abbildungen der aktuellen Druckausgabe. Wer nur ein Teilbild ablesen möchte, findet die neun neuen Druckvorlagen im Ordner `druck/` unter dem Namen `bild_*.pdf`.
 
 | Abbildung | Experiment und Beleg |
 |---|---|
@@ -40,10 +40,14 @@ Die kleineren D2Q9-Karten in 16.1 und 16.4 geben die Originaldaten wieder. In 16
 
 ## Druckausgabe und Bildatlas kontrollieren
 
-Der folgende Aufruf prüft die 92 Bildnummern in der gelieferten Buch-PDF, gleicht die Seiten und SHA-256-Werte mit dem Verzeichnis ab und erzeugt den vollständigen Bildatlas erneut. Legen Sie die Buch-PDF dazu in den Paketstamm oder geben Sie ihren Pfad an. Für die Verzeichnisseiten verwendet der Bildsatz die DejaVu-Schriften in der Standardinstallation von Debian. Ohne die Option `--atlas` führt das Programm nur die Prüfung aus.
+Im Repository prüft `python3 docs/lehrbuch/gesamtausgabe/rechenlabor/bildpruefung/buchatlas.py docs/ARGESIM_SOLVER_STUDY.pdf` direkt die Vektor-PDFs in `druck/Druckabbildungen.zip`. Im vollständigen Offline-Labor liest derselbe Prüfer die ausgepackten Dateien unter `druck/`. Beide Aufbauten unterstützen auch `--register-aktualisieren`.
+
+Der folgende Aufruf prüft die 96 Bildnummern in der gelieferten Buch-PDF, gleicht die Seiten und SHA-256-Werte mit dem Verzeichnis ab und erzeugt den vollständigen Bildatlas erneut. Legen Sie die Buch-PDF dazu in den Paketstamm oder geben Sie ihren Pfad an. Für die Verzeichnisseiten verwendet der Bildsatz die DejaVu-Schriften in der Standardinstallation von Debian. Ohne die Option `--atlas` führt das Programm nur die Prüfung aus.
 
 ```sh
 python3 -B rechenlabor/bildpruefung/buchatlas.py lehrbuch_numerische_simulation.pdf --atlas Mein_Bildatlas.pdf
 ```
 
 Die 57 Vektorlinien von Abb. 18.3 werden im [Druckfahnenversuch](../revisionspruefung/README.md) zusätzlich direkt gegen die Laufzeiten des Archivs geprüft. In Abb. 9.4 ist die Flussprojektion die mittlere der drei Balkenreihen.
+
+Die Abbildungen 16.15–16.18 lassen sich im [Skalierungslabor](../pdes_partitionierung/skalierungsanalyse/README.md) aus den archivierten Laufzeiten neu zeichnen.

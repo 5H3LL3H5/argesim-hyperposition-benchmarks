@@ -1,0 +1,3 @@
+threads,n,steps,output_fields,wall_complete_s,cpu_complete_s,raw_max_abs
+4,257,350000,7,365.4755756710001,748.066392,0.0
+1,257,350000,7,170.49116148899975,170.19992799999997,0.0
