@@ -24,7 +24,7 @@ Ein Federwagen schwingt auf einer reibungsfreien Schiene. Am Umkehrpunkt ruht er
 
 Die [mathematischen Grundlagen](#grundlagen) führen die Rechenwerkzeuge vor Kapitel 1 ein. Der [Einstiegsversuch mit Bleistift und Python](#fb-laborstart) setzt die erste Gleichung in ein Programm um. Die Einleitungen der Kapitel stellen die jeweilige Frage. Die Schlüsse beantworten sie, greifen den Rechenweg auf und ordnen den Befund in die Forschung ein. Der Literaturstand ist November 2026.
 
-[Energietest](#wagen-energietest) · [Fahrplan und Kapitelzugang](#kapitelfahrplan) · [Mathematische Grundlagen](#grundlagen) · [Synthese](#kap17-schluss)
+[Energietest](#wagen-energietest) · [Leseschlüssel für Belege](#druck-beleglegende) · [Fahrplan und Kapitelzugang](#kapitelfahrplan) · [Mathematische Grundlagen](#grundlagen) · [Synthese](#kap17-schluss)
 
 
 <!-- Buchseite -->
@@ -5569,6 +5569,20 @@ Für eine Sollzeit von $1{,}000\,\mathrm s$ und ein Budget von $0{,}002\,\mathrm
 
 <!-- Buchseite -->
 
+<a id="druck-beleglegende"></a>
+
+## Leseschlüssel · Beweis, Gegenprobe oder historische Messung?
+
+**Beweis.** Die Aussage folgt aus Voraussetzungen. Stehen dort feste Enden oder ein einfacher Nulldurchgang, gilt das Ergebnis nicht automatisch für freie Enden oder eine Mehrfachnullstelle. Ein Beispiel kann den Beweis illustrieren, aber nicht ersetzen.
+
+**Numerische Gegenprobe.** Wir nennen Eingaben, Referenz, Raster oder Zeitpunkte und Fehlermaß. Eine eingehaltene Fehlerschranke auf 500 Stützstellen ist zunächst nur ein Befund für diese 500 Stellen. Für eine Schranke zwischen den Stellen brauchen wir ein zusätzliches Argument.
+
+**Historische Messung.** Eine Zahl aus einem Archiv gehört zu genau dieser Revision, Konfiguration und Messumgebung. Vergleichen wir Laufzeiten, müssen Aufgabe und Arbeitsumfang zusammenpassen. Eine neue Wiederholung steht separat und überschreibt den Archivwert nicht.
+
+**Einmal an C05 anwenden:** Das Euler-Schrittlimit für die schnelle lineare Mode ist eine hergeleitete Aussage. Die drei Schaltzeitfehler von Radau und BDF sind gemessene Ergebnisse auf einem begrenzten Versuch. Die ursprüngliche Acht-Fälle-Matrix bleibt mit ihrer eigenen Revision und ihrem eigenen Budget dokumentiert.
+
+<!-- Buchseite -->
+
 <a id="kap10-schluss"></a>
 
 ## Schluss · Ein Auftrag gilt erst mit Beobachtung und Referenz
@@ -5603,7 +5617,7 @@ Das Wärmebild aus Kapitel 1 hilft beim Verständnis der beiden Zeitskalen. C05 
 
 Wir lösen die Phasen nacheinander analytisch und verwenden die Durchgangszeiten als Referenz. Das kurze Studienfenster von $3{,}5\,\mathrm s$ verlangt drei gerichtete Wechsel mit je $1\,\mathrm{ms}$ Zeitbudget und zwei Endwerte mit je $0{,}006$ Budget. Für die Diagnose reichen diese Endwerte allein nicht aus. Auf beiden Seiten eines Wechsels speichern wir auch den Modus und den Zustand. So können wir getrennt untersuchen, ob ein Integrator die schnelle Bewegung dämpft und ob er tatsächlich den richtigen Wächter zur richtigen Zeit erreicht.
 
-[Zum Schluss dieses Kapitels](#kap11-schluss)
+[Übung: Stabilität, Schaltzeit und Aufwand](#druck-c05-entscheidung) · [Zum Schluss dieses Kapitels](#kap11-schluss)
 
 <!-- Buchseite -->
 
@@ -5803,6 +5817,22 @@ Verfolgen Sie die Bahn vom Stern aus. Auf der horizontalen Achse steht der langs
 ![Abbildung 11.2. C05 im Projektfenster bis 3,5 s. In A kennzeichnen offene Kreise die Schaltungen und punktierte Linien die Schwellen bei 2,5 und 5,8. Durchgezogene und gestrichelte Abschnitte verfolgen die beiden Betriebsarten. B vergrößert die ersten vier Mikrosekunden nach der ersten Schaltung.](abbildungen/bild_c05_phase.svg)
 
 Die drei Referenzschaltungen liegen bei 1,108306 s, 2,129685 s und 3,054153 s. Die Vergrößerung erklärt, warum ein Integrator auf der Sekundenskala zugleich eine Mikrosekundenschicht auflösen muss. Am Ende dieser Schicht liegt die Bahn bereits nahe am langsamen Ast. Die zeitlich geordnete Spur zeigt, in welcher Richtung der Regler die Schleife durchläuft. Ein Beweis für die Existenz oder Stabilität eines asymptotischen Grenzzyklus verlangt zusätzliche Argumente.
+
+<!-- Buchseite -->
+
+<a id="druck-c05-entscheidung"></a>
+
+## Übung · Welcher Aufwand lohnt sich bei C05?
+
+**Auftrag.** Bis 3,5 s müssen alle drei gerichteten Schaltungen in der richtigen Reihenfolge und beide Endwerte getroffen werden. Das Endwertbudget je Komponente ist $10^{-5}$. Vergleichen Sie ein Zeitbudget von 10 µs mit einem von 1 µs. Für die schnellste lineare Mode gilt $\lambda=-2{,}7\cdot10^6\,\mathrm{s^{-1}}$. Die [Messung im selben Versuch](#tab-k11-01) liefert für Radau 0,0152 µs Zeitfehler, 5 029 Aufrufe der rechten Seite und 256 LU-Zerlegungen; für BDF 1,13 µs, 1 690 Aufrufe und 169 Zerlegungen. Beide Endwertfehler liegen im Budget.
+
+**1. Erst die Stabilität.** Sind 0,740 µs und 0,741 µs für Vorwärts Euler auf der schnellen Mode zulässig? Wie viele gleich große Schritte verlangt das Stabilitätslimit mindestens?
+
+**2. Dann die Entscheidung.** Welchen gemessenen Lauf wählen Sie unter jedem Zeitbudget? Was lässt sich aus den Arbeitszählern sagen, und was nicht?
+
+**Lösung.** Der Euler-Faktor ist $R=1+h\lambda$. Die beiden Werte sind −0,998 und −1,0007. Nur der erste liegt im Stabilitätsintervall; am Grenzwert $h=2/|\lambda|$ ergeben sich mindestens $\lceil3{,}5/h\rceil=4\,725\,000$ Schritte. Das sagt nichts darüber aus, wie genau der Kalendereintrag einer Schaltung ist.
+
+Bei 10 µs bestehen beide Läufe. BDF braucht in diesem Versuch weniger Aufrufe und LU-Zerlegungen. Bei 1 µs besteht nur Radau; die niedrigeren Zähler retten BDF dann nicht. Zähler sind keine Wandzeit: Eine LU-Zerlegung hat andere Kosten als ein Aufruf der rechten Seite, und der Ereignissucher kann zusätzliche Arbeit verursachen. Eine zusätzliche oder falsch zugeordnete Schaltung würde beide Zeitvergleiche ungültig machen.
 
 <!-- Buchseite -->
 

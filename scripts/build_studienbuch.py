@@ -110,13 +110,17 @@ def verify_measurements():
     current = EDITION / CONTACT
     with (current / "vergleich.csv").open(encoding="utf-8", newline="") as stream:
         if list(csv.DictReader(stream)) != paired:
-            raise ValueError("Contact comparison differs from the primary measurements.")
+            raise ValueError(
+                "Contact comparison differs from the primary measurements."
+            )
     if totals != json.loads((current / "vergleich.json").read_text()):
         raise ValueError("Contact summary differs from the primary measurements.")
     for suite in totals:
         name = "rk23-devs" if suite == "rk23" else "qss-" + suite
         if sha256(EDITION / "daten" / (name + ".csv")) != totals[suite]["after_sha256"]:
-            raise ValueError(f"Current textbook matrix differs from the replay: {suite}")
+            raise ValueError(
+                f"Current textbook matrix differs from the replay: {suite}"
+            )
     with zipfile.ZipFile(PACKAGES / "Laborquellen.zip") as sources:
         for name in ("_polynomial.py", "advanced_qss.py", "qss.py"):
             path = Path("argesim_benchmarks/solvers") / name
@@ -187,10 +191,16 @@ def core_lab(path):
             for name in sorted(source.namelist()):
                 if name.startswith((AUDIT.as_posix() + "/", "beispiele/")):
                     write_entry(lab, name, source.read(name))
-        separate_fields = {"D2Q9_Prueffelder.zip", "Gruppen_QSS34_Prueffelder.zip", "QSS34_Fortsetzung.zip"}
+        separate_fields = {
+            "D2Q9_Prueffelder.zip",
+            "Gruppen_QSS34_Prueffelder.zip",
+            "QSS34_Fortsetzung.zip",
+        }
         for source in sorted((EDITION / PDES).iterdir()):
             if source.is_file() and source.name not in separate_fields:
-                write_entry(lab, source.relative_to(EDITION).as_posix(), source.read_bytes())
+                write_entry(
+                    lab, source.relative_to(EDITION).as_posix(), source.read_bytes()
+                )
         for source in sorted((EDITION / AUDIT).rglob("*")):
             if source.is_file() and "__pycache__" not in source.parts:
                 write_entry(
@@ -332,6 +342,8 @@ def verify_navigation(book):
     targets = book.resolve_names()
     for page in book:
         for link in page.get_links():
+            if link.get("kind") == 1 and not 0 <= link.get("page", -1) < len(book):
+                raise ValueError(f"Invalid page link on page {page.number + 1}")
             name = link.get("nameddest")
             if name and (
                 name not in targets or not 0 <= targets[name]["page"] < len(book)
@@ -339,9 +351,7 @@ def verify_navigation(book):
                 raise ValueError(f"Invalid PDF link on page {page.number + 1}: {name}")
 
 
-def publish_pdf(stage):
-    import pymupdf
-
+def expected_attachments():
     material = compact.material_files()
     attachments = {
         p.name: p.read_bytes()
@@ -364,8 +374,42 @@ def publish_pdf(stage):
     for name in ("qss-extension.csv", "rk23-devs.csv"):
         attachments["Archiv_" + name] = attachments.pop(name)
         attachments[name] = (EDITION / "daten" / name).read_bytes()
-    attachments["QSS_Kontaktvergleich_v9_19.csv"] = (EDITION / CONTACT / "vergleich.csv").read_bytes()
-    attachments["CP2_Vollgitter_v9_20.json"] = (EDITION / PDES / "vollgitter.json").read_bytes()
+    attachments["QSS_Kontaktvergleich_v9_19.csv"] = (
+        EDITION / CONTACT / "vergleich.csv"
+    ).read_bytes()
+    attachments["CP2_Vollgitter_v9_20.json"] = (
+        EDITION / PDES / "vollgitter.json"
+    ).read_bytes()
+    return attachments
+
+
+def verify_published_pdf(path, attachments):
+    import pymupdf
+
+    with pymupdf.open(path) as book:
+        verify_navigation(book)
+        names = book.embfile_names()
+        if sorted(names) != sorted(attachments) or any(
+            book.embfile_get(name) != data for name, data in attachments.items()
+        ):
+            raise ValueError("Invalid embedded lab files.")
+        targets = book.resolve_names()
+        for name, words in (
+            ("druck-beleglegende", ("Beweis", "Gegenprobe", "Messung")),
+            ("druck-c05-entscheidung", ("C05", "Aufwand", "BDF")),
+        ):
+            dest = targets.get(name)
+            if dest is None or not 0 <= dest["page"] < len(book):
+                raise ValueError(f"Missing teaching destination: {name}")
+            page = book[dest["page"]].get_text()
+            if not all(word in page for word in words):
+                raise ValueError(f"Unexpected target page for {name}")
+
+
+def publish_pdf(stage):
+    import pymupdf
+
+    attachments = expected_attachments()
     with pymupdf.open(stage / "text.pdf") as book:
         verify_navigation(book)
         if (
@@ -380,10 +424,7 @@ def publish_pdf(stage):
             for field in ("CreationDate", "ModDate"):
                 book.xref_set_key(xref, "Params/" + field, "(D:20261126000000Z)")
         book.save(stage / PDF, garbage=4, deflate=True, no_new_id=True)
-    with pymupdf.open(stage / PDF) as book:
-        verify_navigation(book)
-        if any(book.embfile_get(name) != data for name, data in attachments.items()):
-            raise ValueError("Invalid embedded lab files.")
+    verify_published_pdf(stage / PDF, attachments)
 
 
 def build(out):
@@ -411,6 +452,11 @@ def main():
         help="verify the publication without typesetting tools",
     )
     mode.add_argument(
+        "--verify-pdf",
+        action="store_true",
+        help="verify published PDF navigation and embedded lab payloads (requires PyMuPDF)",
+    )
+    mode.add_argument(
         "--full-lab",
         type=Path,
         metavar="ZIP",
@@ -422,6 +468,10 @@ def main():
         if args.full_lab:
             check(args.output_dir.resolve())
             full_lab(args.full_lab)
+        elif args.verify_pdf:
+            verify_published_pdf(
+                args.output_dir.resolve() / PDF, expected_attachments()
+            )
         elif args.check:
             check(args.output_dir.resolve())
         else:
