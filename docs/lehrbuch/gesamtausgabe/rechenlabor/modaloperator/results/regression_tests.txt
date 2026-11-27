@@ -1,0 +1,34 @@
+test_archived_checkpoint_enforces_grid (test_runtime_benchmark.NativeTests.test_archived_checkpoint_enforces_grid) ... ok
+test_d2q5_against_full_periodic_extension (test_runtime_benchmark.NativeTests.test_d2q5_against_full_periodic_extension) ... ok
+test_d2q9_matches_vector_reference (test_runtime_benchmark.NativeTests.test_d2q9_matches_vector_reference) ... ok
+test_diffusive_grid_convergence (test_runtime_benchmark.NativeTests.test_diffusive_grid_convergence) ... ok
+test_zero_time_and_zero_coupling (test_runtime_benchmark.NativeTests.test_zero_time_and_zero_coupling) ... ok
+test_full_cavity_clocks_and_field_identity (test_runtime_benchmark.TimingTests.test_full_cavity_clocks_and_field_identity) ... ok
+test_matched_timings_and_sample_counts (test_runtime_benchmark.TimingTests.test_matched_timings_and_sample_counts) ... ok
+test_projected_crossover_uses_a_strict_inequality (test_runtime_benchmark.TimingTests.test_projected_crossover_uses_a_strict_inequality) ... ok
+test_ready_predictions_match_published_models (test_runtime_benchmark.TimingTests.test_ready_predictions_match_published_models) ... ok
+test_bitwise_original_data (test_study.NetworkTests.test_bitwise_original_data) ... ok
+test_counts_boundaries_and_condition_channels (test_study.NetworkTests.test_counts_boundaries_and_condition_channels) ... ok
+test_input_noise_leaves_targets_and_validation_clean (test_study.NetworkTests.test_input_noise_leaves_targets_and_validation_clean) ... ok
+test_restart_determinism_and_hybrid_evaluation (test_study.NetworkTests.test_restart_determinism_and_hybrid_evaluation) ... ok
+test_saved_weights_match_measured_fields (test_study.NetworkTests.test_saved_weights_match_measured_fields) ... ok
+test_generator_against_independent_ode_and_pade (test_study.PhysicsTests.test_generator_against_independent_ode_and_pade) ... ok
+test_generator_identification_and_extra_modes (test_study.PhysicsTests.test_generator_identification_and_extra_modes) ... ok
+test_noise_split_and_rank_independent_of_labels (test_study.PhysicsTests.test_noise_split_and_rank_independent_of_labels) ... ok
+test_original_countercalculation_in_both_units (test_study.PhysicsTests.test_original_countercalculation_in_both_units) ... ok
+test_orthogonal_sines_and_resolvable_indices (test_study.PhysicsTests.test_orthogonal_sines_and_resolvable_indices) ... ok
+test_paired_family_and_mesh (test_study.PhysicsTests.test_paired_family_and_mesh) ... ok
+test_projection_on_two_meshes (test_study.PhysicsTests.test_projection_on_two_meshes) ... ok
+test_rank_failure_and_identification (test_study.PhysicsTests.test_rank_failure_and_identification) ... ok
+test_source_hashes_and_archive_rows (test_study.PhysicsTests.test_source_hashes_and_archive_rows) ... ok
+test_strang_local_defect_order (test_study.PhysicsTests.test_strang_local_defect_order) ... ok
+test_truth_semigroup_symmetry_contraction (test_study.PhysicsTests.test_truth_semigroup_symmetry_contraction) ... ok
+test_unknown_mode_and_residual_fallback (test_study.PhysicsTests.test_unknown_mode_and_residual_fallback) ... ok
+test_zero_exchange_zero_time_and_equal_diffusion (test_study.PhysicsTests.test_zero_exchange_zero_time_and_equal_diffusion) ... ok
+test_complete_measured_grid_and_sample_means (test_study.ResultTests.test_complete_measured_grid_and_sample_means) ... ok
+test_paired_bootstrap_matches_recorded_contrasts (test_study.ResultTests.test_paired_bootstrap_matches_recorded_contrasts) ... ok
+
+----------------------------------------------------------------------
+Ran 29 tests in 5.774s
+
+OK

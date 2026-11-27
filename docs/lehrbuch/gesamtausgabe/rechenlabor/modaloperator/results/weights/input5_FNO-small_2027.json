@@ -1,0 +1,13 @@
+{
+  "model": "FNO-small",
+  "seed": 2027,
+  "case": "input5",
+  "n": 96,
+  "epochs": 40,
+  "steps": 240,
+  "selected_epoch": 40,
+  "parameters": 1034,
+  "train_s": 2.719125028000235,
+  "validation_mse": 0.012902994640171528,
+  "residual_scale": 1.0
+}
