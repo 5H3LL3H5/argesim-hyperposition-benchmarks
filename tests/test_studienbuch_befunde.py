@@ -131,6 +131,10 @@ class FindingTest(unittest.TestCase):
                 writer.writerow(
                     {**row, "id": "F-03", "archivseiten": "4", "archivlinks": link(4)}
                 )
+            (root / audit.ARCHIVE_INVENTORY).write_text(
+                "id,status\nF-01,Entfallen\nF-02,Entfallen\nF-03,Entfallen\n",
+                encoding="utf-8",
+            )
             with patch.object(audit, "git_blob", return_value=b"pdf") as blob:
                 result = audit.archive_entries(
                     root,
@@ -139,6 +143,91 @@ class FindingTest(unittest.TestCase):
             blob.assert_called_once_with(root, commit, audit.PDF)
             self.assertEqual([r.outcome for r in result], ["pass", "fail", "fail"])
             self.assertEqual(result[0].evidence, (link(3),))
+
+    def test_archive_inventory_failure_blocks_release_and_survives_worklist(self):
+        source = audit.ROOT / audit.ARCHIVES
+        with source.open(encoding="utf-8", newline="") as stream:
+            reader = csv.DictReader(stream)
+            fields = reader.fieldnames
+            rows = list(reader)
+        self.assertEqual(len(rows), 33)
+        ident = "R77-G-01"
+        retained = [row for row in rows if row["id"] != ident]
+        self.assertEqual(len(retained), 32)
+        replacement = {
+            **next(row for row in rows if row["id"] == ident),
+            "id": "FAKE-01",
+        }
+        reclassified = [
+            {**row, "status": "Nur Archiv"} if row["id"] == ident else row
+            for row in rows
+        ]
+        for alternate, problems in (
+            (rows, set()),
+            (retained, {ident}),
+            ([*retained, replacement], {ident, "FAKE-01"}),
+            (reclassified, {ident}),
+        ):
+            with (
+                self.subTest(problems=problems),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                root = Path(directory)
+                index = root / audit.ARCHIVES
+                index.parent.mkdir()
+                with index.open("w", encoding="utf-8", newline="") as stream:
+                    writer = csv.DictWriter(stream, fields)
+                    writer.writeheader()
+                    writer.writerows(alternate)
+                (root / audit.ARCHIVE_INVENTORY).write_bytes(
+                    (audit.ROOT / audit.ARCHIVE_INVENTORY).read_bytes()
+                )
+                (root / audit.MANIFEST).write_text(
+                    json.dumps(
+                        {
+                            "edition": "test",
+                            "outputs_sha256": {Path(audit.PDF).name: "a" * 64},
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                for worklist in (None, root / "worklist.csv"):
+                    with (
+                        patch.object(audit, "checkout_commit", return_value="a" * 40),
+                        patch.object(audit.subprocess, "run"),
+                        patch.object(audit, "git_blob", return_value=b"pdf"),
+                        patch.object(audit, "finding_checks", return_value=[]),
+                        patch.object(
+                            audit,
+                            "coverage",
+                            return_value=(
+                                "a" * 40,
+                                {
+                                    ident: audit.Result(
+                                        ident, "manual", "", "", kind="manual"
+                                    )
+                                }
+                                if worklist
+                                else {},
+                            ),
+                        ),
+                    ):
+                        report = audit.run_audit(
+                            root,
+                            None,
+                            worklist,
+                            lambda _: SimpleNamespace(pages=range(600)),
+                        )
+                    failures = {
+                        item["id"]
+                        for item in report["results"]
+                        if item["outcome"] == "fail"
+                    }
+                    self.assertEqual(failures, problems)
+                    self.assertEqual(
+                        audit.exit_status(report, strict=True), int(bool(problems))
+                    )
+                    self.assertEqual(audit.exit_status(report, strict=False), 0)
 
     def test_checkout_rejects_uncommitted_inputs_and_wrong_commit(self):
         with tempfile.TemporaryDirectory() as directory:
