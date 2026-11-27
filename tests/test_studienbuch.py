@@ -20,12 +20,17 @@ class TextbookTests(unittest.TestCase):
     def test_detects_changed_output(self):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp)
-            for name in (book.PDF, book.LAB, book.RECORD):
+            record = json.loads((book.DOCS / book.RECORD).read_text(encoding='utf-8'))
+            for name in (book.RECORD, *record['outputs_sha256']):
                 shutil.copyfile(book.DOCS / name, out / name)
-            with (out / book.PDF).open('ab') as pdf:
-                pdf.write(b'changed')
-            with self.assertRaisesRegex(ValueError, 'changed'):
-                book.check(out)
+
+            for name in (book.PDF, book.OPERATOR_LAB):
+                with self.subTest(output=name):
+                    with (out / name).open('ab') as output:
+                        output.write(b'changed')
+                    with self.assertRaisesRegex(ValueError, 'changed'):
+                        book.check(out)
+                    shutil.copyfile(book.DOCS / name, out / name)
 
     def test_compact_edition_worked_examples_cover_all_17_chapters(self):
         checks = run_path(str(book.MATERIAL / 'kapitelvergleich.py'))
