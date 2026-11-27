@@ -443,6 +443,10 @@ def publish_pdf(stage):
             )
             for field in ("CreationDate", "ModDate"):
                 book.xref_set_key(xref, "Params/" + field, "(D:20261126000000Z)")
+        # xdvipdfmx includes its temporary output path in the trailer IDs.
+        book.xref_set_key(-1, "ID", "null")
+        identifier = hashlib.sha256(book.tobytes(no_new_id=True)).hexdigest()[:32]
+        book.xref_set_key(-1, "ID", f"[<{identifier}><{identifier}>]")
         book.save(stage / PDF, garbage=4, deflate=True, no_new_id=True)
     verify_published_pdf(stage / PDF, attachments)
 
