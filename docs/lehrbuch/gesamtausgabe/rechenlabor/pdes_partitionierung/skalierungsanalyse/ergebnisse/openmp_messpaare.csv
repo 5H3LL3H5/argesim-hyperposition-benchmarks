@@ -1,0 +1,17 @@
+versuch,umfang,wiederholung,t1_s,t4_s,speedup_gepaart,quelle
+Intel · Kern,Voll,1,296.331527563,748.520956613,0.39588942025601725,re1000.csv + pruef4.csv
+Intel · erste 1024,Präfix,1,0.552125863,2.451835756,0.22518876382680506,re1000.csv + pruef4.csv
+Intel · Pilot 1024,Präfix,1,0.470255064,0.238722024,1.9698855435307467,pilot1.csv + pilot4.csv
+"Intel · Gesamt, 7 Ausgaben",Voll,1,170.49116148899975,365.4755756710001,0.46649125916549705,d2q9_prozesszeit.csv
+EPYC · Kern,Voll,1,59.978931836,21.873271510000006,2.74211069928789,CP2_D2Q9_Ursache_Slowdown_257.zip!messungen/full_runs.jsonl
+EPYC · Kern,Voll,2,58.620055269,20.54024225,2.853912556411062,CP2_D2Q9_Ursache_Slowdown_257.zip!messungen/full_runs.jsonl
+EPYC · 0 Lastprozesse,Präfix,1,0.742773817,0.296903195,2.5017373659451527,CP2_D2Q9_Ursache_Slowdown_257.zip!messungen/contention_runs.jsonl
+EPYC · 0 Lastprozesse,Präfix,2,0.681935139,0.270480089,2.52120273074888,CP2_D2Q9_Ursache_Slowdown_257.zip!messungen/contention_runs.jsonl
+EPYC · 0 Lastprozesse,Präfix,3,0.70058167,0.248981116,2.813794400375328,CP2_D2Q9_Ursache_Slowdown_257.zip!messungen/contention_runs.jsonl
+EPYC · 0 Lastprozesse,Präfix,4,0.686792896,0.270193448,2.541856218512005,CP2_D2Q9_Ursache_Slowdown_257.zip!messungen/contention_runs.jsonl
+EPYC · 0 Lastprozesse,Präfix,5,0.687822122,0.232747417,2.955229883388996,CP2_D2Q9_Ursache_Slowdown_257.zip!messungen/contention_runs.jsonl
+EPYC · 3 Lastprozesse,Präfix,1,0.700013863,1.135581583,0.6164364352851609,CP2_D2Q9_Ursache_Slowdown_257.zip!messungen/contention_runs.jsonl
+EPYC · 3 Lastprozesse,Präfix,2,0.70991948,1.187976926,0.5975869265326119,CP2_D2Q9_Ursache_Slowdown_257.zip!messungen/contention_runs.jsonl
+EPYC · 3 Lastprozesse,Präfix,3,0.703440007,1.110825795,0.6332586172974134,CP2_D2Q9_Ursache_Slowdown_257.zip!messungen/contention_runs.jsonl
+EPYC · 3 Lastprozesse,Präfix,4,0.694093672,0.999635911,0.6943464759140691,CP2_D2Q9_Ursache_Slowdown_257.zip!messungen/contention_runs.jsonl
+EPYC · 3 Lastprozesse,Präfix,5,0.730295843,0.978429256,0.7463961635668833,CP2_D2Q9_Ursache_Slowdown_257.zip!messungen/contention_runs.jsonl

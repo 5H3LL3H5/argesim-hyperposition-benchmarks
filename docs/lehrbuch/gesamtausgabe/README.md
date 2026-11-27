@@ -6,7 +6,7 @@ Christian Stenzel · Gesamtausgabe · Revision v9.22
 
 [PDES-Grundbegriffe und Amdahls Gesetz](kapitel/06.md#pdes-grundbegriffe) · [Ein bis acht logische Prozesse](kapitel/06.md#pdes-lp-messung) · [Vier vollständige MPI-Läufe](kapitel/16.md#cp2-mpi-skalierung) · [Gruppen-QSS3 und Gruppen-QSS4 bis zum Endfeld](kapitel/16.md#cp2-gruppen-hoehere-ordnung) · [Komponentenweise Langläufe](kapitel/16.md#cp2-komponenten-langlauf)
 
-Die Revision umfasst 18 Fachkapitel und 92 nummerierte Abbildungen. Die neuen Abschnitte verbinden die Entstehung einer Grenzmeldung mit einer gemessenen Laufzeit. [Kapitel 6 mit Aktivitätskarte und Rechenprobe](kapitel/06.md#pdes-vorausschau) · [Sieben vollständige Kavitätsläufe mit zwei Referenzfeldern](kapitel/16.md#cp2-voll-direktvergleich) · [Komponentenweise QSS3/4 im Anlauf](kapitel/16.md#pdes-kavitaet) · [Primärdaten und Versuchsanleitung](rechenlabor/pdes_partitionierung/README.md)
+Die Revision umfasst 18 Fachkapitel und 96 nummerierte Abbildungen. Die neuen Abschnitte verbinden die Entstehung einer Grenzmeldung mit einer gemessenen Laufzeit. [Kapitel 6 mit Aktivitätskarte und Rechenprobe](kapitel/06.md#pdes-vorausschau) · [Sieben vollständige Kavitätsläufe mit zwei Referenzfeldern](kapitel/16.md#cp2-voll-direktvergleich) · [Komponentenweise QSS3/4 im Anlauf](kapitel/16.md#pdes-kavitaet) · [Primärdaten und Versuchsanleitung](rechenlabor/pdes_partitionierung/README.md)
 
 ## Nachtrag zur QSS3/4-Taylor-Kontaktprüfung
 
@@ -54,7 +54,7 @@ Kapitel 9 (S. 233–234) vergleicht zehn Populationsverläufe bis t=100. Kapitel
 
 ## Abbildungen und Prüfdaten der Revision v9.13
 
-Die 92 Abbildungen der Gesamtausgabe v9.22 sind im [seitenbezogenen Verzeichnis](rechenlabor/bildpruefung/abbildungsverzeichnis.csv) erfasst. Die Revision v9.13 ergänzte neun Grafiken in den Kapiteln 10 bis 16 und 18. Die fünf neuen Abbildungen der Revision v9.18 stehen in Kapitel 6. Die [Versuchsanleitung](rechenlabor/bildpruefung/README.md) beschreibt die Neuberechnung, den Vergleich mit archivierten Feldern und die Leistungsprofile. Der [Prüfbericht](Pruefbericht_Gesamtlehrbuch.md) ordnet die gemeldeten Befunde der gedruckten Seite zu.
+Die 96 Abbildungen der Gesamtausgabe v9.22 sind im [seitenbezogenen Verzeichnis](rechenlabor/bildpruefung/abbildungsverzeichnis.csv) erfasst. Die Revision v9.13 ergänzte neun Grafiken in den Kapiteln 10 bis 16 und 18. Die fünf neuen Abbildungen der Revision v9.18 stehen in Kapitel 6. Die [Versuchsanleitung](rechenlabor/bildpruefung/README.md) beschreibt die Neuberechnung, den Vergleich mit archivierten Feldern und die Leistungsprofile. Der [Prüfbericht](Pruefbericht_Gesamtlehrbuch.md) ordnet die gemeldeten Befunde der gedruckten Seite zu.
 
 ## Rechenlabor
 
@@ -196,7 +196,7 @@ Die erneute Auswertung von Archivzahlen ist im Prüfbericht von den hier neu aus
 
 ## Abbildungen und Drucksatz
 
-Unter `abbildungen/` stehen die 90 verwendeten SVG-Abbildungen und die Satzvorgaben. Die Vektorgrafiken für die Druckausgabe sind zusätzlich im Ordner `druck/` als PDF hinterlegt. Die dortige `buch.tex` ist die gesetzte Quelle des Gesamtbuchs. Sie lässt sich mit XeLaTeX zweimal im Verzeichnis `druck/` übersetzen. Erforderlich sind eine TeX-Live-Installation mit den in der Präambel benannten Paketen und die Schriften Noto Serif, Noto Sans Display, DejaVu Sans Mono und Latin Modern Math.
+Unter `abbildungen/` stehen die 96 verwendeten SVG-Abbildungen und die Satzvorgaben. Die Vektorgrafiken für die Druckausgabe sind zusätzlich im Ordner `druck/` als PDF hinterlegt. Die dortige `buch.tex` ist die gesetzte Quelle des Gesamtbuchs. Sie lässt sich mit XeLaTeX zweimal im Verzeichnis `druck/` übersetzen. Erforderlich sind eine TeX-Live-Installation mit den in der Präambel benannten Paketen und die Schriften Noto Serif, Noto Sans Display, DejaVu Sans Mono und Latin Modern Math.
 
 Nach Änderungen am bestehenden Markdown-Manuskript erzeugt `python3 druck/setzen.py` mit Pandoc 3.1 eine neue TeX-Fassung. Die Tabellenbreiten der vorliegenden Ausgabe sind für ihre jeweiligen Spalten gesetzt. Bei geänderten Tabellen oder Abbildungen die Zuordnung am Dateiende prüfen. Der reine Rechenweg ist unabhängig vom Drucksatz.
 

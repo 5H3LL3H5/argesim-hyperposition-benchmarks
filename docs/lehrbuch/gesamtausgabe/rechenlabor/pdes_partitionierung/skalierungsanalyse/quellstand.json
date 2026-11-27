@@ -1,0 +1,59 @@
+{
+  "revision": "4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689",
+  "dateien": {
+    "Skalierung_Messdaten.zip": {
+      "sha256": "2349147a9d48f53c4308acf43bf36495398d6d0f12438b2641bac78856830d4f",
+      "url": "https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip"
+    },
+    "PDES_Partitionierung_Messpaket.zip": {
+      "sha256": "f99137f780dd7f270fd9b265059f3a48a7babc363338be99b01ce586ab7b16ff",
+      "url": "https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/PDES_Partitionierung_Messpaket.zip"
+    },
+    "CP2_D2Q9_Ursache_Slowdown_257.zip": {
+      "sha256": "477161173e16a7758292d03877c5f3f62921b03c410d8ce811ef581f6a5b2629",
+      "url": "https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/CP2_D2Q9_Ursache_Slowdown_257.zip"
+    },
+    "CP2_Kavitaet_257_QSS_Profil_eb1e551.zip": {
+      "sha256": "86f11da32e7bd69cda6c08ed6fcf38de94de12ec342cf4dfd043725290198285",
+      "url": "https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/CP2_Kavitaet_257_QSS_Profil_eb1e551.zip"
+    },
+    "vollgitter.json": {
+      "sha256": "107d22f95036f409dfcf75576c4eb08dc34bb6162340ec5f56e2c48346795f04",
+      "url": "https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/vollgitter.json"
+    },
+    "Einzelkalender_Stand.json": {
+      "sha256": "b92bb6665099d1043b51f1f26e1cb9c2fb7f56e7f05414ab7ecd4a2dce8bca29",
+      "url": "https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/rechenlabor/pdes_partitionierung/Einzelkalender_Stand.json"
+    },
+    "historisch/re1000.csv": {
+      "sha256": "e059f679b37bdd68ba8b6de9889e5ad22f7006902377b0c7f43165741ebf8162",
+      "member": "rechenlabor/kavitaet_vollgitter/daten/laufzeiten/re1000.csv",
+      "url": "https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/pakete/Laborquellen.zip"
+    },
+    "historisch/pruef4.csv": {
+      "sha256": "b2092200fe1ab4947bf6a70462811120b0cd51b6ee2657a35c280c86d7067967",
+      "member": "rechenlabor/kavitaet_vollgitter/daten/laufzeiten/pruef4.csv",
+      "url": "https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/pakete/Laborquellen.zip"
+    },
+    "historisch/pilot1.csv": {
+      "sha256": "af3ea8592b432497564f51045a591502d76462a79c355fe64b291d6e8c15b526",
+      "member": "rechenlabor/kavitaet_vollgitter/daten/laufzeiten/pilot1.csv",
+      "url": "https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/pakete/Laborquellen.zip"
+    },
+    "historisch/pilot4.csv": {
+      "sha256": "2f385d51e218857edfd7c154867100d908422aab35eae4d538e5c212115cfad6",
+      "member": "rechenlabor/kavitaet_vollgitter/daten/laufzeiten/pilot4.csv",
+      "url": "https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/pakete/Laborquellen.zip"
+    },
+    "historisch/d2q9_prozesszeit.csv": {
+      "sha256": "1b2cc07f41da6640e8b0b6155a77be1c20e4737040b441629987d6c49edaeb66",
+      "member": "rechenlabor/kavitaet_vollgitter/daten/d2q9_prozesszeit.csv",
+      "url": "https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/pakete/Laborquellen.zip"
+    },
+    "historisch/umgebung.json": {
+      "sha256": "bb7366127bc12e7c7fb0577329f53fd25cec6d67d4e00e48a7991d8420be6c3b",
+      "member": "rechenlabor/kavitaet_vollgitter/daten/umgebung.json",
+      "url": "https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/blob/4e8e40d38fc21e38ad7ea0a6471a3ac40e2e6689/docs/lehrbuch/gesamtausgabe/pakete/Laborquellen.zip"
+    }
+  }
+}

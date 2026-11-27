@@ -1,4 +1,5 @@
 """Regressions for the published CP2 measurements, restarts and offline lab."""
+import csv
 import importlib.util
 import json
 import os
@@ -10,6 +11,7 @@ import unittest
 import zipfile
 from pathlib import Path
 from runpy import run_path
+from statistics import median
 
 from scripts import build_studienbuch as book
 
@@ -18,6 +20,35 @@ NUMERICS = all(importlib.util.find_spec(name) for name in ('numpy', 'scipy'))
 
 
 class Cp2PdesLabTests(unittest.TestCase):
+    def test_scaling_points_use_their_own_baseline_and_scope(self):
+        results = LAB / "skalierungsanalyse/ergebnisse"
+        with (results / "einzelzeiten.csv").open(encoding="utf-8", newline="") as src:
+            observations = {}
+            for row in csv.DictReader(src):
+                key = (row["reihe"], row["umfang"], row["uhr"], int(row["p"]))
+                observations.setdefault(key, []).append(float(row["t_s"]))
+        with (results / "kennzahlen.csv").open(encoding="utf-8", newline="") as src:
+            points = list(csv.DictReader(src))
+        self.assertEqual(len(points), len(observations))
+        for point in points:
+            p = int(point["p"])
+            series = (point["reihe"], point["umfang"], point["uhr"])
+            with self.subTest(series=series, p=p):
+                tp = median(observations[(*series, p)])
+                t1 = median(observations[(*series, 1)])
+                self.assertAlmostEqual(float(point["speedup"]), t1 / tp)
+                self.assertAlmostEqual(float(point["effizienz_pct"]), 100*t1/(p*tp))
+                self.assertAlmostEqual(float(point["wand_mehr_s"]), tp-t1/p)
+                self.assertAlmostEqual(float(point["overhead_arbeiter_s"]), p*tp-t1)
+                if p == 1:
+                    self.assertEqual(point["karp_flatt_pct"], "")
+                else:
+                    self.assertAlmostEqual(float(point["karp_flatt_pct"]), 100*(p*tp-t1)/((p-1)*t1))
+                if point["reihe"] in {"D2Q9-MPI", "QSS3", "QSS4"}:
+                    full = point["reihe"] == "D2Q9-MPI"
+                    self.assertEqual(int(point["n"]), 1 if full else 3)
+                    self.assertEqual(point["umfang"], "Voll · 350000 Takte" if full else "Präfix · 8 Intervalle")
+
     @unittest.skipUnless(NUMERICS and shutil.which('taskset'), 'requires Linux lab runtime')
     def test_group_launcher_records_only_successful_runs(self):
         with tempfile.TemporaryDirectory() as tmp:

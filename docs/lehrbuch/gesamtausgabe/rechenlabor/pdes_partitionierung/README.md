@@ -98,3 +98,7 @@ python "$lab/fortsetzungsprobe.py" --resume-one   # benötigt die exakt angegebe
 Die zweite Probe arbeitet auf temporären Kopien, lässt die Originale unverändert und akzeptiert nur genau ein neues bestätigtes Segment pro Ordnung mit steigender Modellzeit und endlichen Polynomen. Sie erzeugt kein Endfeld und misst keine historische Laufzeit. Die reguläre CI prüft die gespeicherten Messungen. Die komponentenweisen Vollgitterläufe auf GitHub wurden am 26. November 2026 wegen ihrer Laufzeit abgebrochen. Das dokumentierte Endfeld bei Takt 350 000 stammt bei QSS3 und QSS4 jeweils aus dem Gruppenverfahren.
 
 Der Workflow **CP2 QSS3-4 Langlauf** kann separat von Hand für ein einzelnes dreistündiges Rechenfenster gestartet werden. Die Eingabe `previous_run` wählt einen abgeschlossenen Lauf mit beiden Checkpoints. Der Wert `0` verwendet die veröffentlichten Ausgangsdaten. Ein Endfeld-Artefakt setzt die Zielzeit und alle sieben Prüffelder voraus.
+
+## Skalierung und historische Slowdowns
+
+[Auswertung zu den Abbildungen 16.15–16.18 mit Python, Einzelzeiten und Diagnosetabellen](skalierungsanalyse/README.md).
