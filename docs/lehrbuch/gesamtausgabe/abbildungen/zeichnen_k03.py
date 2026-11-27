@@ -43,6 +43,10 @@ def ausgabe(fig, name, desc):
     fig.savefig(HERE/(name+".svg"),facecolor="white",
                 metadata={"Date":"2026-11-22","Title":name,
                           "Description":desc,"Creator":"Christian Stenzel"})
+    if name == "k3_stabilitaet":
+        fig.savefig(HERE/(name+".pdf"), facecolor="white",
+                    metadata={"Title": name, "Author":"Christian Stenzel",
+                              "CreationDate":None, "ModDate":None})
     plt.close(fig)
 
 def stabilitaet():
@@ -54,6 +58,13 @@ def stabilitaet():
     a.plot([1+cos(t) for t in phi],[sin(t) for t in phi],
            color=TEAL,lw=1.9,label="Rückwärts-Euler")
     a.axvline(0,color=NAVY,lw=1,ls=":")
+    # The closed real segment is stable; only its interior is strictly damped.
+    a.plot([-2,0],[0,0],color=RED,lw=2.8,solid_capstyle="butt",zorder=5)
+    a.scatter([-2,0],[0,0],color=RED,s=14,zorder=6)
+    a.scatter([-1],[0],facecolor="white",edgecolor=RED,s=23,zorder=7)
+    a.annotate("R(−1) = 0",xy=(-1,0),xytext=(0,11),
+               textcoords="offset points",ha="center",color=RED,fontsize=8.0)
+
     a.set(xlim=(-2.35,2.35),ylim=(-1.35,1.35),aspect="equal",
           xlabel="Re(z) [1]",ylabel="Im(z) [1]",xticks=[-2,-1,0,1,2],
           yticks=[-1,0,1])
@@ -66,7 +77,7 @@ def stabilitaet():
     b.set(xlabel="Schritt n [1]",ylabel="dₙ/d₀ [1]",xlim=(-.1,5.14),
           xticks=n,ylim=(-1.1,1.17),yticks=[-1,0,1])
     legende(b)
-    ausgabe(fig,"k3_stabilitaet","Links zwei Euler-Grenzkreise und die imaginäre Achse. Rechts Gitterwerte für z=-100.")
+    ausgabe(fig,"k3_stabilitaet","Links zwei Euler-Grenzkreise, das reelle Vorwärts-Euler-Intervall [−2,0] und die Verstärkungsnullstelle −1. Rechts Gitterwerte für z=-100.")
 
 def kollokation():
     fig,(a,b)=layout(["A   Temperaturüberschuss","B   Defekt der Kurve"])
