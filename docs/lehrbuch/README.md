@@ -24,6 +24,23 @@ Wann darf ein logischer Prozess bis zur nächsten vorhergesagten Schwelle voraus
 
 [Build und Prüfsummen](../ARGESIM_Buchstand.json) · [Druckquellen](gesamtausgabe/druck) · [Archiv der früheren 17-Kapitel-Ausgabe](studienbuch) · [Kapitelprüfung der früheren Ausgabe](../ARGESIM_Kapitelpruefung.md)
 
+### Abnahme der Lehrbuchbefunde
+
+Unter [Actions → Studienbuch](https://github.com/5H3LL3H5/argesim-hyperposition-benchmarks/actions/workflows/studienbuch.yml) startet **Run workflow** die Prüfung des ausgewählten Git-Stands. Die Zusammenfassung nennt fehlgeschlagene Tests. Im Artefakt **ARGESIM-Lehrbuchbefunde** stehen pro ID das Prüfergebnis, der Bezug zur Quelle und, soweit über ein eindeutiges PDF-Lesezeichen gefunden, die physische Buchseite. Der Bericht enthält den vollständigen Commit und die SHA-256 der geprüften PDF.
+
+Die ersten Abnahmetests prüfen die exakte Brent-Toleranz, die PDF-Anlagenschlüssel und die Herkunft der Operator-Messdateien. Für die Messdateien bindet `source_commit` das Skript an einen Git-Baum und `source_script_sha256` an die verwendeten Skriptbytes. Das Archivregister wird gegen die Git-PDFs einschließlich ihrer physischen Seitenzahlen geprüft. Die archivierte Einstufung bleibt eine redaktionelle Entscheidung. Fachliche Einzelbelege ohne registrierten Test tragen im Bericht den Prüfstatus `manual`. Der separate Wert `review_status` gibt die Einstufung aus dem Archivregister oder der optionalen Arbeitsliste wieder.
+
+Für die Freigabe von `book-v*`-Tags, etwa `book-v9.22`, läuft dieselbe Prüfung im strengen Modus. Der manuelle Start bietet dafür die Option `release_check`. Eine automatisierte Veröffentlichung kann den Workflow über `workflow_call` als vorgeschalteten Job für denselben Commit nutzen. Bei einem manuellen Release dient der erfolgreiche Lauf für den Tag als Freigabenachweis. Die fachliche Abnahme erfolgt anhand der verbleibenden Einzelbelege.
+
+Lokal steht derselbe Prüfbefehl für einen Checkout mit den referenzierten Git-Commits zur Verfügung.
+
+```sh
+python -m pip install pypdf==6.21.4
+python scripts/pruefe_studienbuch_befunde.py --output /tmp/ARGESIM_Lehrbuchbefunde.json
+```
+
+`--strict` liefert bei einem fehlgeschlagenen Abnahmetest Exitcode 1. Infrastruktur- und Zuordnungsfehler liefern in beiden Modi Exitcode 2. Mit `--arbeitsliste PFAD` lassen sich die IDs einer lokalen Arbeitslisten-CSV ergänzen. Ihre Ausgangsrevision steht separat im Bericht. Seitenzahlen werden für die aktuelle PDF und für die belegten Archiv-PDFs ermittelt.
+
 ## Kompaktfassung zum Nachschlagen
 
 Die folgenden Markdown-Kapitel bilden die frühere Kurzfassung. Die Gesamtausgabe v9.22 steht oben.

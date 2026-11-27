@@ -4,26 +4,43 @@ on:
     paths:
       - 'docs/lehrbuch/studienbuch/**'
       - 'docs/lehrbuch/gesamtausgabe/**'
+      - 'docs/reviews/v922-csv/**'
       - 'docs/ARGESIM_*'
       - 'docs/evidence/cp2-operators.json'
       - 'scripts/build_studienbuch*.py'
+      - 'scripts/pruefe_studienbuch_befunde.py'
       - 'scripts/cp2_accuracy/**'
       - 'argesim_benchmarks/experiments/cp2_*.py'
+      - 'tests/test_studienbuch_befunde.py'
       - 'tests/test_cp2_accuracy.py'
       - '.github/workflows/studienbuch.yml'
   push:
     branches: [main]
+    tags: ['book-v*']
     paths:
       - 'docs/lehrbuch/studienbuch/**'
       - 'docs/lehrbuch/gesamtausgabe/**'
+      - 'docs/reviews/v922-csv/**'
       - 'docs/ARGESIM_*'
       - 'docs/evidence/cp2-operators.json'
       - 'scripts/build_studienbuch*.py'
+      - 'scripts/pruefe_studienbuch_befunde.py'
       - 'scripts/cp2_accuracy/**'
       - 'argesim_benchmarks/experiments/cp2_*.py'
+      - 'tests/test_studienbuch_befunde.py'
       - 'tests/test_cp2_accuracy.py'
       - '.github/workflows/studienbuch.yml'
   workflow_dispatch:
+    inputs:
+      release_check:
+        description: Require all automated finding checks to pass
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      release_check:
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -33,11 +50,37 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify published PDF, lab and their inputs
-        run: python scripts/build_studienbuch.py --check
+      - name: Install the PDF inspection dependency
+        run: python -m pip install pypdf==6.21.4
+      - name: Test the finding checks
+        run: python -m unittest tests.test_studienbuch_befunde -v
+      - name: Verify the edition and check findings
+        id: findings
+        shell: bash
+        env:
+          RELEASE_CHECK: ${{ inputs.release_check || startsWith(github.ref, 'refs/tags/book-v') }}
+        run: |
+          args=()
+          if [[ "$RELEASE_CHECK" == true ]]; then args+=(--strict); fi
+          expected_commit="$(git rev-parse --verify "${GITHUB_SHA}^{commit}")"
+          python scripts/pruefe_studienbuch_befunde.py \
+            --expected-commit "$expected_commit" \
+            --output "$RUNNER_TEMP/ARGESIM_Lehrbuchbefunde.json" "${args[@]}" \
+            | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Attach the finding report
+        if: ${{ !cancelled() && steps.findings.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ARGESIM-Lehrbuchbefunde
+          path: ${{ runner.temp }}/ARGESIM_Lehrbuchbefunde.json
+          if-no-files-found: warn
       - name: Rebuild with the Debian 13 typesetting toolchain
         run: |
           docker run --rm -i --volume "$GITHUB_WORKSPACE:/work:ro" --workdir /work debian:trixie-slim sh -se <<'BUILD'
