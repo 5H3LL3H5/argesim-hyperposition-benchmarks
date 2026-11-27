@@ -1,15 +1,28 @@
 """Verify all captions, native source files and page numbers; build the linked print atlas."""
 
+import csv
+import re
 from argparse import ArgumentParser
 from hashlib import sha256
 from pathlib import Path
-import csv
-import re
+from zipfile import ZipFile
 
 import fitz
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
+
+
+def print_files(root, paths):
+    """Read registered plates from the repository volume or the unpacked offline lab."""
+    volume = root / "druck" / "Druckabbildungen.zip"
+    if volume.is_file():
+        with ZipFile(volume) as archive:
+            return {
+                path: archive.read(Path(path).relative_to("druck").as_posix())
+                for path in paths
+            }
+    return {path: (root / path).read_bytes() for path in paths}
 
 
 def update_index(book):
@@ -46,11 +59,13 @@ def update_index(book):
         raise ValueError(
             "Bildfolge in Manuskript und Druckausgabe stimmt nicht überein."
         )
+    vectors = {svg: "druck/" + Path(svg).stem + ".pdf" for _, svg in figures}
+    plates = print_files(ROOT, vectors.values())
     rows = []
     for num, svg in figures:
-        vector = "druck/" + Path(svg).stem + ".pdf"
+        vector = vectors[svg]
         row = dict(by_file.get(svg, {}))
-        with fitz.open(ROOT / vector) as plate:
+        with fitz.open(stream=plates[vector], filetype="pdf") as plate:
             page = plate[0]
             row.update(
                 abbildung=num,
@@ -62,7 +77,7 @@ def update_index(book):
                 vektorpfade=len(page.get_drawings()),
                 bildobjekte=len(page.get_images()),
                 sha256_svg=sha256((ROOT / svg).read_bytes()).hexdigest(),
-                sha256_pdf=sha256((ROOT / vector).read_bytes()).hexdigest(),
+                sha256_pdf=sha256(plates[vector]).hexdigest(),
             )
         if num == "G.1":
             row.update(
@@ -141,10 +156,12 @@ def read_and_check(book):
         raise ValueError(
             "Die Bildnummern oder ihre Buchseiten passen nicht zum Verzeichnis der Druckfassung."
         )
+    plates = print_files(ROOT, (row["druck"] for row in rows))
     for row in rows:
-        for kind, checksum in (("grafik", "sha256_svg"), ("druck", "sha256_pdf")):
-            if sha256((ROOT / row[kind]).read_bytes()).hexdigest() != row[checksum]:
-                raise ValueError("Andere Bilddatei: " + row[kind])
+        if sha256((ROOT / row["grafik"]).read_bytes()).hexdigest() != row["sha256_svg"]:
+            raise ValueError("Andere Bilddatei: " + row["grafik"])
+        if sha256(plates[row["druck"]]).hexdigest() != row["sha256_pdf"]:
+            raise ValueError("Andere Bilddatei: " + row["druck"])
     return expected, {row["abbildung"]: row["titel"] for row in rows}
 
 

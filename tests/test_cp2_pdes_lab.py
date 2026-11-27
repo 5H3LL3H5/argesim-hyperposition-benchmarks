@@ -20,6 +20,17 @@ NUMERICS = all(importlib.util.find_spec(name) for name in ('numpy', 'scipy'))
 
 
 class Cp2PdesLabTests(unittest.TestCase):
+    @unittest.skipUnless(importlib.util.find_spec("fitz"), "requires PyMuPDF")
+    def test_figure_register_works_in_a_repository_checkout(self):
+        script = book.EDITION / "rechenlabor/bildpruefung/buchatlas.py"
+        result = subprocess.run(
+            [sys.executable, str(script), str(book.DOCS / book.PDF)],
+            check=True, capture_output=True, text=True, timeout=90,
+        )
+        with (script.parent / "abbildungsverzeichnis.csv").open(encoding="utf-8") as src:
+            count = sum(1 for _ in csv.DictReader(src))
+        self.assertIn(f"{count} Bildnummern, Seiten und Quelldateipaare geprüft.", result.stdout)
+
     def test_scaling_points_use_their_own_baseline_and_scope(self):
         results = LAB / "skalierungsanalyse/ergebnisse"
         with (results / "einzelzeiten.csv").open(encoding="utf-8", newline="") as src:
