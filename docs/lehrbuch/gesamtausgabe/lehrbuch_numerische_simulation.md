@@ -4166,7 +4166,7 @@ Der Saitenversuch stellt am Ende drei Fragen an das Netz. Welche Information lie
 
 Diese Fragen begleiten uns von der [Wahl des Physik-Layers](#cp2-operator-lernregel) zu [zehn ARGESIM-Teilaufgaben](#no-auswertung). Dort lesen wir jeweils den Eingang, die Referenz und das beobachtete Ergebnis zusammen. Der [projizierte Physik-Residual-Operator](#pr-verfahren) führt vom Abnahmetest ohne bekannte Referenz zum [trainierten Aktionsoperator und zum prüfbaren Fehlernachweis](#op-entscheidung).
 
-[Zum Schluss dieses Kapitels](#kap09-schluss) · [Sieben Kerne auf allen 28 Messaufgaben](#atlas-sieben) · [Fünf Räuber-Beute-Paare](#cp1b-bahn)
+[Methodenwahl für neuronale Operatoren](#no-auswahl-neuraloperator) · [Zum Schluss dieses Kapitels](#kap09-schluss) · [Sieben Kerne auf allen 28 Messaufgaben](#atlas-sieben) · [Fünf Räuber-Beute-Paare](#cp1b-bahn)
 
 <!-- Buchseite -->
 
@@ -5244,6 +5244,93 @@ Jeder der sieben Zeitkerne erzeugt 24 feste Merkmale. Das trainierte Modell komb
 Eine lineare und eine quadratische Interpolation in der Reynolds-Zahl erhalten dieselben Arten von gespeicherten Feldern. Bei unbekannter Ausgabezeit interpolieren sie auch in der Zeit. Ihre Fehler und die Hintergrundkosten stehen [neben denen der sieben Kerne](#cp2-voll-netze). Ein neuer, zeitlich wechselnder Deckelantrieb wäre eine andere Testaufgabe. Für diese Eingänge gelten die gesonderten Profilversuche dieses Kapitels.
 
 Im Zeittransfertest verfehlen alle sieben direkten Modelle und alle sieben Korrekturen mindestens ein Budget. Die Hankel-Korrektur erreicht am einzelnen Endzeitpunkt 0,125 %, über die ganze Prüfung 3,63 %. Zusätzlich rechnen wir auf demselben Gitter eine echte räumliche Fourier-Schicht. Neun nichtlineare Eingangskanäle werden zweidimensional transformiert. Pro Wellenzahl mischt eine gelernte komplexe Matrix die Kanäle. Die Rücktransformation liefert beide Geschwindigkeitskomponenten. Bei je 16 Wellenzahlen oberhalb der Nullmode erreichen direkte und grobgitterkorrigierte Variante maximal 77,61 % und 24,85 % Feldfehler. Damit lässt sich die räumliche Fourier-Faltung mit der zeitlichen Merkmalsauslese getrennt beurteilen.
+
+<!-- Buchseite -->
+
+<a id="no-auswahl-neuraloperator"></a>
+
+## 9.39 · Wie wählt man einen neuronalen Operator?
+
+**Ein Gedankenversuch.** Eine Kavität enthält einen großen Wirbel und eine dünne Scherschicht am bewegten Deckel. Beim ersten Versuch wollen wir das gesamte Feld auf einem Rechteckgitter. Beim zweiten benötigen wir nur drei neue Messorte. Beim dritten verändern wir die Wandform. Die Physik bleibt ähnlich, doch Ein- und Ausgabe ändern sich. Deshalb gibt es keinen insgesamt besten Operator.
+
+**Erste Frage: Wo liegen die Daten?** Ein **FNO** mischt räumliche Moden global und ist unser Ausgangspunkt für regelmäßige Gitter. **FNOGNO** verarbeitet ein regelmäßiges Eingangsgitter und fragt das Ergebnis an frei gelegenen Punkten ab. Dafür prüfen wir in der Kavität unbekannte Sondenorte gegen den einfachen Vergleich »FNO plus Interpolation«. **GINO** verarbeitet auch unregelmäßige Eingaben oder Geometrien. Es verdient erst bei tatsächlich variierenden Netzen und unveränderten physikalischen Vergleichsgrößen einen Versuch. **SFNO** nutzt Kugelflächenfunktionen. Eine rechteckige CP2-Kavität ist dafür kein sinnvoller Prüfstand.
+
+**Zweite Frage: Wo steckt die Schwierigkeit im Feld?** **TFNO** zerlegt die spektralen Gewichte in Tucker-Faktoren: weniger Gewichte, aber nicht notwendig weniger Laufzeit. **UNO** verarbeitet grobe und feine Auflösungen, um ausgedehnte und kleine Strukturen zu verbinden. **LocalNO** ergänzt globale Fourier-Schichten um lokale Differential- und Integralkerne. Für UNO und LocalNO ist die Kavität geeignet, sofern das Referenzgitter die Scherschicht auflöst: neben dem Innenfeld die wandnahe Abweichung und beide Geschwindigkeitskomponenten messen, nicht nur den Geschwindigkeitsbetrag. Das kurze $17\times17$-Feld allein beantwortet diese Frage nicht.
+
+**Vor dem Rechnen:** Eine Sonde wird näher an die Wand verschoben. Welche Änderung ist nötig: eine neue Geometrie, ein anderer Abfrageort oder ein genauerer Feldoperator? Der Messort ändert die Abfrage, nicht die Geometrie; ob zusätzliche lokale Auflösung hilft, entscheidet der Fehler am neuen Ort.
+
+[Offizielle Modell-API](https://neuraloperator.github.io/dev/modules/api.html) · [Unsere Kerne und Schichten](#no-eigene-kerne) · [Zwei gekoppelte Felder](#no-codano).
+
+<!-- Buchseite -->
+
+<a id="no-eigene-kerne"></a>
+
+## 9.40 · Architektur, Kern und Physik sind drei Entscheidungen
+
+**Dritte Frage: Was soll das Ergebnis außer einem Feld liefern?** **CoDA-NO** behandelt vollständige physikalische Variablen als Attention-Einheiten. Die folgende Gegenprobe prüft, ob das Modell eine Kopplung wirklich trifft. **UQNO** ergänzt ein trainiertes Modell durch kalibrierte Fehlerbänder. Ein sinnvoller Anschluss ist C19R: Bänder an getrennten Szenarien kalibrieren, auf neuen Quellenfällen Abdeckung und Breite gemeinsam messen. Ein Band aus Stichproben ersetzt weder ein berechnetes Fehlerzertifikat noch eine Garantie bei veränderter Eingabeverteilung.
+
+**Welche Darstellung gibt der Physik eine Stimme?**
+
+- **Fourier und Sinusmoden:** globale Wellenformen; Sinusmoden erfüllen feste Enden. Prüfstein: neues Anfangsprofil und feineres Gitter separat testen.
+- **Laplace:** kausale Zeitkerne für Abklingen, Verzögerung und Nachlauf. Prüfstein: einen Puls auswerten, nicht nur seinen Endwert.
+- **Haar-Wavelets und Wavelet–Laplace:** lokale Ortsdetails, mit Laplace zusätzlich Vorgeschichte. Prüfstein: Fehlergröße und Fehlerort am Saitenknick.
+- **Hankel/Toeplitz:** direkte und gespiegelte Beiträge. Prüfstein: Rand und Innenfeld getrennt messen.
+- **Radon und Mellin:** Richtungen bzw. geometrische Skalierung. Prüfstein: schräge Fronten drehen und einen Ring skalieren. Eine andere Reynolds-Zahl ist keine reine Skalierung.
+
+Die sieben gemessenen Varianten sind kontrolliert vereinfachte **Kerne**, keine vollständigen Nachbauten der zugehörigen Forschungsmodelle. Ein Physik-Layer ist eine zusätzliche Entscheidung: Direkte Vorhersage, analytisches Grundfeld plus gelernte Korrektur und nachträgliche Projektion sind verschiedene Varianten. PINNs lösen häufig eine konkrete Gleichung per Residuum; DeepONet lernt eine Abbildung von Sensorwerten zu Abfragen. Diese Einteilung verhindert, dass wir Modellklassen mit Randbedingungen, Fehlermaßen oder Basissolvern verwechseln.
+
+[Herleitungen der Kerne](#cp2-operator-grundlagen) · [Gemessener Siebenervergleich](#atlas-sieben) · [Physik-Korrektur](#cp2-operator-lernregel).
+
+<!-- Buchseite -->
+
+<a id="no-codano"></a>
+
+## 9.41 · CoDA-NO: Zwei Felder lernen gemeinsam
+
+Sobald zwei Temperaturfelder Wärme austauschen, reicht ein einzelnes Temperaturprofil nicht mehr aus, um seine Zukunft zu bestimmen. CoDA-NO behandelt jedes physikalische Feld als eigene Informationseinheit: Die Attention gewichtet Beiträge der anderen Felder, während Operatoren die räumliche Verarbeitung übernehmen. Ein FNO mit zwei Eingangskanälen kann die Felder ebenfalls mischen. Die Frage ist deshalb nicht, ob nur CoDA-NO Kopplung lernen kann, sondern welchen Unterschied sein Aufbau im Versuch macht. [Rahman et al., NeurIPS 2024](https://proceedings.neurips.cc/paper_files/paper/2024/hash/bc75fa9843a7905bbed9d83895a88f7f-Abstract-Conference.html) untersuchen auch Vortraining und Übertragung auf andere PDE-Systeme. Unser Lehrversuch prüft beides nicht.
+
+**Die Gegenprobe.** Zwei dimensionslose Felder auf dem Einheitsquadrat diffundieren und tauschen Wärme aus. Der gemeinsame Randwert ist null:
+$$u_t=0.03\Delta u+1.25(v-u),\qquad
+  v_t=0.06\Delta v+1.25(u-v).$$
+Für das Sinusprodukt mit Indizes $k,l$ gilt $-\Delta\phi_{kl}=\mu\phi_{kl}$ mit $\mu=\pi^2(k^2+l^2)$. Die beiden Koeffizienten erfüllen damit ein lineares Zweier-System. Seine Matrix hat Diagonaleinträge $-0.03\mu-1.25$ und $-0.06\mu-1.25$ sowie Nebendiagonaleinträge $1.25$. Die Matrixexponentialfunktion liefert für jede Mode die Referenz bei $t=0.4$.
+
+**Woran sieht man gelernte Kopplung?** Wir halten $u(0)$ fest und ändern nur $v(0)$: von null zum ersten Sinusprodukt. Die Modelle müssen nicht nur die Felder, sondern auch die dadurch verursachte Änderung in $u(0.4)$ treffen. Den Nullrand erzwingen wir für beide mit derselben Projektion. Er beweist keine gelernte Kopplung. Im [Rechenlabor](rechenlabor/codano/README.md) liegen Rezept, Trainingscode und Messdaten; das Testgitter mit $25\times25$ Punkten ist feiner als das Trainingsgitter mit $13\times13$ Punkten.
+
+<!-- Buchseite -->
+
+<a id="no-codano-ergebnis"></a>
+
+## 9.42 · Was der Mehrfeldversuch tatsächlich zeigt
+
+Beide Modelle sahen 96 Trainings- und 24 Validierungsfelder; wir prüften 32 neue Felder. Gleiche Epochenzahl (40), drei gepaarte Starts, ein CPU-Thread. Auf dem feineren Gitter ergeben sich die folgenden Mittelwerte:
+
+- **Feldfehler $u$ und $v$:** FNO 2,96 % und 2,97 %, CoDA-NO 59,50 % und 70,48 %.
+- **Fehler der Kopplungsantwort:** FNO 4,19 %, CoDA-NO 132,04 %.
+- **Reelle Parameter und Trainingszeit (Median):** FNO 10 914 und 8,60 s; CoDA-NO 1 051 und 69,06 s.
+
+**Lesart.** In diesem kleinen Versuch ist der FNO klar besser. CoDA-NO ist hier viel schmaler; die Tabelle vergleicht zwei konkrete Konfigurationen und isoliert nicht den Einfluss der Attention. Ein reiner Null-Prädiktor für die Änderung hätte 100 % Fehler. CoDA-NO verfehlt selbst diese einfache Marke in allen drei Starts. Beide Modelle treffen den vorgegebenen Randwert exakt: Null am Rand ist also kein Beleg dafür, dass die Kopplung gelernt wurde. Für die Frage, ob Attention bei gleichem Modellbudget oder mit Vortraining hilft, wäre ein eigener Versuch nötig.
+
+**Kontrolle am anderen Beispiel.** An der CP2-Saite spart TFNO bei identischem Daten- und Epochenbudget 63 % der Parameter. Über drei gepaarte Starts auf 501 Punkten sinkt der mittlere Fehler an ungesehenen Zupfstellen von 2,11 % auf 2,01 %, der größte Ortsfehler steigt aber von 1,96 mm auf 2,21 mm. Das Modell trainiert in dieser Probe nicht schneller. Welche Variante Sie wählen, hängt davon ab, ob der mittlere Feldfehler, der Fehler am Knick oder der Speicherbedarf zählt.
+
+[Messwerte und Quelltext](rechenlabor/codano/README.md) · [Zur Methodenwahl](#no-auswahl-neuraloperator).
+
+<!-- Buchseite -->
+
+<a id="no-vergleich-budget"></a>
+
+## 9.43 · Was bleibt bei ähnlicher Modellgröße?
+
+Der erste Versuch verglich unterschiedliche Modellgrößen. Jetzt verkleinern wir FNO und ergänzen UNO: Die Zahl reeller Parameter weicht um weniger als 2 % ab. FNO und UNO nutzen gleich viele Spektralgewichte; UNO verarbeitet das Feld dazwischen auf halber Gitterauflösung. Alle drei Modelle sehen dieselben Daten und benötigen je 40 Epochen. Auswahl der Gewichte auf dem Validierungssatz, drei gepaarte Starts. Wir berichten Mittelwerte auf dem feineren Testgitter sowie Medianzeiten auf einem CPU-Thread. Für CoDA-NO verwenden wir dieselben drei Läufe wie im ersten Versuch:
+
+- **FNO (schmal)** (1034 Parameter): Felder 32,69 % / 46,00 %; Kopplungsfehler 38,11 %; Training 4,66 s.
+- **UNO** (1034 Parameter): Felder 30,34 % / 44,38 %; Kopplungsfehler 38,05 %; Training 5,30 s.
+- **CoDA-NO** (1051 Parameter): Felder 59,50 % / 70,48 %; Kopplungsfehler 132,04 %; Training 69,06 s.
+
+**Lesart.** FNO und UNO liegen bei der Kopplungsantwort praktisch gleichauf. Der Vorsprung von UNO beträgt nur 0,06 Prozentpunkte. Beide verfehlen die exakte Antwort noch deutlich. Ähnliche Parameterzahl bedeutet weder gleiche Rechenzeit noch gleiche Repräsentation. Die Messung prüft die drei konkreten Konfigurationen, nicht den isolierten Effekt von Attention, und nicht dieselbe Trainingsdauer. Auch die Zahl der Fourier-Moden ist zwischen den Architekturtypen nicht identisch. Der exakte modale Löser liefert hier die Referenz; für genau diese bekannte lineare Aufgabe braucht man kein Netz.
+
+**Nicht quer über Aufgaben ranken.** Unsere [sieben Kerne](#atlas-ertrag) lösen im Messkatalog eine andere Aufgabe: verlässliche Einzelfreigaben. Wavelet erreicht 190 von 352 direkten Freigaben im endlichen Katalog. Bei C19R liegen Radon und Fourier–Mellin mit 4 603 und 4 584 von 5 101 vor Wavelet mit 4 410. Zähler, Nenner und identische Testbedingungen machen den Vergleich innerhalb der Aufgabe fair. Daraus folgt keine Rangliste gegen die Feldfehler oben.
+
+[Alle Einzelmessungen und Wiederholung](rechenlabor/codano/README.md).
 
 <!-- Buchseite -->
 
