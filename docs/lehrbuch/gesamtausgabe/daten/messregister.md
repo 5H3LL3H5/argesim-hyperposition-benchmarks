@@ -1,6 +1,6 @@
 # Messregister lesen und prüfen
 
-Das [Messregister](messregister.csv) enthält 80 Tabellenkennungen und 24 ergänzende Versuchsnachweise. Die Spalten haben unterschiedliche Bezugspunkte:
+Das [Messregister](messregister.csv) enthält 93 Tabellenkennungen und 24 ergänzende Versuchsnachweise. Die Spalten haben unterschiedliche Bezugspunkte:
 
 - **Physische PDF-Seite** und **PDF-Ausgabe** bezeichnen für Tabellen die vom gleichnamigen PDF-Ziel gelieferte, bei 1 beginnende Seitennummer. Sie werden aus der gesetzten Datei ausgelesen, nicht aus den Seitenmarken des Manuskripts geschätzt.
 - **Archivfundstelle** kennzeichnet die 24 Zusatzzeilen. Ihre früheren Seiten stammen aus dem Register der Druckfassung v9.17; sie werden nicht als aktuelle PDF-Ziele ausgegeben.

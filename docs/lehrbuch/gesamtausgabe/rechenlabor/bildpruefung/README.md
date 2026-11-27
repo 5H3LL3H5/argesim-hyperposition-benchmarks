@@ -17,7 +17,7 @@ python3 -B rechenlabor/bildpruefung/bestand.py
 python3 -B rechenlabor/bildpruefung/test_bilder.py -v
 ```
 
-Benötigt werden Python ab 3.10, NumPy, SciPy, Matplotlib, PyMuPDF und für zwei überarbeitete SVG-Druckvorlagen Inkscape. Die tatsächlich geprüften Versionen stehen in `umgebung.txt`. Alle Eingabedaten liegen bei. Die wissenschaftlichen Kurven und Kartendaten werden unabhängig von der PDF-Seitenfolge erzeugt. Das seitenbezogene Verzeichnis enthält die 96 Abbildungen der aktuellen Druckausgabe. Wer nur ein Teilbild ablesen möchte, findet die neun neuen Druckvorlagen im Ordner `druck/` unter dem Namen `bild_*.pdf`.
+Benötigt werden Python ab 3.10, NumPy, SciPy, Matplotlib, PyMuPDF und für zwei überarbeitete SVG-Druckvorlagen Inkscape. Die tatsächlich geprüften Versionen stehen in `umgebung.txt`. Alle Eingabedaten liegen bei. Die wissenschaftlichen Kurven und Kartendaten werden unabhängig von der PDF-Seitenfolge erzeugt. Das seitenbezogene Verzeichnis enthält die 98 Abbildungen der aktuellen Druckausgabe. Wer nur ein Teilbild ablesen möchte, findet die neun neuen Druckvorlagen im Ordner `druck/` unter dem Namen `bild_*.pdf`.
 
 | Abbildung | Experiment und Beleg |
 |---|---|
@@ -42,7 +42,7 @@ Die kleineren D2Q9-Karten in 16.1 und 16.4 geben die Originaldaten wieder. In 16
 
 Im Repository prüft `python3 docs/lehrbuch/gesamtausgabe/rechenlabor/bildpruefung/buchatlas.py docs/ARGESIM_SOLVER_STUDY.pdf` direkt die Vektor-PDFs in `druck/Druckabbildungen.zip`. Im vollständigen Offline-Labor liest derselbe Prüfer die ausgepackten Dateien unter `druck/`. Beide Aufbauten unterstützen auch `--register-aktualisieren`.
 
-Der folgende Aufruf prüft die 96 Bildnummern in der gelieferten Buch-PDF, gleicht die Seiten und SHA-256-Werte mit dem Verzeichnis ab und erzeugt den vollständigen Bildatlas erneut. Legen Sie die Buch-PDF dazu in den Paketstamm oder geben Sie ihren Pfad an. Für die Verzeichnisseiten verwendet der Bildsatz die DejaVu-Schriften in der Standardinstallation von Debian. Ohne die Option `--atlas` führt das Programm nur die Prüfung aus.
+Der folgende Aufruf prüft die 98 Bildnummern in der gelieferten Buch-PDF, gleicht die Seiten und SHA-256-Werte mit dem Verzeichnis ab und erzeugt den vollständigen Bildatlas erneut. Legen Sie die Buch-PDF dazu in den Paketstamm oder geben Sie ihren Pfad an. Für die Verzeichnisseiten verwendet der Bildsatz die DejaVu-Schriften in der Standardinstallation von Debian. Ohne die Option `--atlas` führt das Programm nur die Prüfung aus.
 
 ```sh
 python3 -B rechenlabor/bildpruefung/buchatlas.py lehrbuch_numerische_simulation.pdf --atlas Mein_Bildatlas.pdf

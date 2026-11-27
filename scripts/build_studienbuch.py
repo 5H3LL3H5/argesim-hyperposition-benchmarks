@@ -35,6 +35,7 @@ COMPARISON = AUDIT / "messung/revisionsvergleich.csv"
 REPLAY = COMPARISON.parent / "skalenfix_c635504"
 MANUSCRIPT = "lehrbuch_numerische_simulation.md"
 CONTACT = COMPARISON.parent / "kontakt_v919"
+MODAL = Path("rechenlabor/modaloperator")
 PDES = Path("rechenlabor/pdes_partitionierung")
 REVISION = "v9.22"
 DATE = (2026, 11, 26, 0, 0, 0)
@@ -183,8 +184,15 @@ def core_lab(path):
                 lab, source.relative_to(MATERIAL).as_posix(), source.read_bytes()
             )
         write_entry(lab, "START_v9_22.md", (EDITION / "Labor.md").read_bytes())
-        for name in ("kapitel/16.md", MANUSCRIPT):
+        for name in ("kapitel/09.md", "kapitel/16.md", MANUSCRIPT):
             write_entry(lab, name, (EDITION / name).read_bytes())
+        for source in edition_files():
+            rel = source.relative_to(EDITION)
+            if rel.is_relative_to(MODAL):
+                write_entry(lab, rel.as_posix(), source.read_bytes())
+        for stem in ("modal_austausch", "modal_lerndaten"):
+            rel = Path("abbildungen") / (stem + ".svg")
+            write_entry(lab, rel.as_posix(), (EDITION / rel).read_bytes())
         matrix = Path("daten/qss-extension.csv")
         write_entry(lab, matrix.as_posix(), (EDITION / matrix).read_bytes())
         with zipfile.ZipFile(PACKAGES / "Laborquellen.zip") as source:
@@ -407,6 +415,8 @@ def verify_published_pdf(path, attachments):
             raise ValueError("Invalid embedded lab files.")
         targets = book.resolve_names()
         for name, words in (
+            ("druck-modal-gesamtzeit", ("42", "3 min 18,47 s", "12 min 39,33 s")),
+            ("druck-modal-lbm", ("D2Q5", "Modal24", "CoDA-NO")),
             ("druck-beleglegende", ("Beweis", "Gegenprobe", "Messung")),
             ("druck-c05-entscheidung", ("C05", "Aufwand", "BDF")),
             ("druck-cp2-skalierung", ("Kavität", "Ereignisintervalle", "D2Q9")),

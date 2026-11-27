@@ -1,8 +1,10 @@
 # Numerische Simulation dynamischer Systeme
 
+Die Studie zu zwei Diffusionsfeldern vergleicht Modaloperator, FNO, UNO, CoDA-NO, Hybridmodelle und D2Q5-LBM. [Kapitel 9.44](gesamtausgabe/kapitel/09.md#druck-modal-studie) · [Studienlabor, Trainingszustände und Laufbefehle](gesamtausgabe/rechenlabor/modaloperator/README.md) · [Gemessene Gesamtzeiten mit LBM](gesamtausgabe/rechenlabor/modaloperator/results/runtime/total_jobs.csv)
+
 **Christian Stenzel · Gesamtausgabe v9.22 · 18 Fachkapitel und vier Anhänge**
 
-Die mathematischen Grundlagen führen von Fehlermaßen und Stabilität zu Zeitintegration, Ereignissen und räumlicher Diskretisierung. Kapitel 6 erklärt die Kalender der QSS-Familie. Kapitel 16 prüft die Verfahren an der CP2-Kavität. Kapitel 18 vergleicht ihre Entscheidungen an den ARGESIM-Modellfenstern. Die Ausgabe enthält 96 nummerierte Abbildungen. [Kapitel 16 untersucht die Skalierung der Kavität](gesamtausgabe/kapitel/16.md#cp2-skalierung-auswertung) mit 1, 2, 4 und 8 Prozessen.
+Die mathematischen Grundlagen führen von Fehlermaßen und Stabilität zu Zeitintegration, Ereignissen und räumlicher Diskretisierung. Kapitel 6 erklärt die Kalender der QSS-Familie. Kapitel 16 prüft die Verfahren an der CP2-Kavität. Kapitel 18 vergleicht ihre Entscheidungen an den ARGESIM-Modellfenstern. Die Ausgabe enthält 98 nummerierte Abbildungen. [Kapitel 16 untersucht die Skalierung der Kavität](gesamtausgabe/kapitel/16.md#cp2-skalierung-auswertung) mit 1, 2, 4 und 8 Prozessen.
 
 [Lehrbuch öffnen (PDF)](../ARGESIM_SOLVER_STUDY.pdf) · [PDF herunterladen](../ARGESIM_SOLVER_STUDY.pdf?raw=true) · [Volltext und Kapitelfahrplan](gesamtausgabe/lehrbuch_numerische_simulation.md) · [Einzelkapitel](gesamtausgabe/kapitel)
 

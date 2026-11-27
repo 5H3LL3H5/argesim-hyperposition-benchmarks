@@ -182,7 +182,7 @@ def verify_matrix(pdf: Path, dests: dict[str, int], lab: zipfile.ZipFile) -> Non
                 )
 
 
-def process(pdf: Path, lab_path: Path, edition: str, update: Path | None) -> None:
+def process(pdf: Path, lab_path: Path, edition: str, update: Path | None) -> tuple[int, int]:
     report = subprocess.check_output(["pdfinfo", pdf], text=True)
     title = re.search(r"^Title:\s*(.+)$", report, re.M)
     if not title or not re.search(rf"(?<!\w){re.escape(edition)}(?![\w.])", title[1]):
@@ -193,8 +193,11 @@ def process(pdf: Path, lab_path: Path, edition: str, update: Path | None) -> Non
         rows = csv_rows(original)
         ids = {row[KEY] for row in rows}
         tables = {key for key in ids if key.startswith("tab-")}
-        if (len(rows), len(ids), len(tables)) != (104, 104, 80):
-            invalid("Erwartet: 104 eindeutige Nachweise, davon 80 Tabelleneinträge.")
+        modal_ids = {f"tab-modal-{i:02d}" for i in range(1, 14)} if "druck-modal-studie" in destinations else set()
+        if {key for key in ids if key.startswith("tab-modal-")} != modal_ids:
+            invalid("Die dreizehn Tabellen des Modaloperatorlabors und seine Druckfassung stimmen nicht überein.")
+        if (len(rows), len(ids), len(tables)) != (104 + len(modal_ids), 104 + len(modal_ids), 80 + len(modal_ids)):
+            invalid("Anzahl der eindeutigen Nachweise oder PDF-Tabellenziele stimmt nicht.")
         verify_matrix(pdf, destinations, lab)
         digests: dict[str, str] = {}
         for row in rows:
@@ -246,6 +249,7 @@ def process(pdf: Path, lab_path: Path, edition: str, update: Path | None) -> Non
                 )
                 writer.writeheader()
                 writer.writerows(rows)
+    return len(rows), len(tables)
 
 
 def main() -> None:
@@ -262,7 +266,7 @@ def main() -> None:
     )
     args = parser.parse_args()
     try:
-        process(args.pdf, args.lab, args.edition, args.update)
+        records, tables = process(args.pdf, args.lab, args.edition, args.update)
     except (
         ValueError,
         KeyError,
@@ -272,7 +276,7 @@ def main() -> None:
     ) as exc:
         parser.exit(1, f"{exc}\n")
     print(
-        "104 Registerzeilen, 80 PDF-Tabellenziele, 24 Archivfundstellen, 168 Matrixzellen, 456 Einzelwerte geprüft."
+        f"{records} Registerzeilen, {tables} PDF-Tabellenziele, 24 Archivfundstellen, 168 Matrixzellen, 456 Einzelwerte geprüft."
     )
 
 

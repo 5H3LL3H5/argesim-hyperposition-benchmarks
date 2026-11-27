@@ -1,12 +1,14 @@
 # Numerische Simulation dynamischer Systeme
 
+Die Studie zu zwei Diffusionsfeldern vergleicht Modaloperator, FNO, UNO, CoDA-NO, Hybridmodelle und D2Q5-LBM. [Kapitel 9.44](kapitel/09.md#druck-modal-studie) · [Studienlabor, Trainingszustände und Laufbefehle](rechenlabor/modaloperator/README.md) · [Gemessene Gesamtzeiten mit LBM](rechenlabor/modaloperator/results/runtime/total_jobs.csv)
+
 Christian Stenzel · Gesamtausgabe · Revision v9.22
 
 ## Parallele QSS und Kavität im Vollgitter
 
 [PDES-Grundbegriffe und Amdahls Gesetz](kapitel/06.md#pdes-grundbegriffe) · [Ein bis acht logische Prozesse](kapitel/06.md#pdes-lp-messung) · [Vier vollständige MPI-Läufe](kapitel/16.md#cp2-mpi-skalierung) · [Gruppen-QSS3 und Gruppen-QSS4 bis zum Endfeld](kapitel/16.md#cp2-gruppen-hoehere-ordnung) · [Komponentenweise Langläufe](kapitel/16.md#cp2-komponenten-langlauf)
 
-Die Revision umfasst 18 Fachkapitel und 96 nummerierte Abbildungen. Die neuen Abschnitte verbinden die Entstehung einer Grenzmeldung mit einer gemessenen Laufzeit. [Kapitel 6 mit Aktivitätskarte und Rechenprobe](kapitel/06.md#pdes-vorausschau) · [Sieben vollständige Kavitätsläufe mit zwei Referenzfeldern](kapitel/16.md#cp2-voll-direktvergleich) · [Komponentenweise QSS3/4 im Anlauf](kapitel/16.md#pdes-kavitaet) · [Primärdaten und Versuchsanleitung](rechenlabor/pdes_partitionierung/README.md)
+Die Revision umfasst 18 Fachkapitel und 98 nummerierte Abbildungen. Die neuen Abschnitte verbinden die Entstehung einer Grenzmeldung mit einer gemessenen Laufzeit. [Kapitel 6 mit Aktivitätskarte und Rechenprobe](kapitel/06.md#pdes-vorausschau) · [Sieben vollständige Kavitätsläufe mit zwei Referenzfeldern](kapitel/16.md#cp2-voll-direktvergleich) · [Komponentenweise QSS3/4 im Anlauf](kapitel/16.md#pdes-kavitaet) · [Primärdaten und Versuchsanleitung](rechenlabor/pdes_partitionierung/README.md)
 
 ## Nachtrag zur QSS3/4-Taylor-Kontaktprüfung
 
@@ -39,7 +41,7 @@ Die [27 Maßnahmen](daten/massnahmen_v9_16.csv) sind nach Bearbeitungsphase geor
 
 Die 40 fachlich bestätigten Arbeitsaufträge stehen mit den Druckseiten der damaligen Ausgabe in [der Umsetzungsliste](daten/aenderungen_v9_15.csv). Die Entscheidungen über alle 34 strittigen Aussagen des Zweitgutachtens bleiben einzeln nachzulesen. Die Begutachtung bezog sich auf die damalige Seitennummerierung. Bei den Grundlagen steht die neue Fühlergrafik jetzt zuerst. Dadurch wird die vorige periodische Aliasing-Abbildung G.4 in v9.15 zu G.5.
 
-- [Messregister für die 80 Tabellen und die zentralen Experimente](daten/messregister.csv)
+- [Messregister für die 93 Tabellen und die zentralen Experimente](daten/messregister.csv)
 - [Erst- und Zweitgutachten im Abgleich](daten/abgleich_erst_zweit_v9_14.csv)
 - [Reichweite der acht ergänzenden Prüfungen](daten/pruefumfang_v9_15.csv)
 - [Operatoren nach Eingabe, Ausgabe, Referenz, Basismethode, Testbereich und Budget](daten/operatorvergleiche.csv)
@@ -54,7 +56,7 @@ Kapitel 9 (S. 233–234) vergleicht zehn Populationsverläufe bis t=100. Kapitel
 
 ## Abbildungen und Prüfdaten der Revision v9.13
 
-Die 96 Abbildungen der Gesamtausgabe v9.22 sind im [seitenbezogenen Verzeichnis](rechenlabor/bildpruefung/abbildungsverzeichnis.csv) erfasst. Die Revision v9.13 ergänzte neun Grafiken in den Kapiteln 10 bis 16 und 18. Die fünf neuen Abbildungen der Revision v9.18 stehen in Kapitel 6. Die [Versuchsanleitung](rechenlabor/bildpruefung/README.md) beschreibt die Neuberechnung, den Vergleich mit archivierten Feldern und die Leistungsprofile. Der [Prüfbericht](Pruefbericht_Gesamtlehrbuch.md) ordnet die gemeldeten Befunde der gedruckten Seite zu.
+Die 98 Abbildungen der Gesamtausgabe v9.22 sind im [seitenbezogenen Verzeichnis](rechenlabor/bildpruefung/abbildungsverzeichnis.csv) erfasst. Die Revision v9.13 ergänzte neun Grafiken in den Kapiteln 10 bis 16 und 18. Die fünf neuen Abbildungen der Revision v9.18 stehen in Kapitel 6. Die [Versuchsanleitung](rechenlabor/bildpruefung/README.md) beschreibt die Neuberechnung, den Vergleich mit archivierten Feldern und die Leistungsprofile. Der [Prüfbericht](Pruefbericht_Gesamtlehrbuch.md) ordnet die gemeldeten Befunde der gedruckten Seite zu.
 
 ## Rechenlabor
 

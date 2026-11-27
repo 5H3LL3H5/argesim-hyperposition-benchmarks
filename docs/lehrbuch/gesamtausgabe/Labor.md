@@ -1,5 +1,7 @@
 # Rechenlabor zur Gesamtausgabe v9.22
 
+Die Studie zu zwei Diffusionsfeldern vergleicht Modaloperator, FNO, UNO, CoDA-NO, Hybridmodelle und D2Q5-LBM. [Kapitel 9.44](kapitel/09.md#druck-modal-studie) · [Studienlabor, Trainingszustände und Laufbefehle](rechenlabor/modaloperator/README.md) · [Gemessene Gesamtzeiten mit LBM](rechenlabor/modaloperator/results/runtime/total_jobs.csv)
+
 **Acht-Fälle-Matrix, jeweils 456 Einstellungen:** [Historische Vorauflage (222 bestanden)](rechenlabor/qss_pruefung/vorher/qss-extension.csv), [Vergleich v9.18 (209 bestanden)](rechenlabor/qss_pruefung/messung/extension.csv), [aktuelle Buchmatrix (224 bestanden)](rechenlabor/qss_pruefung/messung/kontakt_v919/extension.csv). Die vier Primärdateien liegen unter `rechenlabor/qss_pruefung/messung/kontakt_v919/`. Die Zwischenprobe `c635504` (227 bestanden) ist davon getrennt.
 
 [Neue Skalierungsdaten](rechenlabor/pdes_partitionierung/Skalierung_Messdaten.zip) · [Wiederaufnahme der komponentenweisen QSS-Läufe](rechenlabor/pdes_partitionierung/QSS34_Fortsetzung.zip)
