@@ -5290,9 +5290,9 @@ Die sieben gemessenen Varianten sind kontrolliert vereinfachte **Kerne**, keine 
 Sobald zwei Temperaturfelder Wärme austauschen, reicht ein einzelnes Temperaturprofil nicht mehr aus, um seine Zukunft zu bestimmen. CoDA-NO behandelt jedes physikalische Feld als eigene Informationseinheit: Die Attention gewichtet Beiträge der anderen Felder, während Operatoren die räumliche Verarbeitung übernehmen. Ein FNO mit zwei Eingangskanälen kann die Felder ebenfalls mischen. Die Frage ist deshalb nicht, ob nur CoDA-NO Kopplung lernen kann, sondern welchen Unterschied sein Aufbau im Versuch macht. [Rahman et al., NeurIPS 2024](https://proceedings.neurips.cc/paper_files/paper/2024/hash/bc75fa9843a7905bbed9d83895a88f7f-Abstract-Conference.html) untersuchen auch Vortraining und Übertragung auf andere PDE-Systeme. Unser Lehrversuch prüft beides nicht.
 
 **Die Gegenprobe.** Zwei dimensionslose Felder auf dem Einheitsquadrat diffundieren und tauschen Wärme aus. Der gemeinsame Randwert ist null:
-$$u_t=0.03Delta u+1.25(v-u),qquad
-  v_t=0.06Delta v+1.25(u-v).$$
-Für das Sinusprodukt mit Indizes $k,l$ gilt $-Deltaphi_{kl}=muphi_{kl}$ mit $mu=pi^2(k^2+l^2)$. Die beiden Koeffizienten erfüllen damit ein lineares Zweier-System. Seine Matrix hat Diagonaleinträge $-0.03mu-1.25$ und $-0.06mu-1.25$ sowie Nebendiagonaleinträge $1.25$. Die Matrixexponentialfunktion liefert für jede Mode die Referenz bei $t=0.4$.
+$$u_t=0.03\Delta u+1.25(v-u),\qquad
+  v_t=0.06\Delta v+1.25(u-v).$$
+Für das Sinusprodukt mit Indizes $k,l$ gilt $-\Delta\phi_{kl}=\mu\phi_{kl}$ mit $\mu=\pi^2(k^2+l^2)$. Die beiden Koeffizienten erfüllen damit ein lineares Zweier-System. Seine Matrix hat Diagonaleinträge $-0.03\mu-1.25$ und $-0.06\mu-1.25$ sowie Nebendiagonaleinträge $1.25$. Die Matrixexponentialfunktion liefert für jede Mode die Referenz bei $t=0.4$.
 
 **Woran sieht man gelernte Kopplung?** Wir halten $u(0)$ fest und ändern nur $v(0)$: von null zum ersten Sinusprodukt. Die Modelle müssen nicht nur die Felder, sondern auch die dadurch verursachte Änderung in $u(0.4)$ treffen. Den Nullrand erzwingen wir für beide mit derselben Projektion. Er beweist keine gelernte Kopplung. Im [Rechenlabor](rechenlabor/codano/README.md) liegen Rezept, Trainingscode und Messdaten; das Testgitter mit $25\times25$ Punkten ist feiner als das Trainingsgitter mit $13\times13$ Punkten.
 
@@ -5313,6 +5313,24 @@ Beide Modelle sahen 96 Trainings- und 24 Validierungsfelder; wir prüften 32 neu
 **Kontrolle am anderen Beispiel.** An der CP2-Saite spart TFNO bei identischem Daten- und Epochenbudget 63 % der Parameter. Über drei gepaarte Starts auf 501 Punkten sinkt der mittlere Fehler an ungesehenen Zupfstellen von 2,11 % auf 2,01 %, der größte Ortsfehler steigt aber von 1,96 mm auf 2,21 mm. Das Modell trainiert in dieser Probe nicht schneller. Welche Variante Sie wählen, hängt davon ab, ob der mittlere Feldfehler, der Fehler am Knick oder der Speicherbedarf zählt.
 
 [Messwerte und Quelltext](rechenlabor/codano/README.md) · [Zur Methodenwahl](#no-auswahl-neuraloperator).
+
+<!-- Buchseite -->
+
+<a id="no-vergleich-budget"></a>
+
+## 9.43 · Was bleibt bei ähnlicher Modellgröße?
+
+Der erste Versuch verglich unterschiedliche Modellgrößen. Jetzt verkleinern wir FNO und ergänzen UNO: Die Zahl reeller Parameter weicht um weniger als 2 % ab. FNO und UNO nutzen gleich viele Spektralgewichte; UNO verarbeitet das Feld dazwischen auf halber Gitterauflösung. Alle drei Modelle sehen dieselben Daten und benötigen je 40 Epochen. Auswahl der Gewichte auf dem Validierungssatz, drei gepaarte Starts. Wir berichten Mittelwerte auf dem feineren Testgitter sowie Medianzeiten auf einem CPU-Thread. Für CoDA-NO verwenden wir dieselben drei Läufe wie im ersten Versuch:
+
+- **FNO (schmal)** (1034 Parameter): Felder 32,69 % / 46,00 %; Kopplungsfehler 38,11 %; Training 4,66 s.
+- **UNO** (1034 Parameter): Felder 30,34 % / 44,38 %; Kopplungsfehler 38,05 %; Training 5,30 s.
+- **CoDA-NO** (1051 Parameter): Felder 59,50 % / 70,48 %; Kopplungsfehler 132,04 %; Training 69,06 s.
+
+**Lesart.** FNO und UNO liegen bei der Kopplungsantwort praktisch gleichauf. Der Vorsprung von UNO beträgt nur 0,06 Prozentpunkte. Beide verfehlen die exakte Antwort noch deutlich. Ähnliche Parameterzahl bedeutet weder gleiche Rechenzeit noch gleiche Repräsentation. Die Messung prüft die drei konkreten Konfigurationen, nicht den isolierten Effekt von Attention, und nicht dieselbe Trainingsdauer. Auch die Zahl der Fourier-Moden ist zwischen den Architekturtypen nicht identisch. Der exakte modale Löser liefert hier die Referenz; für genau diese bekannte lineare Aufgabe braucht man kein Netz.
+
+**Nicht quer über Aufgaben ranken.** Unsere [sieben Kerne](#atlas-ertrag) lösen im Messkatalog eine andere Aufgabe: verlässliche Einzelfreigaben. Wavelet erreicht 190 von 352 direkten Freigaben im endlichen Katalog. Bei C19R liegen Radon und Fourier–Mellin mit 4 603 und 4 584 von 5 101 vor Wavelet mit 4 410. Zähler, Nenner und identische Testbedingungen machen den Vergleich innerhalb der Aufgabe fair. Daraus folgt keine Rangliste gegen die Feldfehler oben.
+
+[Alle Einzelmessungen und Wiederholung](rechenlabor/codano/README.md).
 
 <!-- Buchseite -->
 

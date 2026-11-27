@@ -31,3 +31,13 @@ class ReferenceTest(unittest.TestCase):
         x, y = sample(coefficients, 25)
         self.assertTrue(x[0, 0].equal(x[1, 0]))
         self.assertGreater(float(y[1, 0, 12, 12] - y[0, 0, 12, 12]), 0.1)
+
+    def test_cross_field_gain_symmetric_at_two_modes(self):
+        for mode, point, expected in ((0, 12, 0.222055180593), (4, 4, 0.056614215014)):
+            with self.subTest(mode=mode):
+                coefficients = np.zeros((2, 2, 6))
+                coefficients[0, 0, mode] = 1
+                coefficients[1, 1, mode] = 1
+                _, future = sample(coefficients, 25)
+                self.assertAlmostEqual(float(future[0, 1, point, 12]), expected)
+                self.assertAlmostEqual(float(future[1, 0, point, 12]), expected)

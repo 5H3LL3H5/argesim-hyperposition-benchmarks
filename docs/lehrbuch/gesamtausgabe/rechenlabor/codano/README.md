@@ -45,3 +45,20 @@ Laufzeiten sind lokal und nicht bitweise reproduzierbar.
   Die letzte JSON-Zeile enthält die vollständigen sechs Trainingsläufe.
 - Beide Proben verwenden unabhängige Validierungs- und Testdaten. Die
   Parameterangabe zählt komplexe Gewichte als zwei reelle Skalare.
+
+## Gleicher Datensatz bei ähnlicher Modellgröße
+
+```sh
+python austausch.py --comparison capacity > messung_kapazitaet_neu.json
+```
+
+FNO (1 034 reelle Parameter), UNO (1 034) und CoDA-NO (1 051) verwenden
+identische Aufteilungen, Gitter, Fehlermetriken und Epochenzahlen. FNO und UNO
+verwenden zehn Fourier-Moden je Achse, CoDA-NO acht; Parameterzahl ist nicht
+gleich Rechenbudget oder Trainingszeit. Die Einzelfeldzeiten der neuen
+FNO- und UNO-Läufe sind Mediane aus 21 Aufrufen nach drei Aufwärmaufrufen,
+auf dem 25 × 25-Testgitter und mit Randprojektion.
+
+Die ausgelieferte Messdatei enthält die drei unverändert wiederverwendeten
+CoDA-NO-Zeilen aus `messung.json` und sechs neue FNO-/UNO-Läufe.
+Mit `--reuse-codano` reproduzieren Sie nur diese sechs Läufe.

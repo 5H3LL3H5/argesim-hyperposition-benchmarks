@@ -6,12 +6,13 @@ import argparse
 from contextlib import redirect_stdout
 import json
 import sys
+from statistics import median
 import time
 from importlib.metadata import version
 
 import numpy as np
 import torch
-from neuralop.models import CODANO, FNO
+from neuralop.models import CODANO, FNO, UNO
 
 RATE = 1.25
 DIFFUSION = np.array([0.03, 0.06])
@@ -44,20 +45,37 @@ def arrays(count, rng, nodes):
 
 
 def make(name):
-    if name == "FNO":
+    if name in ("FNO", "FNO-small"):
         return FNO(
-            n_modes=(8, 8),
+            n_modes=(10, 10) if name == "FNO-small" else (8, 8),
             in_channels=2,
             out_channels=2,
-            hidden_channels=8,
+            hidden_channels=2 if name == "FNO-small" else 8,
             n_layers=2,
             positional_embedding=None,
         )
+    if name == "UNO":
+        return UNO(
+            in_channels=2,
+            out_channels=2,
+            hidden_channels=2,
+            n_layers=2,
+            uno_out_channels=[2, 2],
+            uno_n_modes=[[10, 10], [10, 10]],
+            uno_scalings=[[0.5, 0.5], [2, 2]],
+            lifting_channels=4,
+            projection_channels=4,
+            positional_embedding=None,
+            horizontal_skips_map={},
+        )
+    if name != "CoDA-NO":
+        raise ValueError(f"unknown model {name}")
+    width = 4
     return CODANO(
         output_variable_codimension=1,
-        lifting_channels=4,
-        hidden_variable_codimension=4,
-        projection_channels=4,
+        lifting_channels=width,
+        hidden_variable_codimension=width,
+        projection_channels=width,
         n_layers=2,
         n_modes=[[8, 8], [8, 8]],
         n_heads=[1, 1],
@@ -137,7 +155,17 @@ def trial(name, seed, epochs, train, val, tests, transfer):
             )
             for x, _ in tests.values()
         )
+    with torch.inference_mode():
+        xx = tests[25][0][:1]
+        for _ in range(3):
+            predict(model, xx)
+        latency = []
+        for _ in range(21):
+            t0 = time.perf_counter()
+            predict(model, xx)
+            latency.append((time.perf_counter() - t0) * 1000)
     return dict(
+        median_single_field_inference_ms=median(latency),
         model=name,
         seed=seed,
         selected_epoch=selected,
@@ -151,7 +179,7 @@ def trial(name, seed, epochs, train, val, tests, transfer):
     )
 
 
-def run(epochs, seeds):
+def run(epochs, seeds, comparison="pilot", reuse_codano=False):
     torch.set_num_threads(1)
     torch.backends.nnpack.set_flags(False)
     torch.use_deterministic_algorithms(True)
@@ -162,18 +190,26 @@ def run(epochs, seeds):
     held[:, 0, 0] = 1
     held[1, 1, 0] = 1
     transfer = sample(held, 25)
+    models = (
+        ("FNO", "CoDA-NO")
+        if comparison == "pilot"
+        else (("FNO-small", "UNO") if reuse_codano else ("FNO-small", "UNO", "CoDA-NO"))
+    )
+    rows = []
+    for seed in seeds:
+        for name in models:
+            rows.append(trial(name, seed, epochs, train, val, tests, transfer))
+            print(f"Completed {name}: seed={seed}", file=sys.stderr, flush=True)
     return dict(
+        comparison=comparison,
+        reuse_codano=reuse_codano,
         neuraloperator=version("neuraloperator"),
         torch=str(torch.__version__),
         problem=dict(rate=RATE, diffusivity=DIFFUSION.tolist(), horizon=HORIZON),
         epochs=epochs,
         threads=1,
         counts=[96, 24, 32],
-        rows=[
-            trial(name, seed, epochs, train, val, tests, transfer)
-            for seed in seeds
-            for name in ("FNO", "CoDA-NO")
-        ],
+        rows=rows,
     )
 
 
@@ -181,10 +217,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--epochs", type=int, default=40)
     parser.add_argument("--seeds", type=int, nargs="+", default=[2027, 73, 3917])
+    parser.add_argument("--comparison", choices=("pilot", "capacity"), default="pilot")
+    parser.add_argument(
+        "--reuse-codano",
+        action="store_true",
+        help="capacity: run only FNO and UNO; reuse published CoDA-NO rows",
+    )
     args = parser.parse_args()
+    if args.reuse_codano and args.comparison != "capacity":
+        parser.error("--reuse-codano requires --comparison capacity")
     if args.epochs < 1:
         parser.error("epochs must be positive")
     # neuraloperator 2.0.0 prints its token dimensions to stdout.
     with redirect_stdout(sys.stderr):
-        result = run(args.epochs, args.seeds)
+        result = run(args.epochs, args.seeds, args.comparison, args.reuse_codano)
     print(json.dumps(result, indent=2, allow_nan=False))
