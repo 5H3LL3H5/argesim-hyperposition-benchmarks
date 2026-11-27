@@ -20,6 +20,12 @@ NUMERICS = all(importlib.util.find_spec(name) for name in ('numpy', 'scipy'))
 
 
 class Cp2PdesLabTests(unittest.TestCase):
+    @unittest.skipUnless(NUMERICS and sys.platform.startswith('linux') and shutil.which('g++'),
+                         'requires NumPy, SciPy and the Linux C++ lab runtime')
+    def test_trajectory_audit_from_packaged_model_weights(self):
+        runner = book.EDITION / book.TRAJECTORY / 'reproduce.py'
+        subprocess.run([sys.executable, str(runner)], check=True, timeout=90)
+
     @unittest.skipUnless(importlib.util.find_spec("fitz"), "requires PyMuPDF")
     def test_figure_register_works_in_a_repository_checkout(self):
         script = book.EDITION / "rechenlabor/bildpruefung/buchatlas.py"

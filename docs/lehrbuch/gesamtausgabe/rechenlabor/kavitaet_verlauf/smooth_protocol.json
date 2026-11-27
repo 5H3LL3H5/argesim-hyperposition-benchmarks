@@ -1,0 +1,11 @@
+{
+  "method": "Fine D2Q9 through 32768. Cubic smoothstep blends independently evolving fine and corrected coarse fields through 65536. Then only the frozen coarse-grid Hankel correction is used.",
+  "start_k": 32768,
+  "end_k": 65536,
+  "calibration_re": 1000,
+  "previous_hard_switch_test_re": 975,
+  "prospective_re": 1025,
+  "primary": "All 315 positive fields satisfy relative interior velocity L2 <=0.01 and maximum local vector difference <=0.01 U; initial rest separately.",
+  "secondary": "Test 64 common four-tick intervals at each end of the overlap. Record field and increment error. No derivative acceptance threshold was set.",
+  "design": "One fixed overlap as long as the initial fine-only interval; no fit, change to the frozen weights, or target-specific tuning. Compare against the hard rule."
+}

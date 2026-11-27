@@ -1,0 +1,11 @@
+{
+  "positive": 315,
+  "new_times": 278,
+  "startup": 184,
+  "stepper_fit_positive": 158,
+  "stepper_never_fit_positive": 157,
+  "old_pairs_reproduced": 98,
+  "worst_old_metric_delta": 2.437286483747414e-15,
+  "positions": 316,
+  "models": 14
+}

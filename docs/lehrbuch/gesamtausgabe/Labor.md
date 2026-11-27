@@ -39,3 +39,7 @@ Im historischen Skalierungsvergleich ergeben die 82 ergänzenden Vertragsproben 
 ## CoDA-NO: Zwei gekoppelte Diffusionsfelder
 
 Der [Mehrfeldversuch zu Kapitel 9](rechenlabor/codano/README.md) vergleicht FNO und CoDA-NO am selben analytischen Referenzproblem. Das optionale Training läuft auf der CPU; die Messdaten liegen im vollständigen Labor.
+
+## Kavität über den gesamten Anfahrverlauf
+
+Die [Anleitung](rechenlabor/kavitaet_verlauf/README.md) führt zu den kurzen Regressionstests, den Einzelmessungen für drei Reynolds-Zahlen und der getrennt startbaren Vollrechnung.

@@ -1,0 +1,39 @@
+{
+  "Kavitaet_Operatorfelder_Korrektur.zip": {
+    "daten/operatoren/korrektur_fourier.npz": "9740bebc3db429016ad2f64ded714067ca1fa38e89d3bc82ddcfdbee5b585772",
+    "daten/operatoren/korrektur_fourier_mellin.npz": "9403f4d17f9e8e9ec296ebf42909f991c1484f7cb600339f22f4af77ae6d4fbf",
+    "daten/operatoren/korrektur_hankel.npz": "1b403440df853952de9668e1cb5196864c6f0c5f358d0269a44dab26755c80de",
+    "daten/operatoren/korrektur_laplace.npz": "380fc16d5994f33bfa239b3e4b5455e7deb37fffbdc98a8bd9f692679d61dd64",
+    "daten/operatoren/korrektur_radon.npz": "5f9b218adf7016dd18dff5f53c88b1be7494afc4d9313ccf97f1c5650e7c63fa",
+    "daten/operatoren/korrektur_wavelet.npz": "340428803fcc14dad360f55d286d9f4156b38082e21c2a6731382ba19b4a5264",
+    "daten/operatoren/korrektur_wavelet_laplace.npz": "c6f4ec1334870f78fcf1d60d583034e4d4ff3d644fadd4647dfde129eb6310d6"
+  },
+  "Kavitaet_Operatorfelder_direkt.zip": {
+    "daten/operatoren/direkt_fourier.npz": "bbd84e066990bd1fec89f2dce37a25f5c653023e53e93729a432bd7549ceefdc",
+    "daten/operatoren/direkt_fourier_mellin.npz": "4167652e54645e02ae77c235bcde5486ff50c092709a12ee3bdffd6764b8f35a",
+    "daten/operatoren/direkt_hankel.npz": "62d16d9bf94ed85285599aaa8aa253e92ebe95738e3e0095ba07be7cf8ec3145",
+    "daten/operatoren/direkt_laplace.npz": "3f0a02ada78fb10eaccb0456355a8d4e206245887830a7d616d858f6f8c21be8",
+    "daten/operatoren/direkt_radon.npz": "476d2f65e81b02c803677ab796e2e2cb940f3b1bc108482cb10cd5164eb90073",
+    "daten/operatoren/direkt_wavelet.npz": "51e4bad10f385907ad161df427b274cbea4b0bcc981852e91ba4071117f26ece",
+    "daten/operatoren/direkt_wavelet_laplace.npz": "9be678540ad6ade3c0aaa7d204eda96269b5eab0905f45fb4c573a1eafc22e17"
+  },
+  "Kavitaet_Referenz_und_Galerkinbasis.zip": {
+    "daten/testreferenzen.npz": "6a0f955bbe250fd69155e045a142f102947dfec1b20a91346a789bbfc891f39c"
+  },
+  "Kavitaet_Vollgitter_Felder.zip": {
+    "basis/zeitkerne.npz": "b24ab741515ae4ba856ebb140fd481a5d390f61cfea076dfe883371339a07217"
+  },
+  "Kavitaet_basis_direkt.zip": {
+    "daten/operatoren/basis_direkt.npy": "e2c1a88607b27bf350d1ef56880a7d1915c56b8f0caab59fbebadda402cb594e"
+  },
+  "Kavitaet_basis_korrektur.zip": {
+    "daten/operatoren/basis_korrektur.npy": "bdb9a47eb1aed9eec03d07c94442ef0801463d24b4dede75762075ba545080cc"
+  },
+  "Laborquellen.zip": {
+    "daten/operatoren/aufbau_direkt.json": "8a7f102a57593e36a7114adbcebcaba1b98b1c9e09ac0183169d0df08f4fd662",
+    "daten/operatoren/aufbau_korrektur.json": "277dda8510ee1944fa88891f4eaafca444d7d2d2cc6d20f179979ed554913f8d",
+    "daten/operatoren/test.csv": "d401db05ed84847e3746516c4fdaa2f45f7885ab42a30ae57cb34771250759c9",
+    "src/d2q9.cpp": "19af37840e3a86d8f9938af78d8277bc8e857314dfe034162e85f8fca2dc8de5",
+    "src/zeitpunkte.txt": "bb70cc889b3f75a8502304f2efee3648f3b5880ec1a796b8185d6e4c91b6b5b0"
+  }
+}
