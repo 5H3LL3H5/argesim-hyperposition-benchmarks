@@ -23,6 +23,8 @@ ROOT = Path(__file__).resolve().parents[1]
 PDF = "docs/ARGESIM_SOLVER_STUDY.pdf"
 MANIFEST = "docs/ARGESIM_Buchstand.json"
 ARCHIVES = "docs/ARGESIM_Review_Archivindex.csv"
+ARCHIVE_INVENTORY = "docs/ARGESIM_Review_Archivpflichten.csv"
+ARCHIVE_STATUSES = frozenset({"Entfallen", "Nur Archiv"})
 REVIEW_NOTES = "docs/reviews/v922-csv"
 EDITION = "docs/lehrbuch/gesamtausgabe"
 LAB = f"{EDITION}/pakete/Laborquellen.zip"
@@ -38,6 +40,7 @@ INPUTS = (
     PDF,
     MANIFEST,
     ARCHIVES,
+    ARCHIVE_INVENTORY,
     REVIEW_NOTES,
     EDITION,
     "docs/ARGESIM_Bachelor_Rechenlabor.zip",
@@ -286,8 +289,25 @@ def archive_entries(root: Path, read_pdf) -> list[Result]:
             "archivlinks",
         },
     )
+    expected = csv_entries(root / ARCHIVE_INVENTORY, ",", "id", {"status"})
+    for ident, row in expected.items():
+        if row["status"] not in ARCHIVE_STATUSES:
+            raise ValueError(
+                f"Ungültiger Soll-Archivstatus für {ident}: {row['status']!r}"
+            )
     page_counts: dict[tuple[str, str], int | None] = {}
-    results = []
+    results = [
+        Result(
+            ident,
+            "fail",
+            "Archivfundstelle",
+            ARCHIVES,
+            ("Pflicht-ID fehlt im Archivregister.",),
+            kind="archive",
+            review_status=expected[ident]["status"],
+        )
+        for ident in sorted(expected.keys() - rows.keys())
+    ]
     for ident, row in rows.items():
         path = ARCHIVE_PATHS.get(row["seitenart"])
         commit = row["ausgabe"]
@@ -299,12 +319,31 @@ def archive_entries(root: Path, read_pdf) -> list[Result]:
             kind="archive",
             review_status=row["status"],
         )
+        if ident not in expected:
+            results.append(
+                replace(
+                    result,
+                    outcome="fail",
+                    evidence=("ID fehlt in der Archiv-Soll-Liste.",),
+                )
+            )
+            continue
+        if row["status"] != expected[ident]["status"]:
+            results.append(
+                replace(
+                    result,
+                    outcome="fail",
+                    evidence=(
+                        f"Archivstatus weicht vom Soll ab: {expected[ident]['status']}.",
+                    ),
+                )
+            )
+            continue
         pages = [page.strip() for page in row["archivseiten"].split(",")]
         try:
             if (
                 not path
                 or not COMMIT.fullmatch(commit)
-                or row["status"] not in {"Entfallen", "Nur Archiv"}
                 or row["aktuelle_seite"]
                 or any(not re.fullmatch(r"[1-9][0-9]*", p) for p in pages)
                 or len(pages) != len(set(pages))
