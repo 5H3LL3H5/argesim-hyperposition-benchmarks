@@ -114,6 +114,7 @@ jobs:
           path: |
             docs/ARGESIM_SOLVER_STUDY.pdf
             docs/ARGESIM_Bachelor_Rechenlabor.zip
+            docs/ARGESIM_Operatoren_Vergleichsstudie.zip
             docs/ARGESIM_Buchstand.json
           if-no-files-found: error
 
@@ -131,9 +132,13 @@ jobs:
       - name: Check signed velocities, operator weights and benchmark fields
         run: python -m unittest tests.test_cp2_accuracy tests.test_cp2_operators
       - name: Check the coupled-diffusion operators and LBM against the reference fields
-        working-directory: docs/lehrbuch/gesamtausgabe/rechenlabor/modaloperator
         env:
           OMP_NUM_THREADS: "1"
           OPENBLAS_NUM_THREADS: "1"
           MKL_NUM_THREADS: "1"
-        run: python -B -m unittest -v
+        run: |
+          lab="$RUNNER_TEMP/operatorenlabor"
+          python -m zipfile -e docs/ARGESIM_Operatoren_Vergleichsstudie.zip "$lab"
+          cd "$lab/rechenlabor/modaloperator"
+          sha256sum --quiet -c SHA256SUMS
+          python -B -m unittest -v

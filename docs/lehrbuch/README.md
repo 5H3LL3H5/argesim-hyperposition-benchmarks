@@ -1,6 +1,8 @@
 # Numerische Simulation dynamischer Systeme
 
-Die Studie zu zwei Diffusionsfeldern vergleicht Modaloperator, FNO, UNO, CoDA-NO, Hybridmodelle und D2Q5-LBM. [Kapitel 9.44](gesamtausgabe/kapitel/09.md#druck-modal-studie) · [Studienlabor, Trainingszustände und Laufbefehle](gesamtausgabe/rechenlabor/modaloperator/README.md) · [Gemessene Gesamtzeiten mit LBM](gesamtausgabe/rechenlabor/modaloperator/results/runtime/total_jobs.csv)
+Die Studie zu zwei Diffusionsfeldern vergleicht Modaloperator, FNO, UNO, CoDA-NO, Hybridmodelle und D2Q5-LBM. [Kapitel 9.44](gesamtausgabe/kapitel/09.md#druck-modal-studie) · [Studienlabor, Trainingszustände und Laufbefehle](gesamtausgabe/rechenlabor/modaloperator/README.md) · [Gemessene Gesamtzeiten mit LBM](gesamtausgabe/rechenlabor/modaloperator/results/runtime/total_jobs.csv) · [Eigenständig ausführbares Operatorenlabor als ZIP](../ARGESIM_Operatoren_Vergleichsstudie.zip?raw=true)
+
+Das Operatoren-ZIP enthält die vollständige Studie mit 42 Netzzuständen und beiden LBM-Kernen. Nach dem Entpacken beginnt der Versuch in `rechenlabor/modaloperator/README.md`. Wer mit dem Bachelor-Rechenlabor arbeitet, entpackt beide ZIP-Dateien in dasselbe Verzeichnis. Das vollständige Offline-Labor enthält bereits beide Teile.
 
 **Christian Stenzel · Gesamtausgabe v9.22 · 18 Fachkapitel und vier Anhänge**
 
