@@ -1,0 +1,175 @@
+test_bitwise_original_data (test_study.NetworkTests.test_bitwise_original_data) ... ok
+test_counts_boundaries_and_condition_channels (test_study.NetworkTests.test_counts_boundaries_and_condition_channels) ... ok
+test_input_noise_leaves_targets_and_validation_clean (test_study.NetworkTests.test_input_noise_leaves_targets_and_validation_clean) ... ok
+test_restart_determinism_and_hybrid_evaluation (test_study.NetworkTests.test_restart_determinism_and_hybrid_evaluation) ... ok
+test_saved_weights_match_measured_fields (test_study.NetworkTests.test_saved_weights_match_measured_fields) ... ok
+test_generator_against_independent_ode_and_pade (test_study.PhysicsTests.test_generator_against_independent_ode_and_pade) ... ok
+test_generator_identification_and_extra_modes (test_study.PhysicsTests.test_generator_identification_and_extra_modes) ... ok
+test_noise_split_and_rank_independent_of_labels (test_study.PhysicsTests.test_noise_split_and_rank_independent_of_labels) ... ok
+test_original_countercalculation_in_both_units (test_study.PhysicsTests.test_original_countercalculation_in_both_units) ... ok
+test_orthogonal_sines_and_resolvable_indices (test_study.PhysicsTests.test_orthogonal_sines_and_resolvable_indices) ... ok
+test_paired_family_and_mesh (test_study.PhysicsTests.test_paired_family_and_mesh) ... ok
+test_projection_on_two_meshes (test_study.PhysicsTests.test_projection_on_two_meshes) ... ok
+test_rank_failure_and_identification (test_study.PhysicsTests.test_rank_failure_and_identification) ... ok
+test_source_hashes_and_archive_rows (test_study.PhysicsTests.test_source_hashes_and_archive_rows) ... ok
+test_strang_local_defect_order (test_study.PhysicsTests.test_strang_local_defect_order) ... ok
+test_truth_semigroup_symmetry_contraction (test_study.PhysicsTests.test_truth_semigroup_symmetry_contraction) ... ok
+test_unknown_mode_and_residual_fallback (test_study.PhysicsTests.test_unknown_mode_and_residual_fallback) ... ok
+test_zero_exchange_zero_time_and_equal_diffusion (test_study.PhysicsTests.test_zero_exchange_zero_time_and_equal_diffusion) ... ok
+test_complete_measured_grid_and_sample_means (test_study.ResultTests.test_complete_measured_grid_and_sample_means) ... ok
+test_paired_bootstrap_matches_recorded_contrasts (test_study.ResultTests.test_paired_bootstrap_matches_recorded_contrasts) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 6.533s
+
+OK
+{"model": "FNO-small", "seed": 2027, "case": "n96", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1034, "train_s": 2.794093397999859, "validation_mse": 0.012918763794004917, "residual_scale": 1.0}
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+{"model": "UNO", "seed": 2027, "case": "n96", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1034, "train_s": 3.847266425000271, "validation_mse": 0.0011490777833387256, "residual_scale": 1.0}
+print token code dimension 1 1
+print token code dimension 1 1
+{"model": "CoDA-NO", "seed": 2027, "case": "n96", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 38, "parameters": 1051, "train_s": 63.75810170799923, "validation_mse": 0.006890004500746727, "residual_scale": 1.0}
+{"model": "Strang-FNO", "seed": 2027, "case": "n96", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 21, "parameters": 1034, "train_s": 2.6931141670002035, "validation_mse": 3.860025491694963e-06, "residual_scale": 0.0027597984883283183}
+{"model": "FNO-small", "seed": 73, "case": "n96", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1034, "train_s": 2.6542341790000137, "validation_mse": 0.010351279750466347, "residual_scale": 1.0}
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+{"model": "UNO", "seed": 73, "case": "n96", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1034, "train_s": 3.038683141000547, "validation_mse": 0.012309708632528782, "residual_scale": 1.0}
+print token code dimension 1 1
+print token code dimension 1 1
+{"model": "CoDA-NO", "seed": 73, "case": "n96", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1051, "train_s": 61.13081192899972, "validation_mse": 0.0076110768131911755, "residual_scale": 1.0}
+{"model": "Strang-FNO", "seed": 73, "case": "n96", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1034, "train_s": 2.801070953000817, "validation_mse": 4.275643752514589e-06, "residual_scale": 0.0027597984883283183}
+{"model": "FNO-small", "seed": 3917, "case": "n96", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1034, "train_s": 2.7138278870006616, "validation_mse": 0.0005659946473315358, "residual_scale": 1.0}
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+{"model": "UNO", "seed": 3917, "case": "n96", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1034, "train_s": 3.1941678089997367, "validation_mse": 0.007801402825862169, "residual_scale": 1.0}
+print token code dimension 1 1
+print token code dimension 1 1
+{"model": "CoDA-NO", "seed": 3917, "case": "n96", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 38, "parameters": 1051, "train_s": 59.94423002399981, "validation_mse": 0.014918995089828968, "residual_scale": 1.0}
+{"model": "Strang-FNO", "seed": 3917, "case": "n96", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1034, "train_s": 3.027062092000051, "validation_mse": 1.3567051548476372e-07, "residual_scale": 0.0027597984883283183}
+{"model": "FNO-small", "seed": 2027, "case": "n2", "n": 2, "epochs": 40, "steps": 40, "selected_epoch": 40, "parameters": 1034, "train_s": 0.4326419449998866, "validation_mse": 0.04158507660031319, "residual_scale": 1.0}
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+{"model": "UNO", "seed": 2027, "case": "n2", "n": 2, "epochs": 40, "steps": 40, "selected_epoch": 40, "parameters": 1034, "train_s": 0.4328348819999519, "validation_mse": 0.051219623535871506, "residual_scale": 1.0}
+print token code dimension 1 1
+print token code dimension 1 1
+{"model": "CoDA-NO", "seed": 2027, "case": "n2", "n": 2, "epochs": 40, "steps": 40, "selected_epoch": 40, "parameters": 1051, "train_s": 11.653339151999717, "validation_mse": 0.03418463096022606, "residual_scale": 1.0}
+{"model": "Strang-FNO", "seed": 2027, "case": "n2", "n": 2, "epochs": 40, "steps": 40, "selected_epoch": 40, "parameters": 1034, "train_s": 0.3436440939995009, "validation_mse": 7.287118770628067e-06, "residual_scale": 0.0034540951020174035}
+{"model": "FNO-small", "seed": 2027, "case": "n8", "n": 8, "epochs": 40, "steps": 40, "selected_epoch": 40, "parameters": 1034, "train_s": 0.37329799399958574, "validation_mse": 0.04808579385280609, "residual_scale": 1.0}
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+{"model": "UNO", "seed": 2027, "case": "n8", "n": 8, "epochs": 40, "steps": 40, "selected_epoch": 40, "parameters": 1034, "train_s": 0.4382279480005309, "validation_mse": 0.05216892063617706, "residual_scale": 1.0}
+print token code dimension 1 1
+print token code dimension 1 1
+{"model": "CoDA-NO", "seed": 2027, "case": "n8", "n": 8, "epochs": 40, "steps": 40, "selected_epoch": 40, "parameters": 1051, "train_s": 14.997409564000009, "validation_mse": 0.03263417258858681, "residual_scale": 1.0}
+{"model": "Strang-FNO", "seed": 2027, "case": "n8", "n": 8, "epochs": 40, "steps": 40, "selected_epoch": 40, "parameters": 1034, "train_s": 0.4008566829998017, "validation_mse": 6.699924129598477e-06, "residual_scale": 0.0031857996081868867}
+{"model": "FNO-small", "seed": 2027, "case": "n24", "n": 24, "epochs": 40, "steps": 80, "selected_epoch": 40, "parameters": 1034, "train_s": 0.7564956299993355, "validation_mse": 0.03780990093946457, "residual_scale": 1.0}
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+{"model": "UNO", "seed": 2027, "case": "n24", "n": 24, "epochs": 40, "steps": 80, "selected_epoch": 40, "parameters": 1034, "train_s": 0.914116668999668, "validation_mse": 0.013399939052760601, "residual_scale": 1.0}
+print token code dimension 1 1
+print token code dimension 1 1
+{"model": "CoDA-NO", "seed": 2027, "case": "n24", "n": 24, "epochs": 40, "steps": 80, "selected_epoch": 40, "parameters": 1051, "train_s": 22.263490150000507, "validation_mse": 0.019943058490753174, "residual_scale": 1.0}
+{"model": "Strang-FNO", "seed": 2027, "case": "n24", "n": 24, "epochs": 40, "steps": 80, "selected_epoch": 35, "parameters": 1034, "train_s": 0.8000203029996555, "validation_mse": 4.083681169077471e-06, "residual_scale": 0.0028138816180240255}
+{"model": "FNO-small", "seed": 2027, "case": "n8_steps", "n": 8, "epochs": 240, "steps": 240, "selected_epoch": 226, "parameters": 1034, "train_s": 2.209808085000077, "validation_mse": 0.012595351785421371, "residual_scale": 1.0}
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+{"model": "UNO", "seed": 2027, "case": "n8_steps", "n": 8, "epochs": 240, "steps": 240, "selected_epoch": 240, "parameters": 1034, "train_s": 2.7263091599998006, "validation_mse": 0.001012300024740398, "residual_scale": 1.0}
+print token code dimension 1 1
+print token code dimension 1 1
+{"model": "CoDA-NO", "seed": 2027, "case": "n8_steps", "n": 8, "epochs": 240, "steps": 240, "selected_epoch": 119, "parameters": 1051, "train_s": 90.68370922300073, "validation_mse": 0.012573865242302418, "residual_scale": 1.0}
+{"model": "Strang-FNO", "seed": 2027, "case": "n8_steps", "n": 8, "epochs": 240, "steps": 240, "selected_epoch": 217, "parameters": 1034, "train_s": 2.5803282440001567, "validation_mse": 3.691362447318563e-06, "residual_scale": 0.0031857996081868867}
+{"model": "FNO-small", "seed": 2027, "case": "noise5", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1034, "train_s": 2.6961636380001437, "validation_mse": 0.012927317060530186, "residual_scale": 1.0}
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+{"model": "UNO", "seed": 2027, "case": "noise5", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1034, "train_s": 2.956856961000085, "validation_mse": 0.001154214725829661, "residual_scale": 1.0}
+print token code dimension 1 1
+print token code dimension 1 1
+{"model": "CoDA-NO", "seed": 2027, "case": "noise5", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 38, "parameters": 1051, "train_s": 58.109272190999945, "validation_mse": 0.006900788750499487, "residual_scale": 1.0}
+{"model": "Strang-FNO", "seed": 2027, "case": "noise5", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 39, "parameters": 1034, "train_s": 2.7612221939998562, "validation_mse": 4.4413422074374115e-07, "residual_scale": 0.013323868043013097}
+{"model": "FNO-small", "seed": 2027, "case": "input5", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1034, "train_s": 2.558672228999967, "validation_mse": 0.012902994640171528, "residual_scale": 1.0}
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+{"model": "UNO", "seed": 2027, "case": "input5", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1034, "train_s": 2.871591391000038, "validation_mse": 0.0011446219868957996, "residual_scale": 1.0}
+print token code dimension 1 1
+print token code dimension 1 1
+{"model": "CoDA-NO", "seed": 2027, "case": "input5", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 38, "parameters": 1051, "train_s": 58.589009052999245, "validation_mse": 0.006488725543022156, "residual_scale": 1.0}
+{"model": "Strang-FNO", "seed": 2027, "case": "input5", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1034, "train_s": 2.7215262090003307, "validation_mse": 4.060880605632397e-06, "residual_scale": 0.0034700324820468504}
+{"model": "FNO-cond", "seed": 2027, "case": "family", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1050, "train_s": 3.572074677999808, "validation_mse": 0.01144308689981699, "residual_scale": 1.0}
+{"model": "Strang-FNO-cond", "seed": 2027, "case": "family", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 36, "parameters": 1050, "train_s": 3.2180928190000486, "validation_mse": 1.8289526175756005e-05, "residual_scale": 0.003932848716530736}
+{"model": "FNO-cond", "seed": 73, "case": "family", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 39, "parameters": 1050, "train_s": 3.135594387999845, "validation_mse": 0.012075107544660568, "residual_scale": 1.0}
+{"model": "Strang-FNO-cond", "seed": 73, "case": "family", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1050, "train_s": 3.2064963700004228, "validation_mse": 1.7898003973810447e-05, "residual_scale": 0.003932848716530736}
+{"model": "FNO-cond", "seed": 3917, "case": "family", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1050, "train_s": 3.215434340999309, "validation_mse": 0.011504849418997765, "residual_scale": 1.0}
+{"model": "Strang-FNO-cond", "seed": 3917, "case": "family", "n": 96, "epochs": 40, "steps": 240, "selected_epoch": 40, "parameters": 1050, "train_s": 3.1114492830001836, "validation_mse": 1.8240476191691976e-05, "residual_scale": 0.003932848716530736}
+print token code dimension 1 1
+print token code dimension 1 1
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+print token code dimension 1 1
+print token code dimension 1 1
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+print token code dimension 1 1
+print token code dimension 1 1
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+print token code dimension 1 1
+print token code dimension 1 1
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+print token code dimension 1 1
+print token code dimension 1 1
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+print token code dimension 1 1
+print token code dimension 1 1
+print token code dimension 1 1
+print token code dimension 1 1
+print token code dimension 1 1
+print token code dimension 1 1
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+print token code dimension 1 1
+print token code dimension 1 1
+fno_skip='linear'
+channel_mlp_skip='soft-gating'
+fno_skip='linear'
+channel_mlp_skip='soft-gating'

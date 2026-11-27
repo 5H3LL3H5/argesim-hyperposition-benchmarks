@@ -1,0 +1,13 @@
+{
+  "model": "UNO",
+  "seed": 2027,
+  "case": "noise5",
+  "n": 96,
+  "epochs": 40,
+  "steps": 240,
+  "selected_epoch": 40,
+  "parameters": 1034,
+  "train_s": 2.949982204999742,
+  "validation_mse": 0.001154214725829661,
+  "residual_scale": 1.0
+}

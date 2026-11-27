@@ -1,0 +1,21 @@
+{
+  "python": "3.12.14",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "packages": {
+    "numpy": "2.5.5",
+    "scipy": "1.18.1",
+    "torch": "2.8.0+cpu",
+    "neuraloperator": "2.0.0",
+    "tensorly": "0.10.0",
+    "tensorly-torch": "0.5.0",
+    "matplotlib": "3.11.2"
+  },
+  "thread_limits": {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1"
+  },
+  "archive_commit": "72d670b51c94c8366ca5f1e070fc4730c78d0d52",
+  "timing": "perf_counter; per-sample inference: 3 warmups, median of 21, 25x25, CPU"
+}

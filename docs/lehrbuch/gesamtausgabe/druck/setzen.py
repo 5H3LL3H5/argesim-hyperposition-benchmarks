@@ -184,6 +184,10 @@ mess_tabelle_count = 0
 studien_tabelle_count = 0
 
 
+modal_start = frag.index(r"\label{druck-modal-studie}")
+modal_ende = frag.index(r"\label{kap09-schluss}", modal_start)
+
+
 def gesamt_tabelle(m):
     global \
         table_count, \
@@ -191,6 +195,19 @@ def gesamt_tabelle(m):
         operator_tables, \
         mess_tabelle_count, \
         studien_tabelle_count
+    if modal_start <= m.start() < modal_ende:
+        kopf = m[1].split(r"\toprule", 1)[1].split(r"\midrule", 1)[0]
+        anzahl = kopf.count(" & ") + 1
+        if "Eingebaute Information" in kopf:
+            spalten = r"@{}>{\raggedright\arraybackslash}p{.22\linewidth}X@{}"
+        elif anzahl == 2:
+            spalten = r"@{}Xr@{}"
+        else:
+            spalten = "@{}" + r">{\raggedright\arraybackslash}X" * anzahl + "@{}"
+        satz = tabelle(m, spalten)
+        if anzahl > 4:
+            satz = satz.replace(r"\fontsize{10.1}{13.2}", r"\fontsize{9.1}{11.8}").replace("{5pt}", "{3pt}")
+        return satz
     if all(
         kopf in m[1]
         for kopf in ("Raumverfahren", "Typische Stärke", "Eigene Prüfaufgabe")
@@ -448,5 +465,5 @@ counts = (
     mess_tabelle_count,
     studien_tabelle_count,
 )
-assert counts == (96, 55, 1, 6, 4, 1), counts
+assert counts == (98, 55, 1, 6, 4, 1), counts
 (tex / "buch.tex").write_text(header + frag + "\n" + r"\end{document}" + "\n")

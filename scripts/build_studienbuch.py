@@ -35,6 +35,8 @@ COMPARISON = AUDIT / "messung/revisionsvergleich.csv"
 REPLAY = COMPARISON.parent / "skalenfix_c635504"
 MANUSCRIPT = "lehrbuch_numerische_simulation.md"
 CONTACT = COMPARISON.parent / "kontakt_v919"
+MODAL = Path("rechenlabor/modaloperator")
+OPERATOR_LAB = "ARGESIM_Operatoren_Vergleichsstudie.zip"
 PDES = Path("rechenlabor/pdes_partitionierung")
 REVISION = "v9.22"
 DATE = (2026, 11, 26, 0, 0, 0)
@@ -154,7 +156,7 @@ def distribution_record(out):
     return {
         "edition": REVISION,
         "sources_sha256": digest.hexdigest(),
-        "outputs_sha256": {name: sha256(out / name) for name in (PDF, LAB)},
+        "outputs_sha256": {name: sha256(out / name) for name in (PDF, LAB, OPERATOR_LAB)},
     }
 
 
@@ -168,10 +170,10 @@ def check(out):
         )
 
 
-def write_entry(archive, name, data):
+def write_entry(archive, name, data, compression=zipfile.ZIP_DEFLATED):
     info = zipfile.ZipInfo(name, DATE)
     info.external_attr = (0o100755 if name.endswith(".sh") else 0o100644) << 16
-    info.compress_type = zipfile.ZIP_DEFLATED
+    info.compress_type = compression
     archive.writestr(info, data, compresslevel=6)
 
 
@@ -183,8 +185,8 @@ def core_lab(path):
                 lab, source.relative_to(MATERIAL).as_posix(), source.read_bytes()
             )
         write_entry(lab, "START_v9_22.md", (EDITION / "Labor.md").read_bytes())
-        for name in ("kapitel/16.md", MANUSCRIPT):
-            write_entry(lab, name, (EDITION / name).read_bytes())
+        write_entry(lab, "kapitel/16.md", (EDITION / "kapitel/16.md").read_bytes())
+        write_entry(lab, MANUSCRIPT, (EDITION / MANUSCRIPT).read_bytes(), zipfile.ZIP_BZIP2)
         matrix = Path("daten/qss-extension.csv")
         write_entry(lab, matrix.as_posix(), (EDITION / matrix).read_bytes())
         with zipfile.ZipFile(PACKAGES / "Laborquellen.zip") as source:
@@ -217,6 +219,19 @@ def core_lab(path):
                 write_entry(
                     lab, source.relative_to(EDITION).as_posix(), source.read_bytes()
                 )
+
+
+def operator_lab(path):
+    """Ship the complete chapter 9 study, independently usable and overlayable on the course lab."""
+    with zipfile.ZipFile(path, "w") as archive:
+        for source in edition_files():
+            rel = source.relative_to(EDITION)
+            if rel.is_relative_to(MODAL) or rel.as_posix() in {
+                "kapitel/09.md",
+                "abbildungen/modal_austausch.svg",
+                "abbildungen/modal_lerndaten.svg",
+            }:
+                write_entry(archive, rel.as_posix(), source.read_bytes())
 
 
 def full_lab(target):
@@ -407,6 +422,8 @@ def verify_published_pdf(path, attachments):
             raise ValueError("Invalid embedded lab files.")
         targets = book.resolve_names()
         for name, words in (
+            ("druck-modal-gesamtzeit", ("42", "3 min 18,47 s", "12 min 39,33 s")),
+            ("druck-modal-lbm", ("D2Q5", "Modal24", "CoDA-NO")),
             ("druck-beleglegende", ("Beweis", "Gegenprobe", "Messung")),
             ("druck-c05-entscheidung", ("C05", "Aufwand", "BDF")),
             ("druck-cp2-skalierung", ("Kavität", "Ereignisintervalle", "D2Q9")),
@@ -448,10 +465,11 @@ def build(out):
         typeset(stage)
         publish_pdf(stage)
         core_lab(stage / LAB)
+        operator_lab(stage / OPERATOR_LAB)
         (stage / RECORD).write_text(
             json.dumps(distribution_record(stage), indent=2) + "\n", encoding="utf-8"
         )
-        for name in (PDF, LAB, RECORD):
+        for name in (PDF, LAB, OPERATOR_LAB, RECORD):
             (stage / name).replace(out / name)
     check(out)
 

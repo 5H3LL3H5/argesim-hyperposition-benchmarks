@@ -1,0 +1,13 @@
+{
+  "model": "Strang-FNO-cond",
+  "seed": 2027,
+  "case": "family",
+  "n": 96,
+  "epochs": 40,
+  "steps": 240,
+  "selected_epoch": 36,
+  "parameters": 1050,
+  "train_s": 2.6606325220000144,
+  "validation_mse": 1.8289526175756005e-05,
+  "residual_scale": 0.003932848716530736
+}

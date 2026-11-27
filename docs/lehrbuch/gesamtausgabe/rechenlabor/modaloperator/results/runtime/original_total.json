@@ -1,0 +1,12 @@
+{
+  "original_archive_sha256": "7cc19709cb531a55d748a6487f4541981e37e89c6c8d7f9b7f3906b3194f5daf",
+  "phases_seconds": {
+    "replication": 755.714923435,
+    "chapter": 3.618001851000372
+  },
+  "wall_seconds": 759.3331561019995,
+  "sum_inner_fits_seconds": 516.3266491829991,
+  "trained_networks": 42,
+  "python": "3.12.14",
+  "notes": "Wall time around subprocesses; includes startup, tests, generation, fitting, scoring, file I/O and chapter rendering. Excludes installation and archive transfer."
+}

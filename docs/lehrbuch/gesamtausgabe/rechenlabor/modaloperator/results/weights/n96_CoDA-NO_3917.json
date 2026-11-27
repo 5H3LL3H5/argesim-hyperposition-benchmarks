@@ -1,0 +1,13 @@
+{
+  "model": "CoDA-NO",
+  "seed": 3917,
+  "case": "n96",
+  "n": 96,
+  "epochs": 40,
+  "steps": 240,
+  "selected_epoch": 38,
+  "parameters": 1051,
+  "train_s": 58.57501065099996,
+  "validation_mse": 0.014918995089828968,
+  "residual_scale": 1.0
+}

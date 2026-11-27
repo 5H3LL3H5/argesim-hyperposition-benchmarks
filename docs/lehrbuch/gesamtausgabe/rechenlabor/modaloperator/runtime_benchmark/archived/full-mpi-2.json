@@ -1,0 +1,11 @@
+{
+  "steps": 350000,
+  "px": 1,
+  "py": 2,
+  "ranks": 2,
+  "populations_per_step": 1538,
+  "directed_peer_pairs": 2,
+  "kernel_s": 28.456355925,
+  "launcher_wall_s": 28.72614449699904,
+  "field_sha256": "8cf1b38b796db4d79188531076d875d558371bafba4d2d9d7b85f478862be9c0"
+}

@@ -1,0 +1,13 @@
+{
+  "model": "CoDA-NO",
+  "seed": 2027,
+  "case": "noise5",
+  "n": 96,
+  "epochs": 40,
+  "steps": 240,
+  "selected_epoch": 38,
+  "parameters": 1051,
+  "train_s": 59.92518073000019,
+  "validation_mse": 0.006900788750499487,
+  "residual_scale": 1.0
+}

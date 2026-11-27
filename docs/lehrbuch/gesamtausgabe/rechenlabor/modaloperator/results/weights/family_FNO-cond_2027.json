@@ -1,0 +1,13 @@
+{
+  "model": "FNO-cond",
+  "seed": 2027,
+  "case": "family",
+  "n": 96,
+  "epochs": 40,
+  "steps": 240,
+  "selected_epoch": 40,
+  "parameters": 1050,
+  "train_s": 2.6591922990000967,
+  "validation_mse": 0.01144308689981699,
+  "residual_scale": 1.0
+}
